@@ -1,0 +1,16 @@
+{
+  "version": 3,
+  "projects": [
+    {
+      "token": "0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967",
+      "verified": false,
+      "mode": "network",
+      "profile": {
+        "name": "SYNCAT",
+        "image": "/assets/syncat.png"
+      },
+      "note": "Public SyncNet profile override for the canonical SYNCAT contract. Image is off-chain SyncNet profile metadata; it does not modify immutable PAR/on-chain logo metadata."
+    }
+  ],
+  "note": "Optional SyncNet profile overrides. Add only after verifying the token contract. An entry does not imply endorsement. Set verified=true only after provenance verification."
+}
