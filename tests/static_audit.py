@@ -174,7 +174,7 @@ for label in ['SYNCNET ORIGIN','BUILT WITH SYNCNET · VERIFIED','OPERATOR VERIFI
 assert 'PAR_BYTE_LIMITS' in lib_core and 'findUnsafeChars' in lib_core and 'recipientStaticCheck' in lib_chain
 # server: gate, uploads, auth, guard, registry, errors
 toml=(root/'netlify.toml').read_text(); red=(root/'_redirects').read_text()
-for fn in ['config','launch-guard','registry','upload-auth','ipfs-upload','canary-auth','site-check','par-launches-all','par-tokenlist','ipfs-check','marketplace']:
+for fn in ['config','launch-guard','registry','upload-auth','ipfs-upload','canary-auth','site-check','par-launches-all','par-tokenlist','ipfs-check','marketplace','economies']:
     assert (root/('netlify/functions/'+fn+'.js')).exists(), fn
     assert '/api/'+fn in toml and '/api/'+fn+' /.netlify/functions/'+fn+' 200' in red, 'route '+fn
 assert 'par.family/tokenlist.json' not in red and 'to = "https://par.family' not in toml  # L14: no same-origin proxy
@@ -208,3 +208,31 @@ assert "GATEWAYS = Object.freeze(['https://gateway.pinata.cloud', 'https://ipfs.
 assert 'Sanitizer._internal.decodePng' in _ic and 'Sanitizer._internal.decodeGif' in _ic and "u.protocol !== 'https:'" in _ic
 print('SyncNet V2.5 RC IPFS hotfix static audit: PASS')
 
+# Economies V0: derived membership, append-only curation, its own EIP-712 domain, flags.js gate, no Marketplace writes
+import json as _je, re as _re3
+_eco_fn=(root/'netlify/functions/economies.js').read_text(); _eco_lib=(root/'lib/syncnet-economy.js').read_text()
+_eco_page=(root/'economy.html').read_text()+(root/'economy-v2.js').read_text(); _fl=(root/'netlify/lib/flags.js').read_text()
+assert "name: 'SyncNet Economies'" in _eco_lib and "name: 'SyncNet Marketplace'" not in _eco_lib
+assert "economyCuration: requested.economyCuration && durable && !economiesKilled" in _fl and 'gate.economyCuration' in _eco_fn
+assert not _re3.search(r'env\.SYNCNET_|process\.env\.', _eco_fn)  # the gate lives in flags.js only
+assert not _re3.search(r'store\.(set|del)\(', _eco_fn) and 'store.sadd(K.curation' in _eco_fn and 'store.sadd(K.requests' in _eco_fn
+assert len(_re3.findall(r'`mp:', _eco_fn))==1 and 'passport: (token) => `mp:passport:v1:${token}`' in _eco_fn and 'reg:' not in _eco_fn
+assert '/economy.html /' not in (root/'_redirects').read_text() and '/economy /economy.html 200' in (root/'_redirects').read_text()
+assert 'lib/syncnet-economy.js' in toml and 'syncnet-economies.json' in toml
+_grants=_je.loads((root/'syncnet-economies.json').read_text())
+assert _grants['version']==1 and isinstance(_grants['curators'],list)
+_roots=[g['root'] for g in _grants['curators']]
+assert len(set(_roots))==len(_roots) and all(_re3.fullmatch(r'0x[0-9a-f]{40}',g['root']) and _re3.fullmatch(r'0x[0-9a-f]{40}',g['curator']) for g in _grants['curators'])
+assert 'PARENT-RECOGNIZED' in _eco_lib and 'OUTSIDE CURRENT INDEX WINDOW' in _eco_lib and 'OFFICIAL' not in _eco_page and 'OFFICIAL' not in _eco_lib
+assert not _re3.search(r'\.(volume\w*|tvl\w*|marketCap\w*|liquidityUsd|fees(Usd|Total)\w*)\b', _eco_page+_eco_lib+_eco_fn, _re3.I)  # no aggregate metrics are read or shown
+assert '/build.html?with=' in _eco_page and 'localStorage' not in (root/'economy-v2.js').read_text()
+for _f in ['marketplace.js']: assert 'econom' not in (root/'netlify/functions'/_f).read_text().lower()
+assert "view === 'requests'" not in _eco_fn and 'evidenceUrl: r.evidenceUrl' not in _eco_fn  # pending requests are never served
+_h=_eco_fn[_eco_fn.index('async function handler('):_eco_fn.index('async function curate(')]
+assert "'eco-wallet'" not in _h and 'walletLimited(' not in _h  # no wallet bucket before signature verification
+_c=_eco_fn[_eco_fn.index('async function claimRequest('):]
+assert _c.index("'eco-claim-all'") > _c.index('verifySig(') and _c.index("'eco-claim'") < _c.index('verifySig(')  # global claim budget counts verified requests only
+_cu=_eco_fn[_eco_fn.index('async function curate('):_eco_fn.index('async function claimRequest(')]
+assert _cu.index('walletLimited(') > _cu.index('duplicate: true') and _cu.index('walletLimited(') > _cu.index("'stale'") and _cu.index('walletLimited(') > _cu.index("'full'")  # replays consume no quota
+assert _c.index('walletLimited(') > _c.index('duplicate: true') and _c.index("'eco-claim-all'") > _c.index('duplicate: true')
+print('SyncNet Economies V0 static audit: PASS')

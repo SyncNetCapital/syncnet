@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000"><title>Economy — SyncNet</title><meta name="description" content="SyncNet Economy view: every PAR project with an on-chain market paired with a root token, plus the projects the root's current operator has signed to recognize."><link rel="stylesheet" href="/v2.css"></head><body>
+<header class="site-nav"><div class="wrap nav-inner"><a class="nav-brand" href="/"><span class="nav-mark">S</span><span>SYNCNET</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">MENU</button><nav class="nav-links" aria-label="Primary"><a class="active" aria-current="page" href="/network.html">Map</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/sync.html">$SYNC token</a><a href="/labs.html">Labs</a><a class="nav-cta" href="/build.html">SYNC A PROJECT</a></nav></div></header>
+<main>
+<section class="page-head"><div class="wrap"><div class="eyebrow">Economy · derived from on-chain PAR markets</div><h1 id="ecoTitle">ECONOMY</h1><p id="ecoLead">Every PAR project with a market paired with a root token belongs to that root's Economy. Nothing here is a membership list someone maintains: it is read from PAR market data.</p></div></section>
+<section class="section"><div class="wrap">
+<div class="example-card" id="ecoPick" hidden><div class="field full"><label for="ecoRootInput">Root token contract</label><div class="asset-entry"><input class="input mono" id="ecoRootInput" placeholder="0x…" autocomplete="off" spellcheck="false"><button class="btn primary" id="ecoOpen" type="button">OPEN ECONOMY</button></div><div class="asset-status" id="ecoPickStatus">Paste a token contract address. Economies are opened by contract address only, never by ticker.</div></div></div>
+<div class="example-card" id="ecoCard" hidden>
+<div class="example-top"><div class="example-project"><div><h3 id="ecoRootName">…</h3><p class="mono" id="ecoRootAddr"></p></div></div><div class="badge-stack" id="ecoBadges"></div></div>
+<div id="ecoImpostor"></div>
+<div class="registry-facts" id="ecoFacts"></div>
+<p class="coverage-note" id="ecoCoverage"></p>
+<div class="network-actions"><a class="btn primary" id="ecoBuild" href="/build.html">CREATE A PROJECT IN THIS ECONOMY</a><a class="btn" id="ecoMap" href="/network.html">MAP CONNECTIONS</a><a class="btn" id="ecoProject" href="#">PROJECT PAGE</a></div>
+</div>
+</div></section>
+
+<section class="section compact" id="ecoCuratorSection" hidden><div class="wrap">
+<div class="eyebrow">Curation authority</div><h2 class="section-title" id="ecoCuratorTitle">CURATOR.</h2>
+<div class="wallet-box mp-wallet-box"><div class="wallet-line"><div class="wallet-id"><strong id="ecoWalletName">Not connected</strong><span id="ecoWalletNote">Browsing needs no wallet. Only the root's current curator can recognize projects.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="ecoConnect" type="button">Connect wallet</button></div></div></div>
+<div class="passport-rows" id="ecoCurator"></div>
+<div id="ecoClaim"></div>
+<div class="asset-status" id="ecoNote" role="status" aria-live="polite" hidden></div>
+</div></section>
+
+<section class="section compact" id="ecoRecognizedSection" hidden><div class="wrap">
+<div class="eyebrow">Signed by the root's current operator</div><h2 class="section-title">RECOGNIZED PROJECTS.</h2>
+<p class="section-copy mp-compact-copy">A parent recognition is a one-sided, signed statement by the root's current operator (or reviewed curator). It is not an endorsement by SyncNet, and the recognized project has not necessarily agreed to it. It ends automatically if the operator changes.</p>
+<div class="network-grid" id="ecoRecognized"></div>
+</div></section>
+
+<section class="section compact" id="ecoConnectedSection" hidden><div class="wrap">
+<div class="eyebrow">On-chain PAR markets · indexer view</div><h2 class="section-title">CONNECTED PROJECTS.</h2>
+<p class="section-copy mp-compact-copy">Each of these PAR launches has a market paired with this root, matched by contract address. A market connection is observable on-chain; it does not imply affiliation, approval or endorsement by anyone.</p>
+<div class="network-grid" id="ecoConnected"></div>
+<p class="coverage-note" id="ecoConnectedMore"></p>
+</div></section>
+</main>
+<section class="public-risk"><div class="wrap"><div class="eyebrow">Connection ≠ affiliation · recognition ≠ endorsement</div><p>SyncNet shows which markets exist and which recognitions the root's current operator has signed. It does not verify, approve or endorse any project, and it does not publish volume, TVL or fee figures it cannot read truthfully.</p></div></section>
+<div class="modal" id="ecoWalletModal" role="dialog" aria-modal="true" aria-labelledby="ecoWalletModalTitle"><div class="modal-card"><h3 id="ecoWalletModalTitle">Choose an EVM wallet</h3><p>More than one wallet is installed in this browser. Choosing one only exposes its selected account to this page: nothing is signed and nothing is sent until you act.</p><div class="provider-list" id="ecoProviderList"></div><div class="actions" style="justify-content:flex-end;margin-top:16px"><button class="btn" id="ecoCloseWallet" type="button">Cancel</button></div></div></div>
+<footer class="site-footer"><div class="wrap"><nav class="footer-nav"><a href="/kit.html">Project Kit</a><a href="/network.html">Map</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/labs.html">Labs</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><a href="/contact.html">Contact</a></nav></div></footer><script src="/v2-common.js" defer></script><script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-chain.js" defer></script><script src="/lib/syncnet-economy.js" defer></script><script src="/economy-v2.js" defer></script></body></html>

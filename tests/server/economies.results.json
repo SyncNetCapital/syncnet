@@ -1,0 +1,506 @@
+{
+  "passed": 100,
+  "failed": 0,
+  "results": [
+    {
+      "name": "flags: economy curation is CLOSED by default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "flags: SYNCNET_ECONOMY_CURATION=true + durable store opens curation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "flags: without a durable store curation stays closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "flags: kill switch SYNCNET_ECONOMIES_DISABLED closes curation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "flags: only the exact value \"true\" opens it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "flags: existing gates are unchanged by the addition",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config view: curation reported closed when the flag is off",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config view: open with the flag",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fail closed: writes refused (503) when the flag is off",
+      "ok": true,
+      "detail": "{\"error\":\"Economy curation is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "fail closed: kill switch refuses writes",
+      "ok": true,
+      "detail": "{\"error\":\"Economy curation is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "fail closed: no durable store → writes refused",
+      "ok": true,
+      "detail": "{\"error\":\"Economy curation is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "fail closed: no durable store → reads answer durable:false with nothing recognized",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "method: PUT refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "read: invalid root refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "read: zero address refused as a root",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "read: unknown view refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unclaimed root: nobody can curate (403 no_curator)",
+      "ok": true,
+      "detail": "{\"error\":\"This root has no curator yet. For a PAR launch, its deployer or creator-fee recipient can claim the Project Passport in the Marketplace.\",\"code\":\"no_curator\"}"
+    },
+    {
+      "name": "unclaimed root: economy view has curator:null and nothing recognized",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "setup: the $SYNC deployer claims the Project Passport through /api/marketplace (unchanged flow)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T10:12:50.745Z\",\"claims\":[{\"id\":\"0xaaf2b8bac5ca5cd61bdbf1c044229633e58a1045c58ee5ba5"
+    },
+    {
+      "name": "curator = the Passport operator (source passport)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "curator recognizes a connected child (live PAR market verified)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x92691697832f08cb0fdd0313f34deae5edde746eb48a798899c784e71168ebe4\",\"recognized\":true}"
+    },
+    {
+      "name": "the child is now PARENT-RECOGNIZED in the economy view",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "each recognition is independently verifiable (id = EIP-712 digest, signature recovers to the curator)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a project with NO market paired with the root cannot be recognized (422)",
+      "ok": true,
+      "detail": "{\"error\":\"This project has no on-chain PAR market paired with this root, so it cannot be recognized.\",\"code\":\"not_connected\"}"
+    },
+    {
+      "name": "a non-PAR address cannot be recognized (422)",
+      "ok": true,
+      "detail": "{\"error\":\"This project has no on-chain PAR market paired with this root, so it cannot be recognized.\",\"code\":\"not_connected\"}"
+    },
+    {
+      "name": "the root cannot recognize itself",
+      "ok": true,
+      "detail": "{\"error\":\"Invalid or missing field: child.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "a non-curator wallet (valid signature) is refused (403 not_curator)",
+      "ok": true,
+      "detail": "{\"error\":\"Only the current curator of this root can recognize or revoke projects.\",\"code\":\"not_curator\"}"
+    },
+    {
+      "name": "a signature by a different wallet is refused (401)",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this curation.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "a signature over the Marketplace EIP-712 domain is refused here (401)",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this curation.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "extra client fields cannot change anything (still verified against the real curator)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x9e045d92a52d936e819196ab976f4cb697d84085e30a5a6aa7def9cdf8001580\",\"recognized\":true}"
+    },
+    {
+      "name": "issuedAt far in the past is refused",
+      "ok": true,
+      "detail": "{\"error\":\"issuedAt must be within 300 seconds of the current time. Check your device clock and sign again.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "issuedAt far in the future is refused",
+      "ok": true,
+      "detail": "{\"error\":\"issuedAt must be within 300 seconds of the current time. Check your device clock and sign again.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "only recognize/revoke decisions exist",
+      "ok": true,
+      "detail": "{\"error\":\"Invalid or missing field: decision.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "submitting the same signed event twice is idempotent (duplicate:true, one member)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":true,\"id\":\"0x0cfd703a1b09eb30778a00c222ee1a4b9933358f2fef3a13dce2ff7d4f3ff8a2\",\"recognized\":true}"
+    },
+    {
+      "name": "curator revokes a recognition",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x3385afa675df83cb013c337db57c0d66c682171e7ffc5cee6f68781612c6152d\",\"recognized\":false}"
+    },
+    {
+      "name": "replaying the old signed recognition does not bring it back",
+      "ok": true,
+      "detail": "{\"error\":\"A newer decision for this project already exists. Reload and sign again.\",\"code\":\"stale\"}"
+    },
+    {
+      "name": "an event older than the latest decision is refused as stale (409) and changes nothing",
+      "ok": true,
+      "detail": "{\"error\":\"A newer decision for this project already exists. Reload and sign again.\",\"code\":\"stale\"}"
+    },
+    {
+      "name": "concurrent recognize(t+2) + revoke(t+1) → recognized (latest SIGNED intent wins)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "concurrent recognize(t+3) + revoke(t+4) → not recognized (latest SIGNED intent wins)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "concurrent burst: no request crashes and no event is lost (set membership is additive)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "server view equals an independent fold of the raw set",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fake \"SYNC\" (same ticker, other contract): its operator cannot recognize children of the real $SYNC (422)",
+      "ok": true,
+      "detail": "{\"error\":\"This project has no on-chain PAR market paired with this root, so it cannot be recognized.\",\"code\":\"not_connected\"}"
+    },
+    {
+      "name": "the impostor root ends with nothing recognized, and the real root is unaffected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cap setup: a child is currently recognized and the set is at the cap",
+      "ok": true,
+      "detail": "0xb0a3d82bf46ae6303aee263fc4d48e5c657fc967"
+    },
+    {
+      "name": "at the cap a NEW recognition is refused (409 full)",
+      "ok": true,
+      "detail": "{\"error\":\"This Economy has reached its curation-event limit. Revoking a current recognition still works; new recognitions are paused.\",\"code\":\"full\"}"
+    },
+    {
+      "name": "at the cap a no-op revoke (not recognized) is refused, keeping the set bounded",
+      "ok": true,
+      "detail": "{\"error\":\"This Economy has reached its curation-event limit. Revoking a current recognition still works; new recognitions are paused.\",\"code\":\"full\"}"
+    },
+    {
+      "name": "at the cap a revoke of a CURRENT recognition is still accepted (curator can always clean up)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x7f1ac6879400867d0082e2a82ef1931f079a68c231cdbc94e3c3ee2fb55a143f\",\"recognized\":false}"
+    },
+    {
+      "name": "before transfer: recognitions by the current operator are shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "setup: listing created",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xb5e4343232acc8265f93171322d08b8cc87b22829a4a910e640dc3589b83c49e\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1\",\"currency\":\"USD\",\"terms\":{\"description\":\"Operational control of $SYNC test\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x092a1a08e948d4b392086edc7a0e383db7e843"
+    },
+    {
+      "name": "setup: operator transferred to the buyer through the Marketplace",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x29e5759898971c7df18b4292a6e3f30bc1824bd019ac077f32a21556f212b7f5\",\"listingId\":\"0xb5e4343232acc8265f93171322d08b8cc87b22829a4a910e640dc3589b83c49e\",\"offerId\":\"0x87321c26f6c78c922821dbef090d4f7f98a3da185c2d66d2ca6e8149905b7400\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "after the operator change the curator is the new operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after the operator change ALL earlier recognitions are inert (fail safe)",
+      "ok": true,
+      "detail": "{\"curation\":true,\"durable\":true,\"root\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"curator\":{\"address\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"source\":\"passport\",\"since\":\"2026-09-25T10:12:50.0"
+    },
+    {
+      "name": "the former operator can no longer curate (403)",
+      "ok": true,
+      "detail": "{\"error\":\"Only the current curator of this root can recognize or revoke projects.\",\"code\":\"not_curator\"}"
+    },
+    {
+      "name": "the new operator can recognize again",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xbad9e7e04cdf7146e74d2329248d5ff70325f405e80c47084fb7cd8aba5143e8\",\"recognized\":true}"
+    },
+    {
+      "name": "manual grant: curator source is \"manual\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "manual curator can recognize a child connected on-chain",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x57f4d6c147492164dde98bc0e20d78c4e6303160e00e6cb487e2cdcd91b83412\",\"recognized\":true}"
+    },
+    {
+      "name": "without the grant, the same root has no curator (nothing is hard-coded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "shipped syncnet-economies.json has no curators (no hard-coded $SYNC curator)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim request on a non-PAR contract root is recorded as PENDING",
+      "ok": true,
+      "detail": "{\"ok\":true,\"id\":\"0x67602cc3682f8a259ce6c30b943b03085c30c782e9a3a22f6dd51b0d0bf46ac6\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+    },
+    {
+      "name": "a pending request grants NOTHING (still no curator)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the requester cannot curate while pending",
+      "ok": true,
+      "detail": "{\"error\":\"This root has no curator yet. For a PAR launch, its deployer or creator-fee recipient can claim the Project Passport in the Marketplace.\",\"code\":\"no_curator\"}"
+    },
+    {
+      "name": "claim request on a PAR root is refused (use the Passport claim)",
+      "ok": true,
+      "detail": "{\"error\":\"This root already has a curator.\",\"code\":\"has_curator\"}"
+    },
+    {
+      "name": "claim request on a root that already has a curator is refused",
+      "ok": true,
+      "detail": "{\"error\":\"This root already has a curator.\",\"code\":\"has_curator\"}"
+    },
+    {
+      "name": "claim request with a non-https evidence URL is refused",
+      "ok": true,
+      "detail": "{\"error\":\"Invalid or missing field: evidenceUrl.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "claim request signed by another wallet is refused",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this request.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "privacy setup: a second pending request with a distinctive evidence URL is recorded",
+      "ok": true,
+      "detail": "{\"ok\":true,\"id\":\"0x02f805657dfd2ea1925fbb69f43902425b54d3a52d252fd16b2a8f3c11c7b9cf\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+    },
+    {
+      "name": "privacy: pending requests are kept in the durable store for maintainer inspection",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "privacy: an unauthenticated caller cannot read the requests view (400, no data)",
+      "ok": true,
+      "detail": "{\"error\":\"Unknown view.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "privacy: no public GET response contains a pending evidence URL, claimant signature or request list",
+      "ok": true,
+      "detail": "{\"error\":\"Unknown view.\",\"code\":\"invalid_request\"} | {\"error\":\"Unknown view.\",\"code\":\"invalid_request\"} | {\"error\":\"Unknown view.\",\"code\":\"invalid_request\"} | {\"curation\":true,\"durable\":true,\"root\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d1 | {\"curation\":true,\"durable\":true,\"chainId\":4663,\"maxSkew\":300} | {\"curation\":true,\"durable\":true,\"root\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d1"
+    },
+    {
+      "name": "chain down: recognition refused with 503 and no internal detail",
+      "ok": true,
+      "detail": "{\"error\":\"Robinhood Chain could not be read right now. Try again.\",\"code\":\"unavailable\"}"
+    },
+    {
+      "name": "store failure: 503 without leaking internals",
+      "ok": true,
+      "detail": "{\"error\":\"Economies are temporarily unavailable.\",\"code\":\"unavailable\"}"
+    },
+    {
+      "name": "bodies above 8 KB are refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "per-IP write rate limit applies",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "abuse: 130 unverified requests naming the real curator are all refused (401/409, never 429)",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "abuse: they consumed NOTHING from the curator’s wallet bucket",
+      "ok": true,
+      "detail": "before 4, after 4"
+    },
+    {
+      "name": "abuse: the real curator can still curate afterwards",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xd6efce2eeb9c03b2126ae31833d37b23efa7bd807ca45a8d182178a8d925d36e\",\"recognized\":false}"
+    },
+    {
+      "name": "the wallet bucket is charged once for a verified request",
+      "ok": true,
+      "detail": "before 4, after 5"
+    },
+    {
+      "name": "the per-wallet limit still applies to VERIFIED requests (429 after 120/h)",
+      "ok": true,
+      "detail": "{\"error\":\"Too many requests. Please wait and try again.\",\"code\":\"rate_limited\",\"retryAfter\":2829}"
+    },
+    {
+      "name": "source order: walletLimited runs after verifySig in both write paths, never in the handler",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "abuse: 60 invalid claim requests from 60 IPs are all refused with 401 (never 429)",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "abuse: they consumed NOTHING from the global verified-claim bucket (50/h)",
+      "ok": true,
+      "detail": "before 2, after 2"
+    },
+    {
+      "name": "abuse: a subsequent legitimate signed claim request is still accepted (PENDING)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"id\":\"0x35d36c6289347a4c44a7bf428e9a45d17eed5d58338d0f21f267f277a1cc0d4b\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+    },
+    {
+      "name": "the global bucket is charged once for the verified request",
+      "ok": true,
+      "detail": "before 2, after 3"
+    },
+    {
+      "name": "the global limit still applies to VERIFIED claim requests (429 after 50/h)",
+      "ok": true,
+      "detail": "{\"error\":\"Too many requests. Please wait and try again.\",\"code\":\"rate_limited\",\"retryAfter\":2828}"
+    },
+    {
+      "name": "source order: eco-claim (per IP) before verifySig; eco-wallet and eco-claim-all only after it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "replay setup: the curator recognizes a child (a new write)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xd5fd18788d1ef2edc6806513f9fe12975b118b8d25f5d68fa71061b9bb7eb68a\",\"recognized\":true}"
+    },
+    {
+      "name": "a genuinely new verified write consumes the wallet quota (+1)",
+      "ok": true,
+      "detail": "before 1, after 2"
+    },
+    {
+      "name": "replay: the public signed event replayed 150x by a third party is a harmless duplicate every time (never 429)",
+      "ok": true,
+      "detail": "{}"
+    },
+    {
+      "name": "replay: 150 duplicate replays consumed NOTHING from the curator wallet bucket",
+      "ok": true,
+      "detail": "before 2, after 2"
+    },
+    {
+      "name": "the curator’s next new action (revoke) is accepted and charged once",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x04a27e8576f1ebce2a0755b2f38e135a2fac071eb91561454d1becf76e3bf41f\",\"recognized\":false}"
+    },
+    {
+      "name": "replay: the now-superseded public event is refused as stale (409) and consumes nothing",
+      "ok": true,
+      "detail": "409 used 3"
+    },
+    {
+      "name": "after all replays the real curator can still submit new valid actions",
+      "ok": true,
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xdeed366e32f1da07e1bfc57163a75c59ce6cb428046b9a313b80755f3f34c628\",\"recognized\":true}{\"ok\":true,\"duplicate\":false,\"id\":\"0xd83587d860b7e05eff4cccd0490d657ebc8dc8fd3cab4e7861fbfc4583d3d485\",\"recognized\":true}"
+    },
+    {
+      "name": "genuinely new verified writes keep consuming the wallet quota normally (+1 each)",
+      "ok": true,
+      "detail": "used 5"
+    },
+    {
+      "name": "claim: a new signed claim request is stored and charges wallet + global quota once",
+      "ok": true,
+      "detail": "{\"ok\":true,\"id\":\"0xc8d3e3743d875ffe45f0c4d9b40096286fbe829046d8244b956dcb97c897bccf\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"} global 1"
+    },
+    {
+      "name": "claim: 20 replays of the stored request are duplicates that consume neither wallet nor global quota",
+      "ok": true,
+      "detail": "wallet 20->20 global 1->1"
+    },
+    {
+      "name": "source order: quotas are charged only after the duplicate/stale/full checks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Economies wrote only eco:cur/eco:req sets",
+      "ok": true,
+      "detail": "eco:cur:v1:0x6368e007b9f0b941560ed1f3bceb20247f5eca37,eco:cur:v1:0x1111111111111111111111111111111111111111,eco:req:v1:0x5fc5360d0400a0fd4f2af552add042d716f1d168"
+    },
+    {
+      "name": "no reg:* or other foreign keys were created",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economies.js has no store.set/store.del and writes only with sadd",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economies.js references mp:* only for the read-only Passport key",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

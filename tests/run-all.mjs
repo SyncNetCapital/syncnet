@@ -13,6 +13,8 @@ const SUITES = [
   ['server endpoint abuse (RC)', 'node', ['tests/server/rc-server.test.mjs'], /(\d+)\/(\d+) server checks passed/],
   ['server IPFS check /api/ipfs-check (hotfix)', 'node', ['tests/server/ipfs-check.test.mjs'], /(\d+)\/(\d+) ipfs-check checks passed/],
   ['server Marketplace /api/marketplace (V1)', 'node', ['tests/server/marketplace.test.mjs'], /(\d+)\/(\d+) marketplace server checks passed/],
+  ['Economies unit (EIP-712 domain, fold, derived membership)', 'node', ['tests/unit/economy.test.mjs'], /(\d+) passed, (\d+) failed/],
+  ['server Economies /api/economies (V0)', 'node', ['tests/server/economies.test.mjs'], /(\d+)\/(\d+) economies server checks passed/],
   ['audit PoCs · engine (AFTER)', 'node', ['tests/audit/poc-engine.mjs'], /(\d+)\/(\d+) reproduced/],
   ['audit PoCs · server (AFTER)', 'node', ['tests/audit/poc-server.mjs'], /(\d+)\/(\d+) reproduced/],
   ['audit PoCs · pages (AFTER)', 'node', ['tests/audit/poc-e2e.mjs'], /(\d+)\/(\d+) vulnerability checks reproduced/],
@@ -22,6 +24,7 @@ const SUITES = [
   ['Marketplace walkthrough (two browsers, full deal)', 'node', ['tests/regression/rc-marketplace.mjs'], /(\d+)\/(\d+) marketplace walkthrough checks passed/],
   ['Marketplace wallet selection (multi-wallet chooser)', 'node', ['tests/regression/rc-wallet-select.mjs'], /(\d+)\/(\d+) wallet-selection checks passed/],
   ['mobile 320/360/390/430', 'node', ['tests/regression/rc-mobile.mjs'], /(\d+)\/(\d+) mobile checks passed/],
+  ['Economy walkthrough (derived membership, recognize/revoke)', 'node', ['tests/regression/rc-economy.mjs'], /(\d+)\/(\d+) economy walkthrough checks passed/],
 ];
 const out = [];
 for (const [name, cmd, args, re] of SUITES) {

@@ -23,3 +23,12 @@
 - Topology and name/ticker search are limited to what PAR's indexer exposes. Contract lookups are authoritative.
 - There are no hosted accounts, server-side profiles or automated posting.
 - Legal pages (Terms, Privacy, Risk) were updated for this build but are not legal advice. Have them reviewed before opening to the public.
+
+## Economies V0
+
+- **Membership is only as complete as the PAR index window.** `/api/par-launches-all` covers at most 5,000 launches; older connected projects are not listed. A recognized project outside the window is shown as *connection previously verified · outside current index window*, never as indexer-confirmed.
+- **Recognition is one-sided.** It is signed by the root's current operator (or a reviewed curator); the recognized project does not co-sign (child acknowledgement is planned for V1.1). SyncNet endorses nothing.
+- **Roots without a provable curator stay unclaimed.** Non-PAR roots need a reviewed entry in `syncnet-economies.json`; none is assumed (including $SYNC if it cannot claim a Passport).
+- **Operator changes reset recognitions.** After a Marketplace transfer, earlier recognitions are inert until the new operator signs again.
+- **Per-root event cap (500).** At the cap new recognitions pause; revoking a current recognition always works. There is no compaction yet.
+- **Inherited Marketplace race.** Curator authority reads the Marketplace Passport, which still has read-modify-write races in the Marketplace itself (out of scope for Economies, which only uses SADD).
