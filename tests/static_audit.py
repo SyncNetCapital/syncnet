@@ -227,4 +227,7 @@ assert 'PARENT-RECOGNIZED' in _eco_lib and 'OUTSIDE CURRENT INDEX WINDOW' in _ec
 assert not _re3.search(r'\.(volume\w*|tvl\w*|marketCap\w*|liquidityUsd|fees(Usd|Total)\w*)\b', _eco_page+_eco_lib+_eco_fn, _re3.I)  # no aggregate metrics are read or shown
 assert '/build.html?with=' in _eco_page and 'localStorage' not in (root/'economy-v2.js').read_text()
 for _f in ['marketplace.js']: assert 'econom' not in (root/'netlify/functions'/_f).read_text().lower()
+assert "view === 'requests'" not in _eco_fn and 'evidenceUrl: r.evidenceUrl' not in _eco_fn  # pending requests are never served
+_h=_eco_fn[_eco_fn.index('async function handler('):_eco_fn.index('async function curate(')]
+assert "'eco-wallet'" not in _h and 'walletLimited(' not in _h  # no wallet bucket before signature verification
 print('SyncNet Economies V0 static audit: PASS')

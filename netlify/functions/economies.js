@@ -4,7 +4,6 @@
  *
  *   GET  /api/economies?view=config
  *   GET  /api/economies?view=economy&root=0x…     -> curator + the children the current curator recognizes
- *   GET  /api/economies?view=requests&root=0x…    -> pending curator requests (raw JSON for maintainers; no UI)
  *   POST /api/economies {action:'curate'|'claim-request', ...message, signature}
  *
  * Model (see docs/ECONOMIES.md):
@@ -22,6 +21,10 @@
  *    revoke of a currently recognized child is ALWAYS accepted, so a curator can always clean up.
  *  - Rollout gate: flags.js economyCuration (SYNCNET_ECONOMY_CURATION=true + durable store, kill switch
  *    SYNCNET_ECONOMIES_DISABLED). Reads work whenever a durable store exists.
+ *  - Pending curator requests (eco:req:v1:<root>, incl. claimant + evidence URL) are NEVER served over HTTP: there is
+ *    no maintainer-authenticated read in V0, so maintainers inspect them directly in the durable store.
+ *  - The per-wallet write limit is charged only AFTER that wallet's signature verified, so naming someone else's
+ *    address cannot exhaust their bucket (pre-verification limits are per IP / global only).
  */
 const Core = require('../../lib/syncnet-core.js');
 const Chain = require('../../lib/syncnet-chain.js');
@@ -94,6 +97,13 @@ async function connectedOnChain(rpc, root, child) {
   return markets.some((m) => lc(m.pairToken) === root);
 }
 
+/** Per-wallet write limit. Call ONLY after `wallet`'s signature has verified. Returns a response when denied, else null. */
+async function walletLimited(store, wallet) {
+  const wl = await limit(store, { bucket: 'eco-wallet', id: wallet, limit: 120, windowSeconds: 3600 });
+  if (wl.allowed) return null;
+  return wl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(wl.retryAfter);
+}
+
 const bad = (message) => publicError(400, 'invalid_request', message || 'Invalid request.');
 const skewOk = (t) => Math.abs(t - nowSec()) <= Economy.MAX_SKEW;
 
@@ -113,18 +123,12 @@ async function handler(event = {}, deps = {}) {
     if (!rl.allowed) return denied(rl);
     const view = query(event, 'view') || 'economy';
     if (view === 'config') return json(200, { curation: gate.economyCuration, durable: Boolean(store.durable), chainId: Economy.CHAIN_ID, maxSkew: Economy.MAX_SKEW });
-    if (view !== 'economy' && view !== 'requests') return bad('Unknown view.');
+    if (view !== 'economy') return bad('Unknown view.');
     const root = lc(query(event, 'root'));
     if (!Economy.isRootAddr(root)) return bad('Invalid root address.');
-    if (!store.durable) return json(200, { curation: false, durable: false, root, curator: null, recognized: [], requests: [] });
+    if (!store.durable) return json(200, { curation: false, durable: false, root, curator: null, recognized: [] });
     try {
       const curator = await resolveCurator(store, root, grants);
-      if (view === 'requests') {
-        const requests = (await store.smembers(K.requests(root))).map((m) => Economy.parseMember(m, 'EconomyClaimRequest')).filter((r) => r && r.root === root)
-          .sort((a, b) => b.issuedAt - a.issuedAt).slice(0, Economy.MAX_REQUESTS_PER_ROOT)
-          .map((r) => ({ id: r.id, claimant: r.claimant, evidenceUrl: r.evidenceUrl, issuedAt: r.issuedAt, signature: r.signature, status: 'PENDING' }));
-        return json(200, { durable: true, root, curator: publicCurator(curator), requests });
-      }
       const folded = Economy.fold(await store.smembers(K.curation(root)), root, curator);
       return json(200, {
         curation: gate.economyCuration, durable: true, root, curator: publicCurator(curator),
@@ -146,11 +150,6 @@ async function handler(event = {}, deps = {}) {
   const b = readJsonBody(event, 8192);
   if (!b || typeof b.action !== 'string') return bad('A JSON body with an action is required.');
   try {
-    const wallet = lc(b.curator || b.claimant || '');
-    if (Economy.isAddr(wallet)) {
-      const wl = await limit(store, { bucket: 'eco-wallet', id: wallet, limit: 120, windowSeconds: 3600 });
-      if (!wl.allowed) return denied(wl);
-    }
     if (b.action === 'curate') return await curate(b, { store, rpc, ip, grants });
     if (b.action === 'claim-request') return await claimRequest(b, { store, rpc, ip, grants });
     return bad('Unknown action.');
@@ -175,6 +174,8 @@ async function curate(b, { store, rpc, ip, grants }) {
     log(FN, 'bad-signature', { ip: hashId(ip), root: msg.root });
     return publicError(401, 'bad_signature', 'The signature does not verify for this curation.');
   }
+  const limited = await walletLimited(store, curator.address);
+  if (limited) return limited;
   const members = await store.smembers(K.curation(msg.root));
   const { latest } = Economy.latestByChild(members, msg.root, curator);
   const current = latest.get(msg.child) || null;
@@ -224,6 +225,8 @@ async function claimRequest(b, { store, rpc, ip, grants }) {
   if (!code || code === '0x') return publicError(422, 'not_contract', 'This address is not a contract on Robinhood Chain.');
   const id = Economy.digest('EconomyClaimRequest', msg);
   if (!(await verifySig(rpc, msg.claimant, id, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
+  const limited = await walletLimited(store, msg.claimant);
+  if (limited) return limited;
   const members = await store.smembers(K.requests(msg.root));
   if (members.some((m) => { const r = Economy.parseMember(m, 'EconomyClaimRequest'); return r && r.id === id; })) return json(200, { ok: true, duplicate: true, id, status: 'PENDING' });
   if (members.length >= Economy.MAX_REQUESTS_PER_ROOT) return publicError(409, 'full', 'This root already has the maximum number of pending requests.');

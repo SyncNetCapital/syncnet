@@ -249,8 +249,17 @@ const keysBefore = new Set(MAP.keys());
   check('claim request with a non-https evidence URL is refused', r.statusCode === 400, r.body);
   r = await POST(req({}, OPERATOR));
   check('claim request signed by another wallet is refused', r.statusCode === 401, r.body);
-  const rq = J(await GET({ view: 'requests', root: A.USDG.toLowerCase() }));
-  check('requests view lists pending requests for maintainers', rq.requests.length === 1 && rq.requests[0].status === 'PENDING');
+  // Privacy: pending requests (claimant, evidence URL, signature) are stored for maintainers but never served over HTTP.
+  const USDG = A.USDG.toLowerCase(), SECRET = 'https://evidence.example.org/private-' + rnd().slice(2, 18);
+  r = await POST(req({ evidenceUrl: SECRET, claimant: BUYER }, BUYER));
+  check('privacy setup: a second pending request with a distinctive evidence URL is recorded', r.statusCode === 200 && J(r).status === 'PENDING' && !r.body.includes(SECRET), r.body);
+  const stored = [...MAP.get('eco:req:v1:' + USDG).value];
+  check('privacy: pending requests are kept in the durable store for maintainer inspection', stored.length === 2 && stored.some((m) => m.includes(SECRET)));
+  const probes = [{ view: 'requests', root: USDG }, { view: 'REQUESTS', root: USDG }, { view: 'requests', root: USDG, admin: 'true', key: 'x' }, { view: 'economy', root: USDG }, { view: 'config' }, { root: USDG }];
+  const replies = [];
+  for (const q of probes) replies.push(await eco._handler({ ...ev('GET', { query: q }), headers: { 'x-nf-client-connection-ip': '198.18.0.9', 'x-syncnet-canary-key': 'guess', authorization: 'Bearer guess' } }, deps));
+  check('privacy: an unauthenticated caller cannot read the requests view (400, no data)', replies[0].statusCode === 400 && replies[1].statusCode === 400 && replies[2].statusCode === 400 && !('requests' in J(replies[0])), replies[0].body);
+  check('privacy: no public GET response contains a pending evidence URL, claimant signature or request list', replies.every((x) => !x.body.includes(SECRET) && !x.body.includes('evidence.example.org') && !x.body.includes('example.org/proof') && !/"requests"|evidenceUrl|claimant/.test(x.body)), replies.map((x) => x.body.slice(0, 80)).join(' | '));
 }
 
 // ================================================================================ chain / store outages, limits
@@ -267,6 +276,36 @@ const keysBefore = new Set(MAP.keys());
   let limited = null;
   for (let i = 0; i < 25; i++) { const x = await POST({ action: 'noop' }, deps, '192.0.2.77'); if (x.statusCode === 429) { limited = x; break; } }
   check('per-IP write rate limit applies', limited && limited.statusCode === 429);
+}
+
+// ================================================================================ wallet bucket is charged only after signature verification
+{
+  const { hashId } = require(path.join(ROOT, 'netlify/lib/log.js'));
+  const CUR = J(await GET({ view: 'economy', root: SYNC })).curator.address; // the real, public curator address
+  const bucketKey = () => `rl:eco-wallet:${hashId(CUR)}:${Math.floor(Date.now() / 3600000)}`;
+  const used = () => Number((MAP.get(bucketKey()) || {}).value || 0);
+  const c0 = used();
+  const spoofed = [];
+  for (let i = 0; i < 130; i++) {
+    const body = i % 3 === 0
+      ? curation({ child: SYNCAT, curator: CUR }, ATTACKER) // names the real curator, signed by the attacker
+      : i % 3 === 1
+        ? { ...curation({ child: SYNCAT, curator: CUR }, CUR), signature: '0x' + '11'.repeat(65) } // garbage signature
+        : { action: 'claim-request', root: A.USDG.toLowerCase(), claimant: CUR, evidenceUrl: 'https://example.org/x', issuedAt: nowSec(), nonce: rnd(), signature: '0x' + '22'.repeat(65) };
+    spoofed.push((await POST(body, deps, `100.64.${i >> 8}.${i & 255}`)).statusCode);
+  }
+  check('abuse: 130 unverified requests naming the real curator are all refused (401/409, never 429)', spoofed.every((c) => c === 401 || c === 409) && !spoofed.includes(429), [...new Set(spoofed)].join(','));
+  check('abuse: they consumed NOTHING from the curator\u2019s wallet bucket', used() === c0, `before ${c0}, after ${used()}`);
+  let r = await POST(curation({ child: SYNCAT, curator: CUR, decision: 'revoke', issuedAt: nowSec() + 120 }, CUR), deps, '100.65.0.1');
+  check('abuse: the real curator can still curate afterwards', r.statusCode === 200, r.body);
+  check('the wallet bucket is charged once for a verified request', used() === c0 + 1, `before ${c0}, after ${used()}`);
+  while (used() < 120) await store.incrWindow(bucketKey(), 3600);
+  r = await POST(curation({ child: SYNCAT, curator: CUR, decision: 'recognize', issuedAt: nowSec() + 130 }, CUR), deps, '100.65.0.2');
+  check('the per-wallet limit still applies to VERIFIED requests (429 after 120/h)', r.statusCode === 429, r.body);
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/economies.js'), 'utf8');
+  const cur = src.slice(src.indexOf('async function curate('), src.indexOf('async function claimRequest('));
+  const req = src.slice(src.indexOf('async function claimRequest('));
+  check('source order: walletLimited runs after verifySig in both write paths, never in the handler', cur.indexOf('walletLimited(') > cur.indexOf('verifySig(') && req.indexOf('walletLimited(') > req.indexOf('verifySig(') && !src.slice(src.indexOf('async function handler('), src.indexOf('async function curate(')).includes("'eco-wallet'"));
 }
 
 // ================================================================================ storage scope
