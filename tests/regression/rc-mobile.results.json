@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-25T08:46:09.362Z",
+  "at": "2026-09-24T14:21:53.844Z",
   "failures": 0,
   "passed": 112,
   "total": 112,
@@ -42,7 +42,7 @@
     {
       "name": "320px simulation passes",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xB56B4Ba91571E64A7550D0494BcE786fbA32B315\nMarkets: MOB320 / SYNC · MOB320 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x6aE48AA0c7f044f537Cd29F467288AcF3D797bf7\nMarkets: MOB320 / SYNC · MOB320 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
     },
     {
       "name": "320px simulation status and PAR preflight fit",
@@ -162,7 +162,7 @@
     {
       "name": "360px simulation passes",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xf6253c5E7b07090197C07437be5F957A018A1797\nMarkets: MOB360 / SYNC · MOB360 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x90A9614E54521bE43f37E1ca8eceeae5CDada84d\nMarkets: MOB360 / SYNC · MOB360 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
     },
     {
       "name": "360px simulation status and PAR preflight fit",
@@ -282,7 +282,7 @@
     {
       "name": "390px simulation passes",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x6214BD93DaCD1e5CF74435631Fd0D9e37F8FB74a\nMarkets: MOB390 / SYNC · MOB390 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xCcc5CDFB90fac5c62cEf563B63fA292A60727828\nMarkets: MOB390 / SYNC · MOB390 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
     },
     {
       "name": "390px simulation status and PAR preflight fit",
@@ -402,7 +402,7 @@
     {
       "name": "430px simulation passes",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x2bB97C2141619c208D76b41918F1C61fE7C21032\nMarkets: MOB430 / SYNC · MOB430 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x131B86B923B2077C6dD7B22a2fC5b7D5ddFb2e12\nMarkets: MOB430 / SYNC · MOB430 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
     },
     {
       "name": "430px simulation status and PAR preflight fit",

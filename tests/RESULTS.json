@@ -1,7 +1,7 @@
 {
-  "at": "2026-09-25T08:46:19.037Z",
+  "at": "2026-09-24T14:21:54.094Z",
   "node": "v22.22.2",
-  "site": "sha256:4eee9f90658a58a0768152578abb321c391c67a5b2bb9adc44fbcba39381bf97 (69 deployable files)",
+  "site": "sha256:d7faafdab292a31df7e66851d61f33dce9f5a78be52cbf67ddd572d1c8aa021b (64 deployable files)",
   "suites": [
     {
       "suite": "static audit",
@@ -14,7 +14,7 @@
       "suite": "core unit (keccak, secp256k1, EIP-712, ABI, text policy)",
       "command": "node tests/unit/core.test.mjs",
       "exit": 0,
-      "seconds": 2,
+      "seconds": 3,
       "summary": "333 passed, 0 failed"
     },
     {
@@ -22,7 +22,7 @@
       "command": "node tests/server/image-sanitize.test.mjs",
       "exit": 0,
       "seconds": 5,
-      "summary": "126 passed, 0 failed"
+      "summary": "129 passed, 0 failed"
     },
     {
       "suite": "server infrastructure",
@@ -53,20 +53,6 @@
       "summary": "77/77 marketplace server checks passed"
     },
     {
-      "suite": "Economies unit (EIP-712 domain, fold, derived membership)",
-      "command": "node tests/unit/economy.test.mjs",
-      "exit": 0,
-      "seconds": 0,
-      "summary": "60 passed, 0 failed"
-    },
-    {
-      "suite": "server Economies /api/economies (V0)",
-      "command": "node tests/server/economies.test.mjs",
-      "exit": 0,
-      "seconds": 1,
-      "summary": "74/74 economies server checks passed"
-    },
-    {
       "suite": "audit PoCs · engine (AFTER)",
       "command": "node tests/audit/poc-engine.mjs",
       "exit": 0,
@@ -91,21 +77,21 @@
       "suite": "E2E (existing product suites, updated)",
       "command": "node tests/e2e/run.mjs",
       "exit": 0,
-      "seconds": 109,
+      "seconds": 112,
       "summary": "297/297 checks passed"
     },
     {
       "suite": "required regressions R01–R28",
       "command": "node tests/regression/rc-regressions.mjs",
       "exit": 0,
-      "seconds": 232,
+      "seconds": 209,
       "summary": "206/206 regression checks passed"
     },
     {
       "suite": "IPFS display (canonical utility, PONSYNC CID)",
       "command": "node tests/regression/rc-ipfs-display.mjs",
       "exit": 0,
-      "seconds": 11,
+      "seconds": 10,
       "summary": "23/23 ipfs-display checks passed"
     },
     {
@@ -126,15 +112,8 @@
       "suite": "mobile 320/360/390/430",
       "command": "node tests/regression/rc-mobile.mjs",
       "exit": 0,
-      "seconds": 59,
+      "seconds": 62,
       "summary": "112/112 mobile checks passed"
-    },
-    {
-      "suite": "Economy walkthrough (derived membership, recognize/revoke)",
-      "command": "node tests/regression/rc-economy.mjs",
-      "exit": 0,
-      "seconds": 10,
-      "summary": "32/32 economy walkthrough checks passed"
     }
   ]
 }

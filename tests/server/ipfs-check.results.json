@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-25T08:37:37.965Z",
+  "at": "2026-09-24T14:13:42.011Z",
   "failures": 0,
   "passed": 100,
   "total": 100,
@@ -102,7 +102,7 @@
     {
       "name": "2P PASS: Pinata answers while both public gateways hang (no wait for the timeout)",
       "ok": true,
-      "detail": "2 ms"
+      "detail": "1 ms"
     },
     {
       "name": "2P Pinata redirect to its own host is followed (and loops stop after 3)",
@@ -502,7 +502,7 @@
     {
       "name": "server log records gateway failures (for the operator) without them reaching the client",
       "ok": true,
-      "detail": "[{\"ts\":\"2026-09-25T08:37:37.964Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":150}]"
+      "detail": "[{\"ts\":\"2026-09-24T14:13:42.010Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":151}]"
     }
   ]
 }
