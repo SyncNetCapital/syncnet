@@ -232,4 +232,7 @@ _h=_eco_fn[_eco_fn.index('async function handler('):_eco_fn.index('async functio
 assert "'eco-wallet'" not in _h and 'walletLimited(' not in _h  # no wallet bucket before signature verification
 _c=_eco_fn[_eco_fn.index('async function claimRequest('):]
 assert _c.index("'eco-claim-all'") > _c.index('verifySig(') and _c.index("'eco-claim'") < _c.index('verifySig(')  # global claim budget counts verified requests only
+_cu=_eco_fn[_eco_fn.index('async function curate('):_eco_fn.index('async function claimRequest(')]
+assert _cu.index('walletLimited(') > _cu.index('duplicate: true') and _cu.index('walletLimited(') > _cu.index("'stale'") and _cu.index('walletLimited(') > _cu.index("'full'")  # replays consume no quota
+assert _c.index('walletLimited(') > _c.index('duplicate: true') and _c.index("'eco-claim-all'") > _c.index('duplicate: true')
 print('SyncNet Economies V0 static audit: PASS')

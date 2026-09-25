@@ -23,8 +23,9 @@
  *    SYNCNET_ECONOMIES_DISABLED). Reads work whenever a durable store exists.
  *  - Pending curator requests (eco:req:v1:<root>, incl. claimant + evidence URL) are NEVER served over HTTP: there is
  *    no maintainer-authenticated read in V0, so maintainers inspect them directly in the durable store.
- *  - The per-wallet write limit is charged only AFTER that wallet's signature verified, so naming someone else's
- *    address cannot exhaust their bucket (pre-verification limits are per IP / global only).
+ *  - The per-wallet write limit (and the global claim limit) is charged only AFTER the signature verified AND only
+ *    for an actionable write: naming someone else's address, or replaying a public signed event (duplicate /
+ *    stale / full, all no-ops), cannot exhaust their bucket. Pre-verification limits are per IP only.
  */
 const Core = require('../../lib/syncnet-core.js');
 const Chain = require('../../lib/syncnet-chain.js');
@@ -174,8 +175,8 @@ async function curate(b, { store, rpc, ip, grants }) {
     log(FN, 'bad-signature', { ip: hashId(ip), root: msg.root });
     return publicError(401, 'bad_signature', 'The signature does not verify for this curation.');
   }
-  const limited = await walletLimited(store, curator.address);
-  if (limited) return limited;
+  // Curation events are public, so any valid signature can be replayed by anyone. Duplicate / stale / full
+  // outcomes write nothing and are answered BEFORE the wallet bucket is charged, so replays cannot exhaust it.
   const members = await store.smembers(K.curation(msg.root));
   const { latest } = Economy.latestByChild(members, msg.root, curator);
   const current = latest.get(msg.child) || null;
@@ -191,6 +192,9 @@ async function curate(b, { store, rpc, ip, grants }) {
   if (full && !(msg.decision === 'revoke' && recognizedNow)) {
     return publicError(409, 'full', 'This Economy has reached its curation-event limit. Revoking a current recognition still works; new recognitions are paused.');
   }
+  // Actionable write (it can add a new event): only now is the curator's wallet bucket charged.
+  const limited = await walletLimited(store, curator.address);
+  if (limited) return limited;
   if (msg.decision === 'recognize') {
     let ok;
     try { ok = await connectedOnChain(rpc, msg.root, msg.child); } catch (err) {
@@ -224,13 +228,14 @@ async function claimRequest(b, { store, rpc, ip, grants }) {
   if (!code || code === '0x') return publicError(422, 'not_contract', 'This address is not a contract on Robinhood Chain.');
   const id = Economy.digest('EconomyClaimRequest', msg);
   if (!(await verifySig(rpc, msg.claimant, id, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
+  // An exact duplicate or a full root writes nothing, so it is answered before any authenticated quota is charged.
+  const members = await store.smembers(K.requests(msg.root));
+  if (members.some((m) => { const r = Economy.parseMember(m, 'EconomyClaimRequest'); return r && r.id === id; })) return json(200, { ok: true, duplicate: true, id, status: 'PENDING' });
+  if (members.length >= Economy.MAX_REQUESTS_PER_ROOT) return publicError(409, 'full', 'This root already has the maximum number of pending requests.');
   const limited = await walletLimited(store, msg.claimant);
   if (limited) return limited;
   const all = await limit(store, { bucket: 'eco-claim-all', id: 'all', limit: 50, windowSeconds: 3600 });
   if (!all.allowed) return all.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(all.retryAfter);
-  const members = await store.smembers(K.requests(msg.root));
-  if (members.some((m) => { const r = Economy.parseMember(m, 'EconomyClaimRequest'); return r && r.id === id; })) return json(200, { ok: true, duplicate: true, id, status: 'PENDING' });
-  if (members.length >= Economy.MAX_REQUESTS_PER_ROOT) return publicError(409, 'full', 'This root already has the maximum number of pending requests.');
   await store.sadd(K.requests(msg.root), Economy.member('EconomyClaimRequest', msg, b.signature));
   log(FN, 'claim-requested', { root: msg.root, claimant: hashId(msg.claimant) });
   return json(200, { ok: true, id, status: 'PENDING', note: 'A request grants nothing until SyncNet reviews it and a curator entry is committed.' });

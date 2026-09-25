@@ -62,12 +62,13 @@ new recognitions for that root until a compaction mechanism exists (see limitati
 
 `curate`: gate open → IP rate limits (20/min + 200/h) → body ≤ 8 KB → field validation, `root ≠ child`
 → `issuedAt` skew → resolve curator (none: 403) → `curator` must equal it (403) → signed within the current
-curatorship (409) → signature (ECDSA, or EIP-1271 by live chain call) (401) → **wallet limit (120/h, charged only now)** → stale check (409) → cap →
+curatorship (409) → signature (ECDSA, or EIP-1271 by live chain call) (401) → duplicate (200, no-op) / stale (409) → cap → **wallet limit (120/h, charged only now)** →
 for `recognize`: live `readLaunch(child)` + `readMarkets(child)` must include `R` (422; chain down 503) → `SADD`.
 
 `claim-request`: gate → IP rate limit (5/h) → validation (https evidence URL ≤ 200 chars) → the
 root must have no curator (409), must NOT be a PAR launch (409 — PAR roots use the Passport claim), must be a
-contract (422) → signature → wallet limit (120/h) → global verified-claim limit (50/h) → per-root cap 20 → `SADD`. Status `PENDING`; approval is a reviewed
+contract (422) → signature → exact duplicate (200, no-op) / per-root cap 20 (409) → wallet limit (120/h) → global
+verified-claim limit (50/h) → `SADD`. Status `PENDING`; approval is a reviewed
 commit to `syncnet-economies.json`.
 
 **Pending requests are private.** The claimant, evidence URL and signature are never served over HTTP and never
@@ -77,7 +78,9 @@ maintainers inspect `eco:req:v1:<root>` directly in the durable store (Upstash c
 **Rate-limit ordering.** Before any signature is checked, only per-IP limits apply. The per-wallet `eco-wallet`
 bucket and the global `eco-claim-all` bucket are charged only after the signature has verified, so a request that
 merely names someone else's address (e.g. the public curator) cannot exhaust their bucket, and invalid claim
-requests from many IPs cannot exhaust the global claim budget.
+requests from many IPs cannot exhaust the global claim budget. Because signed curation events are public, those
+quotas are also charged only for an **actionable** write: replaying a public event (duplicate, stale, or refused at
+the cap) and re-submitting an already-stored claim request write nothing and consume no quota.
 
 ## Display rules
 

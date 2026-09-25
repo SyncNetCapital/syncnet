@@ -334,6 +334,52 @@ const keysBefore = new Set(MAP.keys());
   check('source order: eco-claim (per IP) before verifySig; eco-wallet and eco-claim-all only after it', fn.indexOf("'eco-claim'") < fn.indexOf('verifySig(') && fn.indexOf('walletLimited(') > fn.indexOf('verifySig(') && fn.indexOf("'eco-claim-all'") > fn.indexOf('verifySig('));
 }
 
+// ================================================================================ replaying PUBLIC signed events never consumes quota
+{
+  const { hashId } = require(path.join(ROOT, 'netlify/lib/log.js'));
+  const CUR = lc(A.SAFE_OWNER); // a fresh curator (manual grant) so its wallet bucket starts clean
+  const d = { store, env: ON, grants: { version: 1, curators: [{ root: CASHCAT, curator: CUR, since: '2026-01-01T00:00:00Z', basis: 'manual-review' }] } };
+  const hour = () => Math.floor(Date.now() / 3600000);
+  const walletUsed = (w) => Number((MAP.get(`rl:eco-wallet:${hashId(w)}:${hour()}`) || {}).value || 0);
+  const t = nowSec(), u0 = walletUsed(CUR);
+  let r = await POST(curation({ root: CASHCAT, child: CATF0, curator: CUR, issuedAt: t }, CUR), d, '100.70.0.1');
+  check('replay setup: the curator recognizes a child (a new write)', r.statusCode === 200 && J(r).duplicate === false, r.body);
+  const u1 = walletUsed(CUR);
+  check('a genuinely new verified write consumes the wallet quota (+1)', u1 === u0 + 1, `before ${u0}, after ${u1}`);
+  const pub = J(await GET({ view: 'economy', root: CASHCAT }, d)).recognized.find((e) => e.child === CATF0);
+  const replay = { action: 'curate', root: CASHCAT, child: pub.child, curator: pub.curator, decision: pub.decision, issuedAt: pub.issuedAt, nonce: pub.nonce, signature: pub.signature };
+  const codes = [];
+  for (let i = 0; i < 150; i++) codes.push(J(await POST(replay, d, `100.71.${i >> 8}.${i & 255}`)));
+  check('replay: the public signed event replayed 150x by a third party is a harmless duplicate every time (never 429)', codes.every((j) => j.ok === true && j.duplicate === true), JSON.stringify(codes.find((j) => !j.duplicate) || {}));
+  check('replay: 150 duplicate replays consumed NOTHING from the curator wallet bucket', walletUsed(CUR) === u1, `before ${u1}, after ${walletUsed(CUR)}`);
+  r = await POST(curation({ root: CASHCAT, child: CATF0, curator: CUR, decision: 'revoke', issuedAt: t + 1 }, CUR), d, '100.70.0.2');
+  check('the curator\u2019s next new action (revoke) is accepted and charged once', r.statusCode === 200 && walletUsed(CUR) === u1 + 1, r.body);
+  const stale = [];
+  for (let i = 0; i < 40; i++) stale.push((await POST(replay, d, `100.72.0.${i}`)).statusCode);
+  check('replay: the now-superseded public event is refused as stale (409) and consumes nothing', stale.every((c) => c === 409) && walletUsed(CUR) === u1 + 1, [...new Set(stale)].join(',') + ' used ' + walletUsed(CUR));
+  r = await POST(curation({ root: CASHCAT, child: CATF0, curator: CUR, decision: 'recognize', issuedAt: t + 2 }, CUR), d, '100.70.0.3');
+  const r2 = await POST(curation({ root: CASHCAT, child: CATF1, curator: CUR, decision: 'recognize', issuedAt: t + 2 }, CUR), d, '100.70.0.4');
+  check('after all replays the real curator can still submit new valid actions', r.statusCode === 200 && r2.statusCode === 200 && (await recognized(CASHCAT, d)).includes(CATF0), r.body + r2.body);
+  check('genuinely new verified writes keep consuming the wallet quota normally (+1 each)', walletUsed(CUR) === u1 + 3, 'used ' + walletUsed(CUR));
+
+  // Claim requests: an exact stored duplicate writes nothing and consumes neither the wallet nor the global claim quota.
+  const allKey = `rl:eco-claim-all:${hashId('all')}:${hour()}`;
+  MAP.delete(allKey); // a new hour window for the global claim bucket (the previous section filled it on purpose)
+  const allUsed = () => Number((MAP.get(allKey) || {}).value || 0);
+  const m = { root: A.USDG.toLowerCase(), claimant: OPERATOR, evidenceUrl: 'https://example.org/claim', issuedAt: nowSec(), nonce: rnd() };
+  const body = { action: 'claim-request', ...m, signature: signDigest(OPERATOR, Economy.digest('EconomyClaimRequest', m)) };
+  r = await POST(body, deps, '100.73.0.1');
+  const w1 = walletUsed(OPERATOR), g1 = allUsed();
+  check('claim: a new signed claim request is stored and charges wallet + global quota once', r.statusCode === 200 && J(r).duplicate !== true && g1 === 1, r.body + ' global ' + g1);
+  const dup = [];
+  for (let i = 0; i < 20; i++) dup.push(J(await POST(body, deps, `100.74.0.${i}`)));
+  check('claim: 20 replays of the stored request are duplicates that consume neither wallet nor global quota', dup.every((j) => j.duplicate === true) && walletUsed(OPERATOR) === w1 && allUsed() === g1, `wallet ${w1}->${walletUsed(OPERATOR)} global ${g1}->${allUsed()}`);
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/economies.js'), 'utf8');
+  const cur = src.slice(src.indexOf('async function curate('), src.indexOf('async function claimRequest('));
+  const req = src.slice(src.indexOf('async function claimRequest('));
+  check('source order: quotas are charged only after the duplicate/stale/full checks', cur.indexOf('walletLimited(') > cur.indexOf("'full'") && cur.indexOf('walletLimited(') > cur.indexOf("'stale'") && cur.indexOf('walletLimited(') > cur.indexOf('duplicate: true') && req.indexOf('walletLimited(') > req.indexOf('duplicate: true') && req.indexOf("'eco-claim-all'") > req.indexOf("'full'"));
+}
+
 // ================================================================================ storage scope
 {
   const added = [...MAP.keys()].filter((k) => !keysBefore.has(k));
