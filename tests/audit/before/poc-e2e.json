@@ -1,0 +1,179 @@
+{
+  "results": [
+    {
+      "name": "F-R1 wallet broadcast the launch but the page says \"No transaction was sent.\"",
+      "ok": true,
+      "detail": "Internal JSON-RPC error.\n\nNo transaction was sent."
+    },
+    {
+      "name": "F-R1 nothing was persisted as pending (no reload guard, no \"AGAIN\" phrase)",
+      "ok": true,
+      "detail": "pending=0"
+    },
+    {
+      "name": "F-R1 simulation button stays enabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 re-simulation produces a NEW intent hash → new salt → new CREATE2 address on a real chain",
+      "ok": true,
+      "detail": "0x4dfb56ced8 vs 0xe96eebefed"
+    },
+    {
+      "name": "F-R1 plain ticker (no \"AGAIN\") still unlocks the second launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 a second launch transaction was sent",
+      "ok": true,
+      "detail": "eth_sendTransaction calls=2"
+    },
+    {
+      "name": "F-R1 transaction broadcast while the page still waits for the hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 after reload: no \"unverified launch\" notice",
+      "ok": true,
+      "detail": "Simulation not run yet. No transaction will be requested."
+    },
+    {
+      "name": "F-R1 after reload: the PONSYNC draft is offered for a fresh launch",
+      "ok": true,
+      "detail": "Continue your draft · PONSYNC ($PONSYNC)?"
+    },
+    {
+      "name": "F-P6 second simulation (no input change) yields a new intent hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 UI still shows \"SIGNED ✓\" and the sign button stays disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 LAUNCH LIVE is enabled without a signature over the new record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 saved proof: signed recordHash ≠ committed recordHash",
+      "ok": true,
+      "detail": "signed=0xc7f8b25e4b6c committed=0x0af6d68c0c42"
+    },
+    {
+      "name": "F-P6 saved proof: signed salt ≠ salt used in the launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 Registry labels it \"SIGNED + TX-COMMITTED · THIS BROWSER\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-RH1 no rehearsal banner (neither amber nor red)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-RH1 wallet on the fork is reported as \"Wrong network\", not as rehearsal",
+      "ok": true,
+      "detail": "Wrong network · 46630"
+    },
+    {
+      "name": "F-RH1 RUN SIMULATION asks the wallet to switch to Robinhood Chain (0x1237)",
+      "ok": true,
+      "detail": "eth_requestAccounts,eth_chainId,wallet_switchEthereumChain,eth_chainId,eth_chainId"
+    },
+    {
+      "name": "F-RH1 all reads went to the mainnet RPC, none to the fork",
+      "ok": true,
+      "detail": "mainnet=4 fork=0"
+    },
+    {
+      "name": "F-P3 project paired with a FAKE SYNC (other address, same ticker) is listed under \"RECENT $SYNC CONNECTIONS\"",
+      "ok": true,
+      "detail": "SYNCTotally Official SyncNet Child$SCAMSCAM / SYNCObservable market connection on PAR. No affiliation is implied.MAPSYNC WITH ITSYNCSYNCAT$SYNCATSYNCAT / CASHCA"
+    },
+    {
+      "name": "F-P1 marketplace marks a CONTRACT recipient as verified-transferable",
+      "ok": true,
+      "detail": "fees=verified-transferable"
+    },
+    {
+      "name": "F-P1 while the Passport for the same token says \"Depends on that contract\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P4 description longer than 96 chars is rendered as \"Description: Token…\"",
+      "ok": true,
+      "detail": "Description: Token…Direct marketsOPLIVE / CASHCATMAP"
+    },
+    {
+      "name": "F-P5 token with an http:// website is shown as \"Website in token metadata: None\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R3 launch mined, but a lagging node makes the page stop without saving a proof",
+      "ok": true,
+      "detail": "Transaction: 0xabababababababababababababababababababababababababababababababab\nhttps://robinhoodchain.blockscout.com/tx/0xababababababababababababababababababa"
+    },
+    {
+      "name": "F-R3 the intent record + signature now exist only inside the pending entry",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R3 no export button is offered on this path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R3 reload notice names only ticker + tx hash, never the predicted token address, and does not check the chain",
+      "ok": true,
+      "detail": "A launch transaction from this browser has not been verified yet ($LAGT · 0xabababababababababababababababababababababababababababababababab"
+    },
+    {
+      "name": "F-R3 unlocking founder mode wipes the pending warning text (only the CLEAR button remains)",
+      "ok": true,
+      "detail": "Simulation not run yet. No transaction will be requested. | Live launch is locked until simulation and metadata preflight pass."
+    },
+    {
+      "name": "F-R3 following the recovery button erases the record: intent JSON/signature are gone for good",
+      "ok": true,
+      "detail": "{\"p\":0,\"q\":0}"
+    },
+    {
+      "name": "F-P7 an arbitrary contract (not on PAR, used by no project) is badged \"NETWORK HUB\" on a SyncNet page",
+      "ok": true,
+      "detail": "Token0x1234567890abcdef1234567890abcdef12345678NETWORK HUBProjects using this token as a market0This contract is not itself a PAR launch in the current index. S"
+    },
+    {
+      "name": "F-P7 Passport of a NON-PAR contract (USDG) still states \"Ownerless · immutable · never transferred\" and \"Only the creator-fee recipient\" can change",
+      "ok": true,
+      "detail": "Project PassportWho runs this project, who receives its creator fees, and what can change. Read from the PAR factory on-chain unless marked otherwise. Token contractOwnerless · immutable · never transferredPAR tokens hav"
+    },
+    {
+      "name": "F-R1/N1 tx broadcast; page claims \"The hash is saved in this browser\" but nothing was saved",
+      "ok": true,
+      "detail": "pending=0 :: Transaction: 0xabababababababababababababababababababababababababababababababab\nhttps://robinhoodchain.blockscout.com/tx/0xababababababababababababababababababa"
+    },
+    {
+      "name": "F-R1/N1 after reload: no notice, draft offered again",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-UX1 Review still names wallet A as fee recipient while the simulated calldata pays wallet B",
+      "ok": true,
+      "detail": "review=CREATOR / OPERATOR WALLET · 0xabcdefabcdefabcdefabcdefabcdefabcdef0001 | sim has B=true"
+    }
+  ]
+}

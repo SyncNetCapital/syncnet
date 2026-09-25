@@ -1,0 +1,59 @@
+{
+  "results": [
+    {
+      "name": "F-S4 site-check validates DNS once and then fetches by HOSTNAME (resolved address is not pinned → DNS-rebinding TOCTOU)",
+      "ok": true,
+      "detail": "https://rebind.attacker.example/syncnet.json"
+    },
+    {
+      "name": "F-S4 a 64 MB body is fully downloaded before the 16 KB check",
+      "ok": true,
+      "detail": "MB read=64"
+    },
+    {
+      "name": "F-S4 NAT64 / 6to4 / site-local / IPv4-compatible IPv6 answers pass the private-address filter",
+      "ok": true,
+      "detail": "64:ff9b::a00:1, 2002:a00:1::1, fec0::1, ::a00:1"
+    },
+    {
+      "name": "F-S2 public mode pins a 2 MB non-image payload that only starts with the PNG signature",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "F-S2 server pins a JPEG with its EXIF block unchanged (stripping is client-side only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-S2 no rate limit or quota: 200 anonymous pins in a row accepted",
+      "ok": true,
+      "detail": "accepted=200"
+    },
+    {
+      "name": "F-S3 upstream provider error text is returned verbatim to the browser",
+      "ok": true,
+      "detail": "{\"error\":\"API key 3f9a… lacks pinFileToIPFS scope for account founder@example\"}"
+    },
+    {
+      "name": "F-S3 internal exception text (provider hostname) is returned to the browser",
+      "ok": true,
+      "detail": "{\"error\":\"getaddrinfo ENOTFOUND api.pinata.cloud\"}"
+    },
+    {
+      "name": "F-S1 5000 wrong guesses → 5000 plain 401s, no delay/lockout; the right key still works immediately",
+      "ok": true,
+      "detail": "21 ms"
+    },
+    {
+      "name": "F-S1 issued upload session is a bearer token valid for anyone for 4 h (not bound to client, not revocable except by rotating the secret)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-S5 one call to /api/par-launches-all fans out to 11 PAR API requests (query string ignored, cache-bustable URL)",
+      "ok": true,
+      "detail": "upstream=11"
+    }
+  ]
+}

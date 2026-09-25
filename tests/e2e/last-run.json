@@ -1,0 +1,1491 @@
+{
+  "at": "2026-09-24T14:16:24.486Z",
+  "failures": 0,
+  "results": [
+    {
+      "name": "home: mapper hidden before first map",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: mapper section revealed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: topology title in viewport after MAP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: page scrolled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: focus moved to result heading",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: SYNCAT direct markets rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: sync-with action points at token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: ambiguous PONS shows chooser",
+      "ok": true,
+      "detail": "matches=2"
+    },
+    {
+      "name": "home: chooser focused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: collision warning shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: choosing a match maps it and scrolls",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: no-match status is visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: no-match status marked fail",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: empty input keeps focus in search",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: contract lookup maps directly (no chooser)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: bidi characters stripped from rendered graph",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: no horizontal overflow after absurd metadata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "home: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "reduced-motion: jump is immediate (no smooth scroll)",
+      "ok": true,
+      "detail": "y=817"
+    },
+    {
+      "name": "race: last MAP request wins",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "map page: button says MAP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "map page: result in viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "map page: ?token= arrival shows the result",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "map page: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /canary/i",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /PINATA/",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /SYNCNET_[A-Z_]+/",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /upload (access )?key/i",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /operator key/i",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /\\?live=/",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public builder never shows /environment variable/i",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: every [hidden] element is really hidden (root cause of leaked canary UI)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: no upload retry/key controls visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: founder gate hidden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: live panel hidden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: image control reads UPLOAD PROJECT IMAGE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: file input has accessible name",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public (uploads closed): honest non-technical message",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: local preview shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public (uploads closed): nothing uploaded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public (uploads open): upload asks for the wallet first (uploads are tied to a wallet)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wallet modal focus inside",
+      "ok": true,
+      "detail": "<button class=\"provider\" type=\"button\">Mock Wallet</button>"
+    },
+    {
+      "name": "public (uploads open): wallet signed a free upload sign-in (personal_sign, no transaction)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public (uploads open): logo URI set to ipfs",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload normalised to PNG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload has no EXIF or text chunks after server re-encoding",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload pinned with the scoped server credential only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "redundant pin requested at the secondary pinning service",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "step 2 visible after next",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "panel 1 hidden (tabpanel semantics)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no-contract address rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "two connections selected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "connection insight no longer assumes holder mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "total fee shown explicitly (1% + 2.5%)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "creator share shown (0.5% + 2.5%)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee destination required (no default forced)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee mode holders: explanation rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "holders: payout assets listed",
+      "ok": true,
+      "detail": "Fees to holders3% of every trade is credited to PAR’s holder vault. Anyone can harvest it to PAR’s distributor — an operator wallet run by PAR — which pays holders pro rata in rounds (per PAR’s current disperser, in the asset it was earned in: SYNC, PONS and PONSYNC for this project). Payouts depend on trading activity and on PAR running those rounds; no contract forces them and they are never guaranteed. This fee right cannot follow a future operator through a normal transfer (only PAR’s Community Takeover process can move it)."
+    },
+    {
+      "name": "holders: says right cannot follow operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee mode burn: explanation rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "burn: says right cannot follow operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee mode floor: explanation rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "floor: says right cannot follow operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee mode creator: explanation rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "creator: recipient field shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "creator: explains on-chain transferability",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "never claims token contract is transferable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid creator recipient blocks review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review shows creator mode",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review trade fee",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wallet stays connected after the upload sign-in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "simulation passed",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x3CF793F377Dee06AF1E1b68566412eA521Ba7770\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 2.5%\nPAR base fee: 1% · protocol "
+    },
+    {
+      "name": "sim: creator recipient = connected wallet in calldata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: tax 250 in calldata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: two pair tokens",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: public says live launching not open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: salt commits to intent record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "public: no eth_sendTransaction ever requested",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changing fee mode invalidates simulation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: holders → HolderVault recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sim: floor → FloorVault recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "keyboard: ArrowLeft moves to step 3",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "keyboard: radio group arrow selects burn",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: gate visible only with route",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: wrong key denied, live panel still hidden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: live panel unlocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: upload used the founder session (no raw key in UI)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: banner switches to MAINNET · REAL FUNDS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: no upload-key input exists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: sim + metadata preflight pass",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xCE990FbA4287860C5943358346DdE3Bd18885Bc1\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → Creator / operator wallet: 0x2c753"
+    },
+    {
+      "name": "founder: launch locked before signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: EIP-712 intent signs record hash + salt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: editing fee mode after signing re-locks launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: immutable final review shown after signing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: exact ticker alone does not unlock (final confirmation required)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: wrong ticker keeps launch locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: exact ticker unlocks launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: live launch confirmed + verified",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xae836703b42f2ed66d8b127b68e265147d3a00c3\nTransaction: 0x65d5ffadf7557b13d8f35c081becb8634e65c2cdf4229413a031028e265a05b3\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x43187b055a1a2343274ba6607cc18915e7c8338621d472f3798dc92ea8f29c9f committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — exp"
+    },
+    {
+      "name": "founder: tx carries explicit chainId",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "record: feeMode creator + recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "record: intent record includes fee routing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "record: on-chain verification stored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "record: nothing left unresolved after verification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after launch: simulation locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "founder: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mismatch: factory record failure surfaced, tx hash kept",
+      "ok": true,
+      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0x7d8cb5ec7e33e18b539eb6fd520696009d52a07e\nTransaction: 0xb4496b7870a5ff225944548407483cd5cf36a8d18b0151f77003022c289f28e9\nState: MINED\nOn-chain factory record + markets + metadata: MISMATCH in Creator-fee recipient — do not launch again; inspec"
+    },
+    {
+      "name": "mismatch: further launches locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mismatch: evidence export offered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "recovery: launch record visible without founder unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: production surface — no lab/local-test/simulated wording",
+      "ok": true,
+      "detail": "LABS"
+    },
+    {
+      "name": "mp: non-custodial model stated on the page (hero + settlement card)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: empty state is polished, with no fake listings seeded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: live PAR facts shown before any signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: claim is a free EIP-712 signature — no transaction, no approval, no permit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: fee right offerable only because the LIVE chain names this wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: listing is ACTIVE with chain-backed badges (server record, not localStorage)",
+      "ok": true,
+      "detail": "ListingOPERATOR LIVE.← ALL LISTINGS\n Operator Live · $OPLIVE0x55555555555555555555555555555555555555551.5 ETHASKING PRICE\n ACTIVEVERIFIED OPERATOR 0x2c75…5c23CR"
+    },
+    {
+      "name": "mp: what is never sold is explicit (supply, liquidity, metadata, X account)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: nothing marketplace-related was written to localStorage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: holder-vault token → fee right NOT TRANSFERABLE · FIXED TO A PAR VAULT, unincludable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mp: a stranger wallet cannot claim — the recognised operator is protected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: a choice is required before step 2",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: \"I have a site\" shows URL field",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: invalid URL blocks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: \"Build one\" shows Kit card + optional URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: Kit link opens in new tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: kit choice with empty URL may continue",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review: missing website reminder shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review: ADD A URL returns to step 1 and focuses the URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review: reminder hidden once a URL exists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: \"No website\" clears and disables the URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "review: explicit no-website shown as a choice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website: switching back restores the stashed URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: saved with fields, choice, fee, connection",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: never stores simulation/signature/keys",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: banner offered after reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: nothing auto-filled before the user chooses",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: fields restored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: website choice restored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: tax + fee mode restored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: connection restored and re-verified on-chain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: simulation is fresh after restore",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: restored connections pass eligibility validation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: START FRESH clears it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: no banner after discard",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "draft: prefilled link does not overwrite an unanswered draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "website/draft: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: default is no opening buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: 0 ETH keeps the direct factory launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: invalid amount flagged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: invalid amount blocks review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: >10 ETH refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: quick 0.05 sets field + pre-sim explanation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: simulation passes through PAR router",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x9728f5007B4Bb61CB2fa4c8e30a4015122130E43\nMarkets: BUYT / SYNC · BUYT / PONS\nPAR launch fee: 0.0001 ETH\nOpening buy: 0.05 ETH → ≈20,000,000 BUYT (2.0% of supply) · minimum 19,800,000 · via PAR router 0x458D2a59c2F3dd32775a64eE72004561440d64Df\nSent from wallet: 0.0501 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → C"
+    },
+    {
+      "name": "buy: two legs, equal split, sum = buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: legs use PAR pricer routes (1 hop each)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: minTokensOut = 99% of simulated output",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: value = launch fee + buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: status shows tokens + % of supply",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: review shows exact wallet value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: price-protection change invalidates simulation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: 2% protection → 98% minimum",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: large buy (20% supply) warned as public risk signal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: market without ETH route skipped + disclosed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: no reachable market → clear error, nothing sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: unexpected PAR router → refused by the live PAR preflight",
+      "ok": true,
+      "detail": "PAR live preflight failed: launchForwarder() is PAR multi router (expected 0x458d2a59c2f3dd32775a64ee72004561440d64df, got 0x4444444444444444444444444444444444444444). Nothing was sent.\n\nNo transactio"
+    },
+    {
+      "name": "buy: insufficient ETH explained before the wallet",
+      "ok": true,
+      "detail": "Not enough ETH in this wallet: the launch needs about 0.040175 ETH (value + gas) and the wallet holds 0.01 ETH.\n\nNo transaction was sent."
+    },
+    {
+      "name": "buy: live panel states exact value + router",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: final review shows the opening buy and the exact wallet value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: launch confirmed + verified through router path",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x40f32a0c67b448f9aa2f6c2b1538f01b53f934fb\nTransaction: 0x84c327a1310862bc72c691a03979ab620cbd62fc9f761345dd30add89790a18e\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0x0bc1615226823218d7ef3b6861344150a039ea9a"
+    },
+    {
+      "name": "buy: tx sent to router with fee + buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: post-launch balance meets minimum",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x40f32a0c67b448f9aa2f6c2b1538f01b53f934fb\nTransaction: 0x84c327a1310862bc72c691a03979ab620cbd62fc9f761345dd30add89790a18e\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0x0bc1615226823218d7ef3b6861344150a039ea9a66e00edc21c24a4ca7f56a81 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — export the proof and add it to syncnet-projects.json to publish.\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
+    },
+    {
+      "name": "buy: record holds the opening buy, the exact value and the met minimum",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: opening buy committed in the salted intent record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buy: project page discloses the opening buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "opening buy: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: outside founder mode → red banner + simulation disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: non-loopback rpc → red banner + simulation disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: real chain id → red banner + simulation disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: missing chain id → red banner + simulation disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: amber banner names the fork",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: wallet on real chain 4663 is refused",
+      "ok": true,
+      "detail": "Your wallet is on chain 4663. Use the SWITCH NETWORK button to move it to the rehearsal fork 46630, then simulate again.\n\nNo transaction was sent."
+    },
+    {
+      "name": "rehearsal: simulation used the fork RPC only",
+      "ok": true,
+      "detail": "{\"mainnet\":0,\"fork\":58,\"server\":24}"
+    },
+    {
+      "name": "rehearsal: EIP-712 domain uses fork chain id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: final review says REHEARSAL, never MAINNET",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: full launch confirmed on fork",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x4ae284fe0399084a073ca0cf648b5d446bda85c9\nTransaction: 0xd8648460a1cfbfc50c038e2cbb3dc7803224b07b1979b67018238eb493aa3488\nState: INDEXER_PENDING\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: pending (on-chain is authoritative; RE-VERIFY later "
+    },
+    {
+      "name": "rehearsal: tx chainId is the fork",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: record stored separately, never as a real launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: mainnet RPC never touched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rehearsal: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: site prompt includes project + connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: not-launched prompt forbids showing an address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: safety rules present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: invalid connection line warned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: prompt asks for syncnet.json",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: live token → contract, PAR and SyncNet links in prompt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: declaration names the token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: tabs keyboard → description prompt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: listing prompt says token is never sold",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: copy gives feedback (clipboard or manual fallback)",
+      "ok": true,
+      "detail": "Copied ✓ Paste it into your AI."
+    },
+    {
+      "name": "kit: prefilled from builder draft",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "kit: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: token shown as ownerless",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: wallet beneficiary → transferable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: beneficiary ≠ operator stated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: CTO explained",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: bidirectional site link → WEBSITE LINKED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: site-only declaration stays unconfirmed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: holder-vault token → not transferable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: spoof site declaring another token is flagged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "passport: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /network.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/network.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /network.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /build.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/build.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /build.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /marketplace.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/marketplace.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /marketplace.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /sync.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/sync.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /sync.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /registry.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/registry.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /registry.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /labs.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/labs.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /labs.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /kit.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/kit.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /kit.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /launches.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/launches.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "ok": true,
+      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+    },
+    {
+      "name": "desktop /launches.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /terms.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "desktop /terms.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /risk.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "desktop /risk.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /privacy.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "desktop /privacy.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /contact.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "desktop /contact.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop: no JS errors across pages",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /network.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /network.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /network.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /build.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /build.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /build.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /marketplace.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /marketplace.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /marketplace.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /sync.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /sync.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /sync.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /registry.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /registry.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /registry.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /labs.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /labs.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /labs.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /kit.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /kit.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /kit.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /launches.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /launches.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /launches.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /terms.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /terms.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /terms.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /risk.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /risk.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /risk.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /privacy.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /privacy.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /privacy.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /contact.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /contact.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /contact.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile: no JS errors across pages",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "labs: SYNC DUEL opens and starts",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "labs: no JS errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

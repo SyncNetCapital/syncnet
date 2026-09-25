@@ -1,0 +1,139 @@
+{
+  "results": [
+    {
+      "name": "direct path: selector is launchToken(TokenParams,uint256,address[]) = 0x5a4b7ef0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "direct path: to = multi factory 0x3ea2…29C1, value = launchFee exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "direct path: pairTokens keep the chosen order (market index = quote index)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX1 expectedEconomics is always 0x00…00 (PAR economics guard waived)",
+      "ok": true,
+      "detail": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "salt = keccak(abi.encode(\"SYNCNET/1\", keccak(intent JSON)))",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: selector launchAndBuyWithEth = 0x5fe889a4, to = PairPadMultiRouter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: value = launchFee + opening buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: unreachable market (SYNC) skipped and disclosed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: legs sum exactly to the buy (dust kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: hops reversed for a buy (ETH side first)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: minTokensOut = simulated * (1 - 2%)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX1 router path also sends expectedEconomics = 0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "route().qualifies is ignored by the engine (only hops.length is used)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX2 name of 40 chars / 120 UTF-8 bytes passes normalize (PAR limit 64 bytes → MetadataTooLong at simulation)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX2 description of 1000 chars / 3000 bytes passes (PAR limit 2048 bytes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX2 https logo of 620 chars passes (PAR limit 512 bytes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX2 website of 320 chars passes (PAR social limit 256 bytes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-C1 name with U+202E (RTL override) + U+200B (zero width) is accepted and would go on-chain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-C1 description with U+202E accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = router (0x458D2a59…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = poolManager (0x8366a39C…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = dead (0x00000000…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = weth (0x0Bd7D308…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = multiLocker (0x5826FBB6…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX3 creator fee recipient = feeEscrow (0x1C27e8F0…) is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P5 http:// website with a custom port is accepted as permanent metadata",
+      "ok": true,
+      "detail": "http://ponsync.example:8080/"
+    },
+    {
+      "name": "info: native-ETH market (pairToken 0x0, allowed by PAR) cannot be selected",
+      "ok": true,
+      "detail": "One selected asset has an invalid contract address."
+    }
+  ]
+}

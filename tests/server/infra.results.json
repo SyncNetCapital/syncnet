@@ -1,0 +1,1742 @@
+{
+  "passed": 434,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "json(): content-type, nosniff, CSP, referrer-policy",
+      "ok": true
+    },
+    {
+      "name": "json(): cache-control defaults to no-store",
+      "ok": true
+    },
+    {
+      "name": "json(): body escapes < > & U+2028 and parses back to the same value",
+      "ok": true
+    },
+    {
+      "name": "json(): cache-control overridable (case-insensitive, single header)",
+      "ok": true
+    },
+    {
+      "name": "json(): security headers cannot be overridden",
+      "ok": true
+    },
+    {
+      "name": "json(): extra headers added, CR/LF values dropped",
+      "ok": true
+    },
+    {
+      "name": "publicError(): {error, code} only",
+      "ok": true
+    },
+    {
+      "name": "publicError(): an Error object is replaced by a generic message",
+      "ok": true
+    },
+    {
+      "name": "tooManyRequests(): 429 + retry-after (rounded up) + generic body",
+      "ok": true
+    },
+    {
+      "name": "tooManyRequests(): invalid input -> 60 s",
+      "ok": true
+    },
+    {
+      "name": "hashId(): 16 hex chars",
+      "ok": true
+    },
+    {
+      "name": "hashId(): HMAC-SHA256 keyed with SYNCNET_LOG_SALT",
+      "ok": true
+    },
+    {
+      "name": "hashId(): default salt syncnet-log-v1",
+      "ok": true
+    },
+    {
+      "name": "log(): exactly one JSON line with ts/fn/event + fields",
+      "ok": true
+    },
+    {
+      "name": "log(): fields cannot override ts/fn/event",
+      "ok": true
+    },
+    {
+      "name": "logError(): name/message/code (+cause) server side",
+      "ok": true
+    },
+    {
+      "name": "no Upstash env -> memory adapter (durable:false)",
+      "ok": true
+    },
+    {
+      "name": "incrWindow counts 1, 2, 3",
+      "ok": true
+    },
+    {
+      "name": "incrWindow stores the count as a string (like Redis)",
+      "ok": true
+    },
+    {
+      "name": "incrWindow key expires after its ttl",
+      "ok": true
+    },
+    {
+      "name": "set with ttlSeconds expires",
+      "ok": true
+    },
+    {
+      "name": "set without ttl persists",
+      "ok": true
+    },
+    {
+      "name": "del",
+      "ok": true
+    },
+    {
+      "name": "sadd/smembers",
+      "ok": true
+    },
+    {
+      "name": "get missing -> null",
+      "ok": true
+    },
+    {
+      "name": "Upstash env -> upstash adapter (durable:true)",
+      "ok": true
+    },
+    {
+      "name": "incrWindow returns the INCR result",
+      "ok": true
+    },
+    {
+      "name": "incrWindow: POST <url>/pipeline",
+      "ok": true
+    },
+    {
+      "name": "incrWindow: body [[\"INCR\",k],[\"EXPIRE\",k,ttl,\"NX\"]]",
+      "ok": true
+    },
+    {
+      "name": "Authorization: Bearer <token>",
+      "ok": true
+    },
+    {
+      "name": "request carries an AbortSignal and refuses redirects",
+      "ok": true
+    },
+    {
+      "name": "single commands: POST to the base URL",
+      "ok": true
+    },
+    {
+      "name": "GET body [\"GET\",k] -> result",
+      "ok": true
+    },
+    {
+      "name": "SET with ttl body [\"SET\",k,v,\"EX\",ttl]",
+      "ok": true
+    },
+    {
+      "name": "SET without ttl body [\"SET\",k,v]",
+      "ok": true
+    },
+    {
+      "name": "DEL / SADD / SMEMBERS bodies and results",
+      "ok": true
+    },
+    {
+      "name": "pipeline {error} entry -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "any entry carrying an error field fails, even with a result",
+      "ok": true
+    },
+    {
+      "name": "single {error} reply -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "HTTP 401 -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "network error -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "non-JSON reply -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "malformed pipeline reply -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "timeout (injected 40 ms, fetch ignores the signal) -> StoreUnavailable",
+      "ok": true
+    },
+    {
+      "name": "default timeout is 2 s",
+      "ok": true
+    },
+    {
+      "name": "http:// Upstash URL refused, token never sent",
+      "ok": true
+    },
+    {
+      "name": "SYNCNET_UPSTASH_URL / SYNCNET_UPSTASH_TOKEN also select Upstash",
+      "ok": true
+    },
+    {
+      "name": "URL without token -> memory",
+      "ok": true
+    },
+    {
+      "name": "getStore(): singleton (memory without env)",
+      "ok": true
+    },
+    {
+      "name": "getStore({env, fetch}) replaces the singleton for later getStore() calls",
+      "ok": true
+    },
+    {
+      "name": "_resetForTests() drops the singleton",
+      "ok": true
+    },
+    {
+      "name": "clientIp(): x-nf-client-connection-ip first",
+      "ok": true
+    },
+    {
+      "name": "clientIp(): then first x-forwarded-for entry",
+      "ok": true
+    },
+    {
+      "name": "clientIp(): header names case-insensitive",
+      "ok": true
+    },
+    {
+      "name": "clientIp(): 'unknown' otherwise",
+      "ok": true
+    },
+    {
+      "name": "memory windows: first 3 allowed with counts 1..3",
+      "ok": true
+    },
+    {
+      "name": "memory windows: 4th denied, retryAfter = seconds left in the window",
+      "ok": true
+    },
+    {
+      "name": "key format rl:<bucket>:<hashId(id)>:<windowIndex>",
+      "ok": true
+    },
+    {
+      "name": "other ids have their own counter",
+      "ok": true
+    },
+    {
+      "name": "memory windows: next window starts again at 1",
+      "ok": true
+    },
+    {
+      "name": "StoreUnavailable -> fails closed {allowed:false, reason:store-unavailable, retryAfter:60}",
+      "ok": true
+    },
+    {
+      "name": "Upstash HTTP 502 -> StoreUnavailable -> rate limit fails closed",
+      "ok": true
+    },
+    {
+      "name": "Upstash adapter drives the limiter",
+      "ok": true
+    },
+    {
+      "name": "limitAll(): allowed when every spec allows",
+      "ok": true
+    },
+    {
+      "name": "limitAll(): first denial returned, later specs not incremented",
+      "ok": true
+    },
+    {
+      "name": "issue(): v2.<scope>.<subject>.<exp>.<sid>.<mac>",
+      "ok": true
+    },
+    {
+      "name": "issue(): exp = now + ttl",
+      "ok": true
+    },
+    {
+      "name": "issue(): mac = HMAC(SYNCNET_UPLOAD_KEY, syncnet-session|v2|scope|subject|exp|sid|epoch)",
+      "ok": true
+    },
+    {
+      "name": "issue(): sid is random",
+      "ok": true
+    },
+    {
+      "name": "verify(): accepts a founder token",
+      "ok": true
+    },
+    {
+      "name": "verify(): wrong scope option -> null",
+      "ok": true
+    },
+    {
+      "name": "verify(): scope option may be a list; no option = any scope",
+      "ok": true
+    },
+    {
+      "name": "TTL = {founder: 7200, wallet: 1800}",
+      "ok": true
+    },
+    {
+      "name": "wallet token: lowercase address subject, default ttl 30 min",
+      "ok": true
+    },
+    {
+      "name": "ttlSeconds capped at TTL[scope]",
+      "ok": true
+    },
+    {
+      "name": "scope binding: founder token relabelled wallet -> null",
+      "ok": true
+    },
+    {
+      "name": "subject binding: other address -> null",
+      "ok": true
+    },
+    {
+      "name": "subject binding: founder \"-\" token rewritten to an address -> null",
+      "ok": true
+    },
+    {
+      "name": "issue(): wallet scope needs an address subject",
+      "ok": true
+    },
+    {
+      "name": "issue(): invalid subject / unknown scope -> \"\"",
+      "ok": true
+    },
+    {
+      "name": "expiry: valid 1 s before exp",
+      "ok": true
+    },
+    {
+      "name": "expiry: rejected at/after exp",
+      "ok": true
+    },
+    {
+      "name": "correctly signed but exp beyond founder max (2 h) -> null",
+      "ok": true
+    },
+    {
+      "name": "correctly signed but exp beyond wallet max (30 min) -> null",
+      "ok": true
+    },
+    {
+      "name": "epoch bump revokes every earlier session",
+      "ok": true
+    },
+    {
+      "name": "epoch back to default -> new-epoch tokens invalid, old ones valid again",
+      "ok": true
+    },
+    {
+      "name": "tampered mac -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered sid -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered exp -> null",
+      "ok": true
+    },
+    {
+      "name": "malformed / old v1 / non-string -> null",
+      "ok": true
+    },
+    {
+      "name": "secret shorter than 32 chars: issue() -> \"\" and verify() -> null",
+      "ok": true
+    },
+    {
+      "name": "missing secret: issue() -> \"\"",
+      "ok": true
+    },
+    {
+      "name": "issueChallenge(): exact human-readable format",
+      "ok": true
+    },
+    {
+      "name": "issueChallenge(): default ttl 600 s",
+      "ok": true
+    },
+    {
+      "name": "issueChallenge(): Check is an HMAC over the other lines",
+      "ok": true
+    },
+    {
+      "name": "parseChallenge(): {address, exp, nonce}",
+      "ok": true
+    },
+    {
+      "name": "tampered wallet -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered purpose -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered expiry -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered nonce -> null",
+      "ok": true
+    },
+    {
+      "name": "tampered check -> null",
+      "ok": true
+    },
+    {
+      "name": "extra text / CRLF -> null",
+      "ok": true
+    },
+    {
+      "name": "expired challenge -> null",
+      "ok": true
+    },
+    {
+      "name": "custom origin/ttl",
+      "ok": true
+    },
+    {
+      "name": "origin with a newline refused (no line injection)",
+      "ok": true
+    },
+    {
+      "name": "invalid address / ttl out of range -> null",
+      "ok": true
+    },
+    {
+      "name": "epoch bump revokes outstanding challenges",
+      "ok": true
+    },
+    {
+      "name": "weak secret: no challenges issued or accepted",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): matching recovered address -> lowercase address",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): recoverFn receives the exact message and signature",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): other address -> null",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): recoverFn throws -> null",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): tampered message rejected before recoverFn runs",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): expired challenge -> null",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): malformed signature / missing recoverFn -> null",
+      "ok": true
+    },
+    {
+      "name": "verifyChallengeSignature(): async recoverFn -> Promise of the address",
+      "ok": true
+    },
+    {
+      "name": "200 found:true for a public host",
+      "ok": true
+    },
+    {
+      "name": "origin normalised (lowercase, no trailing dot, path ignored)",
+      "ok": true
+    },
+    {
+      "name": "response shape {found, origin, declaration{schema,project,symbol,chainId,token}} only",
+      "ok": true
+    },
+    {
+      "name": "declaration fields sanitised",
+      "ok": true
+    },
+    {
+      "name": "no bidi/zero-width characters and no markup in the response",
+      "ok": true
+    },
+    {
+      "name": "DNS resolved once, {all:true}, for the hostname",
+      "ok": true
+    },
+    {
+      "name": "https.request: hostname + servername = host, port 443, GET /syncnet.json",
+      "ok": true
+    },
+    {
+      "name": "https.request: pinned lookup, fresh socket, TLS verification on",
+      "ok": true
+    },
+    {
+      "name": "https.request: identity encoding requested",
+      "ok": true
+    },
+    {
+      "name": "200 cache-control public, max-age=60 + security headers",
+      "ok": true
+    },
+    {
+      "name": "non-JSON-object declaration -> found with null fields",
+      "ok": true
+    },
+    {
+      "name": "invalid token / non-integer chainId / non-string symbol -> null",
+      "ok": true
+    },
+    {
+      "name": "constants: MAX = 16 KiB, deadline 5 s, 30/60 s rate limit",
+      "ok": true
+    },
+    {
+      "name": "dns lookup called exactly once",
+      "ok": true
+    },
+    {
+      "name": "pinned lookup returns the validated IP (single-address form)",
+      "ok": true
+    },
+    {
+      "name": "pinned lookup returns ONLY the validated IP ({all:true} form)",
+      "ok": true
+    },
+    {
+      "name": "pinned lookup works without an options argument",
+      "ok": true
+    },
+    {
+      "name": "pinned lookup refuses any other hostname",
+      "ok": true
+    },
+    {
+      "name": "still exactly one DNS resolution after the connection lookups",
+      "ok": true
+    },
+    {
+      "name": "check completes against the pinned address",
+      "ok": true
+    },
+    {
+      "name": "both families public -> IPv4 answer is the one pinned",
+      "ok": true
+    },
+    {
+      "name": "blocked 0.0.0.0",
+      "ok": true
+    },
+    {
+      "name": "blocked 0.255.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 10.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 10.255.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 100.64.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 100.127.255.254",
+      "ok": true
+    },
+    {
+      "name": "blocked 127.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 127.255.255.254",
+      "ok": true
+    },
+    {
+      "name": "blocked 169.254.169.254",
+      "ok": true
+    },
+    {
+      "name": "blocked 169.254.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 172.16.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 172.31.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.0.0.8",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.0.0.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.0.2.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.88.99.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.168.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 192.168.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 198.18.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 198.19.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked 198.51.100.7",
+      "ok": true
+    },
+    {
+      "name": "blocked 203.0.113.9",
+      "ok": true
+    },
+    {
+      "name": "blocked 224.0.0.251",
+      "ok": true
+    },
+    {
+      "name": "blocked 239.255.255.250",
+      "ok": true
+    },
+    {
+      "name": "blocked 240.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked 254.1.2.3",
+      "ok": true
+    },
+    {
+      "name": "blocked 255.255.255.255",
+      "ok": true
+    },
+    {
+      "name": "blocked ::",
+      "ok": true
+    },
+    {
+      "name": "blocked ::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 0:0:0:0:0:0:0:1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:127.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:7f00:1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:10.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:169.254.169.254",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:192.168.1.1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::ffff:100.64.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::FFFF:0:1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::127.0.0.1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::8.8.8.8",
+      "ok": true
+    },
+    {
+      "name": "blocked ::a00:1",
+      "ok": true
+    },
+    {
+      "name": "blocked ::2",
+      "ok": true
+    },
+    {
+      "name": "blocked 64:ff9b::7f00:1",
+      "ok": true
+    },
+    {
+      "name": "blocked 64:ff9b::8.8.8.8",
+      "ok": true
+    },
+    {
+      "name": "blocked 64:ff9b::a9fe:a9fe",
+      "ok": true
+    },
+    {
+      "name": "blocked 64:ff9b:1::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 64:ff9b:1:ffff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 100::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 100::ffff:ffff:ffff:ffff",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:0:4136:e378:8000:63bf:3fff:fdd2",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:2::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:2:0:ffff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:10::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:1f::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:20::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:2f:ffff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:db8::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2001:db8:85a3::8a2e:370:7334",
+      "ok": true
+    },
+    {
+      "name": "blocked 2002::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2002:7f00:1::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 2002:c0a8:101::1",
+      "ok": true
+    },
+    {
+      "name": "blocked fc00::1",
+      "ok": true
+    },
+    {
+      "name": "blocked fd12:3456:789a::1",
+      "ok": true
+    },
+    {
+      "name": "blocked fe80::1",
+      "ok": true
+    },
+    {
+      "name": "blocked febf:ffff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked fe80::1%eth0",
+      "ok": true
+    },
+    {
+      "name": "blocked fec0::1",
+      "ok": true
+    },
+    {
+      "name": "blocked feff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked ff02::1",
+      "ok": true
+    },
+    {
+      "name": "blocked ff05::1:3",
+      "ok": true
+    },
+    {
+      "name": "blocked 1::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 4000::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 3fff::1",
+      "ok": true
+    },
+    {
+      "name": "blocked 5f00::1",
+      "ok": true
+    },
+    {
+      "name": "blocked e000::1",
+      "ok": true
+    },
+    {
+      "name": "blocked not-an-ip",
+      "ok": true
+    },
+    {
+      "name": "blocked 1.2.3",
+      "ok": true
+    },
+    {
+      "name": "blocked ::g",
+      "ok": true
+    },
+    {
+      "name": "blocked 1::2::3",
+      "ok": true
+    },
+    {
+      "name": "blocked (empty)",
+      "ok": true
+    },
+    {
+      "name": "privateIp() agrees for every blocked sample",
+      "ok": true
+    },
+    {
+      "name": "allowed 93.184.216.34 (pinned 93.184.216.34)",
+      "ok": true
+    },
+    {
+      "name": "allowed 8.8.8.8 (pinned 8.8.8.8)",
+      "ok": true
+    },
+    {
+      "name": "allowed 1.1.1.1 (pinned 1.1.1.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 11.0.0.1 (pinned 11.0.0.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 100.63.255.255 (pinned 100.63.255.255)",
+      "ok": true
+    },
+    {
+      "name": "allowed 100.128.0.0 (pinned 100.128.0.0)",
+      "ok": true
+    },
+    {
+      "name": "allowed 172.15.255.255 (pinned 172.15.255.255)",
+      "ok": true
+    },
+    {
+      "name": "allowed 172.32.0.0 (pinned 172.32.0.0)",
+      "ok": true
+    },
+    {
+      "name": "allowed 192.0.1.1 (pinned 192.0.1.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 192.88.98.1 (pinned 192.88.98.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 192.169.0.1 (pinned 192.169.0.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 198.17.255.255 (pinned 198.17.255.255)",
+      "ok": true
+    },
+    {
+      "name": "allowed 198.20.0.1 (pinned 198.20.0.1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 223.255.255.254 (pinned 223.255.255.254)",
+      "ok": true
+    },
+    {
+      "name": "allowed 2606:4700:4700::1111 (pinned 2606:4700:4700::1111)",
+      "ok": true
+    },
+    {
+      "name": "allowed 2001:4860:4860::8888 (pinned 2001:4860:4860::8888)",
+      "ok": true
+    },
+    {
+      "name": "allowed 2a00:1450:4001:82b::200e (pinned 2a00:1450:4001:82b::200e)",
+      "ok": true
+    },
+    {
+      "name": "allowed 2001:200::1 (pinned 2001:200::1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 2003::1 (pinned 2003::1)",
+      "ok": true
+    },
+    {
+      "name": "allowed 3fff:1000::1 (pinned 3fff:1000::1)",
+      "ok": true
+    },
+    {
+      "name": "allowed ::ffff:93.184.216.34 (pinned 93.184.216.34)",
+      "ok": true
+    },
+    {
+      "name": "allowed ::ffff:5db8:d822 (pinned 93.184.216.34)",
+      "ok": true
+    },
+    {
+      "name": "rejected: public + private IPv4",
+      "ok": true
+    },
+    {
+      "name": "rejected: private first, then public",
+      "ok": true
+    },
+    {
+      "name": "rejected: public IPv6 + loopback IPv6",
+      "ok": true
+    },
+    {
+      "name": "rejected: public IPv4 + mapped loopback",
+      "ok": true
+    },
+    {
+      "name": "rejected: empty answer",
+      "ok": true
+    },
+    {
+      "name": "rejected: malformed answer entry",
+      "ok": true
+    },
+    {
+      "name": "rejected: non-array answer",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"http://example.com\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://example.com:8443\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://user:pass@example.com\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://user@example.com\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://127.0.0.1\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://8.8.8.8\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://[::1]\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://[2606:4700:4700::1111]\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://0x7f.1\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://2130706433\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://127.1\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://localhost\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://localhost.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://app.localhost\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://app.localhost.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://printer.local\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://printer.local.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://db.internal\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://db.internal.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://nas.lan\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://nas.lan.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://router.home\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://router.home.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://dc.corp\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://dc.corp.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://intranet\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://nodots.\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"ftp://example.com\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"javascript:alert(1)\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"file:///etc/passwd\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"not a url\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://exa mple.com\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://-bad-.example.org\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://a..b.example.org\"",
+      "ok": true
+    },
+    {
+      "name": "rejected URL \"https://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ok": true
+    },
+    {
+      "name": "missing url parameter -> 400",
+      "ok": true
+    },
+    {
+      "name": "explicit :443 and mixed case are accepted",
+      "ok": true
+    },
+    {
+      "name": "IDN hosts are looked up in punycode",
+      "ok": true
+    },
+    {
+      "name": "3xx -> {found:false, reason:\"redirect\"}",
+      "ok": true
+    },
+    {
+      "name": "3xx: not followed, body never read",
+      "ok": true
+    },
+    {
+      "name": "404 -> reason http-404",
+      "ok": true
+    },
+    {
+      "name": "non-JSON body -> reason not-json",
+      "ok": true
+    },
+    {
+      "name": "compressed body (identity was requested) -> not-json",
+      "ok": true
+    },
+    {
+      "name": "UTF-8 BOM tolerated",
+      "ok": true
+    },
+    {
+      "name": "64 MiB body -> {found:false, reason:\"too-large\"}",
+      "ok": true
+    },
+    {
+      "name": "stopped reading early (< 1 MiB of the 64 MiB consumed)",
+      "ok": true
+    },
+    {
+      "name": "response and request destroyed after the cap",
+      "ok": true
+    },
+    {
+      "name": "content-length above 16 KiB -> too-large without reading the body",
+      "ok": true
+    },
+    {
+      "name": "exactly 16 KiB accepted, 16 KiB + 1 byte rejected",
+      "ok": true
+    },
+    {
+      "name": "no response before the deadline -> reason timeout",
+      "ok": true
+    },
+    {
+      "name": "timeout: request destroyed, not cacheable",
+      "ok": true
+    },
+    {
+      "name": "slow-drip body: deadline covers the body too -> timeout",
+      "ok": true
+    },
+    {
+      "name": "connection error -> {found:false, reason:\"unreachable\"}",
+      "ok": true
+    },
+    {
+      "name": "connection error: no exception text in the response",
+      "ok": true
+    },
+    {
+      "name": "connection error: details logged server side",
+      "ok": true
+    },
+    {
+      "name": "DNS failure -> 404 generic",
+      "ok": true
+    },
+    {
+      "name": "DNS timeout -> found:false timeout",
+      "ok": true
+    },
+    {
+      "name": "synchronous request() failure -> unreachable, generic",
+      "ok": true
+    },
+    {
+      "name": "30 requests per minute per IP pass the limiter (even invalid ones count)",
+      "ok": true
+    },
+    {
+      "name": "31st request -> 429 with retry-after",
+      "ok": true
+    },
+    {
+      "name": "other IPs are not affected",
+      "ok": true
+    },
+    {
+      "name": "next minute -> allowed again",
+      "ok": true
+    },
+    {
+      "name": "store unavailable -> 429 (fail closed), no outbound request",
+      "ok": true
+    },
+    {
+      "name": "POST -> 405 with allow: GET",
+      "ok": true
+    },
+    {
+      "name": "exports.handler wired (405 for DELETE)",
+      "ok": true
+    },
+    {
+      "name": "\"::\" -> all zero",
+      "ok": true
+    },
+    {
+      "name": "\"1::\" and \"::1\"",
+      "ok": true
+    },
+    {
+      "name": "full form",
+      "ok": true
+    },
+    {
+      "name": "middle compression",
+      "ok": true
+    },
+    {
+      "name": "embedded IPv4 (mapped, compatible, full)",
+      "ok": true
+    },
+    {
+      "name": "brackets and upper case",
+      "ok": true
+    },
+    {
+      "name": "invalid forms -> null",
+      "ok": true
+    },
+    {
+      "name": "200 with the full history",
+      "ok": true
+    },
+    {
+      "name": "shape {count, indexed, launches, fetchedAt, stale, degraded}",
+      "ok": true
+    },
+    {
+      "name": "upstream: 1 count request + 3 pages",
+      "ok": true
+    },
+    {
+      "name": "upstream URLs",
+      "ok": true
+    },
+    {
+      "name": "upstream redirects not followed",
+      "ok": true
+    },
+    {
+      "name": "cache headers: public, max-age=30 + CDN s-maxage=120, stale-while-revalidate=600",
+      "ok": true
+    },
+    {
+      "name": "JSON + nosniff + CSP",
+      "ok": true
+    },
+    {
+      "name": "second call within 120 s -> 0 upstream requests",
+      "ok": true
+    },
+    {
+      "name": "query string -> 301 to /api/par-launches-all",
+      "ok": true
+    },
+    {
+      "name": "301 is cacheable",
+      "ok": true
+    },
+    {
+      "name": "301 makes no upstream calls",
+      "ok": true
+    },
+    {
+      "name": "no query string -> no redirect",
+      "ok": true
+    },
+    {
+      "name": "exports.handler wired (301 for a query string, default store, no network)",
+      "ok": true
+    },
+    {
+      "name": "POST -> 405",
+      "ok": true
+    },
+    {
+      "name": "6 concurrent invocations share one refresh (1 count + 3 pages)",
+      "ok": true
+    },
+    {
+      "name": "every concurrent caller gets the data",
+      "ok": true
+    },
+    {
+      "name": "5000 launches -> 10 pages",
+      "ok": true
+    },
+    {
+      "name": "at most 3 page requests in flight",
+      "ok": true
+    },
+    {
+      "name": "pages really are fetched 3 at a time",
+      "ok": true
+    },
+    {
+      "name": "count above 5000 -> capped at 10 pages / 5000 launches, count reported as is",
+      "ok": true
+    },
+    {
+      "name": "count unavailable -> history walked until the first short page",
+      "ok": true
+    },
+    {
+      "name": "count unavailable -> at most 2 speculative pages past the end (pool of 3), none repeated",
+      "ok": true
+    },
+    {
+      "name": "duplicate token addresses (any case) are removed",
+      "ok": true
+    },
+    {
+      "name": "503 and 429 pages retried once and succeed",
+      "ok": true
+    },
+    {
+      "name": "backoff between attempts",
+      "ok": true
+    },
+    {
+      "name": "only one retry (2 attempts), then the refresh fails",
+      "ok": true
+    },
+    {
+      "name": "4xx (other than 429) is not retried",
+      "ok": true
+    },
+    {
+      "name": "unexpected payload shape -> failed refresh, not an empty history",
+      "ok": true
+    },
+    {
+      "name": "upstream failure after a success -> 200 stale:true, degraded:true, last good data",
+      "ok": true
+    },
+    {
+      "name": "stale answer carries no exception text; failure logged server side",
+      "ok": true
+    },
+    {
+      "name": "within 15 s of a failed refresh PAR is not called again (stale served)",
+      "ok": true
+    },
+    {
+      "name": "no successful refresh for more than 1 h -> 503",
+      "ok": true
+    },
+    {
+      "name": "no data at all -> 503",
+      "ok": true
+    },
+    {
+      "name": "503 body is exactly the generic message",
+      "ok": true
+    },
+    {
+      "name": "503: no exception text, not cacheable",
+      "ok": true
+    },
+    {
+      "name": "hanging upstream is abandoned by the per-request timeout -> 503",
+      "ok": true
+    },
+    {
+      "name": "default per-request timeout is 12 s, concurrency 3, TTL 120 s / stale 1 h",
+      "ok": true
+    },
+    {
+      "name": "slow refresh with a stale copy -> degraded answer within the response budget",
+      "ok": true
+    },
+    {
+      "name": "slow refresh without any data -> generic 503 within the budget",
+      "ok": true
+    },
+    {
+      "name": "the next request joins the refresh still in flight (no second upstream walk)",
+      "ok": true
+    },
+    {
+      "name": "default response budget stays under the 10 s Netlify limit",
+      "ok": true
+    },
+    {
+      "name": "60 requests per minute per IP allowed",
+      "ok": true
+    },
+    {
+      "name": "61st -> 429 with retry-after",
+      "ok": true
+    },
+    {
+      "name": "other IPs unaffected",
+      "ok": true
+    },
+    {
+      "name": "62 requests -> one upstream refresh",
+      "ok": true
+    },
+    {
+      "name": "200 from https://par.family/tokenlist.json, redirects not followed",
+      "ok": true
+    },
+    {
+      "name": "output shape {name, timestamp, tokens} only",
+      "ok": true
+    },
+    {
+      "name": "malformed entries dropped, valid ones normalised",
+      "ok": true
+    },
+    {
+      "name": "tokens never carry unknown fields",
+      "ok": true
+    },
+    {
+      "name": "no bidi/zero-width characters in the output",
+      "ok": true
+    },
+    {
+      "name": "no unknown/unsafe upstream content echoed",
+      "ok": true
+    },
+    {
+      "name": "content-type JSON + nosniff + CSP",
+      "ok": true
+    },
+    {
+      "name": "cache headers: public, max-age=300 + CDN s-maxage=600",
+      "ok": true
+    },
+    {
+      "name": "HTML page -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "HTML served as application/json -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "top-level array -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "tokens not an array -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "empty object -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "only invalid tokens -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "HTTP 500 -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "302 redirect -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "network error -> 502 generic JSON",
+      "ok": true
+    },
+    {
+      "name": "body above 5 MiB -> 502",
+      "ok": true
+    },
+    {
+      "name": "streaming stopped at the 5 MiB cap (did not read the 64 MiB)",
+      "ok": true
+    },
+    {
+      "name": "declared content-length above 5 MiB -> 502 without reading the body",
+      "ok": true
+    },
+    {
+      "name": "hanging upstream -> 502 after the timeout",
+      "ok": true
+    },
+    {
+      "name": "default timeout 8 s, cap 5 MiB, cache 10 min, chain 4663",
+      "ok": true
+    },
+    {
+      "name": "second call within 10 min -> served from memory, no upstream request",
+      "ok": true
+    },
+    {
+      "name": "after 10 min -> refreshed",
+      "ok": true
+    },
+    {
+      "name": "refresh failure (HTML) with a cached list < 1 h old -> last good list, never the HTML",
+      "ok": true
+    },
+    {
+      "name": "query string -> 301 to /api/par-tokenlist, no upstream call",
+      "ok": true
+    },
+    {
+      "name": "60 requests per minute per IP allowed, 61st -> 429",
+      "ok": true
+    },
+    {
+      "name": "POST -> 405",
+      "ok": true
+    },
+    {
+      "name": "store unavailable -> 429 (fail closed)",
+      "ok": true
+    },
+    {
+      "name": "SYNCNET_CANARY_KEY shorter than 32 chars -> 503 with the generic message",
+      "ok": true
+    },
+    {
+      "name": "short key: server log says the key is too short",
+      "ok": true
+    },
+    {
+      "name": "503 body names no environment variable",
+      "ok": true
+    },
+    {
+      "name": "missing key -> 503",
+      "ok": true
+    },
+    {
+      "name": "wrong key -> 401 {error:\"Access denied.\"}",
+      "ok": true
+    },
+    {
+      "name": "right key -> 200 {ok:true, uploadSession, uploadSessionTtl:7200}",
+      "ok": true
+    },
+    {
+      "name": "session accepted by upload-session.verify (founder, subject \"-\", 2 h)",
+      "ok": true
+    },
+    {
+      "name": "session is not a wallet session",
+      "ok": true
+    },
+    {
+      "name": "no upload secret -> still unlocked, uploadSession:null, ttl 0",
+      "ok": true
+    },
+    {
+      "name": "invalid JSON -> 400",
+      "ok": true
+    },
+    {
+      "name": "base64 body accepted",
+      "ok": true
+    },
+    {
+      "name": "GET -> 405 with allow: POST",
+      "ok": true
+    },
+    {
+      "name": "store unavailable -> 429 (fail closed), key not evaluated",
+      "ok": true
+    },
+    {
+      "name": "exports.handler wired (405 for GET)",
+      "ok": true
+    },
+    {
+      "name": "every attempt is compared with crypto.timingSafeEqual",
+      "ok": true
+    },
+    {
+      "name": "always 32-byte HMAC digests on both sides (no length leak)",
+      "ok": true
+    },
+    {
+      "name": "keysMatch(): non-string input never matches",
+      "ok": true
+    },
+    {
+      "name": "5 attempts per 15 min per IP",
+      "ok": true
+    },
+    {
+      "name": "6th attempt within 15 min -> 429 even with the right key",
+      "ok": true
+    },
+    {
+      "name": "next 15-minute window -> attempts allowed again",
+      "ok": true
+    },
+    {
+      "name": "10 failures within the hour are answered 401",
+      "ok": true
+    },
+    {
+      "name": "lockout logged with the hashed IP only",
+      "ok": true
+    },
+    {
+      "name": "after 10 failures the IP is locked out for 1 h (429 even with the right key)",
+      "ok": true
+    },
+    {
+      "name": "lockout is per IP",
+      "ok": true
+    },
+    {
+      "name": "lockout ends after 1 h",
+      "ok": true
+    },
+    {
+      "name": "100 failures in the hour -> every attempt gets 429, even a new IP with the right key",
+      "ok": true
+    },
+    {
+      "name": "global lockout lifts when the hour window ends",
+      "ok": true
+    },
+    {
+      "name": "a success does not reset the global failure counter",
+      "ok": true
+    },
+    {
+      "name": "netlify.toml: /api/par-tokenlist rewrites to the function",
+      "ok": true
+    },
+    {
+      "name": "netlify.toml: no proxy to par.family/tokenlist.json left",
+      "ok": true
+    },
+    {
+      "name": "netlify.toml: other function rewrites intact",
+      "ok": true
+    },
+    {
+      "name": "netlify.toml: CSP header unchanged",
+      "ok": true
+    },
+    {
+      "name": "_redirects: /api/par-tokenlist rewrites to the function",
+      "ok": true
+    },
+    {
+      "name": "_redirects: every other rule kept",
+      "ok": true
+    },
+    {
+      "name": "no literal bidi/zero-width characters in the server sources",
+      "ok": true
+    },
+    {
+      "name": "site-check.js keeps the markers tests/static_audit.py asserts",
+      "ok": true
+    },
+    {
+      "name": "canary-auth.js keeps SYNCNET_CANARY_KEY + timingSafeEqual (static audit)",
+      "ok": true
+    },
+    {
+      "name": "no real network access was attempted",
+      "ok": true
+    },
+    {
+      "name": "logs never contain a raw client IP",
+      "ok": true
+    },
+    {
+      "name": "every log line is one JSON object with ts/fn/event",
+      "ok": true
+    }
+  ]
+}

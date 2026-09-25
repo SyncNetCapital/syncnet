@@ -1,0 +1,233 @@
+{
+  "at": "2026-09-24T14:20:34.368Z",
+  "failures": 0,
+  "passed": 45,
+  "total": 45,
+  "results": [
+    {
+      "name": "production: no LAB / LOCAL TEST / NO REAL PAYMENTS / simulation wording anywhere",
+      "ok": true,
+      "detail": "LABS"
+    },
+    {
+      "name": "production: the non-custodial model is stated on the page (hero + settlement card)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "production: empty state is polished, with no fake listings seeded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim: live PAR facts shown (deployer, fee recipient, no operator yet)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim: operator claim signed and server-verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim: only free signatures so far — no transaction was ever requested",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "list: the fee right is offerable only because the LIVE chain says the seller wallet holds it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "list: the published listing shows real status badges from server + chain facts",
+      "ok": true,
+      "detail": "ListingOPERATOR LIVE.← ALL LISTINGS\n Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n ACTIVEVERIFIED OPERATOR 0x2c75…5c23C"
+    },
+    {
+      "name": "list: what is NOT sold is explicit (supply, liquidity, metadata, X account)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "refresh: the listing detail re-renders from the server after a full page reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cross-browser: a SECOND browser sees the SAME listing (server persistence, not localStorage)",
+      "ok": true,
+      "detail": "Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n VERIFIED OPERATORLIVE PAR PROJECTCREATOR FEE TRANSFERABLEACTIVE2026-09-24"
+    },
+    {
+      "name": "cross-browser: the buyer browser holds no marketplace records locally",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cards: the project image renders through the canonical IPFS utility (Pinata first)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buyer: connected as a different wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "offer: signed offer delivered (a free signature, not a transaction)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "offer: the buyer sees their own PENDING offer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inbox: the seller sees exactly ONE offer (the double-click made no duplicate)",
+      "ok": true,
+      "detail": "C listed2026-09-24 14:20 UTC operator claim · 0x2c75…5c23\n \n \n CANCEL LISTING · SIGN\n \n \n OFFERS (1)Accept or reject — both are signatures\n 0x19e7…ff2a2.31 ETHPENDING2026-09-24 14:20 UTCACCEPTREJECT\n "
+    },
+    {
+      "name": "deal: acceptance (signed) opened a persistent deal room",
+      "ok": true,
+      "detail": "Deal room · non-custodial settlementOPERATOR LIVE · 2.31 ETH.← LISTING\n \n OPENseller 0x2c75…5c23buyer 0x19e7…ff2a2026-09-24 14:20 UTCYOU ARE THE SELLER\n \n Operator transfer (SyncNet Passport)PENDINGTh"
+    },
+    {
+      "name": "deal: completion is blocked until every step is done",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "transfer: the buyer sees the seller-signed intent in their own browser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "transfer: both signatures verified — the operator record moved A → B",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fee right: the wallet transaction goes to the PAR factory with transferCreatorFeeRecipient(token, buyer)",
+      "ok": true,
+      "detail": "{\"from\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"to\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"data\":\"0x2931861b000000000000000000000000555555555555555"
+    },
+    {
+      "name": "fee right: the chain now names the buyer as recipient (server verified it from the chain)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "payment: the deal room states plainly that SyncNet does not escrow funds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "payment: a PLAIN transfer — to the seller wallet, exact price, no calldata, no approval",
+      "ok": true,
+      "detail": "{\"from\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"to\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"value\":\"0x200ec4c2d7270000\",\"data\":\""
+    },
+    {
+      "name": "manual asset: needs BOTH parties — after the buyer, the seller still has to confirm",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "completion: both signatures over the exact checklist state → deal COMPLETED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "completion: no ACTIVE listing remains; the listing is in past listings as COMPLETED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project page: SYNCNET OPERATOR VERIFIED badge (server-verified signatures, not PAR INDEXED)",
+      "ok": true,
+      "detail": "Operator Live0x5555555555555555555555555555555555555555PAR LAUNCH · FACTORY RECORD ON-CHAINPAR INDEXEDSYNCNET OPERATOR VERIFIEDSYNCNET PROVENANCEPAR INDEXEDA PAR launch: its factory record was read on"
+    },
+    {
+      "name": "project page: the recognised operator is the BUYER now",
+      "ok": true,
+      "detail": "Project PassportWho runs this project, who receives its creator fees, and what can change. Read from the PAR factory on-chain unless marked otherwise.\n Token contractOwnerless · immutable metadataPAR launch tokens have no owner and no function that changes their name, ticker, image, description or l"
+    },
+    {
+      "name": "project page: the operator history shows the transfer and keeps the OLD operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project page: marketplace row reflects the completed hand-over",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "project page: no launch claims were altered (still a verified PAR launch)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authz: the OLD operator gets no seller controls on the new listing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cancel: the other browser sees CANCELLED and can no longer offer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stale: an offer against the cancelled listing is refused server-side",
+      "ok": true,
+      "detail": "{\"status\":409,\"body\":\"{\\\"error\\\":\\\"This listing is CANCELLED — offers are closed.\\\",\\\"code\\\":\\\"not_active\\\"}\"}"
+    },
+    {
+      "name": "malformed: a garbage payload is a clean JSON 400 (no crash, no stack)",
+      "ok": true,
+      "detail": "{\"status\":400,\"body\":\"{\\\"error\\\":\\\"A JSON body with an action is required.\\\",\\\"code\\\":\\\"invalid_request\\\"}\"}"
+    },
+    {
+      "name": "disconnect: the page returns to the not-connected state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "my activity: the buyer sees their listings, offers and deals",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "account change: switching wallets re-renders to that wallet’s (empty) activity",
+      "ok": true,
+      "detail": "My activityLISTINGS · OFFERS · DEALS.\n My listings (0)None yet.\n My offers (0)None yet.\n My deals (0)None yet.\n "
+    },
+    {
+      "name": "rpc down: the sell flow reports the outage instead of guessing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "storage down: browsing degrades to a clear unavailable message (no fake data)",
+      "ok": true,
+      "detail": "The Marketplace is temporarily unavailable."
+    },
+    {
+      "name": "image failure: card logos fall back to the deterministic placeholder",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: no page errors across the whole walkthrough (seller browser)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: no page errors across the whole walkthrough (buyer browser)",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

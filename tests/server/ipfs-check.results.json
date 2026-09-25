@@ -1,0 +1,508 @@
+{
+  "at": "2026-09-24T14:13:42.011Z",
+  "failures": 0,
+  "passed": 100,
+  "total": 100,
+  "results": [
+    {
+      "name": "1a PASS: pinned PNG served by ipfs.io -> {ok:true}",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "1a the gateway request is a GET, redirect: manual, with an image Accept header and a SyncNet user agent",
+      "ok": true,
+      "detail": "{\"url\":\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"host\":\"gateway.pinata.cloud\",\"method\":\"GET\",\"redirect\":\"manual\",\"accept\":\"image/png,image/jpeg,image/gif,image/webp,image/*;q=0.8,*/*;q=0.1\",\"ua\":\"SyncNet/2.5 ipfs-check (+https://syncnet.capital)\"}"
+    },
+    {
+      "name": "1a request goes to https://ipfs.io/ipfs/<cid> exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1b PASS: dweb.link path request -> 301 to its <cid>.ipfs.dweb.link subdomain gateway -> PNG",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu.ipfs.dweb.link/\"]"
+    },
+    {
+      "name": "1c PASS: JPEG image",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "1c PASS: WebP lossless image",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "1c PASS: WebP lossy image",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "1c PASS: GIF image",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "1d PASS: a plain path inside the CID is kept (https://ipfs.io/ipfs/<cid>/assets/logo.png)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1e PASS: bare CIDv0 (Qm…) accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1f PASS: CIDv1 dag-pb (bafybei…) accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2a PASS: ipfs.io 504, dweb.link serves the image",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "2b PASS: dweb.link hangs, ipfs.io answers; the check does not wait for the slow gateway",
+      "ok": true,
+      "detail": "1 ms"
+    },
+    {
+      "name": "2c PASS: ipfs.io network error, dweb.link serves the image",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2d PASS: ipfs.io returns an HTML page, dweb.link returns the real image",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2e PASS: ipfs.io hangs, dweb.link answers quickly",
+      "ok": true,
+      "detail": "1 ms"
+    },
+    {
+      "name": "2P PASS: ipfs.io=429 + dweb.link=429 + gateway.pinata.cloud=200 (valid PNG) -> {ok:true}",
+      "ok": true,
+      "detail": "{\"ok\":true}"
+    },
+    {
+      "name": "2P Pinata is tried, at https://gateway.pinata.cloud/ipfs/<cid>, with GET and redirect: manual",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "2P PASS: Pinata 429 + ipfs.io 429, dweb.link serves the image",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2P PASS: Pinata answers while both public gateways hang (no wait for the timeout)",
+      "ok": true,
+      "detail": "1 ms"
+    },
+    {
+      "name": "2P Pinata redirect to its own host is followed (and loops stop after 3)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2P BLOCK: all three gateways 429 -> {ok:false, reason:\"unreachable\"}",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"unreachable\"}"
+    },
+    {
+      "name": "2P BLOCK: Pinata 200 with HTML (not image bytes) + public 429 -> not_image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "2P BLOCK: Pinata oversized + public 429 -> too_large (size limit kept)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"too_large\"}"
+    },
+    {
+      "name": "2P BLOCK: Pinata redirect to http:// downgrade refused",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "2P BLOCK: Pinata redirect to foreign host refused",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "2P BLOCK: Pinata redirect to look-alike host refused",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "2P BLOCK: Pinata redirect to metadata IP refused",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "2P invalid CID still refused before any request (Pinata included)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3a BLOCK: both gateways 5xx -> {ok:false, reason:\"unreachable\"}",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"unreachable\"}"
+    },
+    {
+      "name": "3a no upstream text in the answer (only ok + a fixed reason)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"unreachable\"}"
+    },
+    {
+      "name": "3b BLOCK: both gateways 4xx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3c BLOCK: both gateways unreachable (network errors), no error text leaked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3d BLOCK: both gateways hang -> strict timeout (8000 ms) -> unreachable",
+      "ok": true,
+      "detail": "8001 ms"
+    },
+    {
+      "name": "3e BLOCK: a failure is never cached (a previous pass does not hide a later outage once the cache is cleared)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "4 BLOCK: HTML page (200 text/html) -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: HTML bytes labelled image/png -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: SVG -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: JSON -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: PNG signature followed by HTML (polyglot) -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: valid PNG with HTML appended after IEND -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: truncated PNG -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: JPEG without EOI -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: RIFF/WEBP with a bogus chunk -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "4 BLOCK: empty body -> not an image",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"not_image\"}"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafytestcid\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://Qm123\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"hello-world\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://BAFKREIFJ2F6MBJ3L4ACL4R2M423XLPRQPMQ2HRSNTJ42JHK5ROW -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5row -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5row -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafyreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5row -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://baaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://Qm00000000000000000000000000000000000000000000\" -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5row -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5row -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: invalid \" ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5ro -> 400 {ok:false, reason:\"invalid\"}, no gateway request",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "5 BLOCK: missing uri parameter -> 400 invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "6a BLOCK: Content-Length 8 MiB (> 5 MiB) -> too_large, refused before reading the body",
+      "ok": true,
+      "detail": "pulled 65536"
+    },
+    {
+      "name": "6b BLOCK: no Content-Length, 64 MiB stream -> too_large, reading stops at the 5 MiB cap",
+      "ok": true,
+      "detail": "pulled 5373952"
+    },
+    {
+      "name": "6c BLOCK: PNG of 5000x5000 px in 72971 bytes -> too_large (dimension cap before inflating)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"too_large\"} 1 ms"
+    },
+    {
+      "name": "6d BLOCK: both gateways stream 6 MiB -> too_large",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"too_large\"}"
+    },
+    {
+      "name": "7a BLOCK: \"https://evil.example/logo.png\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"http://169.254.169.254/latest/meta-data/iam/security-credentials/\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"http://localhost:8080/admin\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"http://127.0.0.1/\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"http://[::1]/\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"file:///etc/passwd\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"//evil.example/a.png\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"javascript:alert(1)\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipns://evil.example\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu@ev -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://evil.example/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5 -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu/.. -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu/%2 -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu?ur -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu#x\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\\r\\ -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu/a  -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://127.0.0.1\" -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7a BLOCK: \"ipfs://bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu/x/ -> 400 invalid, no request made",
+      "ok": true,
+      "detail": "{\"ok\":false,\"reason\":\"invalid\"} requests=0"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to http:// downgrade is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to cloud metadata IP is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to internal host is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to foreign host is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to look-alike host is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to credentials is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to non-443 port is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7b BLOCK: gateway redirect to protocol-relative to another host is refused, never followed",
+      "ok": true,
+      "detail": "[\"https://gateway.pinata.cloud/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://ipfs.io/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"https://dweb.link/ipfs/bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\"]"
+    },
+    {
+      "name": "7c BLOCK: redirect loop stops after 3 redirects per gateway",
+      "ok": true,
+      "detail": "ipfs.io=4 dweb.link=4"
+    },
+    {
+      "name": "7d no request ever left the gateway allow-list in this suite",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "POST -> 405 {ok:false}",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "headers: JSON, nosniff, deny-all CSP, no-store",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate limit: the 21st check within a minute from one IP -> 429 {ok:false, reason:\"rate_limited\"} + Retry-After",
+      "ok": true,
+      "detail": "429 {\"ok\":false,\"reason\":\"rate_limited\"}"
+    },
+    {
+      "name": "a passed CID is remembered: the second check makes no gateway request",
+      "ok": true,
+      "detail": "requests=0"
+    },
+    {
+      "name": "single flight: two concurrent checks of one CID share one request per gateway",
+      "ok": true,
+      "detail": "ipfs.io requests=1"
+    },
+    {
+      "name": "server log records gateway failures (for the operator) without them reaching the client",
+      "ok": true,
+      "detail": "[{\"ts\":\"2026-09-24T14:13:42.010Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":151}]"
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "at": "2026-09-24T14:20:52.186Z",
+  "failures": 0,
+  "passed": 32,
+  "total": 32,
+  "results": [
+    {
+      "name": "phantom+metamask: chooser appears instead of auto-connecting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phantom+metamask: both wallets are visible with their own names",
+      "ok": true,
+      "detail": "Phantom,MetaMask"
+    },
+    {
+      "name": "phantom+metamask: choosing MetaMask connects MetaMask (not providers[0] = Phantom)",
+      "ok": true,
+      "detail": "0x1111…1111"
+    },
+    {
+      "name": "phantom+metamask: chooser closes after the choice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phantom+metamask: only MetaMask was asked for accounts",
+      "ok": true,
+      "detail": "ph:eth_accounts,mm:eth_accounts,mm:eth_requestAccounts,mm:eth_chainId"
+    },
+    {
+      "name": "change wallet: the button now reads Change wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "change wallet: reopens the chooser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "change wallet: choosing Phantom connects Phantom",
+      "ok": true,
+      "detail": "0x2222…2222"
+    },
+    {
+      "name": "no side-effects: connect + change wallet only used eth_requestAccounts / eth_chainId / eth_accounts",
+      "ok": true,
+      "detail": "ph:eth_accounts,mm:eth_accounts,mm:eth_requestAccounts,mm:eth_chainId,ph:eth_requestAccounts,ph:eth_chainId"
+    },
+    {
+      "name": "no side-effects: no chain switch was requested by the chooser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "chooser: Escape cancels and keeps the current wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phantom+metamask: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "metamask+rabby: chooser shows both",
+      "ok": true,
+      "detail": "MetaMask,Rabby Wallet"
+    },
+    {
+      "name": "metamask+rabby: Rabby can be selected",
+      "ok": true,
+      "detail": "0x3333…3333"
+    },
+    {
+      "name": "metamask+rabby: MetaMask can be selected afterwards",
+      "ok": true,
+      "detail": "0x1111…1111"
+    },
+    {
+      "name": "metamask+rabby: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "brave+metamask (EIP-6963): Brave is labelled Brave Wallet, not MetaMask",
+      "ok": true,
+      "detail": "Brave Wallet,MetaMask"
+    },
+    {
+      "name": "brave+metamask: choosing Brave connects Brave",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "brave+metamask (legacy flags): Brave Wallet / MetaMask / Phantom labelled from flags, none mislabelled",
+      "ok": true,
+      "detail": "Brave Wallet,MetaMask,Phantom"
+    },
+    {
+      "name": "duplicates: a provider announced twice / a second object with the same rdns is listed once",
+      "ok": true,
+      "detail": "MetaMask,Phantom"
+    },
+    {
+      "name": "legacy providers[]: both wallets are selectable",
+      "ok": true,
+      "detail": "MetaMask,Phantom"
+    },
+    {
+      "name": "legacy providers[]: choosing Phantom connects Phantom (not window.ethereum itself)",
+      "ok": true,
+      "detail": "0x2222…2222"
+    },
+    {
+      "name": "one provider: connects directly, no chooser",
+      "ok": true,
+      "detail": "0x2c75…5c23"
+    },
+    {
+      "name": "one provider: CHANGE WALLET reconnects directly to that wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "one provider: connection is UI-only (no signature, transaction, approval or chain switch)",
+      "ok": true,
+      "detail": "mock:eth_accounts,mock:eth_chainId,mock:eth_requestAccounts,mock:eth_chainId,mock:eth_requestAccounts,mock:eth_chainId"
+    },
+    {
+      "name": "no provider: the existing helpful error is shown",
+      "ok": true,
+      "detail": "No EVM wallet was found in this browser. Install MetaMask, Rabby or another EVM wallet (on mobile: open this page inside your wallet app’s browser)."
+    },
+    {
+      "name": "no provider: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "two authorised wallets: nothing is auto-selected after a page load",
+      "ok": true,
+      "detail": "Not connected"
+    },
+    {
+      "name": "two authorised wallets: the chooser is required",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "two authorised wallets: only eth_accounts was used silently (no prompt, no signature)",
+      "ok": true,
+      "detail": "ph:eth_accounts,mm:eth_accounts"
+    },
+    {
+      "name": "one authorised wallet among two: it is restored silently (the one that authorised, not providers[0])",
+      "ok": true,
+      "detail": "0x1111…1111"
+    },
+    {
+      "name": "silent restore never prompts",
+      "ok": true,
+      "detail": "ph:eth_accounts,mm:eth_accounts,mm:eth_chainId"
+    }
+  ]
+}

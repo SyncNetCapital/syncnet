@@ -1,0 +1,61 @@
+{
+  "at": "2026-09-24T14:13:43.465Z",
+  "version": "v2.5-rc",
+  "results": [
+    {
+      "name": "F-S4 site-check validates DNS once and then fetches by HOSTNAME (resolved address is not pinned → DNS-rebinding TOCTOU)",
+      "ok": false,
+      "detail": "lookups=1 connected=93.184.216.34 status=200"
+    },
+    {
+      "name": "F-S4 a 64 MB body is fully downloaded before the 16 KB check",
+      "ok": false,
+      "detail": "MB read=1 reason=too-large"
+    },
+    {
+      "name": "F-S4 NAT64 / 6to4 / site-local / IPv4-compatible IPv6 answers pass the private-address filter",
+      "ok": false,
+      "detail": "all blocked"
+    },
+    {
+      "name": "F-S2 public mode pins a 2 MB non-image payload that only starts with the PNG signature",
+      "ok": false,
+      "detail": "anonymous=401 wallet-session=400 malformed"
+    },
+    {
+      "name": "F-S2 server pins a JPEG with its EXIF block unchanged (stripping is client-side only)",
+      "ok": false,
+      "detail": "jpeg=400 png-with-meta=200 pinned-clean=true"
+    },
+    {
+      "name": "F-S2 no rate limit or quota: 200 anonymous pins in a row accepted",
+      "ok": false,
+      "detail": "accepted=2 of 200 (plus 1 earlier)"
+    },
+    {
+      "name": "F-S3 upstream provider error text is returned verbatim to the browser",
+      "ok": false,
+      "detail": "502 {\"error\":\"The image could not be pinned right now. Retrying is safe.\",\"code\":\"pin_failed\"}"
+    },
+    {
+      "name": "F-S3 internal exception text (provider hostname) is returned to the browser",
+      "ok": false,
+      "detail": "502 {\"error\":\"The image could not be pinned right now. Retrying is safe.\",\"code\":\"pin_failed\"}"
+    },
+    {
+      "name": "F-S1 5000 wrong guesses → 5000 plain 401s, no delay/lockout; the right key still works immediately",
+      "ok": false,
+      "detail": "401=5 429=4995 right-key-after=429 128 ms"
+    },
+    {
+      "name": "F-S1 issued upload session is a bearer token valid for anyone for 4 h (not bound to client, not revocable except by rotating the secret)",
+      "ok": false,
+      "detail": "valid at +3.9h=false valid after epoch change=false (founder TTL 2 h, scope-bound, revocable via SYNCNET_SESSION_EPOCH)"
+    },
+    {
+      "name": "F-S5 one call to /api/par-launches-all fans out to 11 PAR API requests (query string ignored, cache-bustable URL)",
+      "ok": false,
+      "detail": "query-string call → HTTP 301, upstream 0; first plain call upstream 4; 5 more calls added 0"
+    }
+  ]
+}

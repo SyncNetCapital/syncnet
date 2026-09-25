@@ -1,0 +1,393 @@
+{
+  "at": "2026-09-24T14:13:42.849Z",
+  "failures": 0,
+  "passed": 77,
+  "total": 77,
+  "results": [
+    {
+      "name": "claim: the on-chain deployer can claim with a valid EIP-712 signature",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-24T14:13:42.187Z\",\"claims\":[{\"id\":\"0x4f8d54c4679ec62cc0df027e3df3eb933006b86dedf5f0aa6"
+    },
+    {
+      "name": "claim: the passport records the evidence basis and an append-only history",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim: a signature by a DIFFERENT wallet is rejected (invalid signer)",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this claim.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "claim: a valid signature is NOT enough — the wallet must match the live chain (attacker ≠ deployer)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "claim: client-supplied \"deployer\"/\"feeRight\" fields cannot spoof the live PAR read",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "claim: a signature bound to the WRONG CHAIN ID does not verify",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this claim.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "claim: a signature for one token is never authorization for another",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this claim.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "claim: an expired signature is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The claim expiry must be in the future (at most 1 hour ahead).\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "claim: a replayed nonce is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"This nonce was already used.\",\"code\":\"replay\"}"
+    },
+    {
+      "name": "claim: an arbitrary non-PAR contract cannot be claimed at all",
+      "ok": true,
+      "detail": "{\"error\":\"This address is not a PAR launch, so it cannot be claimed.\",\"code\":\"not_par\"}"
+    },
+    {
+      "name": "claim: a second wallet cannot take an already-recognised project without evidence",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "signatures: EIP-1271 contract wallets verify through a live isValidSignature call",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "list: a wallet that is NOT the recognised operator cannot list",
+      "ok": true,
+      "detail": "{\"error\":\"Only the recognised operator can list this project. Claim it first.\",\"code\":\"not_operator\"}"
+    },
+    {
+      "name": "list: terms tampered after signing (stale signature ≠ recomputed termsHash) are rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this listing.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "list: price bounds enforced (0, negatives, exponents, >1e9, >18 dp all rejected)",
+      "ok": true,
+      "detail": "0 -> 400"
+    },
+    {
+      "name": "list: expiry beyond 90 days is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The listing expiry must be in the future (at most 90 days ahead).\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "list: the recognised operator creates a real ACTIVE listing",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
+    },
+    {
+      "name": "list: the server snapshot keeps the logo as ipfs:// (metadata is never rewritten to a gateway)",
+      "ok": true,
+      "detail": "{\"name\":\"Operator Live\",\"symbol\":\"OPLIVE\",\"logo\":\"\"}"
+    },
+    {
+      "name": "list: fee right facts come from the live chain (wallet recipient → transferable)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "list: an exact duplicate submission is rejected (deterministic ID)",
+      "ok": true,
+      "detail": "{\"error\":\"This exact listing already exists.\",\"code\":\"duplicate\"}"
+    },
+    {
+      "name": "list: a second ACTIVE listing for the same project is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"This project already has an active listing. Cancel it first.\",\"code\":\"already_listed\"}"
+    },
+    {
+      "name": "list: \"creator-fee right included\" is refused when the live recipient is a PAR vault",
+      "ok": true,
+      "detail": "{\"error\":\"The creator-fee right cannot be included: it is fixed to a PAR vault.\",\"code\":\"fee_right\"}"
+    },
+    {
+      "name": "read: the listing is publicly queryable (persistent server records, not localStorage)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "read: no signatures or nonces leak from the browse view",
+      "ok": true,
+      "detail": "{\"id\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2.5\",\"cur"
+    },
+    {
+      "name": "offer: the seller cannot bid on their own listing",
+      "ok": true,
+      "detail": "{\"error\":\"The seller cannot make an offer on their own listing.\",\"code\":\"self_offer\"}"
+    },
+    {
+      "name": "offer: an offer against different terms than the listing is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The offer was made against different terms than this listing.\",\"code\":\"terms_changed\"}"
+    },
+    {
+      "name": "offer: currency must match the listing",
+      "ok": true,
+      "detail": "{\"error\":\"Offers must use the listing currency (ETH).\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "offer: a signature by a different wallet than the buyer is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this offer.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "offer: a signed offer persists as PENDING",
+      "ok": true,
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5a531b5a325dfdfa3c5f778f741c242244bda70590f1485d3b6ee631fbf5ef62\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f"
+    },
+    {
+      "name": "offer: only the seller can accept (unauthorized acceptance rejected)",
+      "ok": true,
+      "detail": "{\"error\":\"Only the seller can decide on offers.\",\"code\":\"not_seller\"}"
+    },
+    {
+      "name": "offer: seller acceptance (signed) creates a persistent Deal",
+      "ok": true,
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5a531b5a325dfdfa3c5f778f741c242244bda70590f1485d3b6ee631fbf5ef62\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x55555555555555"
+    },
+    {
+      "name": "offer: the deal checklist mirrors the signed terms (operator transfer + fee right + ETH payment + 2 manual assets)",
+      "ok": true,
+      "detail": "{\"operatorTransfer\":{\"required\":true,\"done\":false},\"feeRight\":{\"required\":true,\"recipient\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"done\":false,\"txHash\":null},\"payment\":{\"required\":true,\"kind\":\"o"
+    },
+    {
+      "name": "offer: the other pending offer is SUPERSEDED and the listing is OFFER_ACCEPTED",
+      "ok": true,
+      "detail": "[{\"id\":\"0x85380920ec85da00ae557c0d13b2efeb87419719a9a45e037d11d82d248a48cc\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"0.1\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790345622,\"createdAt\":\"2026-09-24T14:13:42.349Z\",\"decidedAt\":null},{\"id\":"
+    },
+    {
+      "name": "offer: re-accepting the same offer is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"This offer is already ACCEPTED.\",\"code\":\"decided\"}"
+    },
+    {
+      "name": "offer: offers against a no-longer-ACTIVE listing are rejected",
+      "ok": true,
+      "detail": "{\"error\":\"This listing is OFFER_ACCEPTED — offers are closed.\",\"code\":\"not_active\"}"
+    },
+    {
+      "name": "transfer: only seller → buyer for this deal (an attacker cannot inject an intent)",
+      "ok": true,
+      "detail": "{\"error\":\"The transfer must go from the deal seller to the deal buyer for this project.\",\"code\":\"mismatch\"}"
+    },
+    {
+      "name": "transfer: the seller signs a transfer intent (deal enters IN_TRANSFER)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+    },
+    {
+      "name": "transfer: the listing is IN_TRANSFER",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "transfer: the WRONG buyer signing the acceptance is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for the buyer.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "transfer: an acceptance over a different intent hash is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The acceptance does not match the signed transfer intent.\",\"code\":\"mismatch\"}"
+    },
+    {
+      "name": "transfer: BOTH signatures verified → the canonical operator becomes the buyer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+    },
+    {
+      "name": "transfer: history permanently records A → B (append-only, the old operator is never deleted)",
+      "ok": true,
+      "detail": "[\"operator-claim\",\"operator-claim-refresh\",\"listed\",\"operator-transfer\"]"
+    },
+    {
+      "name": "transfer: replaying the acceptance is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The seller is no longer the recognised operator of this project.\",\"code\":\"not_operator\"}"
+    },
+    {
+      "name": "transfer: the seller is no longer the recognised operator → further intents are rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The seller is no longer the recognised operator of this project.\",\"code\":\"not_operator\"}"
+    },
+    {
+      "name": "payment: an unknown transaction hash is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"That transaction is not mined yet.\",\"code\":\"tx_unknown\"}"
+    },
+    {
+      "name": "payment: a transfer to the WRONG wallet is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The payment must be a plain transfer from the buyer wallet to the seller wallet for at least the agreed price.\",\"code\":\"tx_mismatch\"}"
+    },
+    {
+      "name": "payment: a transfer below the agreed price is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The payment must be a plain transfer from the buyer wallet to the seller wallet for at least the agreed price.\",\"code\":\"tx_mismatch\"}"
+    },
+    {
+      "name": "payment: a real buyer→seller transfer of the agreed 2.4 ETH verifies ON-CHAIN",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+    },
+    {
+      "name": "payment: the same transaction cannot be attached twice",
+      "ok": true,
+      "detail": "{\"error\":\"That transaction is already attached to another deal.\",\"code\":\"tx_used\"}"
+    },
+    {
+      "name": "fee right: verified from the CHAIN, not the hash — recipient still the seller → rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The on-chain creator-fee recipient is not the buyer yet. The transfer is verified from the chain, not from the transaction hash alone.\",\"code\":\"not_transferred\"}"
+    },
+    {
+      "name": "fee right: after the real on-chain transferCreatorFeeRecipient, the step verifies",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+    },
+    {
+      "name": "complete: cannot complete while manual assets are unconfirmed",
+      "ok": true,
+      "detail": "{\"error\":\"Not everything in this deal is done yet: Website + domain; Telegram community.\",\"code\":\"incomplete\"}"
+    },
+    {
+      "name": "confirm: only the deal parties can confirm items",
+      "ok": true,
+      "detail": "{\"error\":\"Only the deal buyer or seller can confirm.\",\"code\":\"not_party\"}"
+    },
+    {
+      "name": "confirm: a manual asset needs BOTH parties (website+domain done after both signed)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+    },
+    {
+      "name": "complete: a stale/forged checklist state hash is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"The deal state changed since you reviewed it. Reload and confirm again.\",\"code\":\"stale_state\"}"
+    },
+    {
+      "name": "complete: the buyer confirms completion over the exact checklist state",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+    },
+    {
+      "name": "complete: BOTH confirmations → the deal and the listing are COMPLETED",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+    },
+    {
+      "name": "complete: the Passport shows previous operator → new operator with the deal reference",
+      "ok": true,
+      "detail": "[\"operator-claim\",\"operator-claim-refresh\",\"listed\",\"operator-transfer\",\"deal-completed\"]"
+    },
+    {
+      "name": "lifecycle: the NEW operator can list the project again",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xdc64e648617be4258516f8d7a54e5fd2615fad5f9351c5c9f19d1302215bfa64\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0"
+    },
+    {
+      "name": "cancel: the OLD operator cannot cancel the new listing",
+      "ok": true,
+      "detail": "{\"error\":\"Only the seller can cancel this listing.\",\"code\":\"not_seller\"}"
+    },
+    {
+      "name": "cancel: the seller cancels with a signature; the listing is CANCELLED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "cancel: pending offers against the cancelled listing become void (SUPERSEDED)",
+      "ok": true,
+      "detail": "[{\"id\":\"0x154c7c99cf2ce89a9f5e1d7d662f20ba90cfc11d9d926c8589d6ae61cb33112e\",\"listingId\":\"0xdc64e648617be4258516f8d7a54e5fd2615fad5f9351c5c9f19d1302215bfa64\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"4\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790345622,\"createdAt\":\"2026-09-24T14:13:42.452Z\",\"decidedAt\":null}]"
+    },
+    {
+      "name": "cancel: a stale accept/offer attempt after cancellation is rejected",
+      "ok": true,
+      "detail": "{\"error\":\"This listing is CANCELLED — offers are closed.\",\"code\":\"not_active\"}"
+    },
+    {
+      "name": "payment: non-ETH deals cannot use transaction-hash evidence (manual both-party confirmation instead)",
+      "ok": true,
+      "detail": "{\"error\":\"This deal is priced in USD: payment is confirmed manually by both parties, not by transaction hash.\",\"code\":\"manual_payment\"}"
+    },
+    {
+      "name": "deal-cancel: either party can cancel an open deal; the listing reopens when no transfer happened",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x03c34109b4d08a534284e877fe23b5aeb9c3c121d332c0e570e81e8fcbcf3538\",\"listingId\":\"0xcf9052aad5d52943455f00523"
+    },
+    {
+      "name": "persistence: records live server-side and survive any client reset (3 listings queryable)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "persistence: the wallet view lists my listings, offers and deals",
+      "ok": true,
+      "detail": "{\"l\":2,\"o\":1,\"d\":2}"
+    },
+    {
+      "name": "fail closed: without a durable store the Marketplace reports enabled:false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fail closed: writes without a durable store are refused (503)",
+      "ok": true,
+      "detail": "{\"error\":\"The Marketplace is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "fail closed: SYNCNET_MARKETPLACE_DISABLED=true refuses every write",
+      "ok": true,
+      "detail": "{\"error\":\"The Marketplace is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "abuse: per-IP write rate limit (21st write in a minute → 429 + Retry-After)",
+      "ok": true,
+      "detail": "429"
+    },
+    {
+      "name": "hygiene: unknown actions are a fixed 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: malformed JSON bodies are a fixed 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: unknown records are a plain 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: terms are sanitized server-side (control chars out, length caps applied)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: every response is JSON with nosniff + deny-all CSP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hygiene: an RPC outage fails closed with a generic 503 (no upstream text)",
+      "ok": true,
+      "detail": "{\"error\":\"Robinhood Chain could not be read right now. Try again.\",\"code\":\"unavailable\"}"
+    }
+  ]
+}

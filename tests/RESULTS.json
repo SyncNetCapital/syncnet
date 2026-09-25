@@ -1,0 +1,119 @@
+{
+  "at": "2026-09-24T14:21:54.094Z",
+  "node": "v22.22.2",
+  "site": "sha256:d7faafdab292a31df7e66851d61f33dce9f5a78be52cbf67ddd572d1c8aa021b (64 deployable files)",
+  "suites": [
+    {
+      "suite": "static audit",
+      "command": "python3 tests/static_audit.py",
+      "exit": 0,
+      "seconds": 0,
+      "summary": "PASS"
+    },
+    {
+      "suite": "core unit (keccak, secp256k1, EIP-712, ABI, text policy)",
+      "command": "node tests/unit/core.test.mjs",
+      "exit": 0,
+      "seconds": 3,
+      "summary": "333 passed, 0 failed"
+    },
+    {
+      "suite": "image sanitizer",
+      "command": "node tests/server/image-sanitize.test.mjs",
+      "exit": 0,
+      "seconds": 5,
+      "summary": "129 passed, 0 failed"
+    },
+    {
+      "suite": "server infrastructure",
+      "command": "node tests/server/infra.test.mjs",
+      "exit": 0,
+      "seconds": 3,
+      "summary": "434 passed, 0 failed"
+    },
+    {
+      "suite": "server endpoint abuse (RC)",
+      "command": "node tests/server/rc-server.test.mjs",
+      "exit": 0,
+      "seconds": 1,
+      "summary": "82/82 server checks passed"
+    },
+    {
+      "suite": "server IPFS check /api/ipfs-check (hotfix)",
+      "command": "node tests/server/ipfs-check.test.mjs",
+      "exit": 0,
+      "seconds": 9,
+      "summary": "100/100 ipfs-check checks passed"
+    },
+    {
+      "suite": "server Marketplace /api/marketplace (V1)",
+      "command": "node tests/server/marketplace.test.mjs",
+      "exit": 0,
+      "seconds": 1,
+      "summary": "77/77 marketplace server checks passed"
+    },
+    {
+      "suite": "audit PoCs · engine (AFTER)",
+      "command": "node tests/audit/poc-engine.mjs",
+      "exit": 0,
+      "seconds": 0,
+      "summary": "11/28 reproduced"
+    },
+    {
+      "suite": "audit PoCs · server (AFTER)",
+      "command": "node tests/audit/poc-server.mjs",
+      "exit": 0,
+      "seconds": 0,
+      "summary": "0/11 reproduced"
+    },
+    {
+      "suite": "audit PoCs · pages (AFTER)",
+      "command": "node tests/audit/poc-e2e.mjs",
+      "exit": 0,
+      "seconds": 49,
+      "summary": "0/35 vulnerability checks reproduced"
+    },
+    {
+      "suite": "E2E (existing product suites, updated)",
+      "command": "node tests/e2e/run.mjs",
+      "exit": 0,
+      "seconds": 112,
+      "summary": "297/297 checks passed"
+    },
+    {
+      "suite": "required regressions R01–R28",
+      "command": "node tests/regression/rc-regressions.mjs",
+      "exit": 0,
+      "seconds": 209,
+      "summary": "206/206 regression checks passed"
+    },
+    {
+      "suite": "IPFS display (canonical utility, PONSYNC CID)",
+      "command": "node tests/regression/rc-ipfs-display.mjs",
+      "exit": 0,
+      "seconds": 10,
+      "summary": "23/23 ipfs-display checks passed"
+    },
+    {
+      "suite": "Marketplace walkthrough (two browsers, full deal)",
+      "command": "node tests/regression/rc-marketplace.mjs",
+      "exit": 0,
+      "seconds": 31,
+      "summary": "45/45 marketplace walkthrough checks passed"
+    },
+    {
+      "suite": "Marketplace wallet selection (multi-wallet chooser)",
+      "command": "node tests/regression/rc-wallet-select.mjs",
+      "exit": 0,
+      "seconds": 18,
+      "summary": "32/32 wallet-selection checks passed"
+    },
+    {
+      "suite": "mobile 320/360/390/430",
+      "command": "node tests/regression/rc-mobile.mjs",
+      "exit": 0,
+      "seconds": 62,
+      "summary": "112/112 mobile checks passed"
+    }
+  ]
+}

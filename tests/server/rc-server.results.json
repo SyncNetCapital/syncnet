@@ -1,0 +1,418 @@
+{
+  "at": "2026-09-24T14:13:33.438Z",
+  "failures": 0,
+  "passed": 82,
+  "total": 82,
+  "results": [
+    {
+      "name": "config: everything public is CLOSED by default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: flags + durable store → public features open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: without a durable store every public feature stays closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: only the exact value \"true\" opens a flag (\"1\", \"yes\" do not)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: public uploads need PINATA_JWT",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: public uploads need a ≥32-char session secret",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: kill switch closes public uploads",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: no configuration details leak",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: GET only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "config: the query string cannot open anything",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: closed while public uploads are closed (403, generic)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: challenge issued (wallet, purpose, expiry, nonce, MAC)",
+      "ok": true,
+      "detail": "SyncNet upload session\nWallet: 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\nPurpose: image upload for a token launch\nExpires: 1790259812\nNonce: 035d5595aafb9265\nCheck: 2c13503bec860ea8c916f4c8094031737bc71ab227232f94eb05ef9347b2dd0b"
+    },
+    {
+      "name": "upload-auth: valid signature → 30-minute wallet session bound to that wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: the session cannot be used as a founder session",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: replaying the same challenge → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: signature by another wallet → 401 (generic)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: edited challenge (expiry changed, MAC broken) → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: challenge for wallet B used by wallet A → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: oversized body → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: contract wallet accepted through EIP-1271",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: contract wallet refuses a signature by a non-owner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: 20 challenges / 10 min / IP, then 429 with retry-after",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: 10 verification attempts / 10 min / IP, then 429",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: 10 sessions / day / wallet, then 429",
+      "ok": true,
+      "detail": "200=10 429=2"
+    },
+    {
+      "name": "upload-auth: store unavailable → fails closed (429)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "upload-auth: logs never contain a raw wallet address or IP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: GET reports public=false when closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: GET reports public=true only with the gate open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: no session → 401 (no anonymous pinning)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: wallet session refused while public uploads are closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: forged session MAC → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: valid PNG pinned (200) with cid/uri/type/size",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: pinned bytes are a re-encoded PNG without text/EXIF chunks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: Pinata called with the scoped server JWT, metadata carries only hashed subject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: redundant pin requested (pinning service API)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: PNG signature + HTML → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"The image file is damaged or invalid.\",\"code\":\"malformed\"}"
+    },
+    {
+      "name": "ipfs-upload: declared PNG, actually GIF → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"The file contents do not match the declared image type.\",\"code\":\"type_mismatch\"}"
+    },
+    {
+      "name": "ipfs-upload: JPEG → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"Only PNG and GIF images are accepted.\",\"code\":\"unsupported_type\"}"
+    },
+    {
+      "name": "ipfs-upload: SVG → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"Only PNG and GIF images are accepted.\",\"code\":\"unsupported_type\"}"
+    },
+    {
+      "name": "ipfs-upload: too small (8x8) → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"PNG images must be at least 16x16 pixels.\",\"code\":\"too_small_dimensions\"}"
+    },
+    {
+      "name": "ipfs-upload: too large (1100x10) → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"PNG images must be at most 1024x1024 pixels.\",\"code\":\"too_large_dimensions\"}"
+    },
+    {
+      "name": "ipfs-upload: truncated PNG → 400, user-safe message",
+      "ok": true,
+      "detail": "{\"error\":\"The image file is damaged or invalid.\",\"code\":\"malformed\"}"
+    },
+    {
+      "name": "ipfs-upload: decompression bomb (IDAT inflates past the declared size) refused",
+      "ok": true,
+      "detail": "{\"error\":\"The image data is larger than its dimensions allow.\",\"code\":\"decompression_limit\"}"
+    },
+    {
+      "name": "ipfs-upload: > 3 MB → 400 before decoding",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: nothing invalid was pinned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: Pinata error → generic 502 (no provider text)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: network exception → generic 502 (no hostname/stack)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: provider details are logged server-side",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: secondary pin failure is reported, primary upload still succeeds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: secondary pin not configured → reported as not-configured",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: kill switch → 503 even for founder sessions",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: no PINATA_JWT → 503 generic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: rate-limit store unavailable → fails closed (429)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ipfs-upload: one wallet → 5 per hour, then 429",
+      "ok": true,
+      "detail": "200=5 429=20"
+    },
+    {
+      "name": "ipfs-upload: founder session → 60 per hour, then 429",
+      "ok": true,
+      "detail": "200=60 429=2"
+    },
+    {
+      "name": "ipfs-upload: logs hash identifiers (no raw wallet/IP)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: $SYNC ticker collides with the canonical asset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: full-width ＳＹＮＣ collides (NFKC)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: SYNCAT collides; name \"SyncNet\" collides",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: unrelated ticker does not collide",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: same deployer + ticker found through the indexer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: other wallets using the same ticker are listed (warning, not a block)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: invalid deployer → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: invalid ticker → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: indexer outage → 200 with indexer:\"unavailable\" (the builder then warns + checks on-chain)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launch-guard: normalised cache key → the repeat call makes no upstream request",
+      "ok": true,
+      "detail": "first=2 total=2"
+    },
+    {
+      "name": "launch-guard: 30 requests / minute / IP, then 429",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: submissions closed by default (403)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: submissions stay closed without a durable store",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: a proof that verifies on-chain is published",
+      "ok": true,
+      "detail": "{\"status\":\"VERIFIED\",\"token\":\"0x05ea360a111ecca4214f4fe42ace2377f5d43d89\"}"
+    },
+    {
+      "name": "registry: GET lists it with the proof material for live re-verification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: rejects an edited intent record (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Intent record hashes to recordHash\",\"recordHash commits to salt (keccak(\\\"SYNCNET/1\\\", recordHash))\",\"Transaction metadata equals the intent record\",\"Token metadata e"
+    },
+    {
+      "name": "registry: rejects a claim on another token (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Signed EIP-712 message is exactly this launch\",\"The transaction launched this token (TokenLaunched log)\",\"Factory markets equal the intent record\",\"Token metadata equ"
+    },
+    {
+      "name": "registry: rejects a signature by another wallet (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Signature by the deployer (ECDSA, or EIP-1271 for a contract wallet)\"]}"
+    },
+    {
+      "name": "registry: rejects a swapped deployer (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Intent operator is the deployer\",\"Signed EIP-712 message is exactly this launch\",\"Signature by the deployer (ECDSA, or EIP-1271 for a contract wallet)\",\"Transaction s"
+    },
+    {
+      "name": "registry: rejects a transaction that is not this launch (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Launch transaction found on-chain\"]}"
+    },
+    {
+      "name": "registry: rejects typed data for another token (422)",
+      "ok": true,
+      "detail": "{\"status\":\"UNVERIFIED\",\"failed\":[\"Signed EIP-712 message is exactly this launch\"]}"
+    },
+    {
+      "name": "registry: rejects a proof for another chain (400)",
+      "ok": true,
+      "detail": "{\"error\":\"That is not a SyncNet launch proof.\",\"code\":\"invalid_proof\"}"
+    },
+    {
+      "name": "registry: rejects a malformed proof (400)",
+      "ok": true,
+      "detail": "{\"error\":\"That is not a SyncNet launch proof.\",\"code\":\"invalid_proof\"}"
+    },
+    {
+      "name": "registry: oversized proof → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: chain unreadable → 503 generic, nothing published",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry: 10 submissions / hour / IP, then 429",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

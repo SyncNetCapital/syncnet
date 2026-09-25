@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000"><title>Project Marketplace — SyncNet</title><meta name="description" content="SyncNet Project Marketplace: real, signed listings of SyncNet/PAR projects. Operator provenance and transfers are cryptographically verified; settlement is non-custodial."><link rel="stylesheet" href="/v2.css"></head><body>
+<header class="site-nav"><div class="wrap nav-inner"><a class="nav-brand" href="/"><span class="nav-mark">S</span><span>SYNCNET</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">MENU</button><nav class="nav-links" aria-label="Primary"><a href="/network.html">Map</a><a href="/registry.html">Registry</a><a class="active" aria-current="page" href="/marketplace.html">Marketplace</a><a href="/sync.html">$SYNC token</a><a href="/labs.html">Labs</a><a class="nav-cta" href="/build.html">SYNC A PROJECT</a></nav></div></header>
+<main>
+<section class="page-head mp-product-hero"><div class="wrap"><div class="eyebrow">Project Marketplace</div><h1>BUILD PROJECTS.<br>LAUNCH. GROW. PASS THEM ON.</h1><p>List the <strong>operational control</strong> of a live SyncNet/PAR project. Every listing, offer and operator handover is a real, signed, persistent record — and everything SyncNet cannot verify is labelled exactly that.</p><div class="mp-hero-actions"><button class="btn primary" type="button" data-mp-view="browse">BROWSE PROJECTS</button><button class="btn" type="button" data-mp-view="sell">SELL A PROJECT</button></div><span class="prototype-badge">SIGNED LISTINGS · VERIFIED HANDOVERS · NON-CUSTODIAL</span></div></section>
+
+<section class="section mp-workspace" id="marketplace-workspace"><div class="wrap">
+<div class="wallet-box mp-wallet-box"><div class="wallet-line"><div class="wallet-id"><strong id="mpWalletName">Not connected</strong><span id="mpWalletNote">Connect an EVM wallet to claim, list, offer or settle. Browsing needs no wallet.</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="mpConnect" type="button">Connect wallet</button></div></div></div>
+<div class="asset-status" id="mpServiceNote" role="status" aria-live="polite" hidden></div>
+
+<div class="mp-workspace-tabs" role="tablist" aria-label="Marketplace view"><button class="mp-workspace-tab active" type="button" data-mp-view="browse" role="tab" aria-selected="true">BROWSE</button><button class="mp-workspace-tab" type="button" data-mp-view="sell" role="tab" aria-selected="false">SELL A PROJECT</button><button class="mp-workspace-tab" type="button" data-mp-view="mine" role="tab" aria-selected="false">MY ACTIVITY</button></div>
+
+<div id="mp-browse-panel" class="mp-workspace-panel active">
+<div class="mp-panel-head"><div><div class="eyebrow">Projects for acquisition</div><h2 class="section-title">MARKETPLACE.</h2></div><div class="mp-panel-actions"><button class="btn" type="button" data-mp-view="sell">+ LIST A PROJECT</button></div></div>
+<p class="section-copy mp-compact-copy">Every card is a persistent listing signed by the project’s recognised operator and checked against Robinhood Chain. A sale transfers operational control and the rights it explicitly names — never token supply, locked liquidity or immutable token metadata.</p>
+<div id="mp-listings" class="mp-listings" aria-live="polite"><div class="network-empty">Loading listings…</div></div>
+</div>
+
+<div id="mp-sell-panel" class="mp-workspace-panel" hidden>
+<div class="mp-panel-head"><div><div class="eyebrow">Sell a project</div><h2 class="section-title">CLAIM IT. THEN LIST IT.</h2></div></div>
+<p class="section-copy mp-compact-copy">Step 1 proves to SyncNet, with an on-chain fact plus your signature, that your wallet operates the project. Step 2 signs the exact terms buyers will see. Both are free signatures — never transactions, never token approvals.</p>
+<div class="marketplace-lab-shell">
+<div class="mp-form">
+<div class="step-kicker">01 · Claim the project (signed operator record)</div>
+<div class="field full"><label for="mpToken">Live token contract</label><div class="asset-entry"><input class="input mono" id="mpToken" placeholder="0x…" autocomplete="off" spellcheck="false"><button class="btn" id="mpCheckProject" type="button">CHECK PROJECT</button></div><div class="asset-status" id="mpClaimStatus">SyncNet reads the PAR factory record on-chain: the token must exist, and your wallet must be its deployer, its current creator-fee recipient wallet, or the already-recognised operator.</div></div>
+<div class="mp-claim-facts" id="mpClaimFacts" hidden></div>
+<div class="actions"><button class="btn primary" id="mpSignClaim" type="button" disabled>SIGN OPERATOR CLAIM</button></div>
+
+<div class="step-kicker" style="margin-top:28px">02 · Create the listing (signed terms)</div>
+<div class="field-grid">
+<div class="field"><label for="mpPrice">Asking price</label><input class="input" id="mpPrice" inputmode="decimal" placeholder="2.5" autocomplete="off"></div>
+<div class="field"><label for="mpCurrency">Currency</label><select class="input" id="mpCurrency"><option value="ETH">ETH · payment verifiable on-chain</option><option value="USDG">USDG · settled outside SyncNet</option><option value="USD">USD · settled outside SyncNet</option><option value="EUR">EUR · settled outside SyncNet</option></select></div>
+<div class="field"><label for="mpExpiry">Listing valid for</label><select class="input" id="mpExpiry"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select></div>
+<div class="field full"><label for="mpDescription">Public description</label><textarea class="textarea" id="mpDescription" maxlength="2000" placeholder="What is the project, and why is it worth taking over? (10–2000 characters)"></textarea></div>
+</div>
+<div class="mp-package-editor"><div class="mp-package-head"><div><div class="kicker">Included in the sale</div><h3>WHAT THE BUYER GETS</h3></div><p>Each item carries its evidence level. On-chain and SyncNet-signed steps are verified; everything manual must be confirmed by both parties in the Deal before it can complete.</p></div>
+<div class="mp-package-row fixed"><span>SyncNet operator record (Project Passport)</span><strong class="mp-state transferable">SYNCNET-SIGNED · TWO-PARTY TRANSFER</strong></div>
+<div class="mp-package-row" id="mpFeeRow"><label class="check-line" style="margin:0"><input type="checkbox" id="mpIncludeFee" disabled> <span id="mpFeeRowLabel">Creator-fee right</span></label><strong class="mp-state conditional" id="mpFeeRowState">CHECK THE PROJECT FIRST</strong></div>
+<div class="mp-package-row"><label class="check-line" style="margin:0"><input type="checkbox" class="mp-asset" data-label="Website + domain"> Website + domain</label><strong class="mp-state manual">MANUAL / OFF-CHAIN</strong></div>
+<div class="mp-package-row"><label class="check-line" style="margin:0"><input type="checkbox" class="mp-asset" data-label="Community (Telegram / Discord)"> Community (Telegram / Discord)</label><strong class="mp-state manual">MANUAL / OFF-CHAIN</strong></div>
+<div class="mp-package-row"><label class="check-line" style="margin:0"><input type="checkbox" class="mp-asset" data-label="Repository / code"> Repository / code</label><strong class="mp-state manual">MANUAL / OFF-CHAIN</strong></div>
+<div class="mp-package-row"><label class="check-line" style="margin:0"><input type="checkbox" class="mp-asset" data-label="Brand / artwork package"> Brand / artwork package</label><strong class="mp-state manual">MANUAL / OFF-CHAIN</strong></div>
+<div class="field full"><label for="mpCustomAssets">Other included items · one per line</label><textarea class="textarea" id="mpCustomAssets" maxlength="1000" placeholder="e.g. Newsletter list (2.1k subscribers)"></textarea><div class="field-help">Everything here is MANUAL / OFF-CHAIN: SyncNet cannot verify it, so both parties confirm each item by hand inside the Deal.</div></div>
+<div class="mp-package-row fixed"><span>Token supply · holders’ tokens</span><strong class="mp-state immutable">NOT SOLD · NOT TRANSFERRED</strong></div>
+<div class="mp-package-row fixed"><span>Locked PAR launch liquidity · immutable token metadata</span><strong class="mp-state immutable">IMMUTABLE · NOT TRANSFERRED</strong></div>
+<div class="mp-package-row fixed"><span>X account / handle</span><strong class="mp-state immutable">NOT REPRESENTED AS TRANSFERABLE</strong></div>
+</div>
+<div class="mp-form-error" id="mpSellError" role="alert" hidden></div>
+<div class="actions mp-actions"><button class="btn primary" id="mpCreateListing" type="button" disabled>SIGN &amp; PUBLISH LISTING</button></div>
+<div class="field-help">Publishing asks for one EIP-712 signature over the exact terms above (project, price, currency, terms hash, expiry). If your wallet shows a transaction or gas instead of a signature, reject it.</div>
+</div>
+</div>
+</div>
+
+<div id="mp-detail-panel" class="mp-workspace-panel" hidden><div id="mpDetail"></div></div>
+<div id="mp-deal-panel" class="mp-workspace-panel" hidden><div id="mpDeal"></div></div>
+<div id="mp-mine-panel" class="mp-workspace-panel" hidden><div id="mpMine"><div class="network-empty">Connect a wallet to see your listings, offers and deals.</div></div></div>
+</div></section>
+
+<section class="section compact"><div class="wrap"><div class="mp-rule-grid"><article class="mp-rule-card"><div class="kicker">What a sale is</div><h3>OPERATIONAL CONTROL, WITH PROOF.</h3><p>The recognised-operator record (Project Passport) moves to the buyer through a two-signature transfer, together with every right the listing explicitly includes — each labelled ON-CHAIN VERIFIED, SYNCNET-SIGNED or MANUAL / OFF-CHAIN.</p></article><article class="mp-rule-card"><div class="kicker">What a sale is not</div><h3>NOT THE TOKEN. NOT THE POOL.</h3><p>Token supply, holders’ tokens, locked PAR liquidity and immutable token metadata are never sold here and never move. The Passport confers no power the underlying contracts do not provide.</p></article><article class="mp-rule-card"><div class="kicker">Settlement</div><h3>NON-CUSTODIAL. NO ESCROW.</h3><p>SyncNet V1 never holds funds and provides no escrow. ETH payments go wallet-to-wallet and are verified on-chain from the transaction; everything else is confirmed by both parties. A deal is COMPLETED only when its checklist really is.</p></article></div></div></section>
+</main>
+<section class="public-risk"><div class="wrap"><div class="eyebrow">Operational control ≠ token ownership</div><p>A listing must state exactly what transfers and what does not. SyncNet verifies signatures and on-chain facts; it does not verify off-chain promises, and it says so wherever that is the case.</p></div></section>
+<div class="modal" id="mpWalletModal" role="dialog" aria-modal="true" aria-labelledby="mpWalletModalTitle"><div class="modal-card"><h3 id="mpWalletModalTitle">Choose an EVM wallet</h3><p>More than one wallet is installed in this browser. Choosing one only exposes its selected account to this page: nothing is signed and nothing is sent until you act inside a listing or a Deal.</p><div class="provider-list" id="mpProviderList"></div><div class="actions" style="justify-content:flex-end;margin-top:16px"><button class="btn" id="mpCloseWallet" type="button">Cancel</button></div></div></div>
+<footer class="site-footer"><div class="wrap"><nav class="footer-nav"><a href="/kit.html">Project Kit</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/labs.html">Labs</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><a href="/contact.html">Contact</a></nav></div></footer><script src="/v2-common.js" defer></script><script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-ipfs.js" defer></script><script src="/lib/syncnet-chain.js" defer></script><script src="/lib/syncnet-market.js" defer></script><script src="/marketplace-v2.js" defer></script></body></html>

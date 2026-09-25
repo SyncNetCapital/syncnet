@@ -1,6 +1,115 @@
+# Internal documents, tests and function sources are part of the deploy bundle but are not served publicly.
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/tests/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/docs/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/netlify/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/README.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/README_DUEL.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/CHANGELOG.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/SECURITY.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/TESTING.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/POST_CLAUDE_HARDENING.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/FINAL_RELEASE_REPORT.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/FIRST_LIVE_LAUNCH_CHECKLIST.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/AUDIT_FINDINGS_CLOSED.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/RECOVERY_GUIDE.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/RELEASE_REPORT.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/MARKETPLACE_SECURITY.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/MARKETPLACE_DEPLOY_CHECKLIST.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/WALLET_HOTFIX_REPORT.md"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/.gitignore"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
+  from = "/token/*"
+  to = "/token.html"
   status = 200
 
 [[headers]]
@@ -10,3 +119,76 @@
     X-Frame-Options = "DENY"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; connect-src 'self' http://127.0.0.1:8545 http://localhost:8545 https://api.par.family https://par.family https://rpc.mainnet.chain.robinhood.com https://ipfs.io https://dweb.link; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+
+[[redirects]]
+  from = "/api/par-tokenlist"
+  to = "/.netlify/functions/par-tokenlist"
+  status = 200
+  force = true
+
+
+[[redirects]]
+  from = "/api/par-launches-all"
+  to = "/.netlify/functions/par-launches-all"
+  status = 200
+  force = true
+
+[functions]
+  directory = "netlify/functions"
+  # Shared browser/server modules and the canonical registry used by the functions.
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "syncnet-projects.json"]
+
+[[redirects]]
+  from = "/api/canary-auth"
+  to = "/.netlify/functions/canary-auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/ipfs-upload"
+  to = "/.netlify/functions/ipfs-upload"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/site-check"
+  to = "/.netlify/functions/site-check"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/config"
+  to = "/.netlify/functions/config"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/launch-guard"
+  to = "/.netlify/functions/launch-guard"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/registry"
+  to = "/.netlify/functions/registry"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/upload-auth"
+  to = "/.netlify/functions/upload-auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/ipfs-check"
+  to = "/.netlify/functions/ipfs-check"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/marketplace"
+  to = "/.netlify/functions/marketplace"
+  status = 200
+  force = true

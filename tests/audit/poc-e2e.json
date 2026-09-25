@@ -1,0 +1,206 @@
+{
+  "at": "2026-09-24T14:14:32.085Z",
+  "version": "v2.5-rc",
+  "results": [
+    {
+      "name": "setup: the wallet broadcast the launch and then returned an error",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 wallet broadcast the launch but the page says \"No transaction was sent.\"",
+      "ok": false,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x42768640b4d41b7b41c7240e815c05ed71d0349b\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0xdf23ee"
+    },
+    {
+      "name": "F-R1 nothing was persisted as pending (no reload guard, no \"AGAIN\" phrase)",
+      "ok": false,
+      "detail": "FULLY_VERIFIED"
+    },
+    {
+      "name": "F-R1 simulation button stays enabled",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 re-simulation produces a NEW intent hash → new salt → new CREATE2 address on a real chain",
+      "ok": false,
+      "detail": "0xdf23eeec1b vs 0xdf23eeec1b"
+    },
+    {
+      "name": "F-R1 plain ticker (no \"AGAIN\") still unlocks the second launch",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 a second launch transaction was sent",
+      "ok": false,
+      "detail": "eth_sendTransaction calls=1"
+    },
+    {
+      "name": "setup: F-R1 transaction broadcast while the page still waits for the hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1 after reload: no \"unverified launch\" notice",
+      "ok": false,
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$PONSYNC0x32688a908df64a35b507cce40a2ecb22c8b844a4tx 0xc6001e6c…RE-VERIFYEXPORT"
+    },
+    {
+      "name": "F-R1 after reload: the PONSYNC draft is offered for a fresh launch (without any unresolved-launch warning)",
+      "ok": false,
+      "detail": "Saved in this browser just now. Simulations and signatures are never saved — you will run a fresh one. Note: 1 launch attempt is still unresolved — see MY LAUNC"
+    },
+    {
+      "name": "setup: F-P6 second simulation (no input change) yields a new intent hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 UI still shows \"SIGNED ✓\" and the sign button stays disabled",
+      "ok": false,
+      "detail": "NOT SIGNED"
+    },
+    {
+      "name": "F-P6 LAUNCH LIVE is enabled without a signature over the new record",
+      "ok": false,
+      "detail": "Still needed: sign the launch intent for this exact simulation."
+    },
+    {
+      "name": "F-P6 saved proof: signed recordHash ≠ committed recordHash",
+      "ok": false,
+      "detail": "signed=0xb5751a871e07 committed=0xb5751a871e07 first-signature=0x240e08edfb09"
+    },
+    {
+      "name": "F-P6 saved proof: signed salt ≠ salt used in the launch",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-P6 Registry labels it \"SIGNED + TX-COMMITTED · THIS BROWSER\"",
+      "ok": false,
+      "detail": "STHIS BROWSER ONLY · NOT PUBLICSIGTEST0xa12a623716edbc87044558525b33959bbb15d230Launch record stateFULLY VERIFIEDTransac"
+    },
+    {
+      "name": "F-RH1 no rehearsal banner (neither amber nor red)",
+      "ok": false,
+      "detail": "network-banner error :: REHEARSAL NOT STARTED · Unrecognised rehearsal parameter \"fork\". Use ?live=canary&rpc=http://127.0.0.1:8545&chain=46630 "
+    },
+    {
+      "name": "F-RH1 wallet on the fork is reported as \"Wrong network\" while the page silently runs as mainnet (no rehearsal error shown)",
+      "ok": false,
+      "detail": "Wrong network · 46630 — use SWITCH NETWORK"
+    },
+    {
+      "name": "F-RH1 RUN SIMULATION asks the wallet to switch to Robinhood Chain (0x1237)",
+      "ok": false,
+      "detail": "eth_requestAccounts,eth_chainId"
+    },
+    {
+      "name": "F-RH1 a simulation ran against the mainnet RPC although the URL asked for a fork",
+      "ok": false,
+      "detail": "mainnet=23 fork=0 runSimulation disabled=true"
+    },
+    {
+      "name": "F-P3 project paired with a FAKE SYNC (other address, same ticker) is listed under \"RECENT $SYNC CONNECTIONS\"",
+      "ok": false,
+      "detail": "SYNCSYNCAT$SYNCATSYNCAT / CASHCATSYNCAT / SYNCObservable market connection on PAR. No affiliation is implied.MAPSYNC WITH ITSYNCPONS$PONSPONS / SYNCObservable m"
+    },
+    {
+      "name": "F-P1 marketplace represents a CONTRACT fee recipient as transferable/includable",
+      "ok": false,
+      "detail": "state=RECIPIENT IS A CONTRACT · REQUIRES MANUAL VERIFICATION"
+    },
+    {
+      "name": "F-P1b the forged fee-right listing is accepted server-side and renders as a real listing",
+      "ok": false,
+      "detail": "server said: The creator-fee right cannot be included: the current recipient is a contract."
+    },
+    {
+      "name": "F-P1 marketplace and Passport disagree about a contract recipient",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-P4 description longer than 96 chars is rendered as \"Description: Token…\"",
+      "ok": false,
+      "detail": "Description: A deliberately long but perfectly normal project descriptio"
+    },
+    {
+      "name": "F-P5 token with an http:// website is shown as \"Website in token metadata: None\"",
+      "ok": false,
+      "detail": "Website in token metadatahttp://oplive.example/INSECURE LINK: http:// (not encrypted). Shown as text, not opened by SyncNet. Permanent on-chain f"
+    },
+    {
+      "name": "setup: F-R3 the launch was mined while the node lagged",
+      "ok": true,
+      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0x334a0fb069ac7f503ef9448d1be10229bc07af4e\nTransaction: 0xc2296473c408026e2ac2b8731ebbd6b55dd8581c0809cb3"
+    },
+    {
+      "name": "F-R3 launch mined, but a lagging node makes the page stop without saving a proof",
+      "ok": false,
+      "detail": "MINED intent=true signature=true"
+    },
+    {
+      "name": "F-R3 the intent record + signature exist only in a transient pending entry (no durable launch record)",
+      "ok": false,
+      "detail": "durable record MINED"
+    },
+    {
+      "name": "F-R3 no export button is offered on this path",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-R3 reload notice names only ticker + tx hash, never the predicted token address, and does not check the chain",
+      "ok": false,
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0x334a0fb069ac7f503ef9448d1be10229bc07af4etx 0xc2296473…RE-VERIFYEXPORT"
+    },
+    {
+      "name": "F-R3 unlocking founder mode wipes the launch notice",
+      "ok": false,
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0x334a0fb069ac7f503ef9448d1be10229bc07af4etx 0xc2296473…RE-VERIFYEXPORT"
+    },
+    {
+      "name": "F-R3 following the recovery path erases the record: intent JSON/signature are gone for good",
+      "ok": false,
+      "detail": "FULLY_VERIFIED intent=true"
+    },
+    {
+      "name": "F-P7 an arbitrary contract (not on PAR, used by no project) is badged \"NETWORK HUB\" on a SyncNet page",
+      "ok": false,
+      "detail": "Token0x1234567890abcdef1234567890abcdef12345678NOT VERIFIED AS A PAR LAUNCHProjects using this contract as a market (indexer)0SyncNet could not verify this cont"
+    },
+    {
+      "name": "F-P7 Passport of a NON-PAR contract (USDG) still states \"Ownerless · immutable\" and \"Only the creator-fee recipient\" can change",
+      "ok": false,
+      "detail": "Global Dollar0x5fc5360d0400a0fd4f2af552add042d716f1d168NOT VERIFIED AS A PAR LAUNCHProjects using this contract as a market (indexer)2SyncNet could not verify this contract as a PAR launch. No ownership, fee, market or s"
+    },
+    {
+      "name": "setup: F-R1/N1 the transaction was broadcast",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-R1/N1 tx broadcast; the page claims the launch is saved but nothing was saved",
+      "ok": false,
+      "detail": "FULLY_VERIFIED tx=0x202ba5b5e6"
+    },
+    {
+      "name": "F-R1/N1 the edit made while the wallet popup was open changed the sent transaction",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "F-R1/N1 after reload: no notice, draft offered again",
+      "ok": false,
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$EDPOP0xe5b896ba1557e29d88db8ff938ecee93307e1558tx 0x202ba5b5…RE-VERIFYE"
+    },
+    {
+      "name": "F-UX1 Review still names wallet A as fee recipient while the simulated calldata pays wallet B",
+      "ok": false,
+      "detail": "review=CREATOR / OPERATOR WALLET · 0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0002 | sim has B=true"
+    }
+  ]
+}

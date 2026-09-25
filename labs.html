@@ -1,0 +1,155 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000"><title>Labs — SyncNet</title><meta name="description" content="SyncNet experiments, including the original SYNC DUEL PVP challenge."><link rel="stylesheet" href="/v2.css"></head><body>
+<header class="site-nav"><div class="wrap nav-inner"><a class="nav-brand" href="/"><span class="nav-mark">S</span><span>SYNCNET</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">MENU</button><nav class="nav-links" aria-label="Primary"><a href="/network.html">Map</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/sync.html">$SYNC token</a><a class="active" aria-current="page" href="/labs.html">Labs</a><a class="nav-cta" href="/build.html">SYNC A PROJECT</a></nav></div></header>
+<main><section class="page-head"><div class="wrap"><div class="eyebrow">Labs</div><h1>EXPERIMENT<br>WITHOUT CLUTTER.</h1><p>Labs keeps games and experimental product ideas away from the core Map and Sync flows.</p></div></section>
+<section class="section sync-duel" id="sync-duel">
+  <div class="wrap">
+    <div class="eyebrow">Play the mechanism</div>
+    <h2 class="section-title">SYNC DUEL <span class="cyan">// PVP</span></h2>
+    <p class="section-copy">Two simulated markets drift. Lock the moment they come closest together — practice against the ghost or send the exact same five-round path to another player.</p>
+
+    <div class="duel-shell">
+      <div class="duel-teaser" id="duelTeaser">
+        <div>
+          <div class="duel-kicker">Five rounds. One lock per round.</div>
+          <strong>Practice alone — or challenge a real player.</strong>
+          <p>No wallet. No stake. No prize. No token transfer. Just the same market path and whoever gets closer to zero.</p>
+        </div>
+        <button class="duel-enter" id="duelEnter" type="button">Enter SYNC DUEL</button>
+      </div>
+
+      <div class="duel-panel" id="duelPanel" aria-live="polite">
+        <div class="duel-panel-head">
+          <div class="duel-panel-title">SYNC DUEL <span id="duelPanelMode">// CHOOSE MODE</span></div>
+          <button class="duel-close" id="duelClose" type="button">Close</button>
+        </div>
+
+        <div class="duel-screen" id="duelLobby">
+          <div class="duel-mode-grid" id="duelModeGrid">
+            <button class="duel-mode active" id="duelModePractice" type="button" data-duel-mode="practice">
+              <span>PRACTICE</span>
+              <strong>Beat the ghost.</strong>
+              <small>Unlimited · local record · zero friction</small>
+            </button>
+            <button class="duel-mode" id="duelModeReal" type="button" data-duel-mode="real">
+              <span>REAL DUEL</span>
+              <strong>Challenge a player.</strong>
+              <small>Async PVP · same seed · shareable link</small>
+            </button>
+          </div>
+
+          <div class="duel-versus">
+            <div class="duel-side">
+              <div class="duel-side-label">You</div>
+              <div class="duel-side-value">PRECISION</div>
+            </div>
+            <div class="duel-vs">vs</div>
+            <div class="duel-side">
+              <div class="duel-side-label">Opponent</div>
+              <div class="duel-side-value" id="duelOpponentName">PRACTICE GHOST</div>
+            </div>
+          </div>
+
+          <div class="duel-challenge-card" id="duelChallengeCard" hidden>
+            <div><span id="duelChallengeKicker">REAL DUEL</span><strong id="duelChallengeTitle">Create a challenge.</strong></div>
+            <p id="duelChallengeCopy">Play first. After five rounds, SyncNet creates a link that gives another player the exact same market sequence.</p>
+          </div>
+
+          <div class="duel-seed"><span>Duel seed</span><strong id="duelSeed">SYNC-000000</strong></div>
+          <div class="duel-disclaimer" id="duelDisclaimer">SIMULATED MARKET PATH · SYNC XP IS OFF-CHAIN, NON-TRANSFERABLE AND HAS NO MONETARY VALUE.</div>
+
+          <div class="duel-actions-row">
+            <button class="duel-action primary" id="duelStart" type="button">Start practice</button>
+          </div>
+
+          <div class="duel-practice-record" aria-label="Your local SYNC DUEL record">
+            <div class="duel-record-cell"><div class="duel-record-label">Duels</div><div class="duel-record-value" id="duelRecordDuels">0</div></div>
+            <div class="duel-record-cell"><div class="duel-record-label">PVP wins</div><div class="duel-record-value" id="duelRecordWins">0</div></div>
+            <div class="duel-record-cell"><div class="duel-record-label">Best sync</div><div class="duel-record-value" id="duelRecordBest">—</div></div>
+            <div class="duel-record-cell"><div class="duel-record-label">SYNC XP</div><div class="duel-record-value" id="duelRecordPoints">0</div></div>
+            <div class="duel-record-cell"><div class="duel-record-label">PVP streak</div><div class="duel-record-value" id="duelRecordStreak">0</div></div>
+          </div>
+          <div class="duel-record-note">Local browser record · XP is not a token, reward or claim on future rewards</div>
+        </div>
+
+        <div class="duel-screen" id="duelGame" hidden>
+          <div class="duel-round-head">
+            <div class="duel-round-no" id="duelRoundNo">Round 1 / 5</div>
+            <div class="duel-sim-label" id="duelGameMode">Simulated market path</div>
+          </div>
+
+          <div class="duel-readouts">
+            <div class="duel-readout"><div class="duel-readout-label">Market A</div><div class="duel-readout-value" id="duelPriceA">1.000000</div></div>
+            <div class="duel-readout"><div class="duel-readout-label">Market B</div><div class="duel-readout-value" id="duelPriceB">1.000000</div></div>
+            <div class="duel-readout"><div class="duel-readout-label">Live divergence</div><div class="duel-readout-value cyan" id="duelDivergence">0.000%</div></div>
+          </div>
+
+          <div class="duel-visual" aria-label="Simulated market convergence visualization">
+            <svg viewBox="0 0 1000 260" preserveAspectRatio="none" role="img">
+              <line class="duel-axis" x1="0" y1="130" x2="1000" y2="130"></line>
+              <path class="duel-path-a" id="duelPathA" d=""></path>
+              <path class="duel-path-b" id="duelPathB" d=""></path>
+              <line class="duel-lock-line" id="duelLockLine" x1="0" y1="0" x2="0" y2="260"></line>
+              <circle class="duel-lock-dot-a" id="duelLockDotA" cx="0" cy="130" r="5"></circle>
+              <circle class="duel-lock-dot-b" id="duelLockDotB" cx="0" cy="130" r="5"></circle>
+            </svg>
+          </div>
+
+          <div class="duel-live-line"><span>Reference <strong>USDG = 1.000000</strong></span><span id="duelClock">8.0s</span></div>
+
+          <div class="duel-sync-wrap"><button class="duel-sync-button" id="duelSync" type="button">SYNC</button></div>
+
+          <div class="duel-lock-result" id="duelLockResult" hidden>
+            <div class="duel-lock-col"><div class="duel-lock-label">You locked at</div><div class="duel-lock-value cyan" id="duelUserLock">—</div><div class="duel-lock-note" id="duelUserClass">—</div></div>
+            <div class="duel-lock-col"><div class="duel-lock-label" id="duelOpponentRoundLabel">Practice ghost</div><div class="duel-lock-value" id="duelGhostLock">—</div><div class="duel-lock-note" id="duelGhostClass">—</div></div>
+            <div class="duel-lock-col"><div class="duel-lock-label">Round</div><div class="duel-lock-value" id="duelRoundOutcome">—</div><div class="duel-lock-note" id="duelRoundScore">—</div></div>
+          </div>
+          <div class="duel-round-strip" id="duelRoundStrip" aria-label="Round results"></div>
+        </div>
+
+        <div class="duel-screen" id="duelResult" hidden>
+          <div class="duel-sim-label" id="duelResultMode">Duel complete</div>
+          <div class="duel-result-score">
+            <div class="duel-side"><div class="duel-side-label">You</div><div class="duel-side-value" id="duelFinalYou">0</div></div>
+            <div class="duel-vs">vs</div>
+            <div class="duel-side"><div class="duel-side-label" id="duelFinalOpponentLabel">Practice ghost</div><div class="duel-side-value" id="duelFinalGhost">0</div></div>
+          </div>
+          <div class="duel-verdict" id="duelVerdict">YOU WIN</div>
+
+          <div class="duel-summary-grid">
+            <div class="duel-summary-cell"><div class="duel-summary-label">Best sync</div><div class="duel-summary-value" id="duelFinalBest">—</div></div>
+            <div class="duel-summary-cell"><div class="duel-summary-label">Average divergence</div><div class="duel-summary-value" id="duelFinalAvg">—</div></div>
+            <div class="duel-summary-cell"><div class="duel-summary-label" id="duelFinalRoundsLabel">Rounds won</div><div class="duel-summary-value" id="duelFinalRounds">0 / 5</div></div>
+            <div class="duel-summary-cell"><div class="duel-summary-label">Precision score</div><div class="duel-summary-value" id="duelFinalScore">0</div></div>
+          </div>
+
+          <div class="duel-points">
+            <div><strong id="duelPointsEarned">+25</strong><span>SYNC XP · off-chain · non-transferable · no monetary value</span></div>
+            <div class="duel-point-breakdown" id="duelPointsBreakdown">Complete +25</div>
+          </div>
+
+          <div class="duel-challenge-link" id="duelChallengeLinkPanel" hidden>
+            <span>CHALLENGE READY</span>
+            <strong>Send this duel to someone.</strong>
+            <p>They get the exact same five-round market sequence. Your score stays hidden until they finish.</p>
+            <div class="duel-link-row"><input id="duelChallengeUrl" readonly aria-label="Challenge link"/><button class="duel-small-button" id="duelCopyChallenge" type="button">Copy link</button></div>
+            <small>Casual peer challenge. Client-side results are not used for prizes, payments or financial settlement.</small>
+          </div>
+
+          <div class="duel-actions-row">
+            <button class="duel-action primary" id="duelAgain" type="button">Play again</button>
+            <button class="duel-action" id="duelShare" type="button">Share result</button>
+          </div>
+
+          <div class="duel-share" id="duelSharePanel">
+            <pre id="duelShareText"></pre>
+            <div class="duel-share-actions"><button class="duel-small-button" id="duelCopyShare" type="button">Copy</button></div>
+          </div>
+
+          <div class="duel-future">FREE PVP · NO WALLET · NO STAKE · NO PRIZE · NO TOKEN TRANSFER</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section compact"><div class="wrap"><div class="eyebrow">Why Labs exists</div><h2 class="section-title">ONE CORE.<br>MANY EXPERIMENTS.</h2><p class="section-copy">The core product maps token relationships and lets creators sync new ones. SYNC DUEL stays here as a free, walletless experiment inspired by market convergence.</p></div></section></main>
+<section class="public-risk"><div class="wrap"><div class="eyebrow">Practice / peer challenge only</div><p>SYNC DUEL uses deterministic simulated prices. It has no wallet connection, blockchain interaction, payments, stakes, prizes or crypto rewards. Challenge links are client-side and are not an anti-cheat or settlement system.</p></div></section><footer class="site-footer"><div class="wrap"><nav class="footer-nav"><a href="/kit.html">Project Kit</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a></nav></div></footer><script src="/v2-common.js" defer></script><script src="/labs-v2.js" defer></script></body></html>

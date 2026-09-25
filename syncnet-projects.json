@@ -1,16 +1,62 @@
 {
-  "version": 3,
+  "version": 4,
   "projects": [
     {
       "token": "0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967",
+      "symbol": "SYNCAT",
+      "name": "SYNCAT",
       "verified": false,
       "mode": "network",
       "profile": {
         "name": "SYNCAT",
-        "image": "/assets/syncat.png"
+        "image": "/assets/syncat-thumb.webp"
       },
-      "note": "Public SyncNet profile override for the canonical SYNCAT contract. Image is off-chain SyncNet profile metadata; it does not modify immutable PAR/on-chain logo metadata."
+      "note": "Canonical SYNCAT profile for the recorded SyncNet origin contract. Launched from the SyncNet deployer wallet and built around CASHCAT; this does not imply affiliation with or endorsement by CASHCAT.",
+      "registry": {
+        "id": "SYNCNET-001",
+        "status": "origin",
+        "label": "SYNCNET ORIGIN",
+        "recordType": "backfilled-origin",
+        "canonical": true,
+        "recordedAt": "2026-09-22",
+        "note": "Foundational SyncNet project recorded before the V2 live launcher. Launched from the SyncNet deployer wallet; built around CASHCAT. This provenance record is not evidence of affiliation with or endorsement by CASHCAT.",
+        "definition": "Foundational SyncNet-launched project from the early SyncNet model, recorded before the current V2 live-launch flow."
+      },
+      "links": {
+        "x": "https://x.com/OfficialSYNCAT"
+      }
+    },
+    {
+      "token": "0x6368e007b9f0b941560ed1f3bceb20247f5eca37",
+      "symbol": "SYNC",
+      "name": "SyncNet",
+      "verified": false,
+      "mode": "network",
+      "profile": {
+        "name": "SYNC",
+        "image": "/assets/syncnet-logo-thumb.webp"
+      },
+      "note": "Canonical SyncNet network asset record. $SYNC has PAR markets with NET and USDG; its presence in the Registry does not verify investment quality or connected projects.",
+      "registry": {
+        "id": "SYNCNET-ASSET-001",
+        "status": "network",
+        "label": "SYNCNET NETWORK ASSET",
+        "recordType": "canonical-network-asset",
+        "canonical": true,
+        "recordedAt": "2026-09-22",
+        "note": "Canonical SyncNet network asset. This record identifies the official $SYNC contract used by SyncNet; it is not a safety or investment endorsement."
+      },
+      "links": {
+        "x": "https://x.com/sync_on_par"
+      }
     }
   ],
-  "note": "Optional SyncNet profile overrides. Add only after verifying the token contract. An entry does not imply endorsement. Set verified=true only after provenance verification."
+  "note": "Public SyncNet project/profile registry. Registry provenance, canonical asset identity, operator verification and indexed market relationships are separate concepts. A registry entry does not imply endorsement by connected assets.",
+  "registry": {
+    "name": "SyncNet Project Registry",
+    "status": "experimental",
+    "chainId": 4663,
+    "provenanceModel": "Public Registry records are curated until signed automatic provenance is deployed. Browser-local launch proofs are displayed separately and never counted as public Registry entries.",
+    "futureAutomation": "Automatic signed launch provenance is being introduced through launch-intent commitments and wallet signatures; public server-backed Registry publication is not yet enabled."
+  }
 }

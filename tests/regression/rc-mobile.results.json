@@ -1,0 +1,568 @@
+{
+  "at": "2026-09-24T14:21:53.844Z",
+  "failures": 0,
+  "passed": 112,
+  "total": 112,
+  "results": [
+    {
+      "name": "320px build: no horizontal overflow on load",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px build: network banner visible and inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px build: MAINNET · REAL FUNDS banner after unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px step 1: no overflow with byte counters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px step 2: no overflow with two connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px step 3: no overflow (fees, recipient, opening buy)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px wallet modal fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px simulation passes",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x6aE48AA0c7f044f537Cd29F467288AcF3D797bf7\nMarkets: MOB320 / SYNC · MOB320 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+    },
+    {
+      "name": "320px simulation status and PAR preflight fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px final review visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px final review: every value inside the viewport (long hex wraps)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320px final review: text ≥ 10.5 px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px final review: all required rows present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px launch controls are tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px LAUNCH LIVE enabled only after every step",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "320px launch confirmed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px live status, links and export button fit",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320px MY LAUNCHES: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px MY LAUNCHES: the launch is listed and its controls fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px MY LAUNCHES: buttons tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px MY LAUNCHES: evidence details wrap inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px RECOVER by tx hash finds the launch",
+      "ok": true,
+      "detail": "Found it: this launch matches a record in this browser. State: FULLY VERIFIED."
+    },
+    {
+      "name": "320px recover result fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px build: no horizontal overflow on load",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px build: network banner visible and inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px build: MAINNET · REAL FUNDS banner after unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px step 1: no overflow with byte counters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px step 2: no overflow with two connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px step 3: no overflow (fees, recipient, opening buy)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px wallet modal fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px simulation passes",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x90A9614E54521bE43f37E1ca8eceeae5CDada84d\nMarkets: MOB360 / SYNC · MOB360 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+    },
+    {
+      "name": "360px simulation status and PAR preflight fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px final review visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px final review: every value inside the viewport (long hex wraps)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "360px final review: text ≥ 10.5 px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px final review: all required rows present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px launch controls are tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px LAUNCH LIVE enabled only after every step",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "360px launch confirmed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px live status, links and export button fit",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "360px MY LAUNCHES: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px MY LAUNCHES: the launch is listed and its controls fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px MY LAUNCHES: buttons tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px MY LAUNCHES: evidence details wrap inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px RECOVER by tx hash finds the launch",
+      "ok": true,
+      "detail": "Found it: this launch matches a record in this browser. State: FULLY VERIFIED."
+    },
+    {
+      "name": "360px recover result fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px build: no horizontal overflow on load",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px build: network banner visible and inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px build: MAINNET · REAL FUNDS banner after unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px step 1: no overflow with byte counters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px step 2: no overflow with two connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px step 3: no overflow (fees, recipient, opening buy)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px wallet modal fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px simulation passes",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xCcc5CDFB90fac5c62cEf563B63fA292A60727828\nMarkets: MOB390 / SYNC · MOB390 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+    },
+    {
+      "name": "390px simulation status and PAR preflight fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px final review visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px final review: every value inside the viewport (long hex wraps)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390px final review: text ≥ 10.5 px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px final review: all required rows present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px launch controls are tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px LAUNCH LIVE enabled only after every step",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "390px launch confirmed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px live status, links and export button fit",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390px MY LAUNCHES: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px MY LAUNCHES: the launch is listed and its controls fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px MY LAUNCHES: buttons tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px MY LAUNCHES: evidence details wrap inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px RECOVER by tx hash finds the launch",
+      "ok": true,
+      "detail": "Found it: this launch matches a record in this browser. State: FULLY VERIFIED."
+    },
+    {
+      "name": "390px recover result fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px build: no horizontal overflow on load",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px build: network banner visible and inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px build: MAINNET · REAL FUNDS banner after unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px step 1: no overflow with byte counters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px step 2: no overflow with two connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px step 3: no overflow (fees, recipient, opening buy)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px wallet modal fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px simulation passes",
+      "ok": true,
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x131B86B923B2077C6dD7B22a2fC5b7D5ddFb2e12\nMarkets: MOB430 / SYNC · MOB430 / USDG\nPAR launch fee: 0.0001 ETH\nOpening buy: "
+    },
+    {
+      "name": "430px simulation status and PAR preflight fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px final review visible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px final review: every value inside the viewport (long hex wraps)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "430px final review: text ≥ 10.5 px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px final review: all required rows present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px launch controls are tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px LAUNCH LIVE enabled only after every step",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "430px launch confirmed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px live status, links and export button fit",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "430px MY LAUNCHES: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px MY LAUNCHES: the launch is listed and its controls fit",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px MY LAUNCHES: buttons tappable (≥ 40 px)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px MY LAUNCHES: evidence details wrap inside the viewport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px RECOVER by tx hash finds the launch",
+      "ok": true,
+      "detail": "Found it: this launch matches a record in this browser. State: FULLY VERIFIED."
+    },
+    {
+      "name": "430px recover result fits",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px /: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /network.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /build.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /registry.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /launches.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /marketplace.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /sync.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /labs.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /kit.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /project/0x5fc5360d0400a0fd4f2af552add042d716f1d168: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /terms.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /risk.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /privacy.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /contact.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px all pages: no JS errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000"><title>Project Kit — SyncNet</title><meta name="description" content="Prompts, a publishing guide and a site declaration file to build your project website with the AI you already use."><link rel="stylesheet" href="/v2.css"></head><body>
+<header class="site-nav"><div class="wrap nav-inner"><a class="nav-brand" href="/"><span class="nav-mark">S</span><span>SYNCNET</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">MENU</button><nav class="nav-links" aria-label="Primary"><a href="/network.html">Map</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/sync.html">$SYNC token</a><a href="/labs.html">Labs</a><a class="nav-cta" href="/build.html">SYNC A PROJECT</a></nav></div></header>
+<main>
+<section class="page-head"><div class="wrap"><div class="eyebrow">Project Kit</div><h1>BUILD YOUR SITE.<br><span class="cyan">WITH YOUR OWN AI.</span></h1><p><strong>SyncNet writes the brief. Your AI writes the site. You own it.</strong> Fill in the project once, copy a ready prompt into ChatGPT, Claude or Gemini, and publish the result on Netlify in minutes. No SyncNet account, no API costs, nothing hosted by us.</p><div class="tiny">FREE · WORKS WITH ANY AI · YOUR SITE, YOUR DOMAIN</div></div></section>
+
+<section class="section compact"><div class="wrap kit-shell">
+<div class="kit-block"><div class="step-kicker">01 · Your project</div><h2>Tell SyncNet what you are building.</h2>
+<p id="kitDraftNote" class="field-help" hidden></p>
+<div class="asset-entry kit-load"><label for="kitToken" class="sr-only">Live token contract</label><input class="input mono" id="kitToken" placeholder="Already live? Paste the token contract · 0x…" autocomplete="off" spellcheck="false"><button class="btn" id="kitLoad" type="button">LOAD FROM CHAIN</button></div>
+<div class="asset-status" id="kitStatus" role="status" aria-live="polite">Optional. Loading fills the name, ticker, markets and links from PAR.</div>
+<div class="field-grid">
+<div class="field"><label for="kitName">Project name</label><input class="input" id="kitName" maxlength="40" placeholder="PONSYNC"></div>
+<div class="field"><label for="kitSymbol">Ticker</label><input class="input" id="kitSymbol" maxlength="10" placeholder="PONSYNC"></div>
+<div class="field full"><label for="kitTagline">One-line idea</label><input class="input" id="kitTagline" maxlength="140" placeholder="What is it, in one sentence?"></div>
+<div class="field full"><label for="kitDescription">Description</label><textarea class="textarea" id="kitDescription" maxlength="1500" placeholder="The story, the community, why it should exist."></textarea></div>
+<div class="field full"><label for="kitConnections">Synced with · one per line: TICKER | 0x contract | why</label><textarea class="textarea mono" id="kitConnections" maxlength="1500" placeholder="PONS | 0x39db… | the community we build around&#10;SYNC | 0x6368… | SyncNet network asset"></textarea></div>
+<div class="field"><label for="kitX">X · optional</label><input class="input" id="kitX" placeholder="@handle"></div>
+<div class="field"><label for="kitTelegram">Telegram · optional</label><input class="input" id="kitTelegram" placeholder="https://t.me/…"></div>
+<div class="field"><label for="kitLogo">Project image · optional</label><input class="input mono" id="kitLogo" placeholder="ipfs://… or https://…"></div>
+<div class="field"><label for="kitAccent">Accent colour</label><select class="input" id="kitAccent"><option value="#79e7ef">SyncNet cyan</option><option value="#f4f0e8">Ivory</option><option value="#f2b84b">Amber</option><option value="#ff7a6b">Coral</option><option value="#a78bfa">Violet</option><option value="#7ee08a">Mint</option></select></div>
+<div class="field"><label for="kitTone">Tone</label><select class="input" id="kitTone"><option value="minimal, technical and calm">Minimal · technical</option><option value="warm and community-first">Warm · community</option><option value="premium, editorial and restrained">Premium · editorial</option><option value="light-hearted but respectful, never mocking">Light-hearted · respectful</option></select></div>
+<div class="field"><label for="kitLang">Language</label><select class="input" id="kitLang"><option>English</option><option>Romanian</option><option>Spanish</option><option>German</option><option>French</option><option>Portuguese</option></select></div>
+</div></div>
+
+<div class="kit-block"><div class="step-kicker">02 · Copy a prompt</div><h2>Paste it into the AI you already use.</h2><p>Each prompt already contains your project facts and SyncNet’s safety rules. Review what the AI produces before you publish anything — you are the author.</p>
+<div class="kit-tabs" role="tablist" aria-label="Prompt type">
+<button class="kit-tab active" type="button" role="tab" id="kt-site" aria-selected="true" aria-controls="kitPromptPanel" data-kind="site">Website (zip)</button><button class="kit-tab" type="button" role="tab" id="kt-description" aria-selected="false" aria-controls="kitPromptPanel" tabindex="-1" data-kind="description">Token description</button><button class="kit-tab" type="button" role="tab" id="kt-connections" aria-selected="false" aria-controls="kitPromptPanel" tabindex="-1" data-kind="connections">Connection notes</button><button class="kit-tab" type="button" role="tab" id="kt-announce" aria-selected="false" aria-controls="kitPromptPanel" tabindex="-1" data-kind="announce">Launch post</button><button class="kit-tab" type="button" role="tab" id="kt-listing" aria-selected="false" aria-controls="kitPromptPanel" tabindex="-1" data-kind="listing">Marketplace listing</button></div>
+<div class="kit-prompt" id="kitPromptPanel" role="tabpanel" aria-labelledby="kt-site"><p class="field-help" id="kitPromptHint"></p><label for="kitPrompt" class="sr-only">Generated prompt</label><textarea class="textarea mono kit-output" id="kitPrompt" readonly></textarea><div class="actions"><button class="btn primary" id="kitCopy" type="button">COPY PROMPT</button><span class="asset-status" id="kitCopyStatus" role="status" aria-live="polite"></span></div></div>
+<div class="kit-warnings" id="kitWarnings" role="status" aria-live="polite"></div>
+</div>
+
+<div class="kit-block"><div class="step-kicker">03 · Publish</div><h2>Put it online with Netlify Drop.</h2>
+<ol class="kit-steps">
+<li><strong>Ask for a zip.</strong> The website prompt tells your AI to return one downloadable zip with <span class="mono">index.html</span>, <span class="mono">style.css</span>, <span class="mono">syncnet.json</span> and the images. Open <span class="mono">index.html</span> on your computer first and read every sentence.</li>
+<li><strong>Drop it.</strong> Go to <a href="https://app.netlify.com/drop" target="_blank" rel="noopener noreferrer">app.netlify.com/drop ↗</a> and drag the zip onto the page. You get a live URL in seconds.</li>
+<li><strong>Claim it.</strong> Sign up or log in (free) to keep the site. Until then Netlify protects it with a temporary password.</li>
+<li><strong>Copy the URL — before you launch.</strong> The website field in your token metadata is permanent. Publish first, then paste the final URL into the SyncNet builder, or leave the field empty.</li>
+<li><strong>Update later by dropping again.</strong> After launch, add the token contract here, regenerate <span class="mono">syncnet.json</span>, and drop the updated folder on the same Netlify project (Deploys → drag and drop).</li>
+</ol>
+<div class="economic-card"><strong>What you should know</strong><p>The site is yours: your Netlify account, your domain, your responsibility. Netlify’s free plan pauses sites that exceed its monthly credits. SyncNet does not host, review or endorse the site; it only reads the declaration file below.</p></div>
+</div>
+
+<div class="kit-block"><div class="step-kicker">04 · Link it to SyncNet</div><h2>Declare the site. Let SyncNet check it.</h2>
+<p>Put this file at the root of your site as <span class="mono">syncnet.json</span>. Your project page on SyncNet can then check both directions: the token metadata points to the site, and the site points back to the token. Only when both match does SyncNet show <strong>WEBSITE LINKED ✓</strong>. A site that only declares itself is shown as unconfirmed.</p>
+<label for="kitDeclaration" class="sr-only">syncnet.json content</label><textarea class="textarea mono kit-output small" id="kitDeclaration" readonly></textarea>
+<div class="actions"><button class="btn" id="kitDownloadDecl" type="button">DOWNLOAD SYNCNET.JSON</button><a class="btn" id="kitProjectLink" href="/network.html" hidden>OPEN PROJECT PAGE →</a></div>
+</div>
+
+<div class="kit-block kit-ai-note"><div class="step-kicker">Why no built-in AI?</div><p>A hosted AI would cost money per request, need secret keys and could be abused by anyone. Your own AI is free for you, stronger than a small in-browser model and works on every device. SyncNet supplies the facts and the rules; the writing stays yours.</p></div>
+</div></section>
+</main>
+<section class="public-risk"><div class="wrap"><div class="eyebrow">Your words, your responsibility</div><p>AI output can be wrong. Never publish a contract address, market or claim you have not checked yourself. A market connection is not a partnership, endorsement or promise of returns.</p><a href="/risk.html">Full risk disclosure ↗</a></div></section>
+<footer class="site-footer"><div class="wrap"><nav class="footer-nav"><a href="/kit.html">Project Kit</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/labs.html">Labs</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><a href="/contact.html">Contact</a></nav></div></footer>
+<div class="toast" id="toast">Copied</div><script src="/v2-common.js" defer></script><script src="/kit.js" defer></script></body></html>

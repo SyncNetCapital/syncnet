@@ -1,0 +1,1682 @@
+{
+  "passed": 333,
+  "failed": 0,
+  "checks": [
+    {
+      "section": "module shape and environments",
+      "name": "every documented export exists",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "exported object is frozen",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "nested export objects are frozen",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "exports cannot be reassigned",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "_internal.secp256k1 exposes n, p, Gx, Gy, mulG, sign, privateKeyToAddress",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "CommonJS require() in a fresh Node process works and creates no global",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "browser: classic script defines window.SyncNetCore",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "browser: window.SyncNetCore is frozen",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "browser: keccak works in the bare realm",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "browser: signature recovery works across realms",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "browser: nothing but SyncNetCore was added to the global",
+      "ok": true
+    },
+    {
+      "section": "module shape and environments",
+      "name": "source code uses no Node APIs (require, process, Buffer, node: imports)",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes accepts a 0x prefix",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes accepts no prefix and mixed case",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes(\"0x\") is empty",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes rejects odd length",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes rejects invalid characters",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes rejects a doubled prefix",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes rejects whitespace",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "hexToBytes rejects non-strings",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "bytesToHex is lowercase and prefixed",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "bytesToHex(empty) is 0x",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "bytesToHex rejects plain arrays",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "concatBytes joins in order",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "concatBytes rejects non-bytes",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "utf8Bytes encodes multi-byte characters",
+      "ok": true
+    },
+    {
+      "section": "bytes and hex",
+      "name": "utf8Length equals utf8Bytes().length and Buffer.byteLength for 500 random strings (incl. lone surrogates)",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256(\"\") published vector",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256(\"0x\") equals keccak256 of empty bytes",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256(\"abc\") published vector",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256(quick brown fox) published vector",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "functionSelector(transfer(address,uint256)) = 0xa9059cbb",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "hex input and byte input give the same hash",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256 refuses text that is not 0x-hex (no guessing)",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256 rejects invalid hex",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "functionSelector rejects spaces",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "functionSelector rejects the uint alias",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "functionSelector accepts empty parameter lists",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "300 random inputs (lengths 0..600) match the independent Python keccak.py",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "Python keccak.py agrees with LAUNCH_SELECTORS.launchToken",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "Python keccak.py agrees with LAUNCH_SELECTORS.launchAndBuyWithEth",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "the same 300 inputs match viem.keccak256",
+      "ok": true
+    },
+    {
+      "section": "keccak256",
+      "name": "keccak256 hashes 1 MiB in 69 ms",
+      "ok": true
+    },
+    {
+      "section": "sha256 / hmac-sha256 (internal, used by RFC 6979)",
+      "name": "sha256 and hmacSha256 match node:crypto on 72 random lengths (incl. padding boundaries and keys > 64 bytes)",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed from upper case",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359 from upper case",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB from upper case",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "EIP-55 vector 0xD1220A0cf47c7B9Be7A2E6BA89F429762e7b9aDb from upper case",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "viem accepts 200 random addresses checksummed by toChecksumAddress",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "(oracle sanity) viem rejects a broken checksum",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "isAddress accepts any case",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "isAddress rejects bad input",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "sameAddress is case-insensitive",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "sameAddress is false for invalid input",
+      "ok": true
+    },
+    {
+      "section": "addresses (EIP-55)",
+      "name": "toChecksumAddress rejects non-addresses",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: address",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: bool",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: uint8/16/24/256",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: int8/24/256 extremes",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: bytes1/4/32",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: bytes (0, 1, 32, 33 bytes)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: string (empty, unicode, 64 bytes)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: nested tuple",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: dynamic arrays",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: fixed arrays",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: nested dynamic arrays",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "round trip + viem byte-equality: PAR buy legs (arrays of tuples of arrays of tuples)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "abiDecode accepts Uint8Array input",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "empty type list",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "integers may be safe numbers or numeric strings",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "a leading U+FEFF in a string survives decoding",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "(oracle note) viem drops that leading U+FEFF; syncnet-core keeps the bytes as data",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "300 random type lists: abiEncode === viem.encodeAbiParameters and both decoders agree",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: uint8 256 is out of range",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: negative uint",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: int8 -129 is out of range",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: unsafe JS number",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: fractional number",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: invalid address",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: bytes32 with the wrong length",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: bool given as a string",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: fixed array with the wrong length",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: tuple with the wrong arity",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: string given a number",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: value count mismatch",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "encode: 21 non-canonical or malformed type strings are rejected",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "truncation at each of 288 lengths either throws or decodes the original values (never garbage)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "truncation that removes needed bytes throws",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: offset pointing past the end",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: offset of 2^255",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string length larger than the data",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string length 2^255",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: array length 2^64 is rejected without allocating",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: the huge-length rejection is immediate",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: empty data",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: odd-length hex",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: address with dirty high bytes",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: bool = 2",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: uint8 = 256",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: uint8 = 255",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: int8 = +128 (not sign-extended)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: int8 = -129",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: int8 = -128 and int256 = -1",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: bytes4 with dirty padding",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string with invalid UTF-8 (0xff)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string with an overlong encoding (C0 80)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string with an encoded surrogate (ED A0 80)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: string cut inside a multi-byte character",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: 2000×2000 aliased offsets are rejected (128096 bytes input)",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: aliasing rejection is fast",
+      "ok": true
+    },
+    {
+      "section": "ABI encode/decode",
+      "name": "decode: a canonical 60×60 uint256[][] is not mistaken for aliasing",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "LAUNCH_SELECTORS.launchToken === functionSelector(signature)",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "LAUNCH_SELECTORS.launchAndBuyWithEth === functionSelector(signature)",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "LAUNCH_SELECTORS values",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "LAUNCH_SIGNATURES match the audited ABI",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: fn",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: params equal the fixture (text exact, addresses case-insensitive, numbers equal)",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: pairTokens equal the fixture",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: launchConfigId is 0n and creatorTaxBps is a JS number",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: no legs/minTokensOut on the direct path",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: selector + abiEncode(decoded args) reproduces data byte-for-byte",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: viem re-encodes the decoded args to the same bytes",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "direct: the on-chain salt is the SyncNet commitment to the intent record",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: fn",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: params equal the fixture (text exact, addresses case-insensitive, numbers equal)",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: pairTokens equal the fixture",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: launchConfigId is 0n and creatorTaxBps is a JS number",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: exactly 2 legs",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: legs sum to value − launch fee (0.0005 ETH)",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: markets 0 and 1, every hop has a PoolKey and a v3 flag",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: market/fee/tickSpacing are numbers; amountIn/minTokensOut are BigInt",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: selector + abiEncode(decoded args) reproduces data byte-for-byte",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: viem re-encodes the decoded args to the same bytes",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "router: the on-chain salt is the SyncNet commitment to the intent record",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "unknown selector",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "calldata shorter than a selector",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "truncated launch calldata",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "non-hex calldata",
+      "ok": true
+    },
+    {
+      "section": "PAR launch calldata",
+      "name": "calldata that is not a string or bytes",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: encodeType (EIP-712 spec)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: typeHash (EIP-712 Example.js)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: domain separator (EIP-712 Example.js)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: hashStruct(message) (EIP-712 Example.js)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: digest = 0xbe609aee…7bd2 (published)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: key keccak256(\"cow\") is the Cow address",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: signature r (published)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: signature s (published)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: signature v = 28 (published)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "Mail: recoverTypedDataAddress returns the Cow address",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: encodeType ignores the unreferenced Group",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: typeHash (eth-sig-util)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: hashStruct(Person from) (eth-sig-util)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: hashStruct(Mail) (eth-sig-util)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: digest (eth-sig-util)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "v4 arrays: signature with keccak256(\"cow\") (eth-sig-util)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "encodeType: primary first, then referenced structs in alphabetical order (incl. indirect ones)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "hashStruct: struct arrays, nested fixed/dynamic arrays, bytes, bool, bytes4, negative int16 match a hand-built encoding",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "hashDomain derives EIP712Domain from the fields present when types lack it",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "hashDomain with a subset of fields (name, chainId)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "chainId as number, decimal string, hex string and BigInt hash the same",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "primaryType EIP712Domain hashes only the domain",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "missing message field",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "undeclared message property (a wallet would silently ignore it)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "undeclared domain property",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "unknown domain key without an EIP712Domain type",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "unknown field type",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "non-canonical atomic type (uint)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "unknown primaryType",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "fixed array with the wrong length",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "duplicate field names",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "wrong value type (address)",
+      "ok": true
+    },
+    {
+      "section": "EIP-712",
+      "name": "inherited properties are not values",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "private key 0x4c08…2318 maps to 0x2c7536E3…5c23 (web3.js docs)",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "hashPersonalMessage(\"Some data\") (web3.js docs)",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "signing it gives the published signature (web3.js docs)",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "recoverPersonalSignAddress recovers the signer",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "a Uint8Array message hashes like the same UTF-8 string",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "the length prefix counts UTF-8 bytes, not characters",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "a hex-looking string is hashed as text",
+      "ok": true
+    },
+    {
+      "section": "personal_sign",
+      "name": "rejects non-string, non-bytes messages",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "G is on the curve",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(1) = G",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(2) = 2G (known value)",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(n−1) = −G",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(0) is rejected",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(n) is rejected",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "mulG(k) equals node:crypto ECDH public keys for 40 random keys",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "40 signatures over sha256 digests verify with node:crypto.verify (SPKI key, DER signature)",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "(oracle sanity) node:crypto.verify rejects all 40 signatures for a modified message",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "signatures are low-s with v ∈ {27, 28}",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "RFC 6979 signing is deterministic",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "recoverAddress(sign(d, k)) === privateKeyToAddress(k) for 40 keys",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "recoverPublicKey returns the 65-byte uncompressed key node:crypto derives",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "recovery with the other parity gives a different address (40/40)",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "high-s form (n − s, flipped v) recovers the same signer, like ecrecover",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "sign with an explicit k verifies with node:crypto and recovers",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "an explicit k gives a different signature than RFC 6979",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "sign rejects k = 0",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "sign rejects the zero private key",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "sign rejects a private key ≥ n",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "v = 0/1 is accepted like 27/28",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: s = 0",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: r = 0",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: r = n",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: r ≥ n (n + 1)",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: s = n",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: s = 2^256 − 1",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: v = 29",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: v = 2",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: v = 26",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: 64 bytes (EIP-2098 compact)",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: 66 bytes",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: non-hex characters",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: odd-length hex",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: no 0x prefix",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: not a string",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "malformed signature is rejected: r = 5 has no curve point",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "digest of 31 bytes is rejected",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "digest without 0x prefix is rejected",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "publicKeyToAddress rejects a compressed key",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "publicKeyToAddress rejects a point off the curve",
+      "ok": true
+    },
+    {
+      "section": "secp256k1",
+      "name": "recovery takes < 50 ms per signature (avg 1.9 ms, max 3.69 ms)",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "PROVENANCE_DOMAIN",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: recordHashOf(provenanceJson) === recordHash",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: intentSalt(recordHash) === salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: salt === params.salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: intentSalt matches keccak256(viem.encodeAbiParameters(string, bytes32))",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: recordHashOf(provenanceJson) === recordHash",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: intentSalt(recordHash) === salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: salt === params.salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: intentSalt matches keccak256(viem.encodeAbiParameters(string, bytes32))",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "intentSalt rejects a non-bytes32 recordHash",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "recordHashOf requires the JSON string",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData returns exactly the specified object (same JSON, same key order)",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "chainId given as BigInt or string becomes the number 4663",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentPlainMessage returns exactly the specified text",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid token",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid recordHash",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid chainId 0",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid chainId -1",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid chainId 1.5",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid chainId \"0x1237\"",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentTypedData rejects an invalid no input",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "launchIntentPlainMessage rejects invalid input",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: EIP-712 intent signed by the operator key recovers the fixture operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: personal_sign fallback round-trips to the operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "direct: the same signature does not recover the operator for an intent with another salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: EIP-712 intent signed by the operator key recovers the fixture operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: personal_sign fallback round-trips to the operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "router: the same signature does not recover the operator for an intent with another salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent: identical objects",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent: a JSON round trip is the same",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent: chainId as \"4663\" or 4663n is the same",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent: address case does not matter",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent: hex case does not matter",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed recordHash",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed salt",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed token",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed operator",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed chainId",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed domain name",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed domain version",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed extra message key",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed missing message key",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed extra domain key",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed extra top-level key",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed field type",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed field order",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed primaryType",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed invalid address",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed short bytes32",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent detects a changed chainId garbage",
+      "ok": true
+    },
+    {
+      "section": "SyncNet provenance",
+      "name": "sameTypedIntent never throws on garbage",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "PAR_BYTE_LIMITS",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "all 1,112,064 scalar values classified as specified (multiline=false, 138034 flagged, 413 ms)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "all 1,112,064 scalar values classified as specified (multiline=true, 138033 flagged, 428 ms)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "TAB is flagged even in multiline mode",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "LF is flagged in single-line mode only",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "bidi override U+202E",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "astral invisible U+1D173 and tag U+E0041",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "noncharacters U+FDD0, U+FFFF, U+1FFFE, U+10FFFF",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "private use U+E000 and U+F0000",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "lone surrogates (high at end, low alone, reversed pair)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "index is a UTF-16 index (after an emoji)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "U+FE0E/U+FE0F, emoji, CJK, accents and NBSP are allowed",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "findUnsafeChars rejects non-strings",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "normalizeText: NFC (e + U+0301 → é)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "normalizeText: trims and collapses whitespace runs (incl. LF) in single-line mode",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "normalizeText: multiline converts CRLF/CR to LF, trims, keeps inner spacing",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "normalizeText rejects non-strings",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "40 × \"界\" as name: 120 bytes → TOO_MANY_BYTES with the exact message",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "U+202E in description: exact message with a 1-based position",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "positions count characters, not UTF-16 units",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "several unsafe characters are summarized",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "symbol 17 bytes",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "byte limit boundary: 64 bytes ok, 65 bytes rejected",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "social 257 bytes",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "logo 513 bytes",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "description 2049 bytes",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "empty name → EMPTY",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "empty social link / description are allowed",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "description is multiline by default and keeps LF",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "multiline allows LF but not TAB",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "a TAB in a single-line field is normalized to a space",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "the returned value is NFC-normalized and bytes are counted on it",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "the fixture metadata passes (name, symbol, logo, description, socials)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "unknown field name",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "non-string value",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay strips bidi and zero-width characters",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay truncates by code points without splitting surrogate pairs",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay keeps short strings intact",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay: default maxLength is 160",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay: single-line turns line breaks and tabs into spaces",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay: multiline keeps LF",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay: non-strings become safe strings",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay: invalid maxLength",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "sanitizeForDisplay fuzz: output never contains a flagged character and never exceeds maxLength (400 strings)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "confusableSkeleton('$ЅYNC') === confusableSkeleton('sync') (spec example)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "'$ЅYNC' vs 'SYNC' (Cyrillic Dze)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "'ЅУΝС' vs 'sync' (Cyrillic Ѕ, У, С and Greek Ν)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "'SYNC\u200b' (trailing zero-width space) vs 'sync'",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "'PAR' vs 'рar' (Cyrillic р)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "skeletons of fullwidth, math-bold, digit, punctuated, Cyrillic and Armenian (capital Ո) variants",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "Greek capitals vs small letters (Ν→n, ν→v; Η→h, η→n)",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "dotless ı, long s ſ, ß → ss, digits 0 1 3 8",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "different names keep different skeletons",
+      "ok": true
+    },
+    {
+      "section": "text policy",
+      "name": "confusableSkeleton of a non-string is empty",
+      "ok": true
+    }
+  ],
+  "timings": {
+    "pythonKeccakBatchMs": 532,
+    "keccakMiBPerSec": 14.5,
+    "keccak32BytesUs": 12.3,
+    "decodeLaunchCalldata_direct_ms": 0.27,
+    "decodeLaunchCalldata_router_ms": 0.31,
+    "signAvgMs": 1.39,
+    "recoverAvgMs": 1.9,
+    "recoverMaxMs": 3.69
+  },
+  "seed": 66033140
+}

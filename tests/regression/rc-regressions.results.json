@@ -1,0 +1,1038 @@
+{
+  "at": "2026-09-24T14:19:53.297Z",
+  "failures": 0,
+  "passed": 206,
+  "total": 206,
+  "results": [
+    {
+      "name": "R01 the launch was really broadcast (mock chain has the token)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R01 page reports the launch as executed, never as \"not sent\"",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x2422f79ab76851c33397d19dbfe2c539c7596407\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x61aa06"
+    },
+    {
+      "name": "R01 record resolved from the chain to a verified state",
+      "ok": true,
+      "detail": "FULLY_VERIFIED"
+    },
+    {
+      "name": "R01 history shows BROADCAST_UNKNOWN before the chain resolved it",
+      "ok": true,
+      "detail": "PREPARED → SIGNATURE_VALID → BROADCAST_ATTEMPTED → BROADCAST_UNKNOWN → MINED → MINED → FULLY_VERIFIED"
+    },
+    {
+      "name": "R01 transaction hash recovered from the indexer and confirmed on-chain",
+      "ok": true,
+      "detail": "0x5e0756f44961b9c07ad5dfde20463c5f1c7cc0d43423e8654f5d7ddb892816a9"
+    },
+    {
+      "name": "R01 only ONE eth_sendTransaction",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 record written BEFORE the wallet request (state BROADCAST_ATTEMPTED)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 record holds the full evidence (predicted, recordHash, salt, deployer, intentJson, intentRecord, signature, tx, draft, expected, attemptAt, walletRequest, reviewFingerprint)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 record has exact calldata, target, value, gas and chainId",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 record has the typed data that was signed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 record has expected economics, recipient, tax and markets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 after reload the UNRESOLVED launch is shown with its predicted token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 draft banner warns about the unresolved launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 a second launch of $RELD from the same wallet is BLOCKED while the first is unresolved",
+      "ok": true,
+      "detail": "BLOCKED"
+    },
+    {
+      "name": "R02 LAUNCH LIVE stays disabled",
+      "ok": true,
+      "detail": "Still needed: duplicate/impersonation check blocked this launch."
+    },
+    {
+      "name": "R02 \"mark as not sent\" keeps the record and its history",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R03 form inputs are locked while the wallet is asked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R03 wallet received exactly the recorded transaction",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R03 sent calldata has the ORIGINAL name, description and fee recipient",
+      "ok": true,
+      "detail": "{\"n\":\"Edit Race\",\"r\":\"0x4b79b8298cd890a82dc9de1de5dbb745cf04353c\"}"
+    },
+    {
+      "name": "R03 deployed token matches the reviewed launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 signed and launch enabled before re-simulation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 signature shown as NOT SIGNED after re-simulation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 sign button enabled again (new signature required)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 LAUNCH LIVE disabled with the old signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 the new signature covers the NEW recordHash and salt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 review names wallet A before the switch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 simulation reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 signature reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 final review removed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 review now names wallet B as the creator-fee recipient",
+      "ok": true,
+      "detail": "CREATOR / OPERATOR WALLET · 0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a"
+    },
+    {
+      "name": "R05 new simulation prepared for wallet B",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 signature by wallet B verified for the new launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 simulation reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 signature reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 final review removed and LAUNCH disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 banner and wallet line flag the wrong network",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 simulation refuses to run on the wrong chain (no automatic switch)",
+      "ok": true,
+      "detail": "Your wallet is on chain 1. Use the SWITCH NETWORK button to move it to Robinhood Chain (4663), then simulate again.\n\nNo transaction was sent."
+    },
+    {
+      "name": "R07a signature returned for the replaced launch is discarded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R07b signature over another recordHash is rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R07c signature by another wallet is rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R07 LAUNCH LIVE blocked in every case",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R07 no transaction was ever requested",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R08 record holds the tx hash, intent and signature while waiting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R08 after reload the launch is UNRESOLVED (not forgotten)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R08 RE-VERIFY after mining resolves it to a verified launch with its evidence intact",
+      "ok": true,
+      "detail": "FULLY_VERIFIED"
+    },
+    {
+      "name": "R09 launch confirmed from the chain while the indexer lags",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xc7df89e94e2bdabad9b33fbb1bc27e71f42e39f3\nTransaction: 0x117cc08f2bc834d4531407c49e7899e7a712bcdc33a2025e835e13322868d2f5\nState: INDEXER_PENDING\nOn-chain factory recor"
+    },
+    {
+      "name": "R09 state INDEXER_PENDING (on-chain verified, indexer secondary)",
+      "ok": true,
+      "detail": "INDEXER_PENDING"
+    },
+    {
+      "name": "R09 RE-VERIFY upgrades to FULLY_VERIFIED once indexed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R10 MY LAUNCHES panel still shows the launch after discard + founder unlock",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R10 evidence intact (intent, signature, tx hash)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R10 exportable public proof (syncnet.launch.proof.v2)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R11a pre-send check refuses: the predicted token already exists; nothing sent",
+      "ok": true,
+      "detail": "A token already exists at the predicted address 0x0Ced7641D4b836530c8dc1F642F8230d651ea9E7. This launch was already executed. Nothing was sent."
+    },
+    {
+      "name": "R11b the first $DUPE launch completes",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x9d115aa7a30afbd30a44414b130fb7a0f272435d\nTransaction: 0xc76f30dd1d30a3cc58af58486240a26d1127739955fc43c4cc8d17c27d8beea6\nState: FULLY_VERIFIED\nOn-chain factory record"
+    },
+    {
+      "name": "R11b guard reports the existing $DUPE from this wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R11b plain ticker does NOT unlock a second launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R11b \"AGAIN\" alone is not enough without the explicit acknowledgement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R11b only the high-friction path (checkbox + \"DUPE AGAIN\") unlocks it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R11 no second transaction was sent during the checks",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 Map: launches paired with the fake SYNC are not listed as $SYNC connections",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 project page: fake SYNC flagged \"NOT THE CANONICAL $SYNC\" and not badged canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 project page: real $SYNC carries the canonical-by-address badge",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 builder: adding the fake SYNC as a connection shows an impostor warning",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 builder: launching a token with the canonical ticker is BLOCKED",
+      "ok": true,
+      "detail": "BLOCKED"
+    },
+    {
+      "name": "R13 0xaaaaaaaa: NOT VERIFIED AS A PAR LAUNCH shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 0xaaaaaaaa: no NETWORK HUB / Ownerless / immutable / creator-fee / BUILT WITH SYNCNET claims",
+      "ok": true,
+      "detail": "Random0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaNOT VERIFIED AS A PAR LAUNCHProjects using this contract as a market (indexer)0SyncNet could not verify this contract as a PAR launch. No ownership, fee"
+    },
+    {
+      "name": "R13 0xaaaaaaaa: no Passport panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 0x5fc5360D: NOT VERIFIED AS A PAR LAUNCH shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 0x5fc5360D: no NETWORK HUB / Ownerless / immutable / creator-fee / BUILT WITH SYNCNET claims",
+      "ok": true,
+      "detail": "Global Dollar0x5fc5360d0400a0fd4f2af552add042d716f1d168NOT VERIFIED AS A PAR LAUNCHProjects using this contract as a market (indexer)2SyncNet could not verify this contract as a PAR launch. No ownersh"
+    },
+    {
+      "name": "R13 0x5fc5360D: no Passport panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 0x12345678: NOT VERIFIED AS A PAR LAUNCH shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 0x12345678: no NETWORK HUB / Ownerless / immutable / creator-fee / BUILT WITH SYNCNET claims",
+      "ok": true,
+      "detail": "Token0x1234567890abcdef1234567890abcdef12345678NOT VERIFIED AS A PAR LAUNCHProjects using this contract as a market (indexer)0SyncNet could not verify this contract as a PAR launch. No ownership, fee,"
+    },
+    {
+      "name": "R13 0x12345678: no Passport panel",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 RPC outage: \"PAR STATUS UNAVAILABLE\", no launch claims even for $SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R14 name with RTL override blocked at step 1",
+      "ok": true,
+      "detail": "Name contains an invisible or direction-changing character (U+202E) at position 5."
+    },
+    {
+      "name": "R14 byte counter flags the RTL override",
+      "ok": true,
+      "detail": "12 / 64 bytes · Name contains an invisible or direction-changing character (U+202E) at position 5."
+    },
+    {
+      "name": "R14 name with zero-width space blocked at step 1",
+      "ok": true,
+      "detail": "Name contains an invisible or direction-changing character (U+200B) at position 5."
+    },
+    {
+      "name": "R14 byte counter flags the zero-width space",
+      "ok": true,
+      "detail": "10 / 64 bytes · Name contains an invisible or direction-changing character (U+200B) at position 5."
+    },
+    {
+      "name": "R14 name with bidi isolate blocked at step 1",
+      "ok": true,
+      "detail": "Name contains an invisible or direction-changing character (U+2066) at position 5. 1 more unsafe character found."
+    },
+    {
+      "name": "R14 byte counter flags the bidi isolate",
+      "ok": true,
+      "detail": "11 / 64 bytes · Name contains an invisible or direction-changing character (U+2066) at position 5. 1 more unsafe character found."
+    },
+    {
+      "name": "R14 name with control char blocked at step 1",
+      "ok": true,
+      "detail": "Name contains a control character (U+0007) at position 4."
+    },
+    {
+      "name": "R14 byte counter flags the control char",
+      "ok": true,
+      "detail": "8 / 64 bytes · Name contains a control character (U+0007) at position 4."
+    },
+    {
+      "name": "R14 description with RTL override blocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R14 ticker with a Cyrillic look-alike blocked (A–Z, 0–9 only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R14 nothing reached the chain as a launch simulation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R15 counter shows 120 / 64 bytes",
+      "ok": true,
+      "detail": "120 / 64 bytes · Name is 120 bytes in UTF-8; PAR allows 64."
+    },
+    {
+      "name": "R15 40 CJK characters (120 bytes) blocked at step 1",
+      "ok": true,
+      "detail": "Name is 120 bytes in UTF-8; PAR allows 64."
+    },
+    {
+      "name": "R15 description of 2100 bytes blocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R15 website over 256 bytes blocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R15 no launch simulation was sent to the chain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R16 zero blocked",
+      "ok": true,
+      "detail": "The zero address cannot receive fees."
+    },
+    {
+      "name": "R16 burn 0x…dEaD blocked",
+      "ok": true,
+      "detail": "That is a precompile/system address. Fees sent there would be unreachable."
+    },
+    {
+      "name": "R16 PAR router blocked",
+      "ok": true,
+      "detail": "That address is PAR multi-market router. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "R16 PAR factory blocked",
+      "ok": true,
+      "detail": "That address is PAR multi-market factory. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "R16 holder vault blocked",
+      "ok": true,
+      "detail": "That address is a PAR fee vault. Choose that fee destination instead of typing its address."
+    },
+    {
+      "name": "R16 Uniswap PoolManager blocked",
+      "ok": true,
+      "detail": "That address is Uniswap v4 PoolManager. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "R16 WETH blocked",
+      "ok": true,
+      "detail": "That address is WETH. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "R16 fee escrow blocked",
+      "ok": true,
+      "detail": "That address is PAR fee escrow. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "R16 selected market token blocked",
+      "ok": true,
+      "detail": "That address is the canonical SyncNet asset $SYNC (a token contract). Choose a wallet you control."
+    },
+    {
+      "name": "R16 contract recipient → explicit confirmation shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R16 contract recipient without confirmation blocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R16 contract recipient allowed after confirmation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R16 a canonical SyncNet asset as recipient is blocked",
+      "ok": true,
+      "detail": "That address is the canonical SyncNet asset $SYNCAT (a token contract). Choose a wallet you control."
+    },
+    {
+      "name": "R16 a PAR-launched token as recipient is refused by the simulation",
+      "ok": true,
+      "detail": "The fee recipient is a PAR-launched token contract. Fees credited to it could never be claimed.\n\nNo transaction was sent."
+    },
+    {
+      "name": "R16 another wallet → clear warning that only it can claim",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R17 browser refuses the non-image before upload",
+      "ok": true,
+      "detail": "This image could not be read. Try a different PNG or JPG."
+    },
+    {
+      "name": "R17 PNG signature + HTML → rejected (400)",
+      "ok": true,
+      "detail": "The image file is damaged or invalid."
+    },
+    {
+      "name": "R17 GIF header + JS → rejected (400)",
+      "ok": true,
+      "detail": "GIF images must be at most 512x512 pixels."
+    },
+    {
+      "name": "R17 SVG declared as PNG → rejected (400)",
+      "ok": true,
+      "detail": "Only PNG and GIF images are accepted."
+    },
+    {
+      "name": "R17 JPEG (not accepted server-side) → rejected (400)",
+      "ok": true,
+      "detail": "Only PNG and GIF images are accepted."
+    },
+    {
+      "name": "R17 nothing was pinned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R18 one wallet: 5 uploads per hour, then 429",
+      "ok": true,
+      "detail": "ok=5 429=7"
+    },
+    {
+      "name": "R18 one IP with many wallets: 20 per hour, then 429",
+      "ok": true,
+      "detail": "ok=20 429=5"
+    },
+    {
+      "name": "R18 no anonymous path: upload without a session → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R18 public uploads stay CLOSED without a durable store (gate + wallet session refused)",
+      "ok": true,
+      "detail": "config.publicUploads=false status=401"
+    },
+    {
+      "name": "R18 kill switch SYNCNET_UPLOADS_DISABLED stops even founder uploads",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R19 https://localhost/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 https://127.0.0.1/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 https://[::1]/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 https://169.254.169.254/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 https://10.0.0.1/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 http://example.com/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public https:// sites can be checked.\",\"code\":\"https_only\"}"
+    },
+    {
+      "name": "R19 https://example.com:8443/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public https:// sites can be checked.\",\"code\":\"https_only\"}"
+    },
+    {
+      "name": "R19 https://user:pw@example.com/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public https:// sites can be checked.\",\"code\":\"https_only\"}"
+    },
+    {
+      "name": "R19 https://metadata.google.internal/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 https://intranet/ refused before any connection",
+      "ok": true,
+      "detail": "{\"error\":\"Only public domain names can be checked.\",\"code\":\"public_domain_only\"}"
+    },
+    {
+      "name": "R19 DNS answer 127.0.0.1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 10.1.2.3 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 192.168.1.1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 169.254.169.254 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 100.64.0.1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer ::1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer fd00::1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer fe80::1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 64:ff9b::a00:1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer 2002:a00:1::1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 DNS answer ::ffff:10.0.0.1 → blocked, no connection",
+      "ok": true,
+      "detail": "{\"error\":\"This host does not resolve to a public address.\",\"code\":\"non_public_address\"}"
+    },
+    {
+      "name": "R19 rebinding: one DNS resolution, the socket is pinned to the validated address",
+      "ok": true,
+      "detail": "lookups=1 pinned=93.184.216.34"
+    },
+    {
+      "name": "R20 launch published to the Registry after server-side on-chain verification",
+      "ok": true,
+      "detail": "xer: found\nIntent: recordHash 0x635a0140d92617867eda38e54b711c5c2b119604c4b1be0ec17f7cc438b96bc3 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nSyncNet Registry: VERIFIED and published ✓\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
+    },
+    {
+      "name": "R20 proof verifies: intent→recordHash→salt, deployer signature, salt in tx, TokenLaunched, factory record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R20 tampered proof rejected: intent JSON edited (name changed)",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"Intent record hashes to recordHash\",\"recordHash commits to salt (keccak(\\\"SYNCNET/1\\\", recordHash))\",\"Transaction metadata equ"
+    },
+    {
+      "name": "R20 tampered proof rejected: another token claimed with the same evidence",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"Signed EIP-712 message is exactly this launch\",\"The transaction launched this token (TokenLaunched log)\",\"Factory markets equa"
+    },
+    {
+      "name": "R20 tampered proof rejected: signature by another wallet",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"Signature by the deployer (ECDSA, or EIP-1271 for a contract wallet)\"]}"
+    },
+    {
+      "name": "R20 tampered proof rejected: deployer swapped",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"Intent operator is the deployer\",\"Signed EIP-712 message is exactly this launch\",\"Signature by the deployer (ECDSA, or EIP-127"
+    },
+    {
+      "name": "R20 tampered proof rejected: tx hash of an unrelated transaction",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"Launch transaction found on-chain\"]}"
+    },
+    {
+      "name": "R20 tampered proof rejected: salt not matching recordHash",
+      "ok": true,
+      "detail": "422 {\"status\":\"UNVERIFIED\",\"failed\":[\"recordHash commits to salt (keccak(\\\"SYNCNET/1\\\", recordHash))\",\"Signed EIP-712 message is exactly this launch\",\"Transaction s"
+    },
+    {
+      "name": "R20 Registry page shows BUILT WITH SYNCNET · VERIFIED with what was verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R20 local record listed separately as THIS BROWSER ONLY · NOT PUBLIC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R20 project page: BUILT WITH SYNCNET · VERIFIED with EXPECTED / ACTUAL / VERIFIED evidence",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 final review lists every required field",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 network line says MAINNET · REAL FUNDS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 value sent = value in the final review",
+      "ok": true,
+      "detail": "0xb1fdaf3f3f4000 vs 50100000000000000"
+    },
+    {
+      "name": "R21 target = router named in the review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 calldata hash = the one in the review",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 calldata fields = review (name, ticker, tax, recipient, salt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R21 no token approval was ever requested",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R22 both tabs are ready to launch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R22 tab B is refused at send time (launch appeared since its review)",
+      "ok": true,
+      "detail": "A $TWO launch from this wallet appeared since your review (0xaa064f0876e33bd9b662271b36756d698165b07a). Nothing was sent — simulate again and check MY LAUNCHES."
+    },
+    {
+      "name": "R22 exactly one launch transaction in total",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R23 imported \"FULLY_VERIFIED\" claim is neutralised (BROADCAST_UNKNOWN after the chain check)",
+      "ok": true,
+      "detail": "BROADCAST_UNKNOWN"
+    },
+    {
+      "name": "R23 MY LAUNCHES does not display it as verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R23 Registry: not counted, not public, not verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 ready to launch before the disconnect",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 accountsChanged []: wallet shown as not connected",
+      "ok": true,
+      "detail": "Not connected"
+    },
+    {
+      "name": "R24 accountsChanged []: simulation reset",
+      "ok": true,
+      "detail": "Simulation not run yet. No transaction will be requested."
+    },
+    {
+      "name": "R24 accountsChanged []: signature reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 accountsChanged []: final review removed and LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 reconnect → simulate → sign re-enables LAUNCH LIVE",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "R24 disconnect event: wallet shown as not connected",
+      "ok": true,
+      "detail": "Not connected"
+    },
+    {
+      "name": "R24 disconnect event: simulation reset",
+      "ok": true,
+      "detail": "Simulation not run yet. No transaction will be requested."
+    },
+    {
+      "name": "R24 disconnect event: signature reset",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 disconnect event: final review removed and LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 nothing was ever sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R24 no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R25 launch with hostile metadata confirmed (the text policy allows < > as ordinary characters)",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xfbe7ba0f4bcfbb5ffb369981c8d4c032c55ab81a\nTransaction: 0x1be328d6453caced02ed7a89e5251c1a050efa22d19f0474f9f36c6af5a10f17\nState: FULLY_VERIFIED\nOn-chain factory record"
+    },
+    {
+      "name": "R25 builder (review, final review, status): no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 builder (review, final review, status): the hostile token is rendered (name) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nMAP → SYNC → RECORD\nSYNC A PROJECT.\n\nName the project. Choose what it syncs with. Each connection opens a direct market between your "
+    },
+    {
+      "name": "R25 project page: no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 project page: the hostile token is rendered (name) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nPROJECT CONTEXT · VERIFIED ON-CHAIN FIRST\n<img src=x onerror=window.__xss=1>\n\n$XSSX · 0xfbe7ba0f4bcfbb5ffb369981c8d4c032c55ab81a\n\n<im"
+    },
+    {
+      "name": "R25 MY LAUNCHES: no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 MY LAUNCHES: the hostile token is rendered (ticker) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nMY LAUNCHES · RECOVER A LAUNCH\nMY\nLAUNCHES.\n\nEvery launch attempt made in this browser, resolved from the chain. Records are written "
+    },
+    {
+      "name": "R25 Registry: no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 Registry: the hostile token is rendered (name) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nPROJECT PROVENANCE\nTHE SYNCNET\nREGISTRY.\n\nA catalog of projects with recorded SyncNet provenance. Every status below is checked again"
+    },
+    {
+      "name": "R25 map: no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 map: the hostile token is rendered (ticker) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nMAP\nMAP A TOKEN.\nSEE WHAT IT IS SYNCED WITH.\n\nSearch by project name, ticker, or Robinhood Chain contract. SyncNet maps observable ma"
+    },
+    {
+      "name": "R25 home map: no injected element, no script ran",
+      "ok": true,
+      "detail": "{\"xss\":0,\"imgs\":0,\"bold\":0}"
+    },
+    {
+      "name": "R25 home map: the hostile token is rendered (ticker) as plain text",
+      "ok": true,
+      "detail": "S\nSYNCNET\nMAP\nREGISTRY\nMARKETPLACE\n$SYNC TOKEN\nLABS\nSYNC A PROJECT\nTOKEN RELATIONSHIP MAP · ROBINHOOD CHAIN\nMAKE SYNC\nA VERB.\n\nMap what any Robinhood Chain token is synced with — then sync your projec"
+    },
+    {
+      "name": "R25 no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R26 metadata preflight PASS although the browser cannot load the image from either gateway",
+      "ok": true,
+      "detail": "44b7a102f65cad29903ce38380ef19632ca05682f5585b4755b685797ef\nPAR salt commitment: 0xf9f8ac4618a3c8c5363bb9b26b2ca2cc6cb489034995ac12c81897dd252b13aa\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "R26 the preflight asked the same-origin server check for exactly the logo URI",
+      "ok": true,
+      "detail": "http://localhost:8935/api/ipfs-check?uri=ipfs%3A%2F%2Fbafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a"
+    },
+    {
+      "name": "R26 the server fetched the CID from a public gateway",
+      "ok": true,
+      "detail": "gateway.pinata.cloud/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a | ipfs.io/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a | dweb.link/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a | bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a.ipfs.dweb.link/"
+    },
+    {
+      "name": "R26 the browser preview stays a non-blocking preview (IMAGE UNAVAILABLE after every gateway failed)",
+      "ok": true,
+      "detail": "IMAGE UNAVAILABLE"
+    },
+    {
+      "name": "R26 metadata check PASS and LAUNCH LIVE enabled after the other steps",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "R26 the launch completes and verifies on-chain (logo = the checked URI)",
+      "ok": true,
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x0a61f515936ff0d9dfbcbf4047e2252a268a2d49\nTransaction: 0x95c6309772931d4d90874d9abe64e3512ebd5529e0dc1ea745078d9b3b54e12e\nState"
+    },
+    {
+      "name": "R27 all server-side gateways down: metadata preflight FAILED with a clear reason",
+      "ok": true,
+      "detail": "rom the IPFS gateways (gateway.pinata.cloud, ipfs.io, dweb.link). If you just uploaded it, wait a minute and run the simulation again.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "R27 all server-side gateways down: metadata check shows FAIL, signing disabled, LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": "Still needed: metadata preflight must pass · sign the launch intent for this exact simulation · tick “I understand this launch is real and irreversible” · type IPFSB."
+    },
+    {
+      "name": "R27 gateways answer with an HTML page: metadata preflight FAILED with a clear reason",
+      "ok": true,
+      "detail": "15bb68ffa9b723ebe1851f0095\nMetadata preflight: FAILED — The IPFS gateways returned content that is not a PNG, JPEG, GIF or WebP image.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "R27 gateways answer with an HTML page: metadata check shows FAIL, signing disabled, LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": "Still needed: metadata preflight must pass · sign the launch intent for this exact simulation · tick “I understand this launch is real and irreversible” · type IPFSB."
+    },
+    {
+      "name": "R27 logo is not a valid CID: metadata preflight FAILED with a clear reason",
+      "ok": true,
+      "detail": "03ff19afc27cc8eed9954ad8cbfd754a6d37dff58193\nMetadata preflight: FAILED — The logo is not a valid ipfs:// CID. Upload the image again.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "R27 logo is not a valid CID: metadata check shows FAIL, signing disabled, LAUNCH LIVE disabled",
+      "ok": true,
+      "detail": "Still needed: metadata preflight must pass · sign the launch intent for this exact simulation · tick “I understand this launch is real and irreversible” · type IPFSB."
+    },
+    {
+      "name": "R27 nothing was sent while blocked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R27 once the server check passes, the same page recovers: PASS and LAUNCH LIVE enabled",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "R28 metadata preflight PASS with both public gateways rate-limited",
+      "ok": true,
+      "detail": "bd139774d3f95092c34\nPAR salt commitment: 0xecf8f7ac542d21d4cdbe001e2ccc9f185d59ae43f62f4451cc5cc8aeb4d9489e\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "R28 the server tried Pinata and both public gateways",
+      "ok": true,
+      "detail": "gateway.pinata.cloud/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a | ipfs.io/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a | dweb.link/ipfs/bafkreidlp6sdj6jkroakvmbntpy2clsj77foijheae5byt3iwz7d2k542a"
+    },
+    {
+      "name": "R28 LAUNCH LIVE enabled after the other steps",
+      "ok": true,
+      "detail": "All checks complete. LAUNCH LIVE sends exactly the transaction in the final review."
+    },
+    {
+      "name": "R28 all three gateways 429 → preflight FAILED and LAUNCH LIVE blocked",
+      "ok": true,
+      "detail": "ink). If you just uploaded it, wait a minute and run the simulation again.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    }
+  ]
+}

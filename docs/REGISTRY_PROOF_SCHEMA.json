@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://syncnet.capital/schemas/syncnet.launch.proof.v2.json",
+  "title": "SyncNet launch proof (syncnet.launch.proof.v2)",
+  "description": "Public, independently verifiable evidence that a PAR launch was prepared and signed with SyncNet. Produced by launch-records.js toProof(); verified by lib/syncnet-chain.js verifyEvidence() in the Registry page, on project pages and in /api/registry. Verification needs only this object and Robinhood Chain: (1) keccak256(intentJson) == recordHash; (2) salt == keccak256(abi.encode(string 'SYNCNET/1', bytes32 recordHash)); (3) signature recovers to deployer (ECDSA) or deployer.isValidSignature(...) == 0x1626ba7e (EIP-1271) over LaunchIntent(operator=deployer, token, recordHash, salt) in domain {name:'SyncNet Launch Provenance', version:'1', chainId:4663}, or over the personal_sign text 'SyncNet Launch Intent v1\\nchainId:..\\noperator:..\\ntoken:..\\nrecordHash:..\\nsalt:..'; (4) txHash is a successful transaction from deployer to the PAR multi factory (launchToken) or the PAR multi router (launchAndBuyWithEth) whose decoded params carry this salt and the intent's metadata, fee recipient, tax and markets; (5) its receipt contains PAR's TokenLaunched log for token; (6) the PAR factory record getLaunchedToken(token) exists with this deployer, and its creator tax and markets equal the intent (the fee recipient is checked in the launch transaction, because a wallet recipient may legitimately transfer the right later); (7) the token's on-chain name, symbol, logo and description equal the intent (socials are checked in the transaction). Browser-local records are never published; an imported or pasted proof is only a claim until these checks pass.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema", "chainId", "token", "deployer", "txHash", "recordHash", "salt", "intentJson", "signature"],
+  "properties": {
+    "schema": { "const": "syncnet.launch.proof.v2" },
+    "chainId": { "const": 4663 },
+    "factory": { "type": "string", "pattern": "^0x[0-9a-f]{40}$", "description": "PAR factory that recorded the launch (multi factory 0x3ea29975a79900179f3e1aef93347ba4210c29c1)." },
+    "token": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" },
+    "deployer": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$", "description": "Wallet that sent the launch transaction; PAR records it as deployer (also through the router, via launchTokenFor)." },
+    "txHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$" },
+    "blockNumber": { "type": ["string", "null"] },
+    "recordHash": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$", "description": "keccak256 of the exact UTF-8 bytes of intentJson." },
+    "salt": { "type": "string", "pattern": "^0x[0-9a-fA-F]{64}$", "description": "keccak256(abi.encode('SYNCNET/1', recordHash)); passed to PAR as TokenParams.salt, so it is part of the launch transaction and of the CREATE2 address." },
+    "intentJson": {
+      "type": "string",
+      "maxLength": 16384,
+      "description": "The syncnet.intent.v1 record exactly as hashed: {schema:'syncnet.intent.v1', chainId, operator, name, symbol, description, logo, twitter, website, creatorTaxBps, feeMode, creatorFeeRecipient, openingBuy:{ethWei, slippageBps, router}|null, connections:[{address, symbol, intent}], nonce, createdAt}."
+    },
+    "signature": {
+      "type": "object",
+      "required": ["scheme", "signature"],
+      "properties": {
+        "scheme": { "enum": ["EIP-712", "personal_sign"] },
+        "typedData": { "type": ["object", "null"], "description": "EIP-712 typed data (primaryType LaunchIntent) when scheme is EIP-712." },
+        "message": { "type": ["string", "null"], "description": "The exact signed text when scheme is personal_sign." },
+        "signature": { "type": "string", "maxLength": 8200 },
+        "signer": { "type": "string", "pattern": "^0x[0-9a-fA-F]{40}$" }
+      }
+    },
+    "expected": { "type": ["object", "null"], "description": "What SyncNet prepared (economics read live at preparation, recipient, tax, pair tokens, opening buy). Informational: verification uses intentJson and the chain." },
+    "actual": { "type": ["object", "null"], "description": "What the chain showed at the last verification in the creating browser (base fee, protocol share, pool fee, markets, launch fee, block). Informational." },
+    "createdBy": { "type": "string" }
+  }
+}

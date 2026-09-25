@@ -1,0 +1,123 @@
+{
+  "at": "2026-09-24T14:20:03.336Z",
+  "failures": 0,
+  "passed": 23,
+  "total": 23,
+  "results": [
+    {
+      "name": "launcher regression: simulation + metadata preflight PASS with the real PONSYNC CID",
+      "ok": true,
+      "detail": "246a84a0da22b6ce3681ba4aa262ab653fdfaf1efb5b99a\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+    },
+    {
+      "name": "launcher regression: final review shows the immutable ipfs:// URI (never a gateway URL)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "launcher regression: launch confirmed and verified on-chain",
+      "ok": true,
+      "detail": "FULLY_VERIFIED"
+    },
+    {
+      "name": "metadata untouched: the intent record and the sent calldata carry ipfs://<CID> exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "display 1: Pinata succeeds → logo rendered from gateway.pinata.cloud",
+      "ok": true,
+      "detail": "https://gateway.pinata.cloud/ipfs/bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "display 1: the DOM keeps the original CID as data (ipfs://) — gateway is src-only",
+      "ok": true,
+      "detail": "bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "display 1: PONSYNC stays a verified PAR launch on its page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "display 2: Pinata fails → automatic ipfs.io fallback renders",
+      "ok": true,
+      "detail": "https://ipfs.io/ipfs/bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "display 3: Pinata + ipfs.io fail → automatic dweb.link fallback renders",
+      "ok": true,
+      "detail": "https://dweb.link/ipfs/bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "display 4: all gateways fail → deterministic SVG placeholder, no broken image",
+      "ok": true,
+      "detail": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.o"
+    },
+    {
+      "name": "display 4: no page errors while falling back",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "display 5: a gateway answering non-image bytes falls through to the next gateway",
+      "ok": true,
+      "detail": "https://ipfs.io/ipfs/bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "map: token cards render through the same canonical utility (Pinata first)",
+      "ok": true,
+      "detail": "https://gateway.pinata.cloud/ipfs/bafkreig5hyt4po3peiq3cpezer2yuki57l3wnq4qztjphf4lp7tsq6m6si"
+    },
+    {
+      "name": "builder preview: every gateway failed → graceful IMAGE UNAVAILABLE (after trying all three)",
+      "ok": true,
+      "detail": "gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,ipfs.io,dweb.link,gateway.pinata.cloud,ipfs.io,dweb.link,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,gateway.pinata.cloud,ipfs.io,dweb.link"
+    },
+    {
+      "name": "builder preview: the logo field itself still holds the ipfs:// URI",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder preview: renders from Pinata when reachable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: javascript:/http:/data: URIs are never transformed or rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: https:// and /assets/ pass through unchanged (no unexpected rewriting)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: malformed ipfs URIs (traversal, query, spaces) render nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: a valid CID resolves to Pinata first",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: the placeholder is deterministic per seed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hardening: attribute injection in image values cannot break out of the src attribute",
+      "ok": true,
+      "detail": "<img src=\"https://example.com/%22onerror=%22x.png\" alt=\"\">"
+    },
+    {
+      "name": "My Launches: the PONSYNC record still lists and re-verifies (no launch history lost)",
+      "ok": true,
+      "detail": "LAUNCH RECORDS IN THIS BROWSER · 1RE-VERIFY ALLFULLY VERIFIED$PONSYNC0xa8c776bd7d0c47b0e170e185a5c27116ebbcae6atx 0x1895e472…f996d0RE-VERIFYEXPORT\n Verified on-chain and listed by the PAR indexer.\n PR"
+    }
+  ]
+}

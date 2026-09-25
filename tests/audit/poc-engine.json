@@ -1,0 +1,146 @@
+{
+  "at": "2026-09-24T14:13:43.111Z",
+  "version": "v2.5-rc",
+  "results": [
+    {
+      "name": "direct path: selector is launchToken(TokenParams,uint256,address[]) = 0x5a4b7ef0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "direct path: to = multi factory 0x3ea2…29C1, value = launchFee exactly (read live)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "direct path: pairTokens keep the chosen order (market index = quote index)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX1 expectedEconomics is 0x00…00 WITHOUT a documented reason (spot-priced markets)",
+      "ok": false,
+      "detail": "waived: At least one market is priced from live spot (PONS, SYNC); committing would revert on normal price movement. SyncNet re-"
+    },
+    {
+      "name": "salt = keccak(abi.encode(\"SYNCNET/1\", keccak(intent JSON)))",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX1 expectedEconomics is 0x00…00 even when every market is PAR-curated (guard waived)",
+      "ok": false,
+      "detail": "0x42509852855f819c… committed=true"
+    },
+    {
+      "name": "router path: selector launchAndBuyWithEth = 0x5fe889a4, to = PairPadMultiRouter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: value = launchFee + opening buy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: unreachable market (SYNC) skipped and disclosed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: legs sum exactly to the buy (dust kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: hops reversed for a buy (ETH side first)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "router path: minTokensOut = simulated * (1 - 2%)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F-TX1 router path sends expectedEconomics = 0 without a documented reason",
+      "ok": false,
+      "detail": ""
+    },
+    {
+      "name": "route().qualifies is ignored by the engine (only hops.length is used)",
+      "ok": false,
+      "detail": "None of the selected markets can be reached from ETH, so an opening buy is not possible. Set it to 0."
+    },
+    {
+      "name": "F-TX2 name of 40 chars / 120 UTF-8 bytes passes normalize (PAR limit 64 bytes)",
+      "ok": false,
+      "detail": "Name is 120 bytes in UTF-8; PAR allows 64."
+    },
+    {
+      "name": "F-TX2 description of 1000 chars / 3000 bytes passes (PAR limit 2048 bytes)",
+      "ok": false,
+      "detail": "Description is 3000 bytes in UTF-8; PAR allows 2048."
+    },
+    {
+      "name": "F-TX2 https logo of 620 chars passes (PAR limit 512 bytes)",
+      "ok": false,
+      "detail": "Logo is 620 bytes in UTF-8; PAR allows 512."
+    },
+    {
+      "name": "F-TX2 website of 320 chars passes (PAR social limit 256 bytes)",
+      "ok": false,
+      "detail": "Social link is 320 bytes in UTF-8; PAR allows 256."
+    },
+    {
+      "name": "F-C1 name with U+202E (RTL override) + U+200B (zero width) is accepted and would go on-chain",
+      "ok": false,
+      "detail": "Name contains an invisible or direction-changing character (U+202E) at position 7. 1 more unsafe character found."
+    },
+    {
+      "name": "F-C1 description with U+202E accepted",
+      "ok": false,
+      "detail": "Description contains an invisible or direction-changing character (U+202E) at position 6."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = router (0x458D2a59…) is accepted",
+      "ok": false,
+      "detail": "That address is PAR multi-market router. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = poolManager (0x8366a39C…) is accepted",
+      "ok": false,
+      "detail": "That address is Uniswap v4 PoolManager. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = dead (0x00000000…) is accepted",
+      "ok": false,
+      "detail": "That is a precompile/system address. Fees sent there would be unreachable."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = weth (0x0Bd7D308…) is accepted",
+      "ok": false,
+      "detail": "That address is WETH. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = multiLocker (0x5826FBB6…) is accepted",
+      "ok": false,
+      "detail": "That address is PAR multi-market locker. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "F-TX3 creator fee recipient = feeEscrow (0x1C27e8F0…) is accepted",
+      "ok": false,
+      "detail": "That address is PAR fee escrow. Creator fees sent there could not be claimed by you."
+    },
+    {
+      "name": "F-P5 http:// website with a custom port is accepted as permanent metadata",
+      "ok": false,
+      "detail": "Website must use https:// — the link is permanent on-chain."
+    },
+    {
+      "name": "info: native-ETH market (pairToken 0x0, allowed by PAR) cannot be selected",
+      "ok": true,
+      "detail": "One selected asset has an invalid contract address."
+    }
+  ]
+}
