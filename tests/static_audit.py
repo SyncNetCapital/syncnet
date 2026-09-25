@@ -230,4 +230,6 @@ for _f in ['marketplace.js']: assert 'econom' not in (root/'netlify/functions'/_
 assert "view === 'requests'" not in _eco_fn and 'evidenceUrl: r.evidenceUrl' not in _eco_fn  # pending requests are never served
 _h=_eco_fn[_eco_fn.index('async function handler('):_eco_fn.index('async function curate(')]
 assert "'eco-wallet'" not in _h and 'walletLimited(' not in _h  # no wallet bucket before signature verification
+_c=_eco_fn[_eco_fn.index('async function claimRequest('):]
+assert _c.index("'eco-claim-all'") > _c.index('verifySig(') and _c.index("'eco-claim'") < _c.index('verifySig(')  # global claim budget counts verified requests only
 print('SyncNet Economies V0 static audit: PASS')

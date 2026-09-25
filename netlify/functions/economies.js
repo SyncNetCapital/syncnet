@@ -206,10 +206,9 @@ async function curate(b, { store, rpc, ip, grants }) {
 
 // ---------------------------------------------------------------- claim request (roots with no provable curator)
 async function claimRequest(b, { store, rpc, ip, grants }) {
-  const rl = await limitAll(store, [
-    { bucket: 'eco-claim', id: ip, limit: 5, windowSeconds: 3600 },
-    { bucket: 'eco-claim-all', id: 'all', limit: 50, windowSeconds: 3600 },
-  ]);
+  // Only the per-IP limit applies before verification; the global bucket counts verified requests only, so
+  // invalid requests from many IPs cannot exhaust it and block legitimate claimants.
+  const rl = await limit(store, { bucket: 'eco-claim', id: ip, limit: 5, windowSeconds: 3600 });
   if (!rl.allowed) return rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter);
   const checked = Economy.claimRequestMessage(b);
   if (!checked.ok) return bad('Invalid or missing field: ' + checked.field + '.');
@@ -227,6 +226,8 @@ async function claimRequest(b, { store, rpc, ip, grants }) {
   if (!(await verifySig(rpc, msg.claimant, id, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
   const limited = await walletLimited(store, msg.claimant);
   if (limited) return limited;
+  const all = await limit(store, { bucket: 'eco-claim-all', id: 'all', limit: 50, windowSeconds: 3600 });
+  if (!all.allowed) return all.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(all.retryAfter);
   const members = await store.smembers(K.requests(msg.root));
   if (members.some((m) => { const r = Economy.parseMember(m, 'EconomyClaimRequest'); return r && r.id === id; })) return json(200, { ok: true, duplicate: true, id, status: 'PENDING' });
   if (members.length >= Economy.MAX_REQUESTS_PER_ROOT) return publicError(409, 'full', 'This root already has the maximum number of pending requests.');

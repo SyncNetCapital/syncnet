@@ -308,6 +308,32 @@ const keysBefore = new Set(MAP.keys());
   check('source order: walletLimited runs after verifySig in both write paths, never in the handler', cur.indexOf('walletLimited(') > cur.indexOf('verifySig(') && req.indexOf('walletLimited(') > req.indexOf('verifySig(') && !src.slice(src.indexOf('async function handler('), src.indexOf('async function curate(')).includes("'eco-wallet'"));
 }
 
+// ================================================================================ global claim bucket counts verified requests only
+{
+  const { hashId } = require(path.join(ROOT, 'netlify/lib/log.js'));
+  const USDG = A.USDG.toLowerCase(), LEGIT = lc(A.SAFE_OWNER);
+  const allKey = () => `rl:eco-claim-all:${hashId('all')}:${Math.floor(Date.now() / 3600000)}`;
+  const used = () => Number((MAP.get(allKey()) || {}).value || 0);
+  const claim = (claimant, as) => { const m = { root: USDG, claimant, evidenceUrl: 'https://example.org/proof', issuedAt: nowSec(), nonce: rnd() }; return { action: 'claim-request', ...m, signature: signDigest(as || claimant, Economy.digest('EconomyClaimRequest', m)) }; };
+  const g0 = used();
+  const codes = [];
+  for (let i = 0; i < 60; i++) {
+    const body = i % 2 ? claim(LEGIT, ATTACKER) : { ...claim(ATTACKER), signature: '0x' + '33'.repeat(65) }; // wrong signer / junk signature
+    codes.push((await POST(body, deps, `100.66.${i >> 8}.${i & 255}`)).statusCode);
+  }
+  check('abuse: 60 invalid claim requests from 60 IPs are all refused with 401 (never 429)', codes.every((c) => c === 401), [...new Set(codes)].join(','));
+  check('abuse: they consumed NOTHING from the global verified-claim bucket (50/h)', used() === g0, `before ${g0}, after ${used()}`);
+  let r = await POST(claim(LEGIT), deps, '100.67.0.1');
+  check('abuse: a subsequent legitimate signed claim request is still accepted (PENDING)', r.statusCode === 200 && J(r).status === 'PENDING', r.body);
+  check('the global bucket is charged once for the verified request', used() === g0 + 1, `before ${g0}, after ${used()}`);
+  while (used() < 50) await store.incrWindow(allKey(), 3600);
+  r = await POST(claim(ATTACKER), deps, '100.67.0.2');
+  check('the global limit still applies to VERIFIED claim requests (429 after 50/h)', r.statusCode === 429, r.body);
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/economies.js'), 'utf8');
+  const fn = src.slice(src.indexOf('async function claimRequest('));
+  check('source order: eco-claim (per IP) before verifySig; eco-wallet and eco-claim-all only after it', fn.indexOf("'eco-claim'") < fn.indexOf('verifySig(') && fn.indexOf('walletLimited(') > fn.indexOf('verifySig(') && fn.indexOf("'eco-claim-all'") > fn.indexOf('verifySig('));
+}
+
 // ================================================================================ storage scope
 {
   const added = [...MAP.keys()].filter((k) => !keysBefore.has(k));

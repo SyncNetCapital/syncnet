@@ -1,5 +1,5 @@
 {
-  "passed": 83,
+  "passed": 89,
   "failed": 0,
   "results": [
     {
@@ -95,7 +95,7 @@
     {
       "name": "setup: the $SYNC deployer claims the Project Passport through /api/marketplace (unchanged flow)",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T09:17:53.554Z\",\"claims\":[{\"id\":\"0x845ae194a29486b13446e0c88290ab88c12f76ffb9facfd8a"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T09:22:09.707Z\",\"claims\":[{\"id\":\"0x716f5def66e90b9363e133a559a9ac807adfe316d461f96dd"
     },
     {
       "name": "curator = the Passport operator (source passport)",
@@ -105,7 +105,7 @@
     {
       "name": "curator recognizes a connected child (live PAR market verified)",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x796dfc5a551a327fa18eedc62aabc64b8c6e1711827890885c6a04b8d12f9ff4\",\"recognized\":true}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x2bdea0bc8b299e6d0d706c078de3433fb5744785e0d72e252c0d4c30f7def752\",\"recognized\":true}"
     },
     {
       "name": "the child is now PARENT-RECOGNIZED in the economy view",
@@ -150,7 +150,7 @@
     {
       "name": "extra client fields cannot change anything (still verified against the real curator)",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x79d12c5b23221faba5e799966b7e6316e139d3eacc33ff95e4580c70c623b26f\",\"recognized\":true}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x0846d37b6adb5df5d93f4b49d0d932ebff501f7539cd00d558a022ec659cefea\",\"recognized\":true}"
     },
     {
       "name": "issuedAt far in the past is refused",
@@ -170,12 +170,12 @@
     {
       "name": "submitting the same signed event twice is idempotent (duplicate:true, one member)",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":true,\"id\":\"0xcdd2dbb07a1731ef58239d456e1a1a40761937cf446e608e8e9310e1cad0f766\",\"recognized\":true}"
+      "detail": "{\"ok\":true,\"duplicate\":true,\"id\":\"0x476e5e95df0628b6693c3c039f9b614fb7ef84354c2eedff139c40ef988f0504\",\"recognized\":true}"
     },
     {
       "name": "curator revokes a recognition",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xe8e9a731550d63f8126a9e956aedf655c971e6f4256ae0622a916695801b81eb\",\"recognized\":false}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x1af1ee6e6917a2dccac7bc74a4f5de423ff546540b00b851fb3ee901424eddf0\",\"recognized\":false}"
     },
     {
       "name": "replaying the old signed recognition does not bring it back",
@@ -235,7 +235,7 @@
     {
       "name": "at the cap a revoke of a CURRENT recognition is still accepted (curator can always clean up)",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x4bec3eea5425c8ad8409acf4896e9d7de65fea90f89ad09331ad8ec1ec52281a\",\"recognized\":false}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x8c9e40b092adbd0113d20aa1ff08883a864e424bc0c6b6c6198592e27e26d8e1\",\"recognized\":false}"
     },
     {
       "name": "before transfer: recognitions by the current operator are shown",
@@ -245,12 +245,12 @@
     {
       "name": "setup: listing created",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x4391a2f63cee64ae655b1837879381e680cb32505e9482fd9849c172bacfcb1c\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1\",\"currency\":\"USD\",\"terms\":{\"description\":\"Operational control of $SYNC test\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x092a1a08e948d4b392086edc7a0e383db7e843"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xfa8b99d26931737abe01334c2c37181f832cebfbe732e983af7a3143f5263927\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1\",\"currency\":\"USD\",\"terms\":{\"description\":\"Operational control of $SYNC test\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x092a1a08e948d4b392086edc7a0e383db7e843"
     },
     {
       "name": "setup: operator transferred to the buyer through the Marketplace",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xdd4588d8f8deeefcf73a2db3ca0ef9e2b93b97cb7fd358dc02c5f2ced3953ec1\",\"listingId\":\"0x4391a2f63cee64ae655b1837879381e680cb32505e9482fd9849c172bacfcb1c\",\"offerId\":\"0x730f2761c4a7d7de7fe8cf6d13302d488ecd75a0003525e96ab3757abb615932\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xf4d25822b9300c96b7b5bef2c3c947af33b55261bb0ff3695b617c157f3ddfa5\",\"listingId\":\"0xfa8b99d26931737abe01334c2c37181f832cebfbe732e983af7a3143f5263927\",\"offerId\":\"0x063664bdc6e7c49b86a4e95fd4830be07473c17a5054b2e3198fbd49d9ab2202\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "after the operator change the curator is the new operator",
@@ -260,7 +260,7 @@
     {
       "name": "after the operator change ALL earlier recognitions are inert (fail safe)",
       "ok": true,
-      "detail": "{\"curation\":true,\"durable\":true,\"root\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"curator\":{\"address\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"source\":\"passport\",\"since\":\"2026-09-25T09:17:53.0"
+      "detail": "{\"curation\":true,\"durable\":true,\"root\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"curator\":{\"address\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"source\":\"passport\",\"since\":\"2026-09-25T09:22:09.0"
     },
     {
       "name": "the former operator can no longer curate (403)",
@@ -270,7 +270,7 @@
     {
       "name": "the new operator can recognize again",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x8d4c001cdc4e5a83c53b0fbd121f732440672a8af8f38c2418fbbbd181f956c1\",\"recognized\":true}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x706b76b07a6af592a815fc6b05c5b5b20b474a0d814bb1fe1bfea5d754f71dbb\",\"recognized\":true}"
     },
     {
       "name": "manual grant: curator source is \"manual\"",
@@ -280,7 +280,7 @@
     {
       "name": "manual curator can recognize a child connected on-chain",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x0db3879e46d9a2f1d13a31d31eb9ba58220baf725f5e43f245bbcbceb93c02b5\",\"recognized\":true}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xeab9379e29a9909f91d840f090fa76ae34e54affb5ca1402e5b8354917723707\",\"recognized\":true}"
     },
     {
       "name": "without the grant, the same root has no curator (nothing is hard-coded)",
@@ -295,7 +295,7 @@
     {
       "name": "claim request on a non-PAR contract root is recorded as PENDING",
       "ok": true,
-      "detail": "{\"ok\":true,\"id\":\"0x5106c0b4a58117d47a1949e3b72863d0d7aa08039aafcc760a0a0062ec960f55\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+      "detail": "{\"ok\":true,\"id\":\"0xab6a14ceeddfafd941753c95c7db31432a8a8ab940cf4408543866657adf309d\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
     },
     {
       "name": "a pending request grants NOTHING (still no curator)",
@@ -330,7 +330,7 @@
     {
       "name": "privacy setup: a second pending request with a distinctive evidence URL is recorded",
       "ok": true,
-      "detail": "{\"ok\":true,\"id\":\"0xb880c5fb6a5f98611d50bd3c29ca6fd421ef689bd40e09f361202823708e9e98\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+      "detail": "{\"ok\":true,\"id\":\"0x1d173c92b3cc8bf877ca4b363a6ae3e92a7b9e633f8b2f0ad05f621338a2dc43\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
     },
     {
       "name": "privacy: pending requests are kept in the durable store for maintainer inspection",
@@ -380,7 +380,7 @@
     {
       "name": "abuse: the real curator can still curate afterwards",
       "ok": true,
-      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0xf8a966fd300e863301b9ad5c1e6276865723db928028daaf25e95179ada54664\",\"recognized\":false}"
+      "detail": "{\"ok\":true,\"duplicate\":false,\"id\":\"0x042a7d807b36690dec1e6a93957604f493440eee4804700b7be8ac6253a07831\",\"recognized\":false}"
     },
     {
       "name": "the wallet bucket is charged once for a verified request",
@@ -390,10 +390,40 @@
     {
       "name": "the per-wallet limit still applies to VERIFIED requests (429 after 120/h)",
       "ok": true,
-      "detail": "{\"error\":\"Too many requests. Please wait and try again.\",\"code\":\"rate_limited\",\"retryAfter\":2526}"
+      "detail": "{\"error\":\"Too many requests. Please wait and try again.\",\"code\":\"rate_limited\",\"retryAfter\":2270}"
     },
     {
       "name": "source order: walletLimited runs after verifySig in both write paths, never in the handler",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "abuse: 60 invalid claim requests from 60 IPs are all refused with 401 (never 429)",
+      "ok": true,
+      "detail": "401"
+    },
+    {
+      "name": "abuse: they consumed NOTHING from the global verified-claim bucket (50/h)",
+      "ok": true,
+      "detail": "before 2, after 2"
+    },
+    {
+      "name": "abuse: a subsequent legitimate signed claim request is still accepted (PENDING)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"id\":\"0x35b3297a22c1cbafc71bd3ed2c6d5d2a358e494efc95e65aab83ee83cb529a5a\",\"status\":\"PENDING\",\"note\":\"A request grants nothing until SyncNet reviews it and a curator entry is committed.\"}"
+    },
+    {
+      "name": "the global bucket is charged once for the verified request",
+      "ok": true,
+      "detail": "before 2, after 3"
+    },
+    {
+      "name": "the global limit still applies to VERIFIED claim requests (429 after 50/h)",
+      "ok": true,
+      "detail": "{\"error\":\"Too many requests. Please wait and try again.\",\"code\":\"rate_limited\",\"retryAfter\":2270}"
+    },
+    {
+      "name": "source order: eco-claim (per IP) before verifySig; eco-wallet and eco-claim-all only after it",
       "ok": true,
       "detail": ""
     },
