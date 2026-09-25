@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-24T14:13:42.849Z",
+  "at": "2026-09-25T08:37:38.776Z",
   "failures": 0,
   "passed": 77,
   "total": 77,
@@ -7,7 +7,7 @@
     {
       "name": "claim: the on-chain deployer can claim with a valid EIP-712 signature",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-24T14:13:42.187Z\",\"claims\":[{\"id\":\"0x4f8d54c4679ec62cc0df027e3df3eb933006b86dedf5f0aa6"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T08:37:38.129Z\",\"claims\":[{\"id\":\"0xef4e35c136e3f56998ceead5869ba00beb3daacadf02a5094"
     },
     {
       "name": "claim: the passport records the evidence basis and an append-only history",
@@ -87,7 +87,7 @@
     {
       "name": "list: the recognised operator creates a real ACTIVE listing",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
     },
     {
       "name": "list: the server snapshot keeps the logo as ipfs:// (metadata is never rewritten to a gateway)",
@@ -122,7 +122,7 @@
     {
       "name": "read: no signatures or nonces leak from the browse view",
       "ok": true,
-      "detail": "{\"id\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2.5\",\"cur"
+      "detail": "{\"id\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2.5\",\"cur"
     },
     {
       "name": "offer: the seller cannot bid on their own listing",
@@ -147,7 +147,7 @@
     {
       "name": "offer: a signed offer persists as PENDING",
       "ok": true,
-      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5a531b5a325dfdfa3c5f778f741c242244bda70590f1485d3b6ee631fbf5ef62\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f"
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5bd50ac6fabec694777133c8fa3406fc75291db9d79e94d525fc16801cc11f64\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5"
     },
     {
       "name": "offer: only the seller can accept (unauthorized acceptance rejected)",
@@ -157,7 +157,7 @@
     {
       "name": "offer: seller acceptance (signed) creates a persistent Deal",
       "ok": true,
-      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5a531b5a325dfdfa3c5f778f741c242244bda70590f1485d3b6ee631fbf5ef62\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x55555555555555"
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x5bd50ac6fabec694777133c8fa3406fc75291db9d79e94d525fc16801cc11f64\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\",\"token\":\"0x55555555555555"
     },
     {
       "name": "offer: the deal checklist mirrors the signed terms (operator transfer + fee right + ETH payment + 2 manual assets)",
@@ -167,7 +167,7 @@
     {
       "name": "offer: the other pending offer is SUPERSEDED and the listing is OFFER_ACCEPTED",
       "ok": true,
-      "detail": "[{\"id\":\"0x85380920ec85da00ae557c0d13b2efeb87419719a9a45e037d11d82d248a48cc\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"0.1\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790345622,\"createdAt\":\"2026-09-24T14:13:42.349Z\",\"decidedAt\":null},{\"id\":"
+      "detail": "[{\"id\":\"0xa40b75335e160bfed4d895a1f3ab4c40a5c388a4a91f4b94a1065609dfec2afb\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"0.1\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790411858,\"createdAt\":\"2026-09-25T08:37:38.291Z\",\"decidedAt\":null},{\"id\":"
     },
     {
       "name": "offer: re-accepting the same offer is rejected",
@@ -187,7 +187,7 @@
     {
       "name": "transfer: the seller signs a transfer intent (deal enters IN_TRANSFER)",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626"
     },
     {
       "name": "transfer: the listing is IN_TRANSFER",
@@ -207,7 +207,7 @@
     {
       "name": "transfer: BOTH signatures verified → the canonical operator becomes the buyer",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\""
     },
     {
       "name": "transfer: history permanently records A → B (append-only, the old operator is never deleted)",
@@ -242,7 +242,7 @@
     {
       "name": "payment: a real buyer→seller transfer of the agreed 2.4 ETH verifies ON-CHAIN",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\""
     },
     {
       "name": "payment: the same transaction cannot be attached twice",
@@ -257,7 +257,7 @@
     {
       "name": "fee right: after the real on-chain transferCreatorFeeRecipient, the step verifies",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa50a0542221c3dcb811ccd2b836f2ab01b622a784\""
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626ee17fc85f2f971df495fbffbf5897d8bdcb92e7\""
     },
     {
       "name": "complete: cannot complete while manual assets are unconfirmed",
@@ -272,7 +272,7 @@
     {
       "name": "confirm: a manual asset needs BOTH parties (website+domain done after both signed)",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626"
     },
     {
       "name": "complete: a stale/forged checklist state hash is rejected",
@@ -282,12 +282,12 @@
     {
       "name": "complete: the buyer confirms completion over the exact checklist state",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626"
     },
     {
       "name": "complete: BOTH confirmations → the deal and the listing are COMPLETED",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xea3c046f1ab3dffa90011afeca95999a65dd35faed13123ec28370d85d88ec00\",\"listingId\":\"0x820dd47dbf56602affe7c9aa5"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1fa563eeaa7060ec3b44472ac9604924b1f669f46ece7f6620b812e3d1d9c6d5\",\"listingId\":\"0x6c9981b33f1a45d53ec064626"
     },
     {
       "name": "complete: the Passport shows previous operator → new operator with the deal reference",
@@ -297,7 +297,7 @@
     {
       "name": "lifecycle: the NEW operator can list the project again",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xdc64e648617be4258516f8d7a54e5fd2615fad5f9351c5c9f19d1302215bfa64\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x295d101213687f3524158212bf6f1d4c4092b2544f7b49a0b763bffabd1f8c85\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0"
     },
     {
       "name": "cancel: the OLD operator cannot cancel the new listing",
@@ -312,7 +312,7 @@
     {
       "name": "cancel: pending offers against the cancelled listing become void (SUPERSEDED)",
       "ok": true,
-      "detail": "[{\"id\":\"0x154c7c99cf2ce89a9f5e1d7d662f20ba90cfc11d9d926c8589d6ae61cb33112e\",\"listingId\":\"0xdc64e648617be4258516f8d7a54e5fd2615fad5f9351c5c9f19d1302215bfa64\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"4\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790345622,\"createdAt\":\"2026-09-24T14:13:42.452Z\",\"decidedAt\":null}]"
+      "detail": "[{\"id\":\"0x7b990824a96564bca23b12117fc3ce80c231493af68d7303110bb99e6ddee0b8\",\"listingId\":\"0x295d101213687f3524158212bf6f1d4c4092b2544f7b49a0b763bffabd1f8c85\",\"token\":\"0x5555555555555555555555555555555555555555\",\"buyer\":\"0x5cbdd86a2fa8dc4bddd8a8f69dba48572eec07fb\",\"amount\":\"4\",\"currency\":\"ETH\",\"status\":\"SUPERSEDED\",\"expiry\":1790411858,\"createdAt\":\"2026-09-25T08:37:38.388Z\",\"decidedAt\":null}]"
     },
     {
       "name": "cancel: a stale accept/offer attempt after cancellation is rejected",
@@ -327,7 +327,7 @@
     {
       "name": "deal-cancel: either party can cancel an open deal; the listing reopens when no transfer happened",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x03c34109b4d08a534284e877fe23b5aeb9c3c121d332c0e570e81e8fcbcf3538\",\"listingId\":\"0xcf9052aad5d52943455f00523"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x759f1e066581484243ffdefa8d32cba8607bbd329fe4ebd8461d64f7ffa8a101\",\"listingId\":\"0xb954508a295a80d44bf31ea2d"
     },
     {
       "name": "persistence: records live server-side and survive any client reset (3 listings queryable)",

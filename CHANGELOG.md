@@ -1,3 +1,14 @@
+# V2.5 Economies V0 (`feature/syncnet-economies-v0`): 25 Sep 2026
+
+Additive. Marketplace, Registry, the launch engine, LaunchIntent and the send path are untouched.
+
+- **Economy view** `/economy.html?root=0x…` (also `/economy?root=`): every PAR launch with a market paired with the root, derived from `/api/par-launches-all` by contract address. No stored membership, no Economy ranking, no volume/TVL figures, no recursive graph.
+- **Parent recognition** via `POST /api/economies`: one EIP-712 signature (domain "SyncNet Economies") by the root's current Project Passport operator (read-only reuse) or a reviewed curator in `syncnet-economies.json` (ships empty). Stored append-only in `eco:cur:v1:<root>` Redis sets (SADD only), folded at read time from the signed `issuedAt`, so concurrent writes cannot conflict and no new store primitive is needed. Recognizing requires a live on-chain PAR market between child and root. Labels: PARENT-RECOGNIZED / RECOGNIZED BY $ROOT OPERATOR.
+- **Curator requests** for non-PAR roots are stored as PENDING and grant nothing until reviewed.
+- **Rollout gate** in `flags.js`: `SYNCNET_ECONOMY_CURATION=true` (needs the durable store), kill switch `SYNCNET_ECONOMIES_DISABLED=true`.
+- Entry points: "ECONOMY VIEW" on the Map and the Project page. "Create a project in the $X Economy" uses the Builder's existing `?with=` prefill.
+- Tests: `tests/unit/economy.test.mjs`, `tests/server/economies.test.mjs`, `tests/regression/rc-economy.mjs`, static-audit rules. See `docs/ECONOMIES.md`.
+
 # V2.5 Marketplace V1 wallet hotfix (`v2.5-marketplace-v1-wallet-hotfix`): 24 Sep 2026
 
 Two narrow changes, nothing else:

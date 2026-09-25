@@ -49,11 +49,13 @@ The only transaction SyncNet ever requests is this launch, to the PAR multi fact
 | `/api/registry` | The chain-verified public Registry (GET, and POST only when its gate is open). |
 | `/api/site-check` | SSRF-safe read of `https://<site>/syncnet.json`: pinned DNS, blocked ranges, streamed 16 KiB cap. |
 | `/api/par-launches-all`, `/api/par-tokenlist` | Cached, schema-validated PAR data. These are JSON only and never a proxy. |
+| `/api/economies` | Economies V0 (see `docs/ECONOMIES.md`): signed, append-only parent recognitions (`eco:*` Redis sets, SADD only) by a root's current Project Passport operator or reviewed curator. Economy membership itself is derived in the browser from `/api/par-launches-all`, never stored. |
 
 Every function answers with fixed JSON messages, `nosniff`, and a CSP of `default-src 'none'`. Logs use hashed identifiers. Rate limits and quotas need Upstash to be durable. Every public feature stays closed without it.
 
 ## Concepts kept separate
 
 - Market relationship ≠ provenance ≠ endorsement.
+- Economy membership (an on-chain PAR market) ≠ parent recognition (a one-sided signed statement by the root's operator) ≠ SyncNet endorsement.
 - Fee beneficiary ≠ operator.
 - Browser-local evidence ≠ public proof.

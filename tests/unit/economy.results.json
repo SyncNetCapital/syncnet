@@ -1,0 +1,306 @@
+{
+  "passed": 60,
+  "failed": 0,
+  "results": [
+    {
+      "name": "domain is \"SyncNet Economies\" v1 on chain 4663",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "domain differs from the Marketplace domain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the same struct under the Marketplace domain has a different digest (no cross-domain replay)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a different chainId gives a different digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "digest is deterministic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "decision is part of the digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "typedData lists exactly the six signed fields",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown structures are refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "valid curation message normalizes addresses to lowercase",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "issuedAt accepts a decimal string",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "curation: root=\"0x0000000000000000000000000000000000000000\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"root\"}"
+    },
+    {
+      "name": "curation: root=\"SYNC\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"root\"}"
+    },
+    {
+      "name": "curation: child=\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"child\"}"
+    },
+    {
+      "name": "curation: child=\"nope\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"child\"}"
+    },
+    {
+      "name": "curation: curator=\"\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"curator\"}"
+    },
+    {
+      "name": "curation: decision=\"official\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"decision\"}"
+    },
+    {
+      "name": "curation: decision=\"RECOGNIZE\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"decision\"}"
+    },
+    {
+      "name": "curation: issuedAt=-1 is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"issuedAt\"}"
+    },
+    {
+      "name": "curation: issuedAt=1.5 is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"issuedAt\"}"
+    },
+    {
+      "name": "curation: issuedAt=\"1e9\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"issuedAt\"}"
+    },
+    {
+      "name": "curation: nonce=\"0x12\" is refused",
+      "ok": true,
+      "detail": "{\"ok\":false,\"field\":\"nonce\"}"
+    },
+    {
+      "name": "bare \"official\" is not a decision (recognize/revoke only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL: https accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"http://example.org\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"javascript:alert(1)\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"https://user:pw@example.org/\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"https://localhost/x\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"https://ex ample.org\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"https://example.org/‮\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"https://example.org/aaaaaaaaaaaaaaaaaaa",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "evidence URL refused: \"\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "valid claim request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "claim request with a non-normalized URL is refused (signed string must equal the stored string)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "member round-trips and its id is the EIP-712 digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "identical events produce byte-identical members (SADD dedupe)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "member keys are canonical (sorted)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tampered decision is rejected (id no longer matches)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tampered id is rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "wrong kind is rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "garbage is rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: two recognized children",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: a later revoke removes the recognition",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold is independent of storage order",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: re-recognition after a revoke counts",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: replaying the OLD recognition cannot override the newer revoke",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: same-second tie broken deterministically by id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: events by a non-current curator are inert",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: after a curator change, the old curator’s recognitions no longer count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: events signed before the curatorship began are inert",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: events within the clock-skew tolerance of \"since\" count",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: no curator → nothing recognized",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: events filed under another root are ignored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fold: the same id stored twice (different signature bytes) counts once",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "children: address match across single/multi-market rows, case-insensitive",
+      "ok": true,
+      "detail": "0x1111111111111111111111111111111111111111,0x2222222222222222222222222222222222222222,0x4444444444444444444444444444444444444444"
+    },
+    {
+      "name": "children: a project paired with a FAKE token using the same ticker is NOT a child",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "children: the root itself and duplicates are excluded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "children: invalid root → none",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "join: recognized + indexed child is attached to its connected row",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "join: recognized child missing from the index is reported as outsideIndex, not as connected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "labels: PARENT-RECOGNIZED / RECOGNIZED BY $X OPERATOR / outside-index wording",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

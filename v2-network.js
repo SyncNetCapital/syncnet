@@ -281,6 +281,7 @@ async function loadTopology(address,opts={}){
   if($('sameBranch')) $('sameBranch').innerHTML='';
   if($('buildAround')) $('buildAround').href=`/build.html?with=${encodeURIComponent(address)}`;
   if($('openProjectPage')) $('openProjectPage').href=`/project/${encodeURIComponent(address)}`;
+  if($('openEconomy')) $('openEconomy').href=`/economy.html?root=${encodeURIComponent(String(address).toLowerCase())}`;
   if($('topologyTitle')) $('topologyTitle').innerHTML='MAPPING<br><span class="cyan">CONNECTIONS…</span>';
   if($('topologyMeta')) $('topologyMeta').textContent=`Reading PAR markets for ${short(address)}…`;
   const section=showTopologySection();

@@ -137,7 +137,7 @@
 [functions]
   directory = "netlify/functions"
   # Shared browser/server modules and the canonical registry used by the functions.
-  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "syncnet-projects.json"]
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-economy.js", "syncnet-projects.json", "syncnet-economies.json"]
 
 [[redirects]]
   from = "/api/canary-auth"
@@ -192,3 +192,14 @@
   to = "/.netlify/functions/marketplace"
   status = 200
   force = true
+
+[[redirects]]
+  from = "/api/economies"
+  to = "/.netlify/functions/economies"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/economy"
+  to = "/economy.html"
+  status = 200

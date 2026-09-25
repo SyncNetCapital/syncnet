@@ -9,6 +9,8 @@
 //   SYNCNET_REGISTRY_SUBMISSIONS=true  public, chain-verified registry submissions (needs a durable store)
 //   SYNCNET_UPLOADS_DISABLED=true      kill switch: refuses every upload, founder uploads included
 //   SYNCNET_MARKETPLACE_DISABLED=true  kill switch for Marketplace writes; Marketplace also needs the durable store
+//   SYNCNET_ECONOMY_CURATION=true      signed Economy curation writes (needs a durable store)
+//   SYNCNET_ECONOMIES_DISABLED=true    kill switch for Economy curation writes
 //
 // "Durable store" = Upstash Redis REST (see store.js). Without it, rate limits and quotas would only be
 // per function instance, which is not enough for anything public.
@@ -36,8 +38,10 @@ function flags(options = {}) {
     publicLaunch: truthy(env.SYNCNET_PUBLIC_LAUNCH),
     publicUploads: truthy(env.SYNCNET_PUBLIC_UPLOADS),
     registrySubmissions: truthy(env.SYNCNET_REGISTRY_SUBMISSIONS),
+    economyCuration: truthy(env.SYNCNET_ECONOMY_CURATION),
   };
   const marketplaceKilled = truthy(env.SYNCNET_MARKETPLACE_DISABLED);
+  const economiesKilled = truthy(env.SYNCNET_ECONOMIES_DISABLED);
   const out = {
     durable,
     uploadsKilled,
@@ -46,6 +50,7 @@ function flags(options = {}) {
     publicUploads: requested.publicUploads && !uploadsKilled && pinata && sessions && durable,
     publicLaunch: requested.publicLaunch && durable,
     registrySubmissions: requested.registrySubmissions && durable,
+    economyCuration: requested.economyCuration && durable && !economiesKilled,
     requested,
   };
   // Log (once per instance and configuration) when a requested public feature stays closed.
@@ -60,6 +65,7 @@ function flags(options = {}) {
     missing.push('SYNCNET_PUBLIC_UPLOADS stays closed: ' + why.join(', '));
   }
   if (requested.registrySubmissions && !out.registrySubmissions) missing.push('SYNCNET_REGISTRY_SUBMISSIONS needs a durable store');
+  if (requested.economyCuration && !out.economyCuration) missing.push('SYNCNET_ECONOMY_CURATION stays closed: ' + (economiesKilled ? 'SYNCNET_ECONOMIES_DISABLED is true' : 'no durable store'));
   const key = missing.join('|');
   if (key && key !== warned) {
     warned = key;

@@ -1,13 +1,13 @@
 {
-  "passed": 129,
+  "passed": 126,
   "failed": 0,
-  "skipped": 0,
+  "skipped": 3,
   "node": "v22.22.2",
   "timings": {
-    "png1024NoisyMs": 273,
-    "png1024BinaryNoiseMs": 931,
-    "gif512x120Ms": 377,
-    "totalMs": 4839
+    "png1024NoisyMs": 337,
+    "png1024BinaryNoiseMs": 948,
+    "gif512x120Ms": 397,
+    "totalMs": 4868
   },
   "checks": [
     {
@@ -19,224 +19,224 @@
     {
       "name": "api: ImageRejected extends Error with code and name",
       "status": "pass",
-      "ms": 0.3,
+      "ms": 0.2,
       "detail": ""
     },
     {
       "name": "api: library requires only Node built-ins (zlib)",
       "status": "pass",
-      "ms": 0.4,
+      "ms": 0.5,
       "detail": "requires: zlib"
     },
     {
       "name": "api: caller mistakes throw TypeError (not ImageRejected)",
       "status": "pass",
-      "ms": 0.3,
+      "ms": 0.5,
       "detail": ""
     },
     {
       "name": "png: RGBA 512x512 (sharp)",
       "status": "pass",
-      "ms": 206.6,
+      "ms": 251.4,
       "detail": "512x512 depth 8 type 6: 1016063 -> 560900 B, pixel-exact"
     },
     {
       "name": "png: RGB 8-bit (sharp)",
       "status": "pass",
-      "ms": 23.8,
+      "ms": 26.1,
       "detail": "300x200 depth 8 type 2: 21215 -> 12257 B, pixel-exact"
     },
     {
       "name": "png: grayscale 8-bit (sharp)",
       "status": "pass",
-      "ms": 22.2,
+      "ms": 19.6,
       "detail": "257x131 depth 8 type 0: 978 -> 643 B, pixel-exact"
     },
     {
       "name": "png: grayscale + alpha 8-bit (sharp)",
       "status": "pass",
-      "ms": 8.4,
+      "ms": 7.1,
       "detail": "120x90 depth 8 type 4: 2664 -> 753 B, pixel-exact"
     },
     {
       "name": "png: palette + tRNS (sharp, libimagequant)",
       "status": "pass",
-      "ms": 27.7,
-      "detail": "160x120 depth 4 type 3: 1184 -> 1911 B, pixel-exact"
+      "ms": 16,
+      "detail": "160x120 depth 8 type 3: 1890 -> 954 B, pixel-exact"
     },
     {
       "name": "png: Adam7 interlaced RGBA 301x203 (sharp progressive)",
       "status": "pass",
-      "ms": 41.1,
+      "ms": 42.9,
       "detail": "301x203 depth 8 type 6 Adam7: 241381 -> 140271 B, pixel-exact"
     },
     {
       "name": "png: Adam7 interlaced palette (sharp progressive)",
       "status": "pass",
-      "ms": 30,
+      "ms": 24.9,
       "detail": "160x120 depth 4 type 3 Adam7: 1576 -> 1911 B, pixel-exact"
     },
     {
       "name": "png: 16-bit RGB",
       "status": "pass",
-      "ms": 4.8,
+      "ms": 4.1,
       "detail": "40x30 depth 16 type 2: 3056 -> 441 B, pixel-exact"
     },
     {
       "name": "png: 16-bit RGBA",
       "status": "pass",
-      "ms": 3.5,
+      "ms": 2.9,
       "detail": "33x20 depth 16 type 6: 1817 -> 292 B, pixel-exact"
     },
     {
       "name": "png: 16-bit RGB + tRNS",
       "status": "pass",
-      "ms": 4,
+      "ms": 2.1,
       "detail": "32x16 depth 16 type 2: 363 -> 169 B, pixel-exact"
     },
     {
       "name": "png: 16-bit grey + tRNS (full-precision key)",
       "status": "pass",
-      "ms": 2.6,
+      "ms": 2.8,
       "detail": "24x17 depth 16 type 0: 170 -> 97 B, pixel-exact"
     },
     {
       "name": "png: 16-bit grey + alpha",
       "status": "pass",
-      "ms": 5.9,
+      "ms": 2.9,
       "detail": "19x23 depth 16 type 4: 496 -> 120 B, pixel-exact"
     },
     {
       "name": "png: 1-bit grey",
       "status": "pass",
-      "ms": 5.9,
+      "ms": 3.6,
       "detail": "37x21 depth 1 type 0: 124 -> 112 B, pixel-exact"
     },
     {
       "name": "png: 2-bit grey + tRNS",
       "status": "pass",
-      "ms": 4.2,
+      "ms": 2.7,
       "detail": "29x18 depth 2 type 0: 166 -> 119 B, pixel-exact"
     },
     {
       "name": "png: 4-bit grey",
       "status": "pass",
-      "ms": 5.1,
+      "ms": 2.7,
       "detail": "31x17 depth 4 type 0: 195 -> 177 B, pixel-exact"
     },
     {
       "name": "png: 8-bit grey + tRNS",
       "status": "pass",
-      "ms": 6.6,
+      "ms": 2.5,
       "detail": "20x20 depth 8 type 0: 232 -> 157 B, pixel-exact"
     },
     {
       "name": "png: 1-bit palette",
       "status": "pass",
-      "ms": 3,
+      "ms": 2.3,
       "detail": "45x16 depth 1 type 3: 140 -> 125 B, pixel-exact"
     },
     {
       "name": "png: 2-bit palette + partial tRNS",
       "status": "pass",
-      "ms": 5.1,
+      "ms": 2.3,
       "detail": "26x22 depth 2 type 3: 155 -> 146 B, pixel-exact"
     },
     {
       "name": "png: 4-bit palette (11 entries)",
       "status": "pass",
-      "ms": 4.4,
+      "ms": 2.7,
       "detail": "35x19 depth 4 type 3: 262 -> 201 B, pixel-exact"
     },
     {
       "name": "png: 8-bit palette + tRNS",
       "status": "pass",
-      "ms": 4,
+      "ms": 3.1,
       "detail": "64x48 depth 8 type 3: 1285 -> 577 B, pixel-exact"
     },
     {
       "name": "png: 8-bit RGB + tRNS",
       "status": "pass",
-      "ms": 4.3,
+      "ms": 5.9,
       "detail": "30x20 depth 8 type 2: 913 -> 876 B, pixel-exact"
     },
     {
       "name": "png: Adam7 1-bit grey 33x17",
       "status": "pass",
-      "ms": 8.7,
+      "ms": 3.1,
       "detail": "33x17 depth 1 type 0 Adam7: 148 -> 160 B, pixel-exact"
     },
     {
       "name": "png: Adam7 4-bit palette + tRNS 37x21",
       "status": "pass",
-      "ms": 7.4,
+      "ms": 2,
       "detail": "37x21 depth 4 type 3 Adam7: 388 -> 258 B, pixel-exact"
     },
     {
       "name": "png: Adam7 16-bit RGBA 23x19",
       "status": "pass",
-      "ms": 3,
+      "ms": 2.4,
       "detail": "23x19 depth 16 type 6 Adam7: 1767 -> 296 B, pixel-exact"
     },
     {
       "name": "png: Adam7 8-bit grey + alpha 17x16",
       "status": "pass",
-      "ms": 3.1,
+      "ms": 2.2,
       "detail": "17x16 depth 8 type 4 Adam7: 275 -> 100 B, pixel-exact"
     },
     {
       "name": "png: Adam7 2-bit grey 16x29",
       "status": "pass",
-      "ms": 3.7,
+      "ms": 2.8,
       "detail": "16x29 depth 2 type 0 Adam7: 174 -> 119 B, pixel-exact"
     },
     {
       "name": "png: RGBA split over 9 IDAT chunks",
       "status": "pass",
-      "ms": 5.1,
+      "ms": 3.4,
       "detail": "48x40 depth 8 type 6: 1969 -> 578 B, pixel-exact"
     },
     {
       "name": "png: all rows filter 4 (Paeth), RGB",
       "status": "pass",
-      "ms": 3.5,
+      "ms": 2.8,
       "detail": "50x30 depth 8 type 2: 112 -> 123 B, pixel-exact"
     },
     {
       "name": "png: tiny images incl. empty Adam7 passes (1x1..5x5, limits override)",
       "status": "pass",
-      "ms": 73.9,
+      "ms": 79,
       "detail": "64 images pixel-exact"
     },
     {
       "name": "png: tEXt/zTXt/iTXt/eXIf/pHYs/tIME/private chunks are dropped",
       "status": "pass",
-      "ms": 16.2,
+      "ms": 17.4,
       "detail": "300x200 depth 8 type 2: 21534 -> 12257 B, pixel-exact"
     },
     {
       "name": "png: APNG input becomes a static PNG of the default image",
       "status": "pass",
-      "ms": 3.4,
+      "ms": 3.2,
       "detail": "64x48 depth 8 type 6: 2274 -> 148 B, pixel-exact"
     },
     {
       "name": "png: 1024x1024 RGBA whose IDAT inflates to exactly the expected size",
       "status": "pass",
-      "ms": 176.3,
+      "ms": 172.9,
       "detail": "1024x1024 depth 8 type 6: 4144 -> 4783 B, pixel-exact"
     },
     {
       "name": "perf: 1024x1024 noisy RGBA PNG sanitizes in < 2 s",
       "status": "pass",
-      "ms": 309.2,
-      "detail": "sanitized in 273 ms (2.86 MiB -> 2.07 MiB), pixel-exact"
+      "ms": 378.6,
+      "detail": "sanitized in 337 ms (2.86 MiB -> 2.07 MiB), pixel-exact"
     },
     {
       "name": "perf: 1024x1024 random 0/255 noise PNG (zlib level-9 worst case) sanitizes in < 2 s",
       "status": "pass",
-      "ms": 964.3,
-      "detail": "sanitized in 931 ms (0.62 MiB -> 0.88 MiB), pixel-exact"
+      "ms": 984.3,
+      "detail": "sanitized in 948 ms (0.62 MiB -> 0.88 MiB), pixel-exact"
     },
     {
       "name": "png: polyglot (HTML after IEND)",
@@ -277,13 +277,13 @@
     {
       "name": "png: unknown critical chunk",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
       "name": "png: Apple CgBI chunk before IHDR",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -301,13 +301,13 @@
     {
       "name": "png: IDAT chunks not consecutive",
       "status": "pass",
-      "ms": 1,
+      "ms": 0.1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
       "name": "png: truncated zlib stream",
       "status": "pass",
-      "ms": 0.8,
+      "ms": 1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -343,7 +343,7 @@
     {
       "name": "png: tRNS on an RGBA image",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -409,7 +409,7 @@
     {
       "name": "png: 1025x16 is too wide",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "TOO_LARGE_DIMENSIONS: \"PNG images must be at most 1024x1024 pixels.\""
     },
     {
@@ -427,37 +427,37 @@
     {
       "name": "png: decompression bomb (IDAT inflates to expected + 4 MiB)",
       "status": "pass",
-      "ms": 1.6,
-      "detail": "DECOMPRESSION_LIMIT in 1.6 ms: \"The image data is larger than its dimensions allow.\""
+      "ms": 1.9,
+      "detail": "DECOMPRESSION_LIMIT in 1.9 ms: \"The image data is larger than its dimensions allow.\""
     },
     {
       "name": "png: IDAT inflates to expected + 1 byte",
       "status": "pass",
-      "ms": 5.5,
+      "ms": 4.5,
       "detail": "DECOMPRESSION_LIMIT: \"The image data is larger than its dimensions allow.\""
     },
     {
       "name": "png: IDAT inflates to 1 byte less than expected",
       "status": "pass",
-      "ms": 4.2,
+      "ms": 3.7,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
       "name": "png: real 4.01 MiB PNG is over the 3 MiB input cap",
       "status": "pass",
-      "ms": 2.6,
-      "detail": "TOO_LARGE_BYTES in 0.2 ms: \"Image files must be 3 MB or smaller.\""
+      "ms": 1.6,
+      "detail": "TOO_LARGE_BYTES in 0.3 ms: \"Image files must be 3 MB or smaller.\""
     },
     {
       "name": "png: exactly 3 MiB is not TOO_LARGE_BYTES (trailing junk -> MALFORMED)",
       "status": "pass",
-      "ms": 1.9,
+      "ms": 2.2,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
       "name": "png: output larger than the cap is rejected (TOO_LARGE_BYTES)",
       "status": "pass",
-      "ms": 16.5,
+      "ms": 13.6,
       "detail": "input 264 B -> output 1321 B; with cap 264 B: \"The processed image would exceed 264 bytes. Use a smaller or simpler image.\""
     },
     {
@@ -475,7 +475,7 @@
     {
       "name": "type: PNG declared as image/jpeg",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0,
       "detail": "TYPE_MISMATCH: \"The file contents do not match the declared image type.\""
     },
     {
@@ -493,13 +493,13 @@
     {
       "name": "type: JPEG (sharp) declared as image/jpeg",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0,
       "detail": "UNSUPPORTED_FORMAT: \"Only PNG and GIF images are accepted.\""
     },
     {
       "name": "type: WebP (sharp)",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0,
       "detail": "UNSUPPORTED_FORMAT: \"Only PNG and GIF images are accepted.\""
     },
     {
@@ -523,13 +523,13 @@
     {
       "name": "type: random bytes",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0,
       "detail": "UNSUPPORTED_FORMAT: \"Only PNG and GIF images are accepted.\""
     },
     {
       "name": "type: truncated PNG signature",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "UNSUPPORTED_FORMAT: \"Only PNG and GIF images are accepted.\""
     },
     {
@@ -541,61 +541,61 @@
     {
       "name": "type: declaredType is case/whitespace-insensitive; Uint8Array input works",
       "status": "pass",
-      "ms": 17,
+      "ms": 16.8,
       "detail": ""
     },
     {
       "name": "gif: static GIF (sharp/cgif)",
       "status": "pass",
-      "ms": 29.2,
+      "ms": 35.8,
       "detail": "300x200, 1 frame(s), loop null: 48647 -> 48647 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: static GIF with transparency (sharp/cgif)",
       "status": "pass",
-      "ms": 7.1,
+      "ms": 8.7,
       "detail": "96x64, 1 frame(s), loop null: 3235 -> 3235 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: animated, 4 frames, local table, transparency, disposal 1/2/3, loop 7",
       "status": "pass",
-      "ms": 8.7,
+      "ms": 8.3,
       "detail": "64x48, 4 frame(s), loop 7: 3424 -> 3355 B, indices identical, frame 0 equal, all pages equal"
     },
     {
       "name": "gif: background index 5 is rewritten to 0 (frame 0 + streams compared)",
       "status": "pass",
-      "ms": 3.2,
+      "ms": 8.1,
       "detail": "64x48, 3 frame(s), loop null: 2213 -> 2166 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: interlaced frame, odd height (own writer)",
       "status": "pass",
-      "ms": 4.8,
+      "ms": 5.4,
       "detail": "16x37, 1 frame(s), loop null: 189 -> 188 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: LZW table fills without a clear code (deferred clear)",
       "status": "pass",
-      "ms": 8.3,
+      "ms": 10.2,
       "detail": "128x128, 1 frame(s), loop null: 23972 -> 23239 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: min code size 8 with a 4-colour table (as Pillow writes)",
       "status": "pass",
-      "ms": 6.5,
+      "ms": 4,
       "detail": "40x30, 1 frame(s), loop null: 376 -> 311 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: GIF87a without extensions",
       "status": "pass",
-      "ms": 2.9,
+      "ms": 4.5,
       "detail": "40x30, 1 frame(s), loop null: 311 -> 311 B, indices identical, frame 0 equal"
     },
     {
       "name": "gif: ANIMEXTS1.0 loop count kept (written as NETSCAPE2.0)",
       "status": "pass",
-      "ms": 5.6,
+      "ms": 11.5,
       "detail": "40x30, 2 frame(s), loop 3: 408 -> 408 B, indices identical, frame 0 equal, all pages equal"
     },
     {
@@ -605,39 +605,39 @@
       "detail": "48x32, 2 frame(s), loop 0: 2072 -> 1407 B, indices identical, frame 0 equal, all pages equal"
     },
     {
-      "name": "gif: Pillow animated (4 frames, loop=0, per-frame palettes, transparency, disposal 1/2/3)",
-      "status": "pass",
-      "ms": 5.4,
-      "detail": "80x60, 4 frame(s), loop 0: 4460 -> 4460 B, indices identical, frame 0 equal, all pages equal"
+      "name": "gif: Pillow animated GIF",
+      "status": "skip",
+      "ms": 0,
+      "detail": "Pillow unavailable: Command failed: python3 -c "
     },
     {
-      "name": "gif: Pillow interlaced",
-      "status": "pass",
-      "ms": 9.1,
-      "detail": "80x60, 1 frame(s), loop null: 396 -> 330 B, indices identical, frame 0 equal"
+      "name": "gif: Pillow interlaced GIF",
+      "status": "skip",
+      "ms": 0,
+      "detail": "Pillow unavailable: Command failed: python3 -c "
     },
     {
-      "name": "gif: Pillow comment is dropped",
-      "status": "pass",
-      "ms": 3.2,
-      "detail": "80x60, 1 frame(s), loop null: 427 -> 338 B, indices identical, frame 0 equal"
+      "name": "gif: Pillow comment GIF",
+      "status": "skip",
+      "ms": 0,
+      "detail": "Pillow unavailable: Command failed: python3 -c "
     },
     {
       "name": "perf: 512x512 x 120-frame GIF (limits at maximum)",
       "status": "pass",
-      "ms": 512.7,
-      "detail": "sanitized in 377 ms (1.72 MiB -> 1.72 MiB), 120 frames identical"
+      "ms": 530.8,
+      "detail": "sanitized in 397 ms (1.72 MiB -> 1.72 MiB), 120 frames identical"
     },
     {
       "name": "gif: baseline fixture for the rejection cases is accepted",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0.2,
       "detail": ""
     },
     {
       "name": "gif: frame outside the logical screen",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0.2,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -650,12 +650,12 @@
       "name": "gif: 121 frames (maxFrames 120)",
       "status": "pass",
       "ms": 0.3,
-      "detail": "TOO_MANY_FRAMES in 0.2 ms: \"Animated GIFs may have at most 120 frames.\""
+      "detail": "TOO_MANY_FRAMES in 0.3 ms: \"Animated GIFs may have at most 120 frames.\""
     },
     {
       "name": "gif: width*height*frames over maxTotalPixels (override)",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0.2,
       "detail": "TOO_MANY_FRAMES: \"This animation is too large. Use fewer frames or smaller dimensions.\""
     },
     {
@@ -667,7 +667,7 @@
     {
       "name": "gif: 1024x1024 screen + garbage LZW still reports dimensions (no LZW decoded)",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "TOO_LARGE_DIMENSIONS in 0.0 ms: \"GIF images must be at most 512x512 pixels.\""
     },
     {
@@ -679,7 +679,7 @@
     {
       "name": "gif: 8x8 is too small",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "TOO_SMALL_DIMENSIONS: \"GIF images must be at least 16x16 pixels.\""
     },
     {
@@ -739,7 +739,7 @@
     {
       "name": "gif: pixel index beyond the colour table",
       "status": "pass",
-      "ms": 0.1,
+      "ms": 0.2,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -751,7 +751,7 @@
     {
       "name": "gif: first code after clear is not a literal",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
@@ -775,14 +775,14 @@
     {
       "name": "gif: truncated logical screen descriptor",
       "status": "pass",
-      "ms": 0,
+      "ms": 0.1,
       "detail": "MALFORMED: \"The image file is damaged or invalid.\""
     },
     {
       "name": "size: every accepted fixture re-encodes to <= maxInputBytes",
       "status": "pass",
-      "ms": 0.1,
-      "detail": "47 outputs, largest 2174288 B (perf: 1024x1024 noisy RGBA PNG)"
+      "ms": 0.2,
+      "detail": "44 outputs, largest 2174288 B (perf: 1024x1024 noisy RGBA PNG)"
     }
   ]
 }

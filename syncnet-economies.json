@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "note": "Manually reviewed Economy curators for roots that are NOT PAR launches (PAR launches use the Project Passport operator). An entry grants curation authority only; it is added by code review after a signed curator request has been verified. No curator is assumed for any root.",
+  "curators": []
+}

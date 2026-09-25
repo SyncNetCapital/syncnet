@@ -1,0 +1,166 @@
+{
+  "passed": 32,
+  "failed": 0,
+  "results": [
+    {
+      "name": "no root: only an address picker is shown (no Economy ranking or leaderboard)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no root: a ticker is refused (address only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "derived: every PAR launch with a market paired with $SYNC is listed",
+      "ok": true,
+      "detail": "0xb0a3d82bf46ae6303aee263fc4d48e5c657fc967,0x3333333333333333333333333333333333333333,0x4444444444444444444444444444444444444444,0x8000000000000000000000000000000000000000,0x8111111111111111111111111111111111111111,0x8222222222222222222222222222222222222222,0x8333333333333333333333333333333333333333,0x8444444444444444444444444444444444444444,0x8555555555555555555555555555555555555555"
+    },
+    {
+      "name": "derived: projects not paired with $SYNC are absent (CREATORLIVE, the fake-SYNC contract itself)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "derived: the root is not its own child",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "derived: children carry CONNECTED · ON-CHAIN PAR MARKET, never OFFICIAL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unclaimed PAR root: guidance points to the existing Passport claim",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no volume / TVL / fee aggregates in the Economy content (the footer only disclaims them)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "build link: the existing Builder prefill (?with=<root>)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stats: only connected + parent-recognized counts, with the index coverage stated",
+      "ok": true,
+      "detail": "CONNECTED PROJECTS (INDEXED PAR HISTORY)\n9\nPARENT-RECOGNIZED\n0"
+    },
+    {
+      "name": "setup: $SYNC Passport claimed through the unchanged Marketplace claim",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T08:46:11.176Z\",\"claims\":[{\"id\":\"0x8e8617470ca85f53d4d33a942c462f04635c15695864eed47"
+    },
+    {
+      "name": "curator: the Passport operator is shown as the $SYNC operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "before connecting a wallet no RECOGNIZE control is shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "connected curator sees RECOGNIZE on connected projects",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the wallet signed EIP-712 \"SyncNet Economies\" EconomyCuration (no transaction)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "recognized project shows PARENT-RECOGNIZED + RECOGNIZED BY $SYNC OPERATOR",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "recognized project also keeps its CONNECTED (indexer) label",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "recognized project no longer duplicated in the connected list",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "second browser: the same recognitions (server state, not browser state)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "second browser: a non-curator wallet gets no RECOGNIZE/REVOKE controls",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "second browser: nothing Economy-related stored in browser storage",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "outside index: still PARENT-RECOGNIZED (verified on-chain when recorded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "outside index: labelled CONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW, not as indexer-confirmed",
+      "ok": true,
+      "detail": "0x8000…0000\nname not in current index data\nPARENT-RECOGNIZED\nCONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW\n\n0x8000000000000000000000000000000000000000\n\nRECOGNIZED BY $SYNC OPERATOR · 0x2c75…5c23 · signed 2026-09-25 · the on-chain market was verified by SyncNet when this recognition was recorded\n\nPROJECT PAGE"
+    },
+    {
+      "name": "indexer down: recognitions stay visible, labelled INDEXER UNAVAILABLE, never as connected-now",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "indexer down: connected list says so instead of inferring anything",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "revoke: the project returns to CONNECTED only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors in the curator browser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Create-in-Economy opens the Builder with the root preselected by its existing ?with= prefill",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project page links to the Economy view",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Map links to the Economy view of the mapped token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile 320px: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    },
+    {
+      "name": "mobile 390px: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    }
+  ]
+}

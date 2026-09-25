@@ -406,14 +406,15 @@ const BASE_ENV = {
   UPSTASH_REDIS_REST_URL: 'https://upstash.mock', UPSTASH_REDIS_REST_TOKEN: 'upstash-test-token',
   SYNCNET_PIN_SECONDARY_URL: 'https://psa.mock', SYNCNET_PIN_SECONDARY_TOKEN: 'psa-token',
 };
-const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED'];
-export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, durable = true } = {}) {
+const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED'];
+export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
   if (publicLaunch) process.env.SYNCNET_PUBLIC_LAUNCH = 'true';
   if (publicUploads) process.env.SYNCNET_PUBLIC_UPLOADS = 'true';
   if (registry) process.env.SYNCNET_REGISTRY_SUBMISSIONS = 'true';
   if (uploadsDisabled) process.env.SYNCNET_UPLOADS_DISABLED = 'true';
+  if (economyCuration) process.env.SYNCNET_ECONOMY_CURATION = 'true';
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));
   store.getStore(durable ? { env: process.env } : { env: {} });
 }
@@ -479,7 +480,7 @@ export { realFetch };
 const origLog = console.log;
 console.log = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) { try { serverState.logs.push(JSON.parse(a[0])); } catch { serverState.logs.push(a[0]); } return; } origLog(...a); };
 
-const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace'];
+const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies'];
 const fnModules = Object.fromEntries(FUNCTIONS.map((n) => [n, require(path.join(ROOT, 'netlify/functions', n + '.js'))]));
 function ipfsCheckFn() { return fnModules['ipfs-check']; }
 let ipCounter = 0;
