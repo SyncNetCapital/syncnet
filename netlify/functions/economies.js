@@ -27,7 +27,6 @@
  *    for an actionable write: naming someone else's address, or replaying a public signed event (duplicate /
  *    stale / full, all no-ops), cannot exhaust their bucket. Pre-verification limits are per IP only.
  */
-const Core = require('../../lib/syncnet-core.js');
 const Chain = require('../../lib/syncnet-chain.js');
 const Economy = require('../../lib/syncnet-economy.js');
 const GRANTS_FILE = require('../../syncnet-economies.json');
@@ -38,6 +37,7 @@ const { clientIp, limit, limitAll } = require('../lib/ratelimit');
 const { flags } = require('../lib/flags');
 const { serverRpc } = require('../lib/chain-rpc');
 const { readJsonBody, query, method: methodOf } = require('../lib/body');
+const { verifyDigest } = require('../lib/sig-verify');
 
 const FN = 'economies';
 const K = {
@@ -80,14 +80,7 @@ const publicEvent = (e) => ({ id: e.id, child: e.child, curator: e.curator, deci
 // ---------------------------------------------------------------- signature verification (server-side, always)
 async function verifySig(rpc, wallet, digest, signature) {
   if (typeof signature !== 'string' || !/^0x[0-9a-fA-F]{130,8190}$/.test(signature)) return false;
-  try { if (lc(Core.recoverAddress(digest, signature)) === lc(wallet)) return true; } catch { /* not ECDSA by this wallet */ }
-  try {
-    const code = await Chain.getCode(rpc, wallet);
-    if (!code || code === '0x') return false;
-    const data = Chain.SEL.isValidSignature + Core.abiEncode(['bytes32', 'bytes'], [digest, signature]).slice(2);
-    const out = await rpc('eth_call', [{ to: wallet, data }, 'latest']);
-    return String(out || '').toLowerCase().startsWith('0x1626ba7e');
-  } catch { return false; }
+  return verifyDigest(rpc, wallet, digest, signature); // ECDSA, then EIP-1271 (netlify/lib/sig-verify.js, shared)
 }
 
 /** Live PAR factory read: is `child` a PAR launch with a market paired with `root`? true | false | throws. */
