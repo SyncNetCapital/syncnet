@@ -372,6 +372,52 @@ await suite('Project Home · previous operator home: links disabled, REVIEW & AD
   await n.close();
 });
 
+
+// ================================================================= P1-1: impostor warning must be VISIBLE (not only in DETAILS)
+// Every assertion below uses rendered state (isVisible, innerText, layout rects, accessible role), never textContent,
+// so hidden DOM text inside collapsed DETAILS can never make these checks pass.
+await suite('P1-1 · impostor of a protected canonical ticker is visibly flagged on the Project Page', async () => {
+  fresh({});
+  const FAKE = lc(A.FAKESYNC), SYNC = lc(A.SYNC);
+  const warnVisible = (p) => p.evaluate(() => {
+    const w = document.getElementById('pjWarn'); if (!w || w.hidden) return { shown: false };
+    const r = w.getBoundingClientRect(), cs = getComputedStyle(w);
+    return { shown: cs.display !== 'none' && cs.visibility !== 'hidden' && r.width > 0 && r.height > 0, top: r.top, bottom: r.bottom, vh: innerHeight, inDetails: Boolean(w.closest('details')) };
+  });
+  const loaded = (p) => p.waitForFunction(() => document.querySelector('#projectRows [data-row]'), null, { timeout: 20000 }).then(() => p.waitForTimeout(400));
+  for (const [w, h] of [[1440, 900], [768, 900], [375, 740]]) {
+    const c = await ctx({ width: w, height: h }); const p = await c.newPage();
+    await p.goto(BASE + '/project/' + FAKE); await loaded(p);
+    const v = await warnVisible(p);
+    check(`${w}px impostor: warning rendered, visible and inside the first viewport (not in DETAILS)`, v.shown && !v.inDetails && v.top >= 0 && v.bottom <= v.vh, JSON.stringify(v));
+    check(`${w}px impostor: DETAILS stays collapsed while the warning is visible`, !(await p.$eval('#projectDetails', (d) => d.open)));
+    const head = (await p.innerText('.pj-head')).replace(/\s+/g, ' ');
+    check(`${w}px impostor: rendered text names the canonical contract`, /Not the canonical \$SYNC contract\./.test(head) && /0x6368…ca37/.test(head), head);
+    check(`${w}px impostor: exposed to assistive tech as a note`, (await p.getByRole('note').filter({ hasText: 'Not the canonical $SYNC contract' }).count()) === 1);
+    check(`${w}px impostor: link to the canonical project is visible and correct`, await p.locator('#pjWarn a').isVisible() && (await p.getAttribute('#pjWarn a', 'href')) === '/project/' + SYNC);
+    const acts = (await p.innerText('.pj-actions')).replace(/\s+/g, ' ');
+    check(`${w}px impostor: trade action names the contract, never "Trade on PAR" for the protected ticker`, /Trade contract 0x9999…9999 on PAR/.test(acts) && !/(^| )Trade on PAR/.test(acts), acts);
+    check(`${w}px impostor: no visible "Create a project connected to $SYNC" action`, (await p.locator('a[href^="/build.html?with="]:visible').count()) === 0 && !/connected to \$SYNC/.test(await p.innerText('main')));
+    if (w === 1440) {
+      await p.click('#projectDetails > summary'); await p.waitForTimeout(200);
+      check('impostor: DETAILS still holds the full evidence (visible once expanded)', /NOT THE CANONICAL \$SYNC/.test(await p.innerText('#tokenCard')));
+    }
+    await shot(p, `p1-impostor-${w}`);
+    await c.close();
+  }
+  // canonical $SYNC and other protected / unprotected projects: no false positives
+  const c = await ctx(); const p = await c.newPage();
+  for (const [label, token, createVisible] of [['canonical $SYNC', SYNC, true], ['canonical $SYNCAT', lc(A.SYNCAT), true], ['$PONS (shared, unprotected ticker)', lc(A.PONS), true], ['second $PONS (shared, unprotected ticker)', lc(A.PONS_FAKE), true], ['$CASHCAT (similar, unprotected ticker)', lc(A.CASHCAT), false]]) {
+    await p.goto(BASE + '/project/' + token); await loaded(p);
+    const v = await warnVisible(p);
+    const main = await p.innerText('main');
+    check(`no false positive: ${label} shows no impostor warning`, !v.shown && !/Not the canonical/i.test(main), JSON.stringify(v));
+    if (createVisible) check(`no false positive: ${label} keeps its legitimate actions`, /Trade on PAR/.test(await p.innerText('.pj-actions')) && (await p.locator(`a[href="/build.html?with=${token}"]:visible`).count()) === 1);
+  }
+  await shot(p, 'p1-canonical-sync');
+  await c.close();
+});
+
 await browser.close(); srv.close();
 console.log(`\n${results.length - results.filter((r) => !r.ok).length}/${results.length} phase 2 UI checks passed`);
 process.exit(failures ? 1 : 0);

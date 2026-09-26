@@ -171,7 +171,7 @@ async function run(){
  announce({token:a,name,symbol:sym,logoUri,origin,originLabel:{PAR:'PAR launch',PONS_V2:'Pons V2 launch',PONS_V1:'Pons V1 launch',UNAVAILABLE:'Origin unavailable',UNVERIFIED:'Not a verified launch'}[origin],
   claimable:Boolean(src),deployer:src?String(src.deployer||'').toLowerCase():'',feeRecipient:src?String(src.creatorFeeRecipient||'').toLowerCase():'',
   passport:marketPassport,listing:mkt&&mkt.listing||null,registryOperator:prov&&prov.status===Prov.STATUS.OPERATOR&&prov.operator?String(prov.operator.operator||'').toLowerCase():'',
-  canonical:Boolean(canonical),usedBy:usedBy.length,directMarkets:isPar?Number(launch.marketCount||0):isPons?1:0,tradeUrl:isPar?'https://par.family/token/'+a:''});
+  canonical:Boolean(canonical),impostorOf:impostor?{token:impostor.token,symbol:impostor.symbol}:null,usedBy:usedBy.length,directMarkets:isPar?Number(launch.marketCount||0):isPons?1:0,tradeUrl:isPar?'https://par.family/token/'+a:''});
 }
 function announce(detail){window.__snProject=detail;window.dispatchEvent(new CustomEvent('syncnet:project',{detail}))}
 run().catch(()=>{announce({unavailable:true});$('tokenTitle').textContent='Project data unavailable';$('tokenDescription').textContent='The chain or the indexer did not answer.';$('tokenCard').innerHTML='<div class="network-empty">The chain/indexer did not return enough data for this contract right now. No provenance or relationship has been inferred.</div>'});

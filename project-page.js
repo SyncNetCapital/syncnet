@@ -51,8 +51,17 @@
     $('pjCopy').setAttribute('data-copy-text', P.token);
     $('pjCopy').setAttribute('aria-label', 'Copy contract address');
     $('pjContract').hidden = false;
+    // Same protected ticker as a canonical SyncNet asset at a DIFFERENT contract (identity = contract address, from
+    // the reviewed registry; the ticker comparison is confusable-aware). Always visible — never only inside DETAILS.
+    const imp = P.impostorOf;
+    const warn = $('pjWarn');
+    if (imp) {
+      warn.innerHTML = `<span class="pj-warn-mark" aria-hidden="true">⚠</span><span><strong>Not the canonical $${esc(imp.symbol)} contract.</strong> Same ticker, different contract. The canonical $${esc(imp.symbol)} is <span class="sn-mono">${esc(short(imp.token))}</span>. <a href="/project/${esc(imp.token)}">Open the canonical $${esc(imp.symbol)} →</a></span>`;
+      warn.hidden = false;
+    } else { warn.hidden = true; warn.textContent = ''; }
     const acts = [];
-    if (P.tradeUrl) acts.push(`<a href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">Trade on PAR ↗</a>`);
+    // On an impostor, trading is still possible but is labelled by contract, never by the protected ticker alone.
+    if (P.tradeUrl) acts.push(`<a href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">${imp ? `Trade contract ${esc(short(P.token))} on PAR ↗` : 'Trade on PAR ↗'}</a>`);
     acts.push(`<a href="https://robinhoodchain.blockscout.com/address/${esc(P.token)}" target="_blank" rel="noreferrer">View on explorer ↗</a>`);
     $('pjActions').innerHTML = acts.join('');
   }
@@ -129,7 +138,8 @@
     if (u) parts.push(`used by <span class="sn-num">${u}</span> project${u === 1 ? '' : 's'}`);
     const hub = u >= HUB ? '<small>Network hub</small>' : '';
     const links = [];
-    if (P.origin === 'PAR') links.push(`<a href="/build.html?with=${esc(P.token)}">Create a project connected to $${esc(P.symbol)} →</a>`);
+    // Never offer "connect to $TICKER" on a contract that only imitates a protected ticker.
+    if (P.origin === 'PAR' && !P.impostorOf) links.push(`<a href="/build.html?with=${esc(P.token)}">Create a project connected to $${esc(P.symbol)} →</a>`);
     if (u && !economyRow()) links.push(`<a href="/economy.html?root=${esc(P.token)}">Economy view →</a>`); // derived membership, even before curation
     const note = links.join('<span class="sep" aria-hidden="true"> · </span>');
     return rowHtml('connections', 'Connections', parts.join(' · ').replace(/^./, (c) => c.toUpperCase()) + hub, `<a href="/network.html?token=${esc(P.token)}">View network →</a>`, note);

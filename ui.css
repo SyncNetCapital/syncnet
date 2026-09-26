@@ -154,6 +154,11 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .pj-title{display:flex;align-items:center;gap:16px;min-width:0}
 .pj-title .sn-logo{width:48px;height:48px;font-size:18px}
 .pj-title h1{font-size:clamp(30px,4.6vw,48px);line-height:1.05;font-weight:600;letter-spacing:-.02em;margin:0;overflow-wrap:anywhere}
+.pj-warn{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;padding:10px 14px;border:1px solid rgba(224,179,109,.38);border-left:2px solid var(--warn);border-radius:var(--r);color:var(--bone);font-size:15px;line-height:1.45;max-width:760px}
+.pj-warn[hidden]{display:none}
+.pj-warn strong{color:var(--warn);font-weight:600}
+.pj-warn-mark{color:var(--warn);font-size:16px;line-height:1.3;flex:none}
+.pj-warn a{color:var(--bone);text-decoration:underline;text-underline-offset:3px;white-space:nowrap}
 .pj-sub{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:14px 0 0;color:var(--bone-2);font-size:15px}
 .pj-sub .sep{color:var(--bone-3)}
 .pj-contract{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:var(--mono);font-size:13px;color:var(--bone-3);min-width:0}
