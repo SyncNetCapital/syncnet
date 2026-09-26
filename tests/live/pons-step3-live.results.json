@@ -1,0 +1,270 @@
+{
+  "passed": 18,
+  "failed": 0,
+  "results": [
+    {
+      "name": "1 chainId == 4663",
+      "ok": true,
+      "detail": "4663"
+    },
+    {
+      "name": "2 Pons V2 factory has code",
+      "ok": true,
+      "detail": "48356"
+    },
+    {
+      "name": "3/4 live runtime bytecode == Blockscout-verified bytecode (sha256)",
+      "ok": true,
+      "detail": "226a042e6d68a69a6038d4fda211925b03eb5299399434b87a7877f79f6e3848"
+    },
+    {
+      "name": "4/7/8 selector getLaunchedToken 0x3cf28b5a is in the live dispatcher",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "4/7/8 selector pendingCreatorFeeRecipient 0x9beacf4a is in the live dispatcher",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "4/7/8 selector transferCreatorFeeRecipient 0x2931861b is in the live dispatcher",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "5 TEST → PONS_V2 / supported / bonding curve / native ETH",
+      "ok": true,
+      "detail": "{\"origin\":\"PONS_V2\",\"label\":\"PONS V2\",\"supported\":true,\"token\":\"0x52a03cd2fee18216ee45c66d9be8c0ee2cd8399b\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0xa960de53788c55e76c659fdc3d0b96c55f7e1013\",\"creatorFeeRecipient\":\"0xa960de53788c55e76c659fdc3d0b96c55f7e1013\",\"creatorTaxBps\":100,\"pair\":{\"address\":\"0x0000000000000000000000000000000000000000\",\"native\":true},\"state\":{\"phase\":0,\"code\":\"NotGraduated\",\"label\":\"BONDING CURVE\"},\"buybackEnabled\":false,\"pendingOverride\":null}"
+    },
+    {
+      "name": "5 TEST record: token == TEST, pairToken == 0, no pending override",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "6 PONSI → PONS_V2 / supported / graduated (PoolCreated) / native ETH",
+      "ok": true,
+      "detail": "{\"origin\":\"PONS_V2\",\"label\":\"PONS V2\",\"supported\":true,\"token\":\"0x7f241b9d177826bfc3e8aa9ab87f2d0ac911d164\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x00c4f849c8ee27e27f08ab22f978b3241ec2174e\",\"creatorFeeRecipient\":\"0x1b26226a3aa692c6d55e49e4a0d9af103a673a36\",\"creatorTaxBps\":100,\"pair\":{\"address\":\"0x0000000000000000000000000000000000000000\",\"native\":true},\"state\":{\"phase\":2,\"code\":\"PoolCreated\",\"label\":\"GRADUATED · V4 LIVE\"},\"buybackEnabled\":false,\"pendingOverride\":null}"
+    },
+    {
+      "name": "6 PONSI record: token == PONSI, pairToken == 0, no pending override",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "9 WETH → unsupported (null)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "10 PONS → PONS_V1 / detected / unsupported / LEGACY factory",
+      "ok": true,
+      "detail": "{\"origin\":\"PONS_V1\",\"label\":\"PONS V1\",\"supported\":false,\"token\":\"0x39dbed3a2bd333467115de45665cc57f813c4571\",\"factory\":\"0x0c37a24f5d23a486fa692d1500881d698b1f77a4\",\"generation\":\"LEGACY\",\"deployer\":\"0xb9f5f4ea1af1f5d3678470eb98e8fbdcadeb24b0\"}"
+    },
+    {
+      "name": "10 control: an ACTIVE-factory V1 token → PONS_V1 / unsupported / ACTIVE factory",
+      "ok": true,
+      "detail": "{\"origin\":\"PONS_V1\",\"label\":\"PONS V1\",\"supported\":false,\"token\":\"0x97133372cc4391a4f6889b4d52387649b76bc7ec\",\"factory\":\"0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb\",\"generation\":\"ACTIVE\",\"deployer\":\"0x50e037ecc7c2d79b912950102a53377841a67d1d\"}"
+    },
+    {
+      "name": "10 real PONS claim refused: 422 unsupported_origin (PONS V1 DETECTED)",
+      "ok": true,
+      "detail": "{\"status\":422,\"body\":{\"error\":\"PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.\",\"code\":\"unsupported_origin\"}}"
+    },
+    {
+      "name": "10 real ACTIVE V1 claim refused: 422 unsupported_origin",
+      "ok": true,
+      "detail": "{\"status\":422,\"body\":{\"error\":\"PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.\",\"code\":\"unsupported_origin\"}}"
+    },
+    {
+      "name": "9 real WETH claim refused: 422 not_par",
+      "ok": true,
+      "detail": "{\"status\":422,\"body\":{\"error\":\"This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.\",\"code\":\"not_par\"}}"
+    },
+    {
+      "name": "10 real PONS listing refused even with a planted Passport",
+      "ok": true,
+      "detail": "{\"status\":422,\"body\":{\"error\":\"PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.\",\"code\":\"unsupported_origin\"}}"
+    },
+    {
+      "name": "10 real ACTIVE V1 listing refused even with a planted Passport",
+      "ok": true,
+      "detail": "{\"status\":422,\"body\":{\"error\":\"PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.\",\"code\":\"unsupported_origin\"}}"
+    }
+  ],
+  "evidence": {
+    "at": "2026-09-26T09:11:43.411Z",
+    "rpc": "https://rpc.mainnet.chain.robinhood.com/",
+    "tokens": {
+      "TEST": {
+        "address": "0x52a03cd2fee18216ee45c66d9be8c0ee2cd8399b",
+        "tokenLaunchFactory": "0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e",
+        "resolved": {
+          "origin": "PONS_V2",
+          "label": "PONS V2",
+          "supported": true,
+          "token": "0x52a03cd2fee18216ee45c66d9be8c0ee2cd8399b",
+          "factory": "0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e",
+          "deployer": "0xa960de53788c55e76c659fdc3d0b96c55f7e1013",
+          "creatorFeeRecipient": "0xa960de53788c55e76c659fdc3d0b96c55f7e1013",
+          "creatorTaxBps": 100,
+          "pair": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "native": true
+          },
+          "state": {
+            "phase": 0,
+            "code": "NotGraduated",
+            "label": "BONDING CURVE"
+          },
+          "buybackEnabled": false,
+          "pendingOverride": null
+        },
+        "raw": {
+          "token": "0x52a03cd2fee18216ee45c66d9be8c0ee2cd8399b",
+          "curve": "0x31f94b07e533c0bba7ad6e57f64512a51b46ea8b",
+          "deployer": "0xa960de53788c55e76c659fdc3d0b96c55f7e1013",
+          "creatorFeeRecipient": "0xa960de53788c55e76c659fdc3d0b96c55f7e1013",
+          "pairToken": "0x0000000000000000000000000000000000000000",
+          "graduationThreshold": "4200000000000000000",
+          "poolFee": 0,
+          "tickSpacing": 200,
+          "creatorTaxBps": 100,
+          "buybackEnabled": false,
+          "phase": 0,
+          "sweptQuote": "0",
+          "sweptTokens": "0",
+          "sweptAt": "0"
+        },
+        "feeRight": {
+          "recipient": "0xa960de53788c55e76c659fdc3d0b96c55f7e1013",
+          "kind": "wallet",
+          "transferable": true,
+          "label": "Transferable on-chain by the current recipient wallet"
+        }
+      },
+      "PONSI": {
+        "address": "0x7f241b9d177826bfc3e8aa9ab87f2d0ac911d164",
+        "tokenLaunchFactory": "0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e",
+        "resolved": {
+          "origin": "PONS_V2",
+          "label": "PONS V2",
+          "supported": true,
+          "token": "0x7f241b9d177826bfc3e8aa9ab87f2d0ac911d164",
+          "factory": "0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e",
+          "deployer": "0x00c4f849c8ee27e27f08ab22f978b3241ec2174e",
+          "creatorFeeRecipient": "0x1b26226a3aa692c6d55e49e4a0d9af103a673a36",
+          "creatorTaxBps": 100,
+          "pair": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "native": true
+          },
+          "state": {
+            "phase": 2,
+            "code": "PoolCreated",
+            "label": "GRADUATED · V4 LIVE"
+          },
+          "buybackEnabled": false,
+          "pendingOverride": null
+        },
+        "raw": {
+          "token": "0x7f241b9d177826bfc3e8aa9ab87f2d0ac911d164",
+          "curve": "0xeb9d99f7c1bffe12d49421c9a99696e4e886760b",
+          "deployer": "0x00c4f849c8ee27e27f08ab22f978b3241ec2174e",
+          "creatorFeeRecipient": "0x1b26226a3aa692c6d55e49e4a0d9af103a673a36",
+          "pairToken": "0x0000000000000000000000000000000000000000",
+          "graduationThreshold": "4200000000000000000",
+          "poolFee": 0,
+          "tickSpacing": 200,
+          "creatorTaxBps": 100,
+          "buybackEnabled": false,
+          "phase": 2,
+          "sweptQuote": "0",
+          "sweptTokens": "0",
+          "sweptAt": "0"
+        },
+        "feeRight": {
+          "recipient": "0x1b26226a3aa692c6d55e49e4a0d9af103a673a36",
+          "kind": "contract",
+          "transferable": false,
+          "label": "REQUIRES MANUAL VERIFICATION · recipient is a contract"
+        }
+      },
+      "WETH": {
+        "address": "0x0bd7d308f8e1639fab988df18a8011f41eacad73",
+        "tokenLaunchFactory": "(reverts)",
+        "resolved": null,
+        "raw": null
+      },
+      "PONS": {
+        "address": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+        "tokenLaunchFactory": "0x0c37a24f5d23a486fa692d1500881d698b1f77a4",
+        "resolved": {
+          "origin": "PONS_V1",
+          "label": "PONS V1",
+          "supported": false,
+          "token": "0x39dbed3a2bd333467115de45665cc57f813c4571",
+          "factory": "0x0c37a24f5d23a486fa692d1500881d698b1f77a4",
+          "generation": "LEGACY",
+          "deployer": "0xb9f5f4ea1af1f5d3678470eb98e8fbdcadeb24b0"
+        },
+        "raw": null
+      },
+      "V1_ACTIVE_SAMPLE": {
+        "address": "0x97133372cc4391a4f6889b4d52387649b76bc7ec",
+        "tokenLaunchFactory": "0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb",
+        "resolved": {
+          "origin": "PONS_V1",
+          "label": "PONS V1",
+          "supported": false,
+          "token": "0x97133372cc4391a4f6889b4d52387649b76bc7ec",
+          "factory": "0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb",
+          "generation": "ACTIVE",
+          "deployer": "0x50e037ecc7c2d79b912950102a53377841a67d1d"
+        },
+        "raw": null
+      }
+    },
+    "marketplace": {
+      "PONS_claim": {
+        "status": 422,
+        "body": {
+          "error": "PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.",
+          "code": "unsupported_origin"
+        }
+      },
+      "V1_ACTIVE_SAMPLE_claim": {
+        "status": 422,
+        "body": {
+          "error": "PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.",
+          "code": "unsupported_origin"
+        }
+      },
+      "WETH_claim": {
+        "status": 422,
+        "body": {
+          "error": "This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.",
+          "code": "not_par"
+        }
+      },
+      "PONS_list_with_planted_passport": {
+        "status": 422,
+        "body": {
+          "error": "PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.",
+          "code": "unsupported_origin"
+        }
+      },
+      "V1_ACTIVE_SAMPLE_list_with_planted_passport": {
+        "status": 422,
+        "body": {
+          "error": "PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.",
+          "code": "unsupported_origin"
+        }
+      }
+    },
+    "chainId": 4663,
+    "block": 72965930,
+    "v2RuntimeSha256": "226a042e6d68a69a6038d4fda211925b03eb5299399434b87a7877f79f6e3848"
+  }
+}

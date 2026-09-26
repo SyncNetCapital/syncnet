@@ -152,11 +152,27 @@ for f in site_js:
     t=open(f,encoding='utf-8').read()
     assert '0x095ea7b3' not in t and 'approve(address' not in t and 'permit(' not in t, 'approval code in '+f
     if not (f.endswith('builder-v2.js') or f.endswith('marketplace-v2.js')): assert "method:'eth_sendTransaction'" not in t and 'method: \'eth_sendTransaction\'' not in t, 'only the builder and the marketplace deal room may send: '+f
-# the marketplace's two sends are exactly: a plain value transfer to the seller (data '0x') and PAR's own fee transfer
+# the marketplace's two sends are exactly: a plain value transfer to the seller (data '0x') and the launchpad's own
+# fee transfer, built ONLY by SyncNetOrigins.feeTransferTx for a canonical factory (PAR single/multi, Pons V2)
 _mp=(root/'marketplace-v2.js').read_text()
 assert _mp.count("method:'eth_sendTransaction'")==2, 'marketplace send count changed'
 assert "to:d.seller,value:'0x'+wei.toString(16),data:'0x'" in _mp, 'payment must stay a plain transfer'
-assert "functionSelector('transferCreatorFeeRecipient(address,address)')" in _mp, "fee transfer must use PAR's own call"
+assert "const tx=Origins.feeTransferTx(project,d.token,d.buyer);" in _mp and "params:[{from:account,to:tx.to,data:tx.data,value:'0x0'}]" in _mp, 'fee transfer must come from the single validated builder'
+assert "functionSelector('transferCreatorFeeRecipient" not in _mp, 'no hand-built fee calldata in the page'
+_org=(root/'lib/syncnet-origins.js').read_text()
+assert "const PONS_V2_FACTORY = '0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e';" in _org  # ponsdotdev/pons-labs README, EIP-55 checked
+assert "const PAR_FACTORIES = Object.freeze([lc(Chain.ROBINHOOD.multiFactory), lc(Chain.ROBINHOOD.factory)]);" in _org
+assert "const FEE_FACTORIES = Object.freeze(PAR_FACTORIES.concat([PONS_V2_FACTORY]));" in _org, 'fee-transfer destinations must be exactly the canonical factories'
+assert "if (!FEE_FACTORIES.includes(to)) throw" in _org and "transferCreatorFeeRecipient: Core.functionSelector('transferCreatorFeeRecipient(address,address)')" in _org
+assert _org.count('functionSelector(') == 6 and 'eth_sendTransaction' not in _org, 'origins lib: read selectors (incl. launchFactory) + the one fee-transfer selector only'
+# Pons V1: detection only, exactly two canonical factories, bidirectional evidence, never a fee-transfer destination
+assert "Object.freeze({ address: '0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb', generation: 'ACTIVE' })," in _org
+assert "Object.freeze({ address: '0x0c37a24f5d23a486fa692d1500881d698b1f77a4', generation: 'LEGACY' })," in _org
+assert "const factory = PONS_V1_FACTORIES.find((f) => f.address === claimed);\n    if (!factory) return null;" in _org, 'V1 origin only from an allowlisted factory named by the token itself'
+assert "if (r[11] !== true || lc(r[0]) !== t) return null;" in _org, 'V1 origin requires exists && record.token == token'
+assert "supported: false, token: t, factory: v1.factory" in _org, 'Pons V1 is never supported'
+assert 'PONS_V1' not in _org.split('function feeTransferTx')[1].split("throw new Error('Unsupported project origin.')")[0].replace("project.origin === 'PAR' || project.origin === 'PONS_V2'", ''), 'fee transfers never for V1'
+assert "if (r[14] !== true || lc(r[0]) !== t) return null;" in _org, 'Pons V2 origin requires exists && record.token == token'
 # M3 / M4 / L4 / L8 / L13
 tok=(root/'v2-token.js').read_text(); net=(root/'v2-network.js').read_text(); mp=(root/'marketplace-v2.js').read_text()
 assert 'NOT VERIFIED AS A PAR LAUNCH' in tok and tok.index('Chain.readLaunch(rpc,a)') < tok.index("if(isPar&&usedBy.length)badges.push('<span class=\"badge\">NETWORK HUB</span>')")

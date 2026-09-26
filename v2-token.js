@@ -6,7 +6,7 @@
  * Provenance statuses come from lib/syncnet-provenance.js (checked live). Browser-local launch records are shown
  * separately and are never presented as public provenance.
  */
-const Core=window.SyncNetCore,Chain=window.SyncNetChain,Prov=window.SyncNetProvenance,Records=window.SyncNetRecords;
+const Core=window.SyncNetCore,Chain=window.SyncNetChain,Prov=window.SyncNetProvenance,Records=window.SyncNetRecords,Origins=window.SyncNetOrigins;
 const API='https://api.par.family';
 const rpc=Chain.makeRpc(Chain.ROBINHOOD.rpcUrl,{timeoutMs:10000,retries:1});
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -104,6 +104,9 @@ async function run(){
  $('tokenTitle').textContent='CHECKING…';$('tokenDescription').textContent='Reading the PAR factory record on Robinhood Chain.';
  let launch;try{launch=await Chain.readLaunch(rpc,a)}catch{launch='unavailable'}
  const isPar=Boolean(launch&&launch!=='unavailable');
+ // Other supported origins (Pons V2) — read live from their canonical factory only when the token is not a PAR launch.
+ let pons=null;if(!isPar&&launch!=='unavailable'&&Origins){try{pons=await Origins.resolveProject(rpc,a)}catch{pons='unavailable'}}
+ const isPons=Boolean(pons&&pons!=='unavailable'&&pons.origin==='PONS_V2'),isPonsV1=Boolean(pons&&pons!=='unavailable'&&pons.origin==='PONS_V1');
  // Marketplace passport: server-verified operator provenance (signed claims + two-party transfers). Precise labels:
  // SYNCNET OPERATOR VERIFIED (server-checked signatures) is not PAR INDEXED and not a curated profile note.
  const [all,srv,idxRes,h,meta,mkt]=await Promise.all([projects(),serverEntry(a),fetch(`${API}/launches/${a}`,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null),history(),Chain.readTokenMetadata(rpc,a).catch(()=>null),fetch('/api/marketplace?view=passport&token='+a,{cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null)]);
@@ -117,14 +120,17 @@ async function run(){
  const chainName=disp(meta&&meta.name,64),chainSym=meta&&meta.symbol?safeSymbol(meta.symbol):'';
  const canonical=prov.canonical;
  const sym=chainSym||safeSymbol(profile?.symbol||profile?.profile?.name||'TOKEN');
- const name=(isPar||canonical?(chainName||disp(profile?.profile?.name,64)):chainName)||'Unnamed contract';
+ const name=(isPar||isPons||canonical?(chainName||disp(profile?.profile?.name,64)):chainName)||'Unnamed contract';
  const impostor=!canonical?canonicalList.find(c=>c.token!==a&&Core.confusableSkeleton(c.symbol)===Core.confusableSkeleton(sym)&&sym!=='TOKEN'):null;
  document.title=`${name} — SyncNet`;$('tokenTitle').textContent=name;$('tokenDescription').textContent=`$${sym} · ${a}`;
- const logoUri=isPar?(meta&&meta.logo||profile?.profile?.image||''):canonical?(profile?.profile?.image||''):'';
+ const logoUri=isPar||isPons?(meta&&meta.logo||profile?.profile?.image||''):canonical?(profile?.profile?.image||''):'';
  const logoHtml=Ipfs.imgHtml(logoUri,{letter:(sym||'S').charAt(0)});
  const badges=[];
  if(isPar)badges.push('<span class="badge">PAR LAUNCH · FACTORY RECORD ON-CHAIN</span>');
  else if(launch==='unavailable')badges.push('<span class="badge registry-badge unverified">PAR STATUS UNAVAILABLE</span>');
+ else if(isPons)badges.push('<span class="badge">PONS V2 LAUNCH · FACTORY RECORD ON-CHAIN</span>');
+ else if(isPonsV1)badges.push(`<span class="badge">PONS V1 LAUNCH · ${pons.generation==='LEGACY'?'LEGACY ':''}FACTORY RECORD ON-CHAIN</span>`);
+ else if(pons==='unavailable')badges.push('<span class="badge registry-badge unverified">LAUNCHPAD STATUS UNAVAILABLE</span>');
  else badges.push('<span class="badge registry-badge unverified">NOT VERIFIED AS A PAR LAUNCH</span>');
  if(isPar&&usedBy.length)badges.push('<span class="badge">NETWORK HUB</span>');
  if(canonical)badges.push('<span class="badge registry-badge network">CANONICAL SYNCNET ASSET · BY CONTRACT ADDRESS</span>');
@@ -139,14 +145,25 @@ async function run(){
   const syms=await Promise.all(mk.map(x=>{const row=markets(idxRes).find(r=>same(pairAddr(r),x.pairToken));return row&&row.quoteSymbol?Promise.resolve(safeSymbol(row.quoteSymbol)):ercSymbol(x.pairToken)}));
   ownMarkets=`<div class="eyebrow" style="margin-top:28px">Direct markets · read from the PAR factory</div><div class="chip-row">${mk.map((x,i)=>`<span class="chip">${esc(sym)} / ${esc(syms[i])}</span>`).join('')||'<span class="chip">markets not readable right now</span>'}</div>`;
   marketContracts=mk.length?`<div class="economic-card"><strong>Market contracts</strong><p>${mk.map((x,i)=>`${esc(syms[i])}: <span class="mono">${esc(x.pairToken)}</span>`).join('<br>')}</p></div>`:'';
+ }else if(isPons){
+  // Pons V2 project: verified origin facts + SyncNet Passport/Marketplace state. No PAR analytics are shown for Pons.
+  let pair=null;try{pair=await Origins.pairInfo(rpc,pons.pair.address)}catch{pair=null}
+  const fr=await Origins.classifyFeeRight(rpc,pons).catch(()=>null);
+  const pass=mkt&&mkt.passport,lst=mkt&&mkt.listing||null;
+  const row=(l,v)=>`<div class="passport-row"><span>${esc(l)}</span><div><strong>${v}</strong></div></div>`;
+  const pairText=pair?(pair.native?'ETH':pair.symbol||short(pair.address)):short(pons.pair.address);
+  const frText=fr?(fr.kind==='wallet'?' · wallet':fr.kind==='encumbered'?' · wallet · Pons protocol override pending':' · contract'):'';
+  ownMarkets=`<div class="eyebrow" style="margin-top:28px">Origin · read from the Pons V2 factory</div><div class="passport-rows">${row('Origin','PONS V2 · ON-CHAIN VERIFIED')}${row('Token contract',`<span class="mono">${esc(a)}</span>`)}${row('Pair asset',esc(pairText))}${row('Status',esc(pons.state.label))}${row('Creator tax',esc((pons.creatorTaxBps/100)+'%'))}${row('Deployer',`<span class="mono">${esc(pons.deployer)}</span>`)}${row('Creator-fee recipient',`<span class="mono">${esc(pons.creatorFeeRecipient)}</span>${esc(frText)}`)}${row('Project Passport',pass?`SYNCNET OPERATOR <span class="mono">${esc(pass.operator)}</span>`:'Not claimed yet')}${row('Marketplace',lst?`<a href="/marketplace.html#listing=${esc(lst.id)}">${lst.status==='ACTIVE'?'FOR SALE · '+esc(lst.price)+' '+esc(lst.currency):'LISTING · '+esc(String(lst.status||'').replace(/_/g,' '))} →</a>`:'Not listed')}</div><p class="coverage-note">A Project Passport is SyncNet-recognised operational control, not ownership of the token contract. No partnership with or endorsement by Pons is implied.</p>`;
+ }else if(isPonsV1){
+  ownMarkets=`<p class="example-copy">An earlier-generation Pons launch: its record is on the ${pons.generation==='LEGACY'?'legacy ':''}Pons V1 factory. SyncNet recognises it but does not support this launch generation, so it cannot hold a Project Passport or be listed in the Marketplace. No ownership, fee or security claims are made about it.</p>`;
  }else{
   ownMarkets=`<p class="example-copy">${launch==='unavailable'?'Robinhood Chain could not be read right now, so SyncNet cannot say whether this contract is a PAR launch. No launch, ownership, fee or security claims are made.':'SyncNet could not verify this contract as a PAR launch. No ownership, fee, market or security claims are made about it.'}${usedBy.length?` The PAR indexer lists ${usedBy.length} PAR launch${usedBy.length===1?'':'es'} that use this contract as a market.`:''}</p>`;
  }
  const children=usedBy.slice(0,12).map(x=>{const cs=safeSymbol(x.symbol||x.tokenSymbol),imp=canonicalList.some(c=>c.token!==String(tokenAddr(x)).toLowerCase()&&Core.confusableSkeleton(c.symbol)===Core.confusableSkeleton(cs));return`<a class="chip${imp?' impostor-chip':''}" href="/project/${esc(tokenAddr(x))}">$${esc(cs)}${imp?' (not canonical)':''} · ${esc(short(tokenAddr(x)))}</a>`}).join('');
- const facts=isPar?`<div class="registry-facts">${fact('Deployer',short(launch.deployer))}${fact('Fee mode',VAULTS[String(launch.creatorFeeRecipient).toLowerCase()]||'creator wallet')}${fact('Launched (indexer)',idxRes?.createdAt?String(idxRes.createdAt).replace('T',' ').slice(0,16)+(/^\d{4}-/.test(String(idxRes.createdAt))?' UTC':''):'')}${fact('Projects using this token as a market',String(usedBy.length))}</div>`:`<div class="registry-facts">${fact('Projects using this contract as a market (indexer)',String(usedBy.length))}</div>`;
+ const facts=isPar?`<div class="registry-facts">${fact('Deployer',short(launch.deployer))}${fact('Fee mode',VAULTS[String(launch.creatorFeeRecipient).toLowerCase()]||'creator wallet')}${fact('Launched (indexer)',idxRes?.createdAt?String(idxRes.createdAt).replace('T',' ').slice(0,16)+(/^\d{4}-/.test(String(idxRes.createdAt))?' UTC':''):'')}${fact('Projects using this token as a market',String(usedBy.length))}</div>`:(isPons||isPonsV1)?'':`<div class="registry-facts">${fact('Projects using this contract as a market (indexer)',String(usedBy.length))}</div>`; // Pons pages show no PAR-indexer-derived counts
  let desc='';
  if(isPar&&meta&&meta.description){const full=Core.sanitizeForDisplay(meta.description,{maxLength:2048,multiline:true});const head=Array.from(full).slice(0,420).join('');desc=full.length>head.length?`<div class="example-copy token-description"><strong>Description:</strong> <span>${esc(head)}…</span><details><summary>Show the full description</summary><p>${esc(full)}</p></details></div>`:`<p class="example-copy token-description"><strong>Description:</strong> ${esc(full)}</p>`}
- $('tokenCard').innerHTML=`<div class="example-top"><div class="example-project">${logoHtml}<div><h3>${esc(name)}</h3><p class="mono">${esc(a)}</p></div></div><div class="badge-stack">${badges.join('')}</div></div>${impostorNote}${provBox}${localBox}${facts}${desc}${ownMarkets}${usedBy.length?`<div class="eyebrow" style="margin-top:28px">${isPar?'Projects using this token as a market':'PAR launches using this contract as a market (indexer)'}</div><div class="chip-row">${children}</div>${usedBy.length>12?`<p class="coverage-note">Showing 12 of ${usedBy.length}. Open Map for the network view.</p>`:''}`:''}<div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(a)}">MAP CONNECTIONS</a><a class="btn" href="/economy.html?root=${esc(a.toLowerCase())}">ECONOMY VIEW</a>${isPar?`<a class="btn" href="/build.html?with=${esc(a)}">SYNC WITH $${esc(sym)}</a><a class="btn" href="https://par.family/token/${esc(a)}" target="_blank" rel="noreferrer">PAR ↗</a>`:''}<a class="btn" href="https://robinhoodchain.blockscout.com/address/${esc(a)}" target="_blank" rel="noreferrer">EXPLORER ↗</a></div>${isPar?'<div class="passport-panel" id="passportPanel" aria-live="polite"><div class="network-empty">Reading Passport data from PAR…</div></div>':''}${marketContracts}`;
+ $('tokenCard').innerHTML=`<div class="example-top"><div class="example-project">${logoHtml}<div><h3>${esc(name)}</h3><p class="mono">${esc(a)}</p></div></div><div class="badge-stack">${badges.join('')}</div></div>${impostorNote}${provBox}${localBox}${facts}${desc}${ownMarkets}${usedBy.length&&!isPons&&!isPonsV1?`<div class="eyebrow" style="margin-top:28px">${isPar?'Projects using this token as a market':'PAR launches using this contract as a market (indexer)'}</div><div class="chip-row">${children}</div>${usedBy.length>12?`<p class="coverage-note">Showing 12 of ${usedBy.length}. Open Map for the network view.</p>`:''}`:''}<div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(a)}">MAP CONNECTIONS</a><a class="btn" href="/economy.html?root=${esc(a.toLowerCase())}">ECONOMY VIEW</a>${isPar?`<a class="btn" href="/build.html?with=${esc(a)}">SYNC WITH $${esc(sym)}</a><a class="btn" href="https://par.family/token/${esc(a)}" target="_blank" rel="noreferrer">PAR ↗</a>`:''}<a class="btn" href="https://robinhoodchain.blockscout.com/address/${esc(a)}" target="_blank" rel="noreferrer">EXPLORER ↗</a></div>${isPar?'<div class="passport-panel" id="passportPanel" aria-live="polite"><div class="network-empty">Reading Passport data from PAR…</div></div>':''}${marketContracts}`;
  if(isPar)renderPassport(a,launch,meta,prov,profile,mkt).catch(()=>{const h=$('passportPanel');if(h)h.innerHTML='<div class="network-empty">Passport data is temporarily unavailable.</div>'});
 }
 run().catch(()=>{$('tokenTitle').textContent='TOKEN DATA UNAVAILABLE';$('tokenDescription').textContent='The chain or the indexer did not answer.';$('tokenCard').innerHTML='<div class="network-empty">The chain/indexer did not return enough data for this contract right now. No provenance or relationship has been inferred.</div>'});

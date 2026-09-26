@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-24T14:20:34.368Z",
+  "at": "2026-09-26T09:28:56.128Z",
   "failures": 0,
   "passed": 45,
   "total": 45,
@@ -42,7 +42,7 @@
     {
       "name": "list: the published listing shows real status badges from server + chain facts",
       "ok": true,
-      "detail": "ListingOPERATOR LIVE.← ALL LISTINGS\n Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n ACTIVEVERIFIED OPERATOR 0x2c75…5c23C"
+      "detail": "ListingOPERATOR LIVE.← ALL LISTINGS\n Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n ACTIVEVERIFIED OPERATOR 0x2c75…5c23L"
     },
     {
       "name": "list: what is NOT sold is explicit (supply, liquidity, metadata, X account)",
@@ -57,7 +57,7 @@
     {
       "name": "cross-browser: a SECOND browser sees the SAME listing (server persistence, not localStorage)",
       "ok": true,
-      "detail": "Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n VERIFIED OPERATORLIVE PAR PROJECTCREATOR FEE TRANSFERABLEACTIVE2026-09-24"
+      "detail": "Operator Live · $OPLIVE0x55555555555555555555555555555555555555552.31 ETHASKING PRICE\n VERIFIED OPERATORLIVE PAR PROJECTCREATOR FEE TRANSFERABLEACTIVE2026-09-26"
     },
     {
       "name": "cross-browser: the buyer browser holds no marketplace records locally",
@@ -87,12 +87,12 @@
     {
       "name": "inbox: the seller sees exactly ONE offer (the double-click made no duplicate)",
       "ok": true,
-      "detail": "C listed2026-09-24 14:20 UTC operator claim · 0x2c75…5c23\n \n \n CANCEL LISTING · SIGN\n \n \n OFFERS (1)Accept or reject — both are signatures\n 0x19e7…ff2a2.31 ETHPENDING2026-09-24 14:20 UTCACCEPTREJECT\n "
+      "detail": "C listed2026-09-26 09:28 UTC operator claim · 0x2c75…5c23\n \n \n CANCEL LISTING · SIGN\n \n \n OFFERS (1)Accept or reject — both are signatures\n 0x19e7…ff2a2.31 ETHPENDING2026-09-26 09:28 UTCACCEPTREJECT\n "
     },
     {
       "name": "deal: acceptance (signed) opened a persistent deal room",
       "ok": true,
-      "detail": "Deal room · non-custodial settlementOPERATOR LIVE · 2.31 ETH.← LISTING\n \n OPENseller 0x2c75…5c23buyer 0x19e7…ff2a2026-09-24 14:20 UTCYOU ARE THE SELLER\n \n Operator transfer (SyncNet Passport)PENDINGTh"
+      "detail": "Deal room · non-custodial settlementOPERATOR LIVE · 2.31 ETH.← LISTING\n \n OPENseller 0x2c75…5c23buyer 0x19e7…ff2a2026-09-26 09:28 UTCYOU ARE THE SELLER\n \n Operator transfer (SyncNet Passport)PENDINGTh"
     },
     {
       "name": "deal: completion is blocked until every step is done",

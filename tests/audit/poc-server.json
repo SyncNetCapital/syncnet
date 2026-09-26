@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-24T14:13:43.465Z",
+  "at": "2026-09-26T09:21:36.037Z",
   "version": "v2.5-rc",
   "results": [
     {
@@ -45,7 +45,7 @@
     {
       "name": "F-S1 5000 wrong guesses → 5000 plain 401s, no delay/lockout; the right key still works immediately",
       "ok": false,
-      "detail": "401=5 429=4995 right-key-after=429 128 ms"
+      "detail": "401=5 429=4995 right-key-after=429 71 ms"
     },
     {
       "name": "F-S1 issued upload session is a bearer token valid for anyone for 4 h (not bound to client, not revocable except by rotating the secret)",

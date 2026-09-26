@@ -8,8 +8,9 @@
  * Trust model (see MARKETPLACE_SECURITY.md):
  *  - every write is authorised by an EIP-712 signature (domain "SyncNet Marketplace" v1, chain 4663)
  *    verified SERVER-SIDE (ECDSA recovery; EIP-1271 for contract wallets via a live chain read);
- *  - claims about the project come from LIVE PAR reads on Robinhood Chain (factory record, fee recipient,
- *    recipient code), never from client-supplied fields;
+ *  - claims about the project come from LIVE reads of the canonical factory of a SUPPORTED ORIGIN on Robinhood
+ *    Chain (PAR, Pons V2 — lib/syncnet-origins.js): factory record, fee recipient, recipient code, pending
+ *    overrides. Never from client-supplied fields; the origin itself is server-derived, never signed or supplied;
  *  - records are persisted in the durable store (Upstash). Without a durable store, or with
  *    SYNCNET_MARKETPLACE_DISABLED=true, every write fails CLOSED and reads answer with enabled:false;
  *  - per-wallet nonces (single use, 90 days), expiries and server-enforced status transitions give
@@ -24,6 +25,7 @@
 const Core = require('../../lib/syncnet-core.js');
 const Chain = require('../../lib/syncnet-chain.js');
 const Market = require('../../lib/syncnet-market.js');
+const Origins = require('../../lib/syncnet-origins.js');
 const { json, publicError, tooManyRequests } = require('../lib/respond');
 const { log, logError, hashId } = require('../lib/log');
 const { getStore } = require('../lib/store');
@@ -88,29 +90,36 @@ async function verifySig(rpc, wallet, kind, message, signature) {
   } catch { return false; }
 }
 
-// ---------------------------------------------------------------- live PAR reads (never client-supplied)
-const VAULTS = { [lc(Chain.ROBINHOOD.holderVault)]: 'holders', [lc(Chain.ROBINHOOD.burnVault)]: 'burn', [lc(Chain.ROBINHOOD.floorVault)]: 'floor' };
-async function feeRightOf(rpc, launch) {
-  const recipient = lc(launch.creatorFeeRecipient);
-  const vault = VAULTS[recipient];
-  if (vault) return { recipient, kind: 'vault', vault, transferable: false, label: 'NOT TRANSFERABLE · fixed to a PAR vault' };
-  let code = '';
-  try { code = String(await Chain.getCode(rpc, recipient)).toLowerCase(); } catch { code = null; }
-  if (code === null) return { recipient, kind: 'unknown', transferable: false, label: 'REQUIRES MANUAL VERIFICATION · recipient could not be read' };
-  const wallet = code === '0x' || code.startsWith('0xef0100');
-  if (wallet) return { recipient, kind: 'wallet', transferable: true, label: 'Transferable on-chain by the current recipient wallet' };
-  return { recipient, kind: 'contract', transferable: false, label: 'REQUIRES MANUAL VERIFICATION · recipient is a contract' };
-}
+// ---------------------------------------------------------------- live origin reads: PAR, Pons V2 (never client-supplied)
+// Fee-right classification is shared with the browser (lib/syncnet-origins.js); PAR results are unchanged.
+const feeRightOf = (rpc, launch) => Origins.classifyFeeRight(rpc, launch.origin ? launch : { ...launch, origin: 'PAR' });
+/**
+ * Launchpad-agnostic live project: {launch} is the normalized project (origin, factory, deployer,
+ * creatorFeeRecipient, …) of a SUPPORTED origin, or null. {unsupported} carries a positively identified but not yet
+ * supported origin (Pons V1). Throws when any canonical factory cannot be read (callers answer 503).
+ */
 async function liveProject(rpc, token) {
-  const launch = await Chain.readLaunch(rpc, token); // multi factory first, then single — live, authoritative
-  if (!launch) return { launch: null };
-  const [feeRight, meta] = await Promise.all([feeRightOf(rpc, launch), Chain.readTokenMetadata(rpc, token).catch(() => null)]);
+  const project = await Origins.resolveProject(rpc, token); // PAR factories, then Pons V2, then Pons V1 — live
+  if (!project) return { launch: null };
+  if (!project.supported) return { launch: null, unsupported: project };
+  const [feeRight, meta, pair] = await Promise.all([
+    feeRightOf(rpc, project), Chain.readTokenMetadata(rpc, token).catch(() => null),
+    project.origin === 'PONS_V2' ? Origins.pairInfo(rpc, project.pair.address).catch(() => null) : null,
+  ]);
+  const launch = project;
   const snapshot = meta ? {
     name: Market.clean(meta.name, 64), symbol: Market.clean(meta.symbol, 16).toUpperCase(),
     logo: /^ipfs:\/\/[A-Za-z0-9]+(?:\/[A-Za-z0-9._~/-]+)?$/.test(String(meta.logo || '')) ? String(meta.logo) : '', // stays ipfs://; display-only gateways live in the browser
   } : { name: '', symbol: '', logo: '' };
-  return { launch, feeRight, snapshot };
+  return { launch, feeRight, snapshot, origin: Origins.publicOrigin(project, pair) };
 }
+const NOT_SUPPORTED = 'This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.';
+function unsupportedAnswer(live) {
+  if (live.unsupported && live.unsupported.origin === 'PONS_V1') return publicError(422, 'unsupported_origin', 'PONS V1 DETECTED · This earlier Pons launch generation is not supported by the Marketplace.');
+  return publicError(422, 'not_par', NOT_SUPPORTED);
+}
+/** Origin facts for records written before multi-origin support (always verified PAR launches). */
+const originOf = (rec) => rec.origin || { launchpad: Origins.recordOrigin(rec), label: Origins.ORIGINS[Origins.recordOrigin(rec)].label, factory: rec.factory || null };
 
 // ---------------------------------------------------------------- effective (computed) statuses
 function listingStatus(l) {
@@ -129,14 +138,14 @@ function offerStatus(o, l) {
 const publicListing = (l) => l && {
   id: l.id, token: l.token, seller: l.seller, price: l.price, currency: l.currency, terms: l.terms, termsHash: l.termsHash,
   status: listingStatus(l), expiry: l.expiry, createdAt: l.createdAt, cancelledAt: l.cancelledAt || null, dealId: l.dealId || null,
-  snapshot: l.snapshot, feeRight: l.feeRight, operatorVerified: true,
+  snapshot: l.snapshot, feeRight: l.feeRight, operatorVerified: true, origin: originOf(l),
 };
 const publicOffer = (o, l) => o && { id: o.id, listingId: o.listingId, token: o.token, buyer: o.buyer, amount: o.amount, currency: o.currency, status: offerStatus(o, l), expiry: o.expiry, createdAt: o.createdAt, decidedAt: o.decidedAt || null };
 // Historical 'operator-superseded' entries (retired fee-recipient takeover rule) are shown as history only. The
 // annotation is added to the public VIEW; the stored record and its recordHash are computed from the untouched history.
 const LEGACY_SUPERSESSION = 'Recorded under a retired rule that let the creator-fee recipient take over the Passport. Kept as history; it grants no authority today.';
 const annotateHistory = (h) => (Array.isArray(h) ? h.map((e) => (e && e.type === 'operator-superseded' ? { ...e, legacy: true, note: LEGACY_SUPERSESSION } : e)) : h);
-const publicPassport = (p) => p && { ...p, history: annotateHistory(p.history), recordHash: Market.hashJson({ token: p.token, operator: p.operator, history: p.history }) };
+const publicPassport = (p) => p && { ...p, history: annotateHistory(p.history), launchpad: p.launchpad || Origins.recordOrigin(p), recordHash: Market.hashJson({ token: p.token, operator: p.operator, history: p.history }) };
 function publicDeal(d) {
   if (!d) return null;
   return { ...d, completeHash: Market.completeHash(d), checklistState: Market.checklistState(d) };
@@ -266,18 +275,22 @@ async function write(b, ctx) {
     if (!(await verifySig(rpc, operator, 'OperatorClaim', message, b.signature))) { log(FN, 'claim-bad-sig', { ip: hashId(ip), token }); return publicError(401, 'bad_signature', 'The signature does not verify for this claim.'); }
     let live;
     try { live = await liveProject(rpc, token); } catch (err) { logError(FN, 'chain-unavailable', err, { token }); return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now. Try again.'); }
-    if (!live.launch) return publicError(422, 'not_par', 'This address is not a PAR launch, so it cannot be claimed.');
+    if (!live.launch) return unsupportedAnswer(live);
     const passport = await getJson(store, K.passport(token));
-    // conservative evidence rules — the wallet must PROVE an on-chain / recognised relationship
+    // conservative evidence rules — the wallet must PROVE an on-chain / recognised relationship, read from the
+    // canonical factory of the token's verified origin (PAR texts are unchanged; other origins name their venue)
+    const isPar = live.launch.origin === 'PAR';
+    const venue = Origins.ORIGINS[live.launch.origin].venue;
+    const feeRecipientWallet = live.feeRight.kind === 'wallet' || live.feeRight.kind === 'encumbered'; // a directly controlled wallet either way
     let evidence = '';
-    if (b.basis === 'deployer' && operator === lc(live.launch.deployer)) evidence = 'wallet is the on-chain deployer (PAR factory record)';
-    else if (b.basis === 'fee-recipient' && operator === lc(live.launch.creatorFeeRecipient) && live.feeRight.kind === 'wallet') evidence = 'wallet is the current on-chain creator-fee recipient';
+    if (b.basis === 'deployer' && operator === lc(live.launch.deployer)) evidence = 'wallet is the on-chain deployer (' + venue + ')';
+    else if (b.basis === 'fee-recipient' && operator === lc(live.launch.creatorFeeRecipient) && feeRecipientWallet) evidence = 'wallet is the current on-chain creator-fee recipient' + (isPar ? '' : ' (' + venue + ')');
     else if (b.basis === 'operator' && passport && lc(passport.operator) === operator) evidence = 'wallet is the already-recognised SyncNet operator';
     if (!evidence) return publicError(422, 'no_evidence', 'This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).');
-    // PASSPORT AUTHORITY: deployer / fee-recipient evidence can only ESTABLISH the first Passport. Once a Passport
-    // exists, only its recognised operator may claim again (refresh). Operational control then changes ONLY through
-    // the signed Marketplace transfer (seller TransferIntent + buyer TransferAccept); holding or receiving the
-    // creator-fee right on-chain never moves it. Refused before the nonce is consumed.
+    // PASSPORT AUTHORITY (same rule for every origin): deployer / fee-recipient evidence can only ESTABLISH the first
+    // Passport. Once a Passport exists, only its recognised operator may claim again (refresh). Operational control
+    // then changes ONLY through the signed Marketplace transfer (seller TransferIntent + buyer TransferAccept);
+    // holding or receiving the creator-fee right on-chain never moves it. Refused before the nonce is consumed.
     if (passport && lc(passport.operator) !== operator) {
       log(FN, 'claim-refused-operator-exists', { token, basis: b.basis });
       return publicError(409, 'operator_exists', 'An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.');
@@ -286,7 +299,7 @@ async function write(b, ctx) {
     const claim = { id: Market.digest('OperatorClaim', message), operator, basis: b.basis, evidence, signature: b.signature, nonce: lc(b.nonce), expiry, at: iso() };
     let p = passport;
     if (!p) {
-      p = { schema: 'syncnet.passport.v1', token, chainId: Market.CHAIN_ID, factory: lc(live.launch.factory), deployer: lc(live.launch.deployer), operator, operatorSince: iso(), claims: [claim], listing: null, history: [{ type: 'operator-claim', operator, basis: b.basis, evidence, claimId: claim.id, at: claim.at }], createdAt: iso(), updatedAt: iso() };
+      p = { schema: 'syncnet.passport.v1', token, chainId: Market.CHAIN_ID, launchpad: live.launch.origin, factory: lc(live.launch.factory), deployer: lc(live.launch.deployer), operator, operatorSince: iso(), claims: [claim], listing: null, history: [{ type: 'operator-claim', operator, basis: b.basis, evidence, claimId: claim.id, at: claim.at }], createdAt: iso(), updatedAt: iso() };
     } else if (lc(p.operator) === operator) {
       p.claims = [...(p.claims || []), claim].slice(-20);
       p.history = [...p.history, { type: 'operator-claim-refresh', operator, basis: b.basis, claimId: claim.id, at: claim.at }];
@@ -316,9 +329,9 @@ async function write(b, ctx) {
     if (!passport || lc(passport.operator) !== seller) return publicError(403, 'not_operator', 'Only the recognised operator can list this project. Claim it first.');
     let live;
     try { live = await liveProject(rpc, token); } catch (err) { logError(FN, 'chain-unavailable', err, { token }); return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now. Try again.'); }
-    if (!live.launch) return publicError(422, 'not_par', 'This address is not a PAR launch.');
+    if (!live.launch) return unsupportedAnswer(live);
     if (t.terms.includeFeeRight && !(live.feeRight.transferable && live.feeRight.recipient === seller)) {
-      return publicError(422, 'fee_right', 'The creator-fee right cannot be included: ' + (live.feeRight.kind === 'vault' ? 'it is fixed to a PAR vault.' : live.feeRight.kind === 'contract' ? 'the current recipient is a contract.' : 'the seller wallet is not the current on-chain recipient.'));
+      return publicError(422, 'fee_right', 'The creator-fee right cannot be included: ' + (live.feeRight.kind === 'vault' ? 'it is fixed to a PAR vault.' : live.feeRight.kind === 'contract' ? 'the current recipient is a contract.' : live.feeRight.kind === 'encumbered' ? 'a Pons protocol override of the creator-fee recipient is pending, so the right cannot be handed over cleanly.' : 'the seller wallet is not the current on-chain recipient.'));
     }
     const termsHash = Market.hashJson(t.terms);
     const message = { token, seller, price, currency: b.currency, termsHash, nonce: lc(b.nonce), expiry };
@@ -333,6 +346,7 @@ async function write(b, ctx) {
       schema: 'syncnet.listing.v1', id, token, seller, price, currency: b.currency, terms: t.terms, termsHash,
       nonce: lc(b.nonce), expiry, signature: b.signature, status: 'ACTIVE', createdAt: iso(),
       snapshot: live.snapshot, feeRight: live.feeRight, deployer: lc(live.launch.deployer), factory: lc(live.launch.factory),
+      origin: live.origin, // server-derived from the live factory read; never part of any signature
     };
     await putJson(store, K.listing(id), listing);
     await store.sadd(K.listingIndex, id);
@@ -509,10 +523,15 @@ async function write(b, ctx) {
     if (!d) return publicError(404, 'not_found', 'Deal not found.');
     if (!d.checklist.feeRight.required) return publicError(409, 'not_required', 'This deal does not include the creator-fee right.');
     let launch, tx;
-    try { launch = await Chain.readLaunch(rpc, d.token); tx = await Chain.readTx(rpc, lc(b.txHash)); } catch (err) { logError(FN, 'chain-unavailable', err, {}); return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now.'); }
+    try { launch = await Origins.resolveProject(rpc, d.token); tx = await Chain.readTx(rpc, lc(b.txHash)); } catch (err) { logError(FN, 'chain-unavailable', err, {}); return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now.'); }
     if (!tx.receipt || tx.receipt.status !== '0x1') return publicError(409, 'tx_failed', 'That transaction has not succeeded on-chain.');
-    if (!launch || lc(launch.creatorFeeRecipient) !== d.buyer) return publicError(409, 'not_transferred', 'The on-chain creator-fee recipient is not the buyer yet. The transfer is verified from the chain, not from the transaction hash alone.');
+    // Authoritative condition: a FRESH read of the token's canonical factory names the buyer. The hash is only a pointer.
+    if (!launch || !launch.supported || lc(launch.creatorFeeRecipient) !== d.buyer) return publicError(409, 'not_transferred', 'The on-chain creator-fee recipient is not the buyer yet. The transfer is verified from the chain, not from the transaction hash alone.');
+    if (launch.origin === 'PONS_V2' && launch.pendingOverride && launch.pendingOverride.active) {
+      return publicError(409, 'encumbered', 'The buyer is the recipient now, but a Pons protocol override of the creator-fee recipient is pending and would supersede it. This step cannot be verified as final until the override is cancelled or expires.');
+    }
     d.checklist.feeRight.done = true; d.checklist.feeRight.txHash = lc(b.txHash); d.checklist.feeRight.verifiedAt = iso(); d.checklist.feeRight.recipientNow = lc(launch.creatorFeeRecipient);
+    d.checklist.feeRight.factory = lc(launch.factory);
     await putJson(store, K.deal(d.id), d);
     log(FN, 'fee-right-verified', { deal: d.id.slice(0, 18) });
     return json(200, { ok: true, deal: publicDeal(d) });
@@ -627,4 +646,4 @@ async function write(b, ctx) {
 
 exports.handler = (event) => handler(event);
 exports._handler = handler;
-exports._internals = { K, listingStatus, offerStatus, feeRightOf, verifySig };
+exports._internals = { K, listingStatus, offerStatus, feeRightOf, verifySig, liveProject };

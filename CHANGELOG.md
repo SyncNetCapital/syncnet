@@ -1,3 +1,42 @@
+# Pons V1 strict detection + live Step 3 verification (`feature/syncnet-economies-v0`): 26 Sep 2026
+
+- Pons V1 detection now knows both canonical factory generations from the official Pons docs: ACTIVE
+  `0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB` and LEGACY `0x0c37a24F5D23A486FA692d1500881d698B1F77a4` (PONS itself was
+  launched from LEGACY and was previously shown as a generic unsupported token). Detection is bidirectional: the token's
+  `launchFactory()` must name an allowlisted V1 factory AND that factory's record must name the token with `exists`.
+  A token without `launchFactory()` (revert) is not V1; any other read failure throws (fail closed).
+- V1 stays UNSUPPORTED: no Passport claim, listing, fee transfer, trading or settlement. The Project Page badge says
+  "PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN" for LEGACY launches.
+- Pre-PR clarity fixes (copy only): the Pons V1 message no longer implies future support ("PONS V1 DETECTED · This
+  earlier Pons launch generation is not supported by the Marketplace."); a Pons V1 Project Page explains that the
+  launch is recognised but unsupported instead of repeating "could not verify this contract as a PAR launch"; the
+  Marketplace hero says Passports are for projects from a *supported* launchpad (was: "launched across Robinhood Chain").
+- Tests: 46 new server checks (V1-1 … V1-10, including the real PONS answers), 5 new walkthrough checks, and
+  `tests/live/pons-step3-live.mjs` (real network, not in `run-all`): live Pons V2 bytecode == Blockscout-verified
+  bytecode; TEST → PONS_V2 bonding curve / native ETH; PONSI → PONS_V2 graduated / native ETH; WETH → unsupported;
+  PONS → PONS_V1 LEGACY / unsupported.
+
+# Marketplace: Pons V2 as a supported origin (`feature/syncnet-economies-v0`): 26 Sep 2026
+
+The Project Marketplace is now launchpad-agnostic, with two supported origins: **PAR** (unchanged) and **PONS V2**.
+
+- `lib/syncnet-origins.js` (new, browser + server): resolves a token's origin ONLY from live reads of the canonical factories
+  (PAR multi/single; PonsV2LaunchFactory `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, verified against ponsdotdev/pons-labs
+  `162310f`); positively detects Pons V1 as not yet supported; classifies the creator-fee right (vault / contract / unknown /
+  encumbered / wallet); single validated fee-transfer builder whose destinations are exactly the canonical factories.
+- Server: claims, listings and fee-right settlement use the resolver; origin is server-derived and never signed; Pons evidence
+  texts name "(Pons V2 factory record)"; an active Pons protocol fee-recipient override blocks including/settling the fee right.
+  EIP-712 domain and structures unchanged; legacy records read as PAR without migration.
+- UI: automatic origin detection in SELL A PROJECT, LIVE PAR / LIVE PONS PROJECT badges, Pons PAIR/STATUS facts, ALL/PAR/PONS
+  filter over the one shared market, "SUPPORTED ORIGINS · PAR · PONS V2"; Project Pages show a Pons V2 origin block.
+  Pons Project Pages show no PAR-indexer-derived market/project counts (PAR pages unchanged).
+- **Passport authority fix (PAR and Pons):** deployer / fee-recipient evidence only establishes the FIRST Passport; afterwards only
+  the recognised operator may claim (refresh) and control changes only via the signed Marketplace transfer. The retired
+  fee-recipient takeover (`operator-superseded`) let a seller who sold only the Passport take it back; legacy entries stay
+  readable and are annotated as granting no authority. Same rule as the standalone main fix `455315f` (below), extended to Pons.
+  Tests: `tests/server/passport-authority.test.mjs`.
+- No Pons launching, trading, fees or splitter. Tests: `tests/server/marketplace-pons.test.mjs`, `tests/regression/rc-marketplace-pons.mjs`.
+
 # Security fix: Project Passport authority (main): 26 Sep 2026
 
 - **Fixed:** a seller who sold only the Project Passport (creator-fee right not included) could make a fee-recipient claim

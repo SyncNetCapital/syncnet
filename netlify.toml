@@ -137,7 +137,7 @@
 [functions]
   directory = "netlify/functions"
   # Shared browser/server modules and the canonical registry used by the functions.
-  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-economy.js", "syncnet-projects.json", "syncnet-economies.json"]
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "syncnet-projects.json", "syncnet-economies.json"]
 
 [[redirects]]
   from = "/api/canary-auth"
