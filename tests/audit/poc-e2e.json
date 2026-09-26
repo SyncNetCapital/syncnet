@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T17:55:46.965Z",
+  "at": "2026-09-26T18:08:45.515Z",
   "version": "v2.5-rc",
   "results": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "F-R1 wallet broadcast the launch but the page says \"No transaction was sent.\"",
       "ok": false,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x427b0d26c6501ef692bf732ddfe2e666f3134c2d\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0xcbef2d"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x4ae6fbd9330fc7cdcfd87b2786418594115d6337\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x8dbcb6"
     },
     {
       "name": "F-R1 nothing was persisted as pending (no reload guard, no \"AGAIN\" phrase)",
@@ -25,7 +25,7 @@
     {
       "name": "F-R1 re-simulation produces a NEW intent hash → new salt → new CREATE2 address on a real chain",
       "ok": false,
-      "detail": "0xcbef2dbcfd vs 0xcbef2dbcfd"
+      "detail": "0x8dbcb67728 vs 0x8dbcb67728"
     },
     {
       "name": "F-R1 plain ticker (no \"AGAIN\") still unlocks the second launch",
@@ -45,7 +45,7 @@
     {
       "name": "F-R1 after reload: no \"unverified launch\" notice",
       "ok": false,
-      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$PONSYNC0xc53fc14b83ee5fb4b9c701b2537df2bf22828de0tx 0x3fc189b1…RE-VERIFYEXPORT"
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$PONSYNC0x35da388ffee91f9cdff3d9a74fc74b179481db33tx 0x3091c58f…RE-VERIFYEXPORT"
     },
     {
       "name": "F-R1 after reload: the PONSYNC draft is offered for a fresh launch (without any unresolved-launch warning)",
@@ -70,7 +70,7 @@
     {
       "name": "F-P6 saved proof: signed recordHash ≠ committed recordHash",
       "ok": false,
-      "detail": "signed=0x4ed2f00a54fa committed=0x4ed2f00a54fa first-signature=0xf064c2af1e8e"
+      "detail": "signed=0x8b1f61e79417 committed=0x8b1f61e79417 first-signature=0xeacac9f21da7"
     },
     {
       "name": "F-P6 saved proof: signed salt ≠ salt used in the launch",
@@ -80,7 +80,7 @@
     {
       "name": "F-P6 Registry labels it \"SIGNED + TX-COMMITTED · THIS BROWSER\"",
       "ok": false,
-      "detail": "STHIS BROWSER ONLY · NOT PUBLICSIGTEST0x6489cda3daefa7f829468cfb8b082a9a54f08639Launch record stateFULLY VERIFIEDTransac"
+      "detail": "STHIS BROWSER ONLY · NOT PUBLICSIGTEST0x928a1740fdcbef849b6305bf2a7af50666e9f3a7Launch record stateFULLY VERIFIEDTransac"
     },
     {
       "name": "F-RH1 no rehearsal banner (neither amber nor red)",
@@ -135,7 +135,7 @@
     {
       "name": "setup: F-R3 the launch was mined while the node lagged",
       "ok": true,
-      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0xf9ebb9452eef8f7202cd21d1e122f08b03f9622b\nTransaction: 0x2f2b39d305bf50a325ee15388b183f0e4ac7709305cd4d4"
+      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0x1441e9aa2ee8f18646adaeba179386c44540b9f3\nTransaction: 0xa5953e0e13ef4731f51ed8aee465aa86bb75a9cac636090"
     },
     {
       "name": "F-R3 launch mined, but a lagging node makes the page stop without saving a proof",
@@ -155,12 +155,12 @@
     {
       "name": "F-R3 reload notice names only ticker + tx hash, never the predicted token address, and does not check the chain",
       "ok": false,
-      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0xf9ebb9452eef8f7202cd21d1e122f08b03f9622btx 0x2f2b39d3…RE-VERIFYEXPORT"
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0x1441e9aa2ee8f18646adaeba179386c44540b9f3tx 0xa5953e0e…RE-VERIFYEXPORT"
     },
     {
       "name": "F-R3 unlocking founder mode wipes the launch notice",
       "ok": false,
-      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0xf9ebb9452eef8f7202cd21d1e122f08b03f9622btx 0x2f2b39d3…RE-VERIFYEXPORT"
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →MINED$LAGT0x1441e9aa2ee8f18646adaeba179386c44540b9f3tx 0xa5953e0e…RE-VERIFYEXPORT"
     },
     {
       "name": "F-R3 following the recovery path erases the record: intent JSON/signature are gone for good",
@@ -185,7 +185,7 @@
     {
       "name": "F-R1/N1 tx broadcast; the page claims the launch is saved but nothing was saved",
       "ok": false,
-      "detail": "FULLY_VERIFIED tx=0xafecac8201"
+      "detail": "FULLY_VERIFIED tx=0x1310078aa3"
     },
     {
       "name": "F-R1/N1 the edit made while the wallet popup was open changed the sent transaction",
@@ -195,7 +195,7 @@
     {
       "name": "F-R1/N1 after reload: no notice, draft offered again",
       "ok": false,
-      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$EDPOP0x4e127cfbe36efc0741c7b5ea0e373b5331cad6ectx 0xafecac82…RE-VERIFYE"
+      "detail": "MY LAUNCHESMY LAUNCHES / RECOVER →FULLY VERIFIED$EDPOP0x0bbfb34211a7c839cf2b9a353f4114c06de482d9tx 0x1310078a…RE-VERIFYE"
     },
     {
       "name": "F-UX1 Review still names wallet A as fee recipient while the simulated calldata pays wallet B",

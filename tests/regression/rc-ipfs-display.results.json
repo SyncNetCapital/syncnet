@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T18:02:06.548Z",
+  "at": "2026-09-26T18:14:52.594Z",
   "failures": 0,
   "passed": 23,
   "total": 23,
@@ -7,7 +7,7 @@
     {
       "name": "launcher regression: simulation + metadata preflight PASS with the real PONSYNC CID",
       "ok": true,
-      "detail": "2de64c6228dd07033128118c686a19f45a30204edf94442\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "d2e2695310a740d9d79c678f5936043c68d9f3637f029f4\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "launcher regression: final review shows the immutable ipfs:// URI (never a gateway URL)",
@@ -72,7 +72,7 @@
     {
       "name": "builder preview: every gateway failed → graceful IMAGE UNAVAILABLE (after trying all three)",
       "ok": true,
-      "detail": "gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,dweb.link,ipfs.io,gateway.pinata.cloud,ipfs.io,dweb.link,gateway.pinata.cloud,ipfs.io,gateway.p"
+      "detail": "gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,gateway.pinata.cloud,ipfs.io,gateway.pinata.cloud,dweb.link,ipfs.io,gateway.pinata.cloud,ipfs.io,dweb.link,gateway.pinata.cloud,ipfs.io,gateway.pinata.cl"
     },
     {
       "name": "builder preview: the logo field itself still holds the ipfs:// URI",
@@ -117,7 +117,7 @@
     {
       "name": "My Launches: the PONSYNC record still lists and re-verifies (no launch history lost)",
       "ok": true,
-      "detail": "LAUNCH RECORDS IN THIS BROWSER · 1RE-VERIFY ALLFULLY VERIFIED$PONSYNC0x855eae4988cc5e1404e4578d0cd9fdef7d06b42atx 0x1f7ffd1c…35545eRE-VERIFYEXPORT\n Verified on-chain and listed by the PAR indexer.\n PR"
+      "detail": "LAUNCH RECORDS IN THIS BROWSER · 1RE-VERIFY ALLFULLY VERIFIED$PONSYNC0xaef2356c9db09c1f036fd469d95e91d0e43f556etx 0x83ba51f8…3ec7aeRE-VERIFYEXPORT\n Verified on-chain and listed by the PAR indexer.\n PR"
     }
   ]
 }
