@@ -7,7 +7,9 @@
 //   PROJECT_HOME_PRICE_USD_CENTS=3900            must EQUAL that version's reviewed price (a second, explicit key)
 //   PROJECT_HOME_RATE_VERSION=<n>                active SYNCNET REFERENCE RATE version (must exist, be effective and
 //                                                not expired in the pricing file)
-//   PROJECT_HOME_SINK_ADDRESS=0x…                the deployed SyncNetProjectHomeSink (no default exists)
+//   PROJECT_HOME_SINK_ADDRESS=0x…                the deployed SyncNetProjectHomeSink (no default exists); it must ALSO be a
+//                                                reviewed deployment in syncnet-project-home-deployment.json, and it is
+//                                                verified ON-CHAIN before any quote (netlify/lib/project-home-deployment.js)
 //
 // Prices and rates themselves live ONLY in the git-reviewed syncnet-project-home-pricing.json: a deployment can select
 // a reviewed version, never type a new value into an environment variable. Any missing, malformed or inconsistent
@@ -15,6 +17,7 @@
 const Pricing = require('../../lib/syncnet-project-home-pricing.js');
 const PRICING_FILE = require('../../syncnet-project-home-pricing.json');
 const { log } = require('./log');
+const { loadDeployment } = require('./project-home-deployment');
 
 const CHAIN_ID = 4663;
 const CANONICAL_SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37';
@@ -28,7 +31,7 @@ let warned = '';
 /**
  * projectHomeConfig({env, store, file, now}) -> {
  *   durable, siteEnabled, paymentsEnabled, closedReasons: string[],
- *   chainId, sync, sink, price: {priceVersion, priceUsdCents} | null, rate: {rateVersion, …} | null }
+ *   chainId, sync, sink, deployment, price: {priceVersion, priceUsdCents} | null, rate: {rateVersion, …} | null }
  */
 function projectHomeConfig(options = {}) {
   const env = options.env || process.env;
@@ -65,9 +68,12 @@ function projectHomeConfig(options = {}) {
     else rate = r;
   }
 
+  let deployment = null;
+  try { deployment = loadDeployment(options.deploymentFile); } catch (err) { reasons.push('deployment file invalid: ' + err.message); }
   const sinkRaw = lc(env.PROJECT_HOME_SINK_ADDRESS);
-  const sink = /^0x[0-9a-f]{40}$/.test(sinkRaw) && sinkRaw !== ZERO && sinkRaw !== CANONICAL_SYNC ? sinkRaw : null;
+  let sink = /^0x[0-9a-f]{40}$/.test(sinkRaw) && sinkRaw !== ZERO && sinkRaw !== CANONICAL_SYNC ? sinkRaw : null;
   if (!sink) reasons.push('PROJECT_HOME_SINK_ADDRESS missing or invalid');
+  else if (!deployment || !deployment.deployments.has(sink)) { reasons.push('PROJECT_HOME_SINK_ADDRESS is not a reviewed deployment'); sink = null; }
 
   const paymentsRequested = truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED);
   if (!paymentsRequested) reasons.push('SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED is not true');
@@ -77,7 +83,8 @@ function projectHomeConfig(options = {}) {
     const key = reasons.join('|');
     if (key !== warned) { warned = key; log('project-home', 'payments-closed', { problems: reasons }); }
   }
-  return { durable, siteEnabled, paymentsEnabled, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, price, rate };
+  // paymentsEnabled is the STATIC gate. Quotes additionally require an on-chain deployment PASS (project-home.js).
+  return { durable, siteEnabled, paymentsEnabled, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, deployment, price, rate };
 }
 
 module.exports = { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC };

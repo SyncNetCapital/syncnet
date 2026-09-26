@@ -128,6 +128,24 @@ if (forge.status === 0) {
   console.log('NOTE forge not installed: committed ABIs checked, not re-derived');
 }
 
+// P1-2: code identity pins agree everywhere (reviewed JSON ⇄ Foundry test deploying the real constructors), and the
+// approved treasury lives ONLY in the reviewed deployment configuration (never in code, scripts or pages).
+{
+  const lc = (v) => String(v == null ? '' : v).toLowerCase();
+  const dep = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-deployment.json'), 'utf8'));
+  const fpTest = fs.readFileSync(path.join(DIR, 'test/CodeFingerprint.t.sol'), 'utf8');
+  const constOf = (n) => ((fpTest.match(new RegExp(n + '\\s*=\\s*(0x[0-9a-f]{64}|\\d+)')) || [])[1] || '');
+  check('code fingerprints: Foundry constants equal the reviewed deployment file', constOf('SINK_FINGERPRINT') === dep.code.sink.normalizedKeccak && constOf('CONVERTER_FINGERPRINT') === dep.code.converter.normalizedKeccak && constOf('SINK_LENGTH') === String(dep.code.sink.runtimeLength) && constOf('CONVERTER_LENGTH') === String(dep.code.converter.runtimeLength));
+  const offs = (name) => dep.code.sink.immutables[name] ? dep.code.sink.immutables[name].map((r) => r[0]) : [];
+  const sinkLine = (fpTest.match(/sync_ = \[uint256\(([^\]]+)\]/) || [])[1] || '', convLine = (fpTest.match(/conv_ = \[uint256\(([^\]]+)\]/) || [])[1] || '';
+  check('code fingerprints: Foundry immutable offsets equal the reviewed deployment file (sink)', sinkLine.replace(/\)/, '').split(/,\s*/).map(Number).join() === offs('SYNC').join() && convLine.replace(/\)/, '').split(/,\s*/).map(Number).join() === offs('TREASURY_CONVERTER').join());
+  check('reviewed deployment: canonical infrastructure, market 1, no deployment reviewed yet', lc(dep.sync) === '0x6368e007b9f0b941560ed1f3bceb20247f5eca37' && lc(dep.usdg) === '0x5fc5360d0400a0fd4f2af552add042d716f1d168' && lc(dep.router) === '0x458d2a59c2f3dd32775a64ee72004561440d64df' && dep.market === 1 && Array.isArray(dep.deployments) && dep.deployments.length === 0);
+  const T = /65fac39a7a672afebba404aecddb34a1eddc879b/i;
+  const tracked = spawnSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter((f) => /\.(js|mjs|html|sol|json|toml)$/.test(f) && !f.startsWith('tests/'));
+  const holders = tracked.filter((f) => T.test(fs.readFileSync(path.join(ROOT, f), 'utf8')));
+  check('the approved treasury appears ONLY in the reviewed deployment configuration', holders.join() === 'syncnet-project-home-deployment.json', holders.join());
+}
+
 const passed = results.filter((r) => r.ok).length;
 fs.writeFileSync(path.join(ROOT, 'tests/project-home/sink-static-audit.results.json'), JSON.stringify({ at: new Date().toISOString(), passed, failed: failures, results }, null, 2));
 console.log(`${passed}/${results.length} sink static audit checks passed`);

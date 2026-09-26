@@ -44,6 +44,7 @@ const { readJsonBody, query, method: methodOf } = require('../lib/body');
 const { verifyDigest } = require('../lib/sig-verify');
 const { liveProject, readPassport, passportKey } = require('../lib/live-project');
 const { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC } = require('../lib/project-home-config');
+const { deploymentStatus } = require('../lib/project-home-deployment');
 
 const FN = 'project-home';
 const K = {
@@ -84,6 +85,7 @@ const isTx = isB32;
 const CLOSED = 'Project Home is not enabled on this deployment.';
 const PAY_CLOSED = 'Project Home activation payments are not open on this deployment.';
 const UNAVAILABLE = 'Project Home is temporarily unavailable.';
+const UNVERIFIED = 'Project Home activation payments are paused: the payment contracts could not be verified on Robinhood Chain. No payment was requested.';
 const SPLIT_NOTE = 'Paid SYNC is COMMITTED TO THE PROJECT HOME SINK. 60% is COMMITTED TO BURN and is burned by SYNC.burn() only when the sink is settled; 40% is allocated to the SyncNet protocol treasury and converted to USDG later, at the actual DEX execution rate (not the SyncNet reference rate). Your activation does not depend on either step.';
 const CHAIN_DOWN = 'Robinhood Chain could not be read right now. Nothing was changed. Try again.';
 
@@ -147,7 +149,7 @@ async function handler(event = {}, deps = {}) {
   const now = typeof deps.now === 'function' ? deps.now : Date.now;
   const rpc = deps.rpc || serverRpc({ retries: 2 });
   const ip = clientIp(event);
-  const cfg = projectHomeConfig({ env, store, now, file: deps.pricingFile });
+  const cfg = projectHomeConfig({ env, store, now, file: deps.pricingFile, deploymentFile: deps.deploymentFile });
   const casOk = typeof store.cas === 'function';
   const denied = (rl) => (rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter));
   const ctx = { store, rpc, env, now, cfg, ip, random: deps.random || ((n) => crypto.randomBytes(n)) };
@@ -157,7 +159,10 @@ async function handler(event = {}, deps = {}) {
     if (!rl.allowed) return denied(rl);
     const view = query(event, 'view') || 'config';
     try {
-      if (view === 'config') return json(200, configView(cfg));
+      if (view === 'config') {
+        const verified = cfg.paymentsEnabled ? (await deploymentStatus(rpc, cfg.deployment, cfg.sink, { now })).ok : false;
+        return json(200, configView(cfg, verified));
+      }
       if (!cfg.siteEnabled) return json(200, { enabled: false, note: CLOSED });
       return await readView(view, event, ctx);
     } catch (err) {
@@ -188,16 +193,18 @@ async function handler(event = {}, deps = {}) {
   }
 }
 
-function configView(cfg) {
+/** `verified`: the on-chain deployment validation PASSED. Until then no payment recipient or quote is exposed. */
+function configView(cfg, verified) {
+  const payable = Boolean(cfg.paymentsEnabled && verified);
   const out = {
-    enabled: cfg.siteEnabled, payments: cfg.paymentsEnabled, chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: cfg.sink,
+    enabled: cfg.siteEnabled, payments: payable, deploymentVerified: Boolean(verified), chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: payable ? cfg.sink : null,
     product: 'PROJECT HOME · ONE-TIME ACTIVATION', lockSeconds: LOCK, domain: Site.DOMAIN,
     split: { burnPercent: 60, treasuryPercent: 40, treasuryAsset: 'USDG', note: SPLIT_NOTE }, refund: 'Non-refundable after successful activation.',
     price: cfg.price ? { priceUsdCents: cfg.price.priceUsdCents, priceUsd: displayUsd(cfg.price.priceUsdCents), priceVersion: cfg.price.priceVersion } : null,
     rate: cfg.rate ? { label: 'SYNCNET REFERENCE RATE', syncUsdReferenceRate: cfg.rate.syncUsdReferenceRate, rateVersion: cfg.rate.rateVersion, updatedAt: cfg.rate.rateEffectiveAt, expiresAt: cfg.rate.rateExpiresAt, note: 'A server-controlled reference rate reviewed by SyncNet. It is not an on-chain oracle.' } : null,
     quote: null,
   };
-  if (cfg.price && cfg.rate) {
+  if (payable && cfg.price && cfg.rate) {
     try {
       const base = Pricing.baseSyncWei(cfg.price.priceUsdCents, BigInt(cfg.rate.rateUsdE18));
       out.quote = { baseSyncAmount: base.toString(), approxSync: Pricing.displaySync(base), note: 'Indicative. The exact amount is locked in a payment intent for 30 minutes.' };
@@ -362,6 +369,13 @@ async function createIntent(b, { store, rpc, cfg, now, random }) {
   if (env.error) return env.error;
   const { token, operator, nonce, issuedAt } = env;
   if (!(await verifySig(rpc, operator, 'ActivationRequest', { token, operator, issuedAt, nonce }, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
+  // PAYMENT DEPLOYMENT VALIDATION: no payable amount (new OR reused quote) unless the configured sink, its converter and
+  // the treasury verify on-chain against the reviewed deployment (cached PASS, bounded reads, RPC failure = no quote).
+  const dv = await deploymentStatus(rpc, cfg.deployment, cfg.sink, { now: () => now() });
+  if (!dv.ok) {
+    log(FN, 'payments-unverified', { kind: dv.kind, reason: dv.reason, sink: cfg.sink, token });
+    return publicError(503, 'payments_unverified', UNVERIFIED);
+  }
   let live;
   try { live = await liveProject(rpc, token); } catch (err) { logError(FN, 'chain-unavailable', err, { token }); return publicError(503, 'chain_unavailable', CHAIN_DOWN); }
   if (!live.launch) return publicError(422, 'not_supported', 'This address is not a supported project (PAR or Pons V2 launch) on Robinhood Chain.');

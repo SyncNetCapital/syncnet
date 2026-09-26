@@ -417,6 +417,20 @@ UPSTASH_REDIS_REST_URL / _TOKEN              # durable store (required)
 
 If any of these is missing or inconsistent, payments stay closed. Without the durable store, everything is closed.
 
+**Payment deployment validation (before every quote).** `PROJECT_HOME_SINK_ADDRESS` must also be listed in the
+git-reviewed `syncnet-project-home-deployment.json` (with its converter). That file pins the canonical SYNC, USDG, PAR
+router and market 1, the approved SyncNet Protocol Treasury, and immutable-aware code fingerprints of the audited build.
+Before any quote (new or re-served), `netlify/lib/project-home-deployment.js` verifies on-chain, within 12 RPC reads:
+chain 4663; the sink and the converter have code whose runtime — with every immutable range zeroed — hashes to the
+audited fingerprint; every immutable word in the deployed code equals the reviewed value; sink `SYNC()`,
+`BURN_PERCENT() == 60`, `TREASURY_CONVERTER()`; converter `SYNC()`, `USDG()`, `ROUTER()`, `MARKET() == 1`,
+`TREASURY()`. A PASS is cached for 10 minutes per exact configuration; a FAIL (including any RPC failure) is remembered
+for 30 seconds and never becomes a pass. Until it passes, no quote is issued, no intent is stored, and the config view
+exposes no payment recipient (`sink: null`, `payments: false`). Why both bytecode identity and getters: the fingerprint
+proves the code is exactly the audited build, the getters prove the live contract answers as reviewed. The fingerprints
+are checked against a fresh compilation (`tests/project-home/code-fingerprint.mjs`) and against code produced by the
+real constructors (`contracts/project-home-sink/test/CodeFingerprint.t.sol`).
+
 ## 13. Enabling (not done in this phase)
 
 1. Create a **dedicated** SyncNet protocol treasury wallet. A simple EOA is acceptable for V1; it must never be a
@@ -434,7 +448,8 @@ If any of these is missing or inconsistent, payments stay closed. Without the du
    deployer and any infrastructure address as treasury. The converter constructor re-verifies the live route, and the
    script re-reads every immutable after deployment.
 3. Verify both contracts on Blockscout.
-4. Set `PROJECT_HOME_SINK_ADDRESS` to the deployed sink. Metrics find the converter through the sink.
+4. Add the deployed `{sink, converter}` to `syncnet-project-home-deployment.json` in a reviewed commit, then set
+   `PROJECT_HOME_SINK_ADDRESS` to that sink. The server verifies the pair on-chain before it quotes any payment.
 5. Review and commit the first SYNC/USD reference-rate version, with `effectiveAt` and `expiresAt`.
 6. Canary on a preview deploy with the flags on, using the Phase 2 UI (section 14).
 7. Only then enable production.

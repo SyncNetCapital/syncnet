@@ -11,6 +11,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { deploymentChain } from '../project-home/deployment-fixture.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
@@ -389,8 +390,8 @@ export function rpcHandle(body, chainHex = '0x1237') {
       switch (method) {
         case 'eth_chainId': result = chainHex; break;
         case 'eth_blockNumber': result = hex(chain.block); break;
-        case 'eth_getCode': result = hasCode(params[0]) ? '0x6080604052' : '0x'; break;
-        case 'eth_call': result = ethCall(params[0]); break;
+        case 'eth_getCode': { const ph = phDeployChain().code.get(lc(params[0])); result = ph !== undefined ? ph : hasCode(params[0]) ? '0x6080604052' : '0x'; break; }
+        case 'eth_call': { const g = phDeployChain().getters.get(lc(params[0].to) + ':' + lc(params[0].data)); result = g !== undefined ? '0x' + BigInt(g).toString(16).padStart(64, '0') : ethCall(params[0]); break; }
         case 'eth_getBalance': result = hex(chain.balanceWei); break;
         case 'eth_gasPrice': result = '0x5f5e100'; break;
         case 'eth_maxPriorityFeePerGas': result = '0x0'; break;
@@ -467,6 +468,16 @@ const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_RE
 export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
 export const PH_TEST_RATE = Object.freeze({ rateVersion: 900, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z', source: 'E2E TEST FIXTURE — never deployed' });
 const PRICING = require(path.join(ROOT, 'syncnet-project-home-pricing.json'));
+/** The fixture Project Home deployment: a converter + sink built from the AUDITED runtime with correct immutables and
+ *  the approved treasury, so the server's on-chain deployment validation passes exactly as it would in production. It
+ *  is added to the reviewed deployment list in memory only while projectHome is on (the repo file ships empty). */
+export const PH_CONVERTER = '0xc0417e2700000000000000000000000000000c0e';
+const DEPLOYMENT = require(path.join(ROOT, 'syncnet-project-home-deployment.json'));
+let phChain = null;
+function phDeployChain() {
+  if (!phChain) phChain = deploymentChain({ sink: PH_SINK, converter: PH_CONVERTER, treasury: DEPLOYMENT.treasury, sync: A.SYNC, usdg: A.USDG, router: DEPLOYMENT.router }, (x) => Core.functionSelector(x));
+  return phChain;
+}
 export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
@@ -478,8 +489,11 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   const i = PRICING.rates.findIndex((r) => r.rateVersion === PH_TEST_RATE.rateVersion);
   if (i >= 0) PRICING.rates.splice(i, 1);
   chain.realTime = Boolean(projectHome);
+  const d = DEPLOYMENT.deployments.findIndex((x) => lc(x.sink) === PH_SINK);
+  if (d >= 0) DEPLOYMENT.deployments.splice(d, 1);
   if (projectHome) {
     PRICING.rates.push({ ...PH_TEST_RATE });
+    DEPLOYMENT.deployments.push({ sink: PH_SINK, converter: PH_CONVERTER });
     Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: String(PH_TEST_RATE.rateVersion), PROJECT_HOME_SINK_ADDRESS: PH_SINK });
     if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
   }

@@ -1,0 +1,190 @@
+{
+  "schema": "syncnet.project-home.deployment.v1",
+  "notes": [
+    "Reviewed Project Home payment deployment. The server quotes a payment ONLY after verifying on-chain that PROJECT_HOME_SINK_ADDRESS is one of the deployments below and that its code and every immutable match this file (netlify/lib/project-home-deployment.js). Anything else keeps payments CLOSED.",
+    "Addresses are added here in a reviewed commit AFTER an explicitly authorised deployment (contracts/project-home-sink/script/DeployProjectHome.s.sol). Nothing is deployed yet: deployments is empty, so payments stay closed.",
+    "code: immutable-aware runtime fingerprints of the audited build (keccak256 of the runtime with every immutable range zeroed). Verified against a fresh compilation by tests/project-home/code-fingerprint.mjs.",
+    "treasury: the approved SyncNet Protocol Treasury (public address). It is the ONLY accepted converter TREASURY()."
+  ],
+  "chainId": 4663,
+  "sync": "0x6368e007b9f0b941560ed1f3bceb20247f5eca37",
+  "usdg": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+  "router": "0x458d2a59c2f3dd32775a64ee72004561440d64df",
+  "market": 1,
+  "treasury": "0x65FAc39A7A672afEbba404aecdDB34a1Eddc879B",
+  "code": {
+    "sink": {
+      "contract": "SyncNetProjectHomeSink",
+      "runtimeLength": 1778,
+      "normalizedKeccak": "0x1c47a73e49c4b108b38d9bef6be50afbdc9bbf2bbace210b545111458f2bde2b",
+      "immutables": {
+        "SYNC": [
+          [
+            380,
+            32
+          ],
+          [
+            487,
+            32
+          ],
+          [
+            750,
+            32
+          ],
+          [
+            977,
+            32
+          ],
+          [
+            1373,
+            32
+          ]
+        ],
+        "TREASURY_CONVERTER": [
+          [
+            234,
+            32
+          ],
+          [
+            930,
+            32
+          ]
+        ]
+      }
+    },
+    "converter": {
+      "contract": "SyncNetProjectHomeTreasuryConverter",
+      "runtimeLength": 5803,
+      "normalizedKeccak": "0x4a08834b625063e43d4df726ac525e44bd70b9e3ad15c7d01da848a02ca68944",
+      "immutables": {
+        "MARKET": [
+          [
+            478,
+            32
+          ],
+          [
+            1847,
+            32
+          ],
+          [
+            3954,
+            32
+          ],
+          [
+            4047,
+            32
+          ]
+        ],
+        "ROUTER": [
+          [
+            275,
+            32
+          ],
+          [
+            1544,
+            32
+          ],
+          [
+            2148,
+            32
+          ],
+          [
+            2343,
+            32
+          ],
+          [
+            3601,
+            32
+          ]
+        ],
+        "SYNC": [
+          [
+            439,
+            32
+          ],
+          [
+            586,
+            32
+          ],
+          [
+            1115,
+            32
+          ],
+          [
+            1594,
+            32
+          ],
+          [
+            2193,
+            32
+          ],
+          [
+            2389,
+            32
+          ],
+          [
+            2597,
+            32
+          ],
+          [
+            3801,
+            32
+          ],
+          [
+            4110,
+            32
+          ],
+          [
+            4378,
+            32
+          ]
+        ],
+        "TREASURY": [
+          [
+            194,
+            32
+          ],
+          [
+            808,
+            32
+          ],
+          [
+            3298,
+            32
+          ]
+        ],
+        "USDG": [
+          [
+            314,
+            32
+          ],
+          [
+            1357,
+            32
+          ],
+          [
+            2805,
+            32
+          ],
+          [
+            3040,
+            32
+          ],
+          [
+            3345,
+            32
+          ],
+          [
+            4199,
+            32
+          ],
+          [
+            4289,
+            32
+          ]
+        ]
+      }
+    }
+  },
+  "deployments": []
+}

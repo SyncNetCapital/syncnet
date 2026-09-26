@@ -9,7 +9,7 @@ import net from 'node:net';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { A, ROOT, SINK, PRICING, ENV, clock, pc, resetPc, resetChain, pay, setTags, rpc, signDigest, lc, rnd32 } from './fixtures.mjs';
+import { A, ROOT, SINK, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, setTags, rpc, signDigest, lc, rnd32 } from './fixtures.mjs';
 
 const require = createRequire(import.meta.url);
 const results = []; let failures = 0;
@@ -122,7 +122,7 @@ const W = lc(A.WALLET);
 const TA = '0x8' + '0'.repeat(39), TB = '0x8' + '1'.repeat(39);
 for (const t of [TA, TB]) await up.set('mp:passport:v1:' + t, JSON.stringify({ token: t, operator: W, operatorSince: new Date(clock.now()).toISOString(), history: [] }));
 let ipn = 0;
-const call = async (body) => { const r = await ph._handler({ httpMethod: 'POST', headers: { 'x-nf-client-connection-ip': '203.0.113.' + (ipn++ % 250) }, body: JSON.stringify(body) }, { store: up, env: ENV, rpc, now: () => clock.now(), pricingFile: PRICING }); return { s: r.statusCode, j: JSON.parse(r.body || '{}') }; };
+const call = async (body) => { const r = await ph._handler({ httpMethod: 'POST', headers: { 'x-nf-client-connection-ip': '203.0.113.' + (ipn++ % 250) }, body: JSON.stringify(body) }, { store: up, env: ENV, rpc, now: () => clock.now(), pricingFile: PRICING, deploymentFile: DEPLOYMENT }); return { s: r.statusCode, j: JSON.parse(r.body || '{}') }; };
 const intentFor = async (token) => { const m = { token, operator: W, issuedAt: Math.floor(clock.now() / 1000), nonce: rnd32() }; return call({ action: 'intent', ...m, signature: signDigest(W, Site.digest('ActivationRequest', m)) }); };
 const ia = await intentFor(TA), ib = await intentFor(TB);
 check('R13 intents created through the Upstash adapter on real Redis', ia.s === 201 && ib.s === 201, JSON.stringify(ia.j) + JSON.stringify(ib.j));

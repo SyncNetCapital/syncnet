@@ -35,6 +35,8 @@ const SUITES = [
   ['Project Home · site schema, EIP-712, renderer audit', 'node', ['tests/project-home/site.test.mjs'], /(\d+)\/(\d+) project-home site checks passed/],
   ['Project Home · server (intents, activation, sites)', 'node', ['tests/project-home/server.test.mjs'], /(\d+)\/(\d+) project-home server checks passed/],
   ['Project Home · atomic commit on real Redis', 'node', ['tests/project-home/redis-atomic.test.mjs'], /(\d+)\/(\d+) project-home real-Redis checks passed/],
+  ['Project Home · payment deployment validation (P1-2, adversarial)', 'node', ['tests/project-home/deployment.test.mjs'], /(\d+)\/(\d+) deployment validation checks passed/],
+  ['Project Home · code identity (immutable-aware fingerprints vs fresh build)', 'node', ['tests/project-home/code-fingerprint.mjs'], /(\d+)\/(\d+) code fingerprint checks passed/],
   ['Phase 2 UI · Explore, Project Page, You, Project Home editor/payment/adoption', 'node', ['tests/e2e/phase2-ui.mjs'], /(\d+)\/(\d+) phase 2 UI checks passed/],
 ];
 const out = [];

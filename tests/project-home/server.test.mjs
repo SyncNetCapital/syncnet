@@ -7,7 +7,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {
-  A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex,
+  A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex,
 } from './fixtures.mjs';
 
 const require = createRequire(import.meta.url);
@@ -43,7 +43,7 @@ const ip = () => `198.51.${(ipSeq >> 8) & 255}.${ipSeq++ & 255}`;
 let envNow = { ...ENV };
 let pricingNow = PRICING;
 const parse = (r) => { let j = {}; try { j = JSON.parse(r.body); } catch { j = {}; } return { s: r.statusCode, j, body: r.body, headers: r.headers }; };
-const api = async (method, body, query, over = {}) => parse(await ph._handler({ httpMethod: method, headers: { 'x-nf-client-connection-ip': ip() }, queryStringParameters: query || {}, body: body ? JSON.stringify(body) : null }, { store, env: over.env || envNow, rpc: over.rpc || rpc, now: () => clock.now(), pricingFile: over.pricingFile || pricingNow, random: over.random }));
+const api = async (method, body, query, over = {}) => parse(await ph._handler({ httpMethod: method, headers: { 'x-nf-client-connection-ip': ip() }, queryStringParameters: query || {}, body: body ? JSON.stringify(body) : null }, { store, env: over.env || envNow, rpc: over.rpc || rpc, now: () => clock.now(), pricingFile: over.pricingFile || pricingNow, deploymentFile: over.deploymentFile || DEPLOYMENT, random: over.random }));
 const market = async (body) => parse(await mp._handler({ httpMethod: 'POST', headers: { 'x-nf-client-connection-ip': ip() }, queryStringParameters: {}, body: JSON.stringify(body) }, { store, env: {}, rpc }));
 const site = async (p, over = {}) => siteFn._handler({ httpMethod: over.method || 'GET', path: p, headers: { 'x-nf-client-connection-ip': ip() } }, { store, env: over.env || envNow });
 const nowSec = () => Math.floor(clock.now() / 1000);

@@ -1,6 +1,7 @@
 // Shared fixtures for the Project Home server suites: a controllable mock of the Robinhood Chain payment surface
 // (chain id, head / safe / finalized tags, blocks, receipts with canonical-SYNC Transfer logs, reorgs, outages, 429)
 // layered over the existing E2E harness chain (PAR / Pons factories, EIP-1271 Safe) for project resolution.
+import { deploymentFile, deploymentChain } from './deployment-fixture.mjs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -15,6 +16,10 @@ export const SINK = '0x5111c0000000000000000000000000000000beef'; // fixture sin
 export const CONVERTER = '0xc0417e2700000000000000000000000000000c0e'; // fixture treasury converter (never deployed)
 export const TREASURY_FIXTURE = '0x0000000000000000000000000000000000007ea5'; // fixture treasury wallet
 export const OTHER_SINK = '0x5111c0000000000000000000000000000000dead';
+export const USDG = '0x5fc5360d0400a0fd4f2af552add042d716f1d168';
+export const PAR_ROUTER = '0x458d2a59c2f3dd32775a64ee72004561440d64df';
+/** The reviewed deployment file used by the server tests: canonical infrastructure, fixture sink/converter/treasury. */
+export const DEPLOYMENT = deploymentFile({ treasury: TREASURY_FIXTURE, deployments: [{ sink: SINK, converter: CONVERTER }] });
 export const TRANSFER = Core.keccak256Utf8('Transfer(address,address,uint256)');
 export const lc = (v) => String(v == null ? '' : v).toLowerCase();
 export const hex = (n) => '0x' + BigInt(n).toString(16);
@@ -43,9 +48,14 @@ export const pc = {
   chainHex: '0x1237', head: 1000n, safe: 990n, finalized: 900n, genesisTs: 0n, blocks: new Map(), receipts: new Map(),
   mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, forwarded: 0n }, converterBalance: 0n, converterTotals: { converted: 0n, produced: 0n, delivered: 0n }, reorged: new Set(),
 };
+/** On-chain view of the fixture deployment (correct by default). Tests mutate pc.dep.code / pc.dep.getters. */
+export function resetDeployChain() {
+  pc.dep = deploymentChain({ sink: SINK, converter: CONVERTER, treasury: TREASURY_FIXTURE, sync: SYNC, usdg: USDG, router: PAR_ROUTER }, (s) => Core.functionSelector(s));
+}
 export function resetPc() {
   Object.assign(pc, { chainHex: '0x1237', head: 1000n, safe: 990n, finalized: 900n, blocks: new Map(), receipts: new Map(), mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, forwarded: 0n }, converterBalance: 0n, converterTotals: { converted: 0n, produced: 0n, delivered: 0n }, reorged: new Set() });
   pc.genesisTs = BigInt(Math.floor(clock.t / 1000)) - pc.head;
+  resetDeployChain();
 }
 resetPc();
 const blockHash = (n, v = 0) => Core.keccak256Utf8('block|' + n + '|' + v);
@@ -107,8 +117,12 @@ export async function rpc(method, params = []) {
       return n > pc.head ? null : q(blockAt(n));
     }
     case 'eth_getTransactionReceipt': return pc.receipts.get(lc(params[0])) || pc.receipts.get(params[0]) || null;
+    case 'eth_getCode': if (pc.dep && pc.dep.code.has(lc(params[0]))) return pc.dep.code.get(lc(params[0])); break;
     case 'eth_call': {
       const to = lc(params[0].to), data = lc(params[0].data);
+      const dg = pc.dep && pc.dep.getters.get(to + ':' + data);
+      if (dg === 'revert') throw Object.assign(new Error('execution reverted'), { name: 'RpcError', code: 3, revert: true });
+      if (dg !== undefined) return '0x' + BigInt(dg).toString(16).padStart(64, '0');
       const word = (v) => '0x' + BigInt(v).toString(16).padStart(64, '0');
       if (to === SYNC && data.startsWith(SEL('balanceOf(address)')) && data.endsWith(lc(SINK).slice(2))) return word(pc.sinkBalance);
       if (to === SYNC && data.startsWith(SEL('balanceOf(address)')) && data.endsWith(lc(CONVERTER).slice(2))) return word(pc.converterBalance);
