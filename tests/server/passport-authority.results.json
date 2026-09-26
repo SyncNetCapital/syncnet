@@ -1,0 +1,296 @@
+{
+  "passed": 58,
+  "failed": 0,
+  "results": [
+    {
+      "name": "PAR 1 current wallet fee recipient establishes the FIRST Passport",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8000000000000000000000000000000000000000\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.154Z\",\"claims\":[{\"id\":\"0x870a3fcc6b4ba6103577f1f6dfd0099"
+    },
+    {
+      "name": "PAR 2 deployer establishes the FIRST Passport",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.163Z\",\"claims\":[{\"id\":\"0x36f85ea24a63ee6c17bf1e849f8a48e"
+    },
+    {
+      "name": "PAR 3 existing operator refreshes (basis operator)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.163Z\",\"claims\":[{\"id\":\"0x36f85ea24a63ee6c17bf1e849f8a48e"
+    },
+    {
+      "name": "PAR 3 existing operator refreshes (basis deployer) without changing anything",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.163Z\",\"claims\":[{\"id\":\"0x36f85ea24a63ee6c17bf1e849f8a48e"
+    },
+    {
+      "name": "PAR setup: fee recipient W2 establishes the Passport where W is deployer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8111111111111111111111111111111111111111\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.181Z\",\"claims\":[{\"id\":\"0x3868b8424e2ea33c55ae6a5061b51ce"
+    },
+    {
+      "name": "PAR 4 a different deployer cannot supersede the operator (409 operator_exists)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR 5 a new on-chain fee recipient cannot supersede the operator",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR 5 the refusal writes no history (no operator-superseded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PAR 8 buyer is operator after the signed Marketplace transfer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PAR 6 seller still holds the fee right on-chain (not sold)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PAR 6 seller cannot reclaim the Passport (basis fee-recipient)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR 6 seller cannot reclaim the Passport (basis deployer)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR 6 seller cannot reclaim the Passport (basis operator)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "PAR 7 setup: seller transferred the fee right on-chain to a third wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PAR 7 the new fee recipient cannot take the Passport",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR 8 buyer remains operator and can refresh",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8222222222222222222222222222222222222222\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.221Z\",\"claims\":[{\"id\":\"0x4b03fd9314cb03e40b5114ceb7d8f6b"
+    },
+    {
+      "name": "PAR 8 history is exactly claim → listed → operator-transfer → buyer refresh (no supersession)",
+      "ok": true,
+      "detail": "operator-claim,listed,operator-transfer,operator-claim-refresh"
+    },
+    {
+      "name": "PAR deal-window setup: buyer operator, fee-right step still pending, seller still recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PAR deal window: seller cannot reclaim using still-current fee-recipient status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR deal window: seller cannot reclaim using still-current deployer status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PAR deal window: the included fee right then completes normally",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x627096ef45339f94b5ea61255d84684a5416f1d218f4e975d42ee3440ad2ac1f\",\"listingId\":\"0x842ecb5ad24b227966389709e516e999bd1f2e959fce42d6aa6b15da9e984e23\",\"offerId\":\"0x42fcb81411977ee0964144d7109bb307a6b5967e10e310aafd2f4d6c0d697a0b\",\"token\":\"0x8333333333333333333333333333333333333333\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "PAR after the deal: seller (deployer) still cannot reclaim",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 1 current wallet fee recipient establishes the FIRST Passport",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.295Z\",\"claims\":[{\"id\":\"0x0ce2bb587d7ce3bc7564fd33f24"
+    },
+    {
+      "name": "PONS_V2 2 deployer establishes the FIRST Passport",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.300Z\",\"claims\":[{\"id\":\"0x9803d85ce40a790eee457de7c99"
+    },
+    {
+      "name": "PONS_V2 3 existing operator refreshes (basis operator)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.300Z\",\"claims\":[{\"id\":\"0x9803d85ce40a790eee457de7c99"
+    },
+    {
+      "name": "PONS_V2 3 existing operator refreshes (basis deployer) without changing anything",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.300Z\",\"claims\":[{\"id\":\"0x9803d85ce40a790eee457de7c99"
+    },
+    {
+      "name": "PONS_V2 setup: fee recipient W2 establishes the Passport where W is deployer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000010\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.316Z\",\"claims\":[{\"id\":\"0xee6b2d0ae24e3bd633ca0e97ab0"
+    },
+    {
+      "name": "PONS_V2 4 a different deployer cannot supersede the operator (409 operator_exists)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 5 a new on-chain fee recipient cannot supersede the operator",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 5 the refusal writes no history (no operator-superseded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PONS_V2 8 buyer is operator after the signed Marketplace transfer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PONS_V2 6 seller still holds the fee right on-chain (not sold)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PONS_V2 6 seller cannot reclaim the Passport (basis fee-recipient)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 6 seller cannot reclaim the Passport (basis deployer)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 6 seller cannot reclaim the Passport (basis operator)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "PONS_V2 7 setup: seller transferred the fee right on-chain to a third wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PONS_V2 7 the new fee recipient cannot take the Passport",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 8 buyer remains operator and can refresh",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000011\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:20:11.358Z\",\"claims\":[{\"id\":\"0xc3633084751bdbaeb9d58152b7f"
+    },
+    {
+      "name": "PONS_V2 8 history is exactly claim → listed → operator-transfer → buyer refresh (no supersession)",
+      "ok": true,
+      "detail": "operator-claim,listed,operator-transfer,operator-claim-refresh"
+    },
+    {
+      "name": "PONS_V2 deal-window setup: buyer operator, fee-right step still pending, seller still recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "PONS_V2 deal window: seller cannot reclaim using still-current fee-recipient status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 deal window: seller cannot reclaim using still-current deployer status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "PONS_V2 deal window: the included fee right then completes normally",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xec6f5b15d66641a2533c0376146a3b9bd76e157251aa3d0a2e7fcba561a4cbf7\",\"listingId\":\"0x3799977acb9a43b8b8ce409d1db29dc7598243d557139c29b0a48448e1371819\",\"offerId\":\"0x51ed1f74100d68382a6ad898df537bd3b5e0ba83dc8c17deea5caa815fa4cb3f\",\"token\":\"0x7a11000000000000000000000000000000000012\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "PONS_V2 after the deal: seller (deployer) still cannot reclaim",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "9 pending Pons override: the proposed recipient has no claim",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "9 executed Pons override: the new on-chain recipient cannot take the Passport",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "9 the recognised operator keeps control and can refresh after the override",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000013\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:20:11.431Z\",\"claims\":[{\"id\":\"0xe37702d5a4eab181ddefd5253e5"
+    },
+    {
+      "name": "10 PAR vault fee recipient still gives no claim (422)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "10 unrelated wallet still gets 422 no_evidence (not operator_exists)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "10 non-launch token still 422 not_par",
+      "ok": true,
+      "detail": "{\"error\":\"This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.\",\"code\":\"not_par\"}"
+    },
+    {
+      "name": "10 signature checks still come first (401 for a wrong signer)",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this claim.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "11 legacy record readable: operator as recorded, both history entries present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 legacy operator-superseded entry is annotated as conferring no authority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 the stored record is untouched (no rewrite, no migration)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 recordHash is still computed over the untouched stored history",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 the superseded former operator gains nothing from the legacy entry (409)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "no code path writes an operator-superseded entry anymore",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "existing-operator refusal happens before the nonce is consumed",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

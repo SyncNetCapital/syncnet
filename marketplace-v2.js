@@ -342,8 +342,10 @@ async function checkProject(){
  const feeRight=await Origins.classifyFeeRight(rpc,launch);
  const vault=feeRight.vault;
  const walletRecipient=feeRight.kind==='wallet'||feeRight.kind==='encumbered';
+ // Deployer / fee-recipient evidence only ESTABLISHES the first Passport; once one exists only its operator may claim
+ // (refresh) and control changes only through the signed Marketplace transfer — the fee right never moves it.
  let basis='';
- if(account&&passport&&same(passport.operator,account))basis='operator';
+ if(passport)basis=account&&same(passport.operator,account)?'operator':'';
  else if(account&&same(launch.deployer,account))basis='deployer';
  else if(account&&same(launch.creatorFeeRecipient,account)&&walletRecipient)basis='fee-recipient';
  claimCheck={token,launch,feeRight,basis,passport,claimed:Boolean(account&&passport&&same(passport.operator,account))};
@@ -364,7 +366,7 @@ async function checkProject(){
  $('mpClaimFacts').hidden=false;
  if(!account){sellStatus('Connect the wallet that operates this project, then check again.','fail');return}
  if(claimCheck.claimed){sellStatus('This wallet is already the recognised operator ✓ — continue to step 02.','pass');renderSellState();return}
- if(passport&&!basis){sellStatus('An operator is already recognised for this project ('+short(passport.operator)+'). It can only change hands through a Marketplace transfer.','fail');return}
+ if(passport&&!basis){sellStatus('An operator is already recognised for this project ('+short(passport.operator)+'). Operational control changes only through a Marketplace Passport transfer — being the deployer or the creator-fee recipient does not transfer it.','fail');return}
  if(!basis){sellStatus('This wallet is neither the deployer nor the current fee-recipient wallet, so it cannot claim this project.','fail');return}
  sellStatus('Evidence found: your wallet is the on-chain '+(basis==='deployer'?'deployer':'creator-fee recipient')+' ('+(isPons?'Pons V2':'PAR')+' factory record). Sign the operator claim to create the Passport record.','pass');
  $('mpSignClaim').disabled=false;

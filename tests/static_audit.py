@@ -244,4 +244,7 @@ assert _c.index("'eco-claim-all'") > _c.index('verifySig(') and _c.index("'eco-c
 _cu=_eco_fn[_eco_fn.index('async function curate('):_eco_fn.index('async function claimRequest(')]
 assert _cu.index('walletLimited(') > _cu.index('duplicate: true') and _cu.index('walletLimited(') > _cu.index("'stale'") and _cu.index('walletLimited(') > _cu.index("'full'")  # replays consume no quota
 assert _c.index('walletLimited(') > _c.index('duplicate: true') and _c.index("'eco-claim-all'") > _c.index('duplicate: true')
+_mpsrv=(root/'netlify/functions/marketplace.js').read_text()
+assert "type: 'operator-superseded'" not in _mpsrv, 'no fee-recipient takeover of a Passport'
+assert "if (passport && lc(passport.operator) !== operator)" in _mpsrv, 'existing Passport: only its operator may claim'
 print('SyncNet Economies V0 static audit: PASS')

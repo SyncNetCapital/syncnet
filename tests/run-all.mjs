@@ -13,6 +13,7 @@ const SUITES = [
   ['server endpoint abuse (RC)', 'node', ['tests/server/rc-server.test.mjs'], /(\d+)\/(\d+) server checks passed/],
   ['server IPFS check /api/ipfs-check (hotfix)', 'node', ['tests/server/ipfs-check.test.mjs'], /(\d+)\/(\d+) ipfs-check checks passed/],
   ['server Marketplace /api/marketplace (V1)', 'node', ['tests/server/marketplace.test.mjs'], /(\d+)\/(\d+) marketplace server checks passed/],
+  ['server Passport authority (no fee-recipient takeover)', 'node', ['tests/server/passport-authority.test.mjs'], /(\d+)\/(\d+) passport authority checks passed/],
   ['server Marketplace × Pons V2 (origins)', 'node', ['tests/server/marketplace-pons.test.mjs'], /(\d+)\/(\d+) marketplace Pons checks passed/],
   ['Economies unit (EIP-712 domain, fold, derived membership)', 'node', ['tests/unit/economy.test.mjs'], /(\d+) passed, (\d+) failed/],
   ['server Economies /api/economies (V0)', 'node', ['tests/server/economies.test.mjs'], /(\d+)\/(\d+) economies server checks passed/],

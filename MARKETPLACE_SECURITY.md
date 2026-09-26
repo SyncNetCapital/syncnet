@@ -68,7 +68,27 @@ A Project Passport (recognised-operator record) is created or refreshed only whe
 - the **current creator-fee recipient**, when that recipient is a plain wallet (EOA or 7702-delegated) — a PAR vault or unknown contract recipient gives no claim, or
 - the **already-recognised operator** (refresh).
 
-Precedence and takeover: an existing operator blocks a deployer claim (`operator_exists`); only the current on-chain fee recipient can supersede a recorded operator, and that supersession is itself an append-only history entry (`operator-superseded`). A token that is not a supported launch cannot be claimed at all (`not_par`; a positively identified Pons V1 launch gets `unsupported_origin`). Evidence texts name the venue: PAR texts are unchanged ("wallet is the on-chain deployer (PAR factory record)"), Pons texts end in "(Pons V2 factory record)". Claims prove **control of a wallet**, not the quality of a project — the UI says exactly that.
+**Passport authority (same rule for PAR and Pons V2).**
+
+| Situation | Who may claim | Result |
+|---|---|---|
+| No Passport yet | the on-chain **deployer**, or the **current creator-fee recipient** if it is a directly controlled wallet | the first Passport is established |
+| Passport exists | **only its recognised operator** (any evidence basis) | refresh; operator unchanged |
+| Passport exists, any other wallet (deployer, current / new / pending-override fee recipient, anyone) | nobody | `409 operator_exists`, nothing written, nonce not consumed |
+
+Once a Passport exists, its operator changes **only** through the signed Marketplace transfer (seller `TransferIntent` +
+buyer `TransferAccept`). The creator-fee right and operational control are separate: keeping, receiving, transferring or
+having the fee right overridden by a launchpad never moves the Passport. A buyer who buys only the Passport stays operator
+even though the seller keeps the fee right; this also holds between the Passport transfer and an included fee-right transfer
+in an open deal. A recovery/dispute mechanism, if ever needed, will be designed separately.
+
+*Retired rule.* Until this change, a wallet proving it was the current fee recipient could supersede a different recorded
+operator (`operator-superseded`). That allowed a seller who sold only the Passport to take it back. No code path writes
+such entries anymore. Existing ones stay in the append-only history unchanged (records are never rewritten); the public
+view annotates them `legacy: true` with a note that they grant no authority. The operator recorded at that time remains the
+recorded operator, and the entry itself enables nothing further.
+
+A token that is not a supported launch cannot be claimed at all (`not_par`; a positively identified Pons V1 launch gets `unsupported_origin`). Evidence texts name the venue: PAR texts are unchanged ("wallet is the on-chain deployer (PAR factory record)"), Pons texts end in "(Pons V2 factory record)". Claims prove **control of a wallet**, not the quality of a project — the UI says exactly that.
 
 ## 4. Listings and offers
 
