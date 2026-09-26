@@ -156,7 +156,9 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .pj-contract{display:flex;align-items:center;gap:10px;margin-top:8px;font-family:var(--mono);font-size:13px;color:var(--bone-3);min-width:0}
 .pj-contract span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pj-contract button{flex:none;border:1px solid var(--line);background:none;color:var(--bone-2);border-radius:var(--r);min-height:32px;padding:0 10px;font-size:12px;cursor:pointer;font-family:var(--sans)}
-.pj-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.pj-actions{display:flex;flex-wrap:wrap;gap:0 22px;margin-top:14px}
+.pj-actions a{display:inline-flex;align-items:center;min-height:44px;color:var(--bone-2);font-size:14px}
+.pj-actions a:hover{color:var(--bone);text-decoration:underline;text-underline-offset:4px}
 .pj-actions:empty{display:none}
 .pj-rows{margin:0;padding:0;list-style:none}
 .pj-row{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:16px;align-items:center;min-height:64px;padding:10px 0;border-bottom:1px solid var(--line)}
@@ -172,7 +174,9 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .pj-row-a .sn-btn.primary{background:var(--bone);color:var(--ink);border-color:var(--bone)}
 .pj-row[data-row="market"] .is-for-sale{color:var(--copper)}
 .pj-row[data-row="connections"] .pj-row-v a{color:var(--accent)}
-.pj-note{grid-column:2/-1;font-size:13px;color:var(--bone-3);margin:-2px 0 4px}
+.pj-note{grid-column:2/-1;font-size:13px;color:var(--bone-3);margin:-6px 0 2px}
+.pj-note a{display:inline-flex;align-items:center;min-height:32px;color:var(--bone-2)}
+.pj-note a:hover{color:var(--bone);text-decoration:underline;text-underline-offset:4px}
 .pj-panel{grid-column:1/-1;padding:4px 0 18px}
 @media (max-width:759px){
   .pj-row{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:14px 0}
@@ -186,6 +190,7 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .pj-details>summary::after{content:"Expand";margin-left:auto;font-weight:400;font-size:14px;color:var(--bone-2)}
 .pj-details[open]>summary::after{content:"Collapse"}
 .pj-details-body{padding:4px 0 28px}
+@media (max-width:759px){.pj-details>summary span{display:none}}
 
 /* ------------------------------------------------------------------ panels inside rows / flows (flat, hairline) */
 .sn-panel{border:1px solid var(--line);border-radius:var(--r);padding:18px;background:var(--ink)}

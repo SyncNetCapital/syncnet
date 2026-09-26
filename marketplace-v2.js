@@ -87,9 +87,12 @@ function note(text,cls){const el=$('mpServiceNote');el.hidden=!text;el.className
 // ---------------------------------------------------------------- routing
 const PANELS={browse:'mp-browse-panel',sell:'mp-sell-panel',mine:'mp-mine-panel',detail:'mp-detail-panel',deal:'mp-deal-panel'};
 let route={view:'browse',id:''};
-function parseHash(){const h=location.hash.replace(/^#\/?/,'');let m;if((m=/^listing=(0x[0-9a-fA-F]{64})$/.exec(h)))return{view:'detail',id:lc(m[1])};if((m=/^deal=(0x[0-9a-fA-F]{64})$/.exec(h)))return{view:'deal',id:lc(m[1])};if(h==='sell')return{view:'sell',id:''};if(h==='mine')return{view:'mine',id:''};return{view:'browse',id:''}}
+function parseHash(){const h=location.hash.replace(/^#\/?/,'');let m;if((m=/^listing=(0x[0-9a-fA-F]{64})$/.exec(h)))return{view:'detail',id:lc(m[1])};if((m=/^deal=(0x[0-9a-fA-F]{64})$/.exec(h)))return{view:'deal',id:lc(m[1])};if(h==='sell')return{view:'sell',id:''};if((m=/^sell=(0x[0-9a-fA-F]{40})$/.exec(h)))return{view:'sell',id:'',token:lc(m[1])};if(h==='mine')return{view:'mine',id:''};return{view:'browse',id:''}}
 function go(hash){if(('#'+hash)===location.hash||(!hash&&!location.hash)){onRoute()}else location.hash=hash}
-function onRoute(){route=parseHash();for(const[v,id]of Object.entries(PANELS)){const el=$(id);if(el){el.hidden=v!==route.view;el.classList.toggle('active',v===route.view)}}
+function onRoute(){route=parseHash();
+ // #sell=0x… (from a Project Page: Transfer → / List →) only PREFILLS the project field; checking is still explicit.
+ if(route.token&&$('mpToken')&&lc($('mpToken').value.trim())!==route.token){$('mpToken').value=route.token;$('mpToken').dispatchEvent(new Event('input'))}
+for(const[v,id]of Object.entries(PANELS)){const el=$(id);if(el){el.hidden=v!==route.view;el.classList.toggle('active',v===route.view)}}
  document.querySelectorAll('.mp-workspace-tab').forEach(b=>{const active=b.dataset.mpView===route.view||(route.view==='detail'&&b.dataset.mpView==='browse')||(route.view==='deal'&&b.dataset.mpView==='mine');b.classList.toggle('active',active);if(b.getAttribute('role')==='tab')b.setAttribute('aria-selected',active?'true':'false')});
  rerender();
 }
