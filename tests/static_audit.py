@@ -164,7 +164,14 @@ assert "const PONS_V2_FACTORY = '0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e';" i
 assert "const PAR_FACTORIES = Object.freeze([lc(Chain.ROBINHOOD.multiFactory), lc(Chain.ROBINHOOD.factory)]);" in _org
 assert "const FEE_FACTORIES = Object.freeze(PAR_FACTORIES.concat([PONS_V2_FACTORY]));" in _org, 'fee-transfer destinations must be exactly the canonical factories'
 assert "if (!FEE_FACTORIES.includes(to)) throw" in _org and "transferCreatorFeeRecipient: Core.functionSelector('transferCreatorFeeRecipient(address,address)')" in _org
-assert _org.count('functionSelector(') == 5 and 'eth_sendTransaction' not in _org, 'origins lib: read selectors + the one fee-transfer selector only'
+assert _org.count('functionSelector(') == 6 and 'eth_sendTransaction' not in _org, 'origins lib: read selectors (incl. launchFactory) + the one fee-transfer selector only'
+# Pons V1: detection only, exactly two canonical factories, bidirectional evidence, never a fee-transfer destination
+assert "Object.freeze({ address: '0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb', generation: 'ACTIVE' })," in _org
+assert "Object.freeze({ address: '0x0c37a24f5d23a486fa692d1500881d698b1f77a4', generation: 'LEGACY' })," in _org
+assert "const factory = PONS_V1_FACTORIES.find((f) => f.address === claimed);\n    if (!factory) return null;" in _org, 'V1 origin only from an allowlisted factory named by the token itself'
+assert "if (r[11] !== true || lc(r[0]) !== t) return null;" in _org, 'V1 origin requires exists && record.token == token'
+assert "supported: false, token: t, factory: v1.factory" in _org, 'Pons V1 is never supported'
+assert 'PONS_V1' not in _org.split('function feeTransferTx')[1].split("throw new Error('Unsupported project origin.')")[0].replace("project.origin === 'PAR' || project.origin === 'PONS_V2'", ''), 'fee transfers never for V1'
 assert "if (r[14] !== true || lc(r[0]) !== t) return null;" in _org, 'Pons V2 origin requires exists && record.token == token'
 # M3 / M4 / L4 / L8 / L13
 tok=(root/'v2-token.js').read_text(); net=(root/'v2-network.js').read_text(); mp=(root/'marketplace-v2.js').read_text()

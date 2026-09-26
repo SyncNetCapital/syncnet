@@ -47,7 +47,8 @@ export const A = {
   PONS2_ETH: '0x7a11000000000000000000000000000000000002', // pair native ETH · graduated · fee recipient = another wallet
   PONS2_CONTRACT: '0x7a11000000000000000000000000000000000003', // fee recipient is a contract
   PONS2_PENDING: '0x7a11000000000000000000000000000000000004', // protocol-owner fee-recipient override pending
-  PONS1: '0x7a11000000000000000000000000000000000005', // a Pons V1 launch
+  PONS1: '0x7a11000000000000000000000000000000000005', // a Pons V1 launch (ACTIVE V1 factory)
+  PONS1_LEGACY: '0x7a11000000000000000000000000000000000006', // a Pons V1 launch (LEGACY V1 factory)
   OTHER_EOA: '0x1234567890123456789012345678901234567890',
   FACTORY: '0x3ea29975a79900179F3e1aEF93347Ba4210c29C1',
   HOLDER: '0x4B79B8298cd890A82dC9De1dE5dBb745Cf04353C',
@@ -82,7 +83,7 @@ export const LAUNCHES = [
 ];
 const byAddr = new Map(LAUNCHES.map((l) => [lc(l.token), l]));
 const ERC = { [lc(A.SYNC)]: ['SyncNet', 'SYNC'], [lc(A.USDG)]: ['Global Dollar', 'USDG'], [lc(A.PONS)]: ['PONS', 'PONS'], [lc(A.CASHCAT)]: ['CASHCAT', 'CASHCAT'], [lc(A.SYNCAT)]: ['SYNCAT', 'SYNCAT'], [lc(A.NET)]: ['NET', 'NET'], [lc(A.FAKESYNC)]: ['SyncNet', 'SYNC'], [lc(A.RANDOM_CONTRACT)]: ['Random', 'RND'] };
-Object.assign(ERC, { [lc(A.PONS2)]: ['Pons Alpha', 'PALPHA'], [lc(A.PONS2_ETH)]: ['Pons Ether', 'PETH'], [lc(A.PONS2_CONTRACT)]: ['Pons Vaulted', 'PVAULT'], [lc(A.PONS2_PENDING)]: ['Pons Pending', 'PPEND'], [lc(A.PONS1)]: ['Pons Legacy', 'PLEG'] });
+Object.assign(ERC, { [lc(A.PONS2)]: ['Pons Alpha', 'PALPHA'], [lc(A.PONS2_ETH)]: ['Pons Ether', 'PETH'], [lc(A.PONS2_CONTRACT)]: ['Pons Vaulted', 'PVAULT'], [lc(A.PONS2_PENDING)]: ['Pons Pending', 'PPEND'], [lc(A.PONS1)]: ['Pons Legacy', 'PLEG'], [lc(A.PONS1_LEGACY)]: ['Pons Genesis', 'PGEN'] });
 
 // ---- mutable chain state
 const SUPPLY = 10n ** 27n;
@@ -106,15 +107,19 @@ function freshChain() {
       [lc(A.PONS2_CONTRACT), { deployer: A.WALLET, creatorFeeRecipient: lc(A.RANDOM_CONTRACT), pairToken: lc(A.NET), phase: 1, creatorTaxBps: 0, buyback: false, pending: null }],
       [lc(A.PONS2_PENDING), { deployer: A.WALLET, creatorFeeRecipient: A.WALLET, pairToken: lc(A.USDG), phase: 0, creatorTaxBps: 150, buyback: false, pending: { newRecipient: A.ATTACKER, effectiveAt: Math.floor(Date.now() / 1000) + 3 * 86400, expiresAt: Math.floor(Date.now() / 1000) + 6 * 86400 } }],
     ]),
-    ponsV1: new Map([[lc(A.PONS1), { deployer: A.WALLET, pairedToken: lc(A.USDG) }]]),
+    // Pons V1 launches: token -> {factory (its launchFactory() AND the factory holding its record), deployer, pairedToken}
+    ponsV1: new Map([
+      [lc(A.PONS1), { factory: Origins.PONS_V1_FACTORIES[0].address, deployer: A.WALLET, pairedToken: lc(A.USDG) }],
+      [lc(A.PONS1_LEGACY), { factory: Origins.PONS_V1_FACTORIES[1].address, deployer: A.WALLET, pairedToken: lc(R.weth) }],
+    ]),
   };
 }
 export const chain = freshChain();
 export function resetChain() { Object.assign(chain, freshChain()); }
 
 class Revert extends Error {}
-const PONS_V2_FACTORY = Origins.PONS_V2_FACTORY, PONS_V1_FACTORY = Origins.PONS_V1_FACTORY;
-const CONTRACTS = new Set([PONS_V2_FACTORY, PONS_V1_FACTORY, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
+const PONS_V2_FACTORY = Origins.PONS_V2_FACTORY, PONS_V1_FACTORIES = Origins.PONS_V1_FACTORIES.map((f) => f.address);
+const CONTRACTS = new Set([PONS_V2_FACTORY, ...PONS_V1_FACTORIES, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), lc(A.PONS1_LEGACY), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
 function hasCode(a) {
   a = lc(a);
   if (chain.tokens.has(a)) return true;
@@ -246,6 +251,7 @@ function ethCall(call) {
       return enc(T, [[[[ZERO, q, 10000, 200, chain.routeHooks.get(q) || ZERO], false]], !chain.routeNotQualified.has(q)]);
     }
   }
+  if (chain.ponsV1.has(to) && s === S.launchFactory) return enc(['address'], [chain.ponsV1.get(to).factory]);
   // Pons factories (exact ABI layouts from ponsdotdev/pons-labs @ 162310f)
   if (to === PONS_V2_FACTORY) {
     const x = chain.pons.get(arg0());
@@ -254,8 +260,8 @@ function ethCall(call) {
     if (s === S.pendingCreatorFeeRecipient) { const p = x && x.pending; return enc(['address', 'uint256', 'uint256'], p ? [lc(p.newRecipient), BigInt(p.effectiveAt), BigInt(p.expiresAt)] : [ZERO, 0n, 0n]); }
     return '0x';
   }
-  if (to === PONS_V1_FACTORY && s === S.getLaunchedToken) {
-    const x = chain.ponsV1.get(arg0());
+  if (PONS_V1_FACTORIES.includes(to) && s === S.getLaunchedToken) {
+    const y = chain.ponsV1.get(arg0()), x = y && y.factory === to ? y : null;
     return enc([PONS_V1_REC], [x ? [arg0(), lc(x.deployer), lc(x.pairedToken), lc(R.positionManager), 7n, 1n, 0n, 0n, SUPPLY, true, 10000, true, 0n] : [ZERO, ZERO, ZERO, ZERO, 0n, 0n, 0n, 0n, 0n, false, 0, false, 0n]]);
   }
   if (to === lc(R.holderVault) && s === S.escrow) return enc(['address'], [R.feeEscrow]);

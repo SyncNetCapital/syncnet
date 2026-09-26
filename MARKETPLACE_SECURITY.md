@@ -11,8 +11,13 @@ canonical factory on Robinhood Chain (chain 4663), in `lib/syncnet-origins.js`, 
 |---|---|---|---|
 | **PAR** | `PairPadMultiLaunchFactory` `0x3ea29975a79900179F3e1aEF93347Ba4210c29C1`, then `PairPadLaunchFactory` `0x9d33Ba78389c8772bC114Cba47Dc1985E933e76F` | `getLaunchedToken(token)` (exists flag) | supported (unchanged) |
 | **PONS V2** | `PonsV2LaunchFactory` `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e` (ponsdotdev/pons-labs README, commit `162310f`; EIP-55 checksum verified) | `getLaunchedToken(token)` → 15-field `LaunchedToken`; accepted only if `exists == true` **and** `record.token == token`; plus `pendingCreatorFeeRecipient(token)` | supported |
-| PONS V1 | `PonsLaunchFactory` `0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB` | `getLaunchedToken(token)` (13 fields, `exists`) | **detected only** — "PONS V1 DETECTED · not enabled yet" |
+| PONS V1 | ACTIVE `PonsLaunchFactory` `0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB` (Blockscout-verified) · LEGACY `0x0c37a24F5D23A486FA692d1500881d698B1F77a4` (tokens deployed before the current version, e.g. PONS; not source-verified) — both listed in the official Pons docs | **bidirectional**: the token's own `launchFactory()` must name one of these two factories **and** that factory's `getLaunchedToken(token)` (13 fields) must have `exists == true` and `record.token == token`. A factory the token names that is not on this allowlist is never queried | **detected only** — "PONS V1 DETECTED · not enabled yet". No Passport claim, listing, fee transfer, trading or settlement |
 
+- **Live verification (Step 3, 26 Sep 2026, `tests/live/pons-step3-live.mjs`)**: the live Pons V2 factory runtime bytecode is
+  byte-identical to the Blockscout-verified `PonsV2LaunchFactory` (solc 0.8.35, viaIR, verified 2026-08-04); the verified
+  ABI of `getLaunchedToken` (15 fields), `GraduationPhase` enum order, `pendingCreatorFeeRecipient` (3 values) and
+  `transferCreatorFeeRecipient(address,address)` (`0x2931861b`, current recipient only, does not cancel a pending
+  override) match the resolver exactly. The live deployment, not a GitHub checkout, is the reference.
 - The origin is **server-derived** and stored on new Passports (`launchpad`) and listings (`origin`). It is never part of a
   signature and never taken from a request: a client-supplied `launchpad`/`origin`/`factory` field is ignored.
 - Records written before multi-origin support have no such field; they are read as PAR (their recorded `factory` is a PAR

@@ -225,6 +225,138 @@ let LISTING;
   check('14 server re-read of the Pons V2 factory verifies the transfer', r.statusCode === 200 && J(r).deal.checklist.feeRight.done === true && J(r).deal.checklist.feeRight.factory === PONS_FACTORY, r.body);
 }
 
+// ================================================================================ Pons V1 strict detection (V1-1 … V1-10)
+// Detection only: V1 is recognised truthfully and stays UNSUPPORTED (no Passport, listing, fee transfer, trade, settle).
+// Origin needs BOTH sides: token.launchFactory() names an allowlisted V1 factory AND that factory's record names the token.
+{
+  const [ACTIVE, LEGACY] = Origins.PONS_V1_FACTORIES;
+  check('V1 allowlist is exactly ACTIVE 0xA5aAb3… + LEGACY 0x0c37a2…', Origins.PONS_V1_FACTORIES.length === 2
+    && ACTIVE.generation === 'ACTIVE' && ACTIVE.address === '0xa5aab3f0c6eeadf30ef1d3eb997108e976351feb'
+    && LEGACY.generation === 'LEGACY' && LEGACY.address === '0x0c37a24f5d23a486fa692d1500881d698b1f77a4' && Object.isFrozen(Origins.PONS_V1_FACTORIES));
+
+  // mock chain (harness): one launch per generation
+  const a = await Origins.resolveProject(rpc, PONS1);
+  check('V1-1 ACTIVE-factory V1 token → PONS_V1 / unsupported / ACTIVE factory', a && a.origin === 'PONS_V1' && a.supported === false && a.factory === ACTIVE.address && a.generation === 'ACTIVE', JSON.stringify(a));
+  const PONS1_LEGACY = lc(A.PONS1_LEGACY);
+  const g = await Origins.resolveProject(rpc, PONS1_LEGACY);
+  check('V1-2 LEGACY-factory V1 token → PONS_V1 / unsupported / LEGACY factory', g && g.origin === 'PONS_V1' && g.supported === false && g.factory === LEGACY.address && g.generation === 'LEGACY', JSON.stringify(g));
+
+  // stub RPC: exact answers per (to, selector); PAR + Pons V2 factories answer "unknown token"
+  const Z = '0x' + '00'.repeat(20);
+  const V1REC = '(address,address,address,address,uint256,uint256,uint256,uint256,uint256,bool,uint24,bool,uint256)';
+  const V2REC = '(address,address,address,address,address,uint256,uint24,int24,uint16,bool,uint8,uint256,uint256,uint256,bool)';
+  const v1rec = (tok, exists) => Core.abiEncode([V1REC], [[tok, SELLER, Z, Z, 1n, 0n, 0n, 0n, 10n ** 27n, false, 10000, exists, 0n]]);
+  const addr = (x) => Core.abiEncode(['address'], [x]);
+  const SELF = Origins.SEL.launchFactory, GLT = Origins.SEL.getLaunchedToken;
+  const stubV1 = (answers) => {
+    const seen = [];
+    const rpcStub = async (method, params) => {
+      if (method !== 'eth_call') throw new Error('unexpected ' + method);
+      const to = lc(params[0].to), data = params[0].data, sel = data.slice(0, 10);
+      seen.push(to);
+      if (to === lc(Chain.ROBINHOOD.multiFactory)) return Core.abiEncode(['(address,address,address,uint24,int24,uint16,uint16,uint16,address,uint64,uint8,bool)'], [[Z, Z, Z, 0, 0, 0, 0, 0, Z, 0n, 0, false]]);
+      if (to === lc(Chain.ROBINHOOD.factory)) return '0x' + '00'.repeat(32 * 17);
+      if (to === PONS_FACTORY) return sel === GLT ? Core.abiEncode([V2REC], [[Z, Z, Z, Z, Z, 0n, 0, 0, 0, false, 0, 0n, 0n, 0n, false]]) : '0x';
+      const f = answers[to + ':' + sel];
+      if (f === undefined) return '0x';
+      return typeof f === 'function' ? f() : f;
+    };
+    rpcStub.seen = seen;
+    return rpcStub;
+  };
+  const revert = () => { throw new Chain.RpcError('execution reverted', { code: 3, revert: true }); };
+  const T = '0x' + 'b1'.repeat(20), EVIL_FACTORY = '0x' + 'e1'.repeat(20);
+
+  // V1-2 (real data): the actual PONS token, with the exact answers read live from Robinhood Chain on 2026-09-26
+  const PONS_REAL = '0x39dbed3a2bd333467115de45665cc57f813c4571';
+  const PONS_REAL_RECORD = '0x00000000000000000000000039dbed3a2bd333467115de45665cc57f813c4571000000000000000000000000b9f5f4ea1af1f5d3678470eb98e8fbdcadeb24b00000000000000000000000000bd7d308f8e1639fab988df18a8011f41eacad7300000000000000000000000073991a25c818bf1f1128deaab1492d45638de0d3000000000000000000000000000000000000000000000000000000000001aaa00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000018581040000000000000000000000000000000000000000033b2e3c9fd0803ce8000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000027100000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000016345785d8a0000';
+  const real = await Origins.resolveProject(stubV1({ [PONS_REAL + ':' + SELF]: addr(LEGACY.address), [LEGACY.address + ':' + GLT]: PONS_REAL_RECORD, [ACTIVE.address + ':' + GLT]: v1rec(Z, false) }), PONS_REAL);
+  check('V1-2 real PONS answers (launchFactory = LEGACY, LEGACY 13-word record) → PONS_V1 / unsupported / LEGACY', real && real.origin === 'PONS_V1' && real.supported === false && real.factory === LEGACY.address && real.generation === 'LEGACY' && real.deployer === '0xb9f5f4ea1af1f5d3678470eb98e8fbdcadeb24b0', JSON.stringify(real));
+
+  // V1-3 a token naming a factory NOT on the allowlist is never Pons, even if that factory "confirms" it
+  const s3 = stubV1({ [T + ':' + SELF]: addr(EVIL_FACTORY), [EVIL_FACTORY + ':' + GLT]: v1rec(T, true) });
+  check('V1-3 token names an arbitrary launchFactory (not allowlisted) → NOT Pons', (await Origins.resolveProject(s3, T)) === null);
+  check('V1-3 the non-allowlisted factory is never even queried', !s3.seen.includes(EVIL_FACTORY));
+
+  // V1-4 canonical factory has a valid record but the token's own launchFactory() disagrees / is missing
+  check('V1-4 ACTIVE factory record exists but token.launchFactory names LEGACY → NOT Pons',
+    (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(LEGACY.address), [ACTIVE.address + ':' + GLT]: v1rec(T, true), [LEGACY.address + ':' + GLT]: v1rec(Z, false) }), T)) === null);
+  check('V1-4 LEGACY factory record exists but token.launchFactory names an unrelated address → NOT Pons',
+    (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(EVIL_FACTORY), [LEGACY.address + ':' + GLT]: v1rec(T, true) }), T)) === null);
+  check('V1-4 canonical record exists but token has no launchFactory() (reverts) → NOT Pons',
+    (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: revert, [ACTIVE.address + ':' + GLT]: v1rec(T, true) }), T)) === null);
+  check('V1-4 canonical record exists but token.launchFactory() is empty → NOT Pons',
+    (await Origins.resolveProject(stubV1({ [ACTIVE.address + ':' + GLT]: v1rec(T, true) }), T)) === null);
+  check('V1-4 canonical record exists but token.launchFactory() returns zero address → NOT Pons',
+    (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(Z), [ACTIVE.address + ':' + GLT]: v1rec(T, true) }), T)) === null);
+  check('V1-4 malformed launchFactory() answer → NOT Pons (no crash)',
+    (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: '0x1234', [ACTIVE.address + ':' + GLT]: v1rec(T, true) }), T)) === null);
+
+  // V1-5 / V1-6 token names a canonical factory but the factory side does not agree
+  for (const F of [ACTIVE, LEGACY]) {
+    check(`V1-5 token.launchFactory = ${F.generation} but record exists=false → NOT Pons`,
+      (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(F.address), [F.address + ':' + GLT]: v1rec(T, false) }), T)) === null);
+    check(`V1-6 token.launchFactory = ${F.generation} but record.token is another token → NOT Pons`,
+      (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(F.address), [F.address + ':' + GLT]: v1rec('0x' + 'c2'.repeat(20), true) }), T)) === null);
+    check(`V1-6 token.launchFactory = ${F.generation} but factory returns nothing → NOT Pons`,
+      (await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(F.address) }), T)) === null);
+  }
+
+  // fail closed: an unreadable chain during V1 detection is an error, never "not Pons"
+  let threw = false;
+  try { await Origins.resolveProject(stubV1({ [T + ':' + SELF]: () => { throw new Chain.RpcError('RPC HTTP 429', { transient: true }); } }), T); } catch { threw = true; }
+  check('V1 RPC failure reading token.launchFactory() THROWS (fail closed)', threw);
+  threw = false;
+  try { await Origins.resolveProject(stubV1({ [T + ':' + SELF]: () => { throw new TypeError('fetch failed'); } }), T); } catch { threw = true; }
+  check('V1 network error (non-RpcError) reading token.launchFactory() THROWS (fail closed)', threw);
+  threw = false;
+  try { await Origins.resolveProject(stubV1({ [T + ':' + SELF]: addr(LEGACY.address), [LEGACY.address + ':' + GLT]: () => { throw new Chain.RpcError('RPC timeout', { transient: true }); } }), T); } catch { threw = true; }
+  check('V1 RPC failure reading the canonical V1 factory THROWS (fail closed)', threw);
+
+  // V1-7 no Project Passport for either generation, on any basis
+  for (const [name, tok] of [['ACTIVE', PONS1], ['LEGACY', PONS1_LEGACY]]) {
+    for (const basis of ['deployer', 'fee-recipient']) {
+      const r = await claim(tok, SELLER, basis);
+      check(`V1-7 ${name} V1 ${basis} claim refused: 422 unsupported_origin "PONS V1 DETECTED"`, r.statusCode === 422 && J(r).code === 'unsupported_origin' && /PONS V1 DETECTED/.test(J(r).error), r.body);
+    }
+    const r = await claim(tok, SELLER, 'deployer', { launchpad: 'PONS_V2', origin: { launchpad: 'PONS_V2' }, factory: PONS_FACTORY });
+    check(`V1-7 ${name} V1 claim with client-supplied launchpad=PONS_V2 still refused`, r.statusCode === 422 && J(r).code === 'unsupported_origin', r.body);
+    check(`V1-7 no Passport was stored for the ${name} V1 token`, (await store.get('mp:passport:v1:' + tok)) == null);
+  }
+
+  // V1-8 no Marketplace entry: even with a Passport planted directly in the store, listing re-reads the chain
+  for (const [name, tok] of [['ACTIVE', PONS1], ['LEGACY', PONS1_LEGACY]]) {
+    const key = 'mp:passport:v1:' + tok;
+    await store.set(key, JSON.stringify({ schema: 'syncnet.passport.v1', token: tok, chainId: 4663, launchpad: 'PONS_V2', factory: PONS_FACTORY, deployer: SELLER, operator: SELLER, claims: [], listing: null, history: [] }));
+    for (const fee of [false, true]) {
+      const r = await list(tok, SELLER, fee);
+      check(`V1-8 ${name} V1 listing (feeRight=${fee}) refused with a planted Passport: 422 unsupported_origin`, r.statusCode === 422 && J(r).code === 'unsupported_origin', r.body);
+    }
+    await store.del(key);
+    const p = await Origins.resolveProject(rpc, tok);
+    let refused = false; try { Origins.feeTransferTx(p, tok, BUYER); } catch { refused = true; }
+    check(`V1-8 ${name} V1 resolved project cannot build a creator-fee transfer`, refused);
+    check(`V1-8 ${name} V1 factory is not a fee-transfer destination`, !Origins.FEE_FACTORIES.includes(p.factory) && Origins.originOfFactory(p.factory) === null);
+  }
+  const idx = await store.smembers('mp:listings:v1');
+  const listed = await Promise.all(idx.map(async (id) => JSON.parse((await store.get('mp:listing:v1:' + id)) || '{}')));
+  check('V1-8 no listing in the store is for a V1 token', !listed.some((l) => [PONS1, PONS1_LEGACY].includes(lc(l.token))));
+
+  // V1-9 PAR and Pons V2 detection unchanged (resolved before V1; V1 logic never reclassifies them)
+  const par = await Origins.resolveProject(rpc, PAR);
+  check('V1-9 PAR launch still resolves as PAR (supported)', par && par.origin === 'PAR' && par.supported === true && Origins.PAR_FACTORIES.includes(par.factory));
+  for (const tok of [PONS, PONS_ETH, PONS_CONTRACT, PONS_PENDING]) {
+    const v = await Origins.resolveProject(rpc, tok);
+    check('V1-9 Pons V2 launch still resolves as PONS_V2 (supported) ' + tok.slice(-4), v && v.origin === 'PONS_V2' && v.supported === true && v.factory === PONS_FACTORY);
+  }
+
+  // V1-10 WETH (and a plain ERC-20) remain unsupported
+  check('V1-10 WETH → null (unsupported)', (await Origins.resolveProject(rpc, lc(Chain.ROBINHOOD.weth))) === null);
+  check('V1-10 USDG → null (unsupported)', (await Origins.resolveProject(rpc, USDG)) === null);
+  const r = await claim(lc(Chain.ROBINHOOD.weth), SELLER, 'deployer');
+  check('V1-10 WETH claim → generic "not a PAR launch or a Pons V2 launch"', r.statusCode === 422 && J(r).code === 'not_par', r.body);
+}
+
 // ================================================================================ no approvals (19)
 {
   const src = ['lib/syncnet-origins.js', 'marketplace-v2.js', 'netlify/functions/marketplace.js'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');

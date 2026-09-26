@@ -1,3 +1,17 @@
+# Pons V1 strict detection + live Step 3 verification (`feature/syncnet-economies-v0`): 26 Sep 2026
+
+- Pons V1 detection now knows both canonical factory generations from the official Pons docs: ACTIVE
+  `0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB` and LEGACY `0x0c37a24F5D23A486FA692d1500881d698B1F77a4` (PONS itself was
+  launched from LEGACY and was previously shown as a generic unsupported token). Detection is bidirectional: the token's
+  `launchFactory()` must name an allowlisted V1 factory AND that factory's record must name the token with `exists`.
+  A token without `launchFactory()` (revert) is not V1; any other read failure throws (fail closed).
+- V1 stays UNSUPPORTED: no Passport claim, listing, fee transfer, trading or settlement. The Project Page badge says
+  "PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN" for LEGACY launches.
+- Tests: 46 new server checks (V1-1 … V1-10, including the real PONS answers), 5 new walkthrough checks, and
+  `tests/live/pons-step3-live.mjs` (real network, not in `run-all`): live Pons V2 bytecode == Blockscout-verified
+  bytecode; TEST → PONS_V2 bonding curve / native ETH; PONSI → PONS_V2 graduated / native ETH; WETH → unsupported;
+  PONS → PONS_V1 LEGACY / unsupported.
+
 # Marketplace: Pons V2 as a supported origin (`feature/syncnet-economies-v0`): 26 Sep 2026
 
 The Project Marketplace is now launchpad-agnostic, with two supported origins: **PAR** (unchanged) and **PONS V2**.

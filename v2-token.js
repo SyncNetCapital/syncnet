@@ -129,7 +129,7 @@ async function run(){
  if(isPar)badges.push('<span class="badge">PAR LAUNCH · FACTORY RECORD ON-CHAIN</span>');
  else if(launch==='unavailable')badges.push('<span class="badge registry-badge unverified">PAR STATUS UNAVAILABLE</span>');
  else if(isPons)badges.push('<span class="badge">PONS V2 LAUNCH · FACTORY RECORD ON-CHAIN</span>');
- else if(isPonsV1)badges.push('<span class="badge">PONS V1 LAUNCH · FACTORY RECORD ON-CHAIN</span>');
+ else if(isPonsV1)badges.push(`<span class="badge">PONS V1 LAUNCH · ${pons.generation==='LEGACY'?'LEGACY ':''}FACTORY RECORD ON-CHAIN</span>`);
  else if(pons==='unavailable')badges.push('<span class="badge registry-badge unverified">LAUNCHPAD STATUS UNAVAILABLE</span>');
  else badges.push('<span class="badge registry-badge unverified">NOT VERIFIED AS A PAR LAUNCH</span>');
  if(isPar&&usedBy.length)badges.push('<span class="badge">NETWORK HUB</span>');

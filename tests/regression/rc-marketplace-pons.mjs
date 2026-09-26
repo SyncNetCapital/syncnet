@@ -62,6 +62,8 @@ await S.page.goto(BASE + '/marketplace.html'); await S.page.waitForTimeout(800);
   check('3 random ERC-20 → UNSUPPORTED PROJECT', /UNSUPPORTED PROJECT/.test(st), st);
   st = await checkToken(S.page, A.PONS1);
   check('Pons V1 → PONS V1 DETECTED · not enabled yet', /PONS V1 DETECTED/.test(st), st);
+  st = await checkToken(S.page, A.PONS1_LEGACY);
+  check('Pons V1 (LEGACY factory) → PONS V1 DETECTED · not enabled yet, no claim step', /PONS V1 DETECTED/.test(st) && !/Evidence found/.test(st), st);
   st = await checkToken(S.page, A.CREATORLIVE);
   const parFacts = await text(S.page, '#mpClaimFacts');
   check('1 PAR project → DETECTED PAR, facts unchanged', /PAR · ON-CHAIN VERIFIED/.test(parFacts) && /EXISTS · multi factory/.test(parFacts) && /Evidence found/.test(st), parFacts.slice(0, 200));
@@ -167,6 +169,12 @@ let LISTING_ID = '';
   await P.page.goto(BASE + '/project/' + lc(A.CREATORLIVE)); await P.page.waitForTimeout(2500);
   check('1 PAR Project Page unchanged (PAR LAUNCH · FACTORY RECORD ON-CHAIN)', /PAR LAUNCH · FACTORY RECORD ON-CHAIN/.test(await text(P.page, '#tokenCard')));
   check('J PAR Project Page keeps its indexer facts (Projects using this token as a market)', /Projects using this token as a market/i.test(await text(P.page, '#tokenCard')));
+  for (const [tok, re, name] of [[A.PONS1, /PONS V1 LAUNCH · FACTORY RECORD ON-CHAIN/, 'ACTIVE'], [A.PONS1_LEGACY, /PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN/, 'LEGACY']]) {
+    await P.page.goto(BASE + '/project/' + lc(tok)); await P.page.waitForTimeout(2500);
+    const v1card = await text(P.page, '#tokenCard');
+    check(`Project Page: Pons V1 (${name}) recognised truthfully, not "not a PAR launch"`, re.test(v1card) && !/NOT VERIFIED AS A PAR LAUNCH/.test(v1card), v1card.slice(0, 300));
+    check(`Project Page: Pons V1 (${name}) offers no Passport / listing / PAR builder action`, !/SYNCNET OPERATOR VERIFIED/.test(v1card) && !(await P.page.$('#tokenCard a[href^="/marketplace.html#listing="]')) && !(await P.page.$('#tokenCard a[href^="/build.html?with="]')), v1card.slice(0, 300));
+  }
   await P.c.close();
 }
 check('no page errors in the seller browser', S.page.__errors.length === 0, S.page.__errors.join(' | '));

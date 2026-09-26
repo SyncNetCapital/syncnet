@@ -44,11 +44,15 @@ cast call $F "getLaunchedToken(address)((address,address,address,address,address
 #   expect: first field == T, last field (exists) == true; note deployer, creatorFeeRecipient, pairToken, phase
 cast call $F "pendingCreatorFeeRecipient(address)(address,uint256,uint256)" $T --rpc-url $R   # expect 0x0…0,0,0 normally
 cast call $T "launchFactory()(address)" --rpc-url $R                                            # expect $F
-cast call 0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB "getLaunchedToken(address)" $T --rpc-url $R # V1 must NOT know a V2 token
+cast call 0xA5aAb3F0c6EeadF30Ef1D3Eb997108E976351feB "getLaunchedToken(address)" $T --rpc-url $R # V1 (ACTIVE) must NOT know a V2 token
+cast call 0x39dBED3a2bd333467115dE45665cC57F813C4571 "launchFactory()(address)" --rpc-url $R     # PONS → 0x0c37…77a4 (V1 LEGACY)
 ```
 
+All of the above is automated (plus Blockscout-bytecode pinning and real signed claim/list refusals for V1):
+`node tests/live/pons-step3-live.mjs` (real network; last run 26 Sep 2026: 18/18).
+
 - [ ] `/marketplace.html` → SELL A PROJECT → paste `$T`: **DETECTED PONS V2**, pair/phase/tax/deployer/fee recipient match the cast output.
-- [ ] A random ERC-20 → UNSUPPORTED PROJECT. A real Pons V1 token (if any) → PONS V1 DETECTED.
+- [ ] A random ERC-20 → UNSUPPORTED PROJECT. PONS `0x39dBED3a2bd333467115dE45665cC57F813C4571` (V1 LEGACY) → PONS V1 DETECTED, no claim step.
 - [ ] With the deployer (or current fee-recipient wallet) claim the Passport: evidence ends in "(Pons V2 factory record)".
 - [ ] List without the fee right; the card shows LIVE PONS PROJECT · PAIR · STATUS; `/project/$T` shows the Pons origin block.
 - [ ] Only with a throwaway test launch: include the fee right, run a deal, send TRANSFER FEE RIGHT — the wallet shows a
