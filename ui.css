@@ -241,3 +241,26 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .sn-legacy .example-card,.sn-legacy .grid-card,.sn-legacy .card{border-radius:var(--r);background:var(--ink)}
 .sn-legacy .badge,.sn-legacy .chip{border-radius:2px;letter-spacing:.06em}
 .sn-legacy .search-box{margin-left:0}
+
+/* ------------------------------------------------------------------ You / My Projects */
+.you-wallet{margin-top:14px}
+.you-kv{margin-top:18px}
+.you-head,.you-row{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.3fr) auto;gap:16px;align-items:center}
+.you-head{margin-top:28px;padding:12px 0 8px;border-bottom:1px solid var(--line)}
+.you-row{min-height:64px;padding:8px 0;border-bottom:1px solid var(--line)}
+.you-row .sn-proj{color:var(--bone);min-height:44px}
+.you-row .sn-proj:hover .sn-proj-name{text-decoration:underline;text-underline-offset:4px}
+.you-row .sn-m-main{display:flex;align-items:baseline;gap:10px;min-width:0}
+.you-status{display:flex;align-items:center;gap:8px;color:var(--bone-2);font-size:14px;min-width:0}
+.you-status[data-state="synced"]{color:var(--bone)}
+.you-action{justify-self:end}
+.you-action a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;color:var(--bone);font-size:15px;white-space:nowrap}
+.you-action a:not(.sn-btn):hover{text-decoration:underline;text-underline-offset:4px}
+.you-action .sn-btn{padding:0 16px}
+.you-links{display:flex;flex-wrap:wrap;gap:4px 28px;margin:14px 0 0}
+@media (max-width:759px){
+  .you-head{display:none}
+  .you-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"proj action" "status status";gap:2px 12px;padding:12px 0}
+  .you-row .sn-proj{grid-area:proj}.you-row .you-status{grid-area:status;padding-left:36px}.you-row .you-action{grid-area:action}
+  .you-row .sn-m-main{flex-direction:column;gap:0}
+}

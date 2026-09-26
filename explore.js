@@ -180,6 +180,7 @@
     });
     $('exploreMore').addEventListener('click', () => { state.shown += PAGE; render(); });
     if (initial) input.value = initial;
+    if (params.get('find')) input.focus(); // from My Projects: "+ Find another project"
     load().then(() => (initial ? onQuery(initial) : render())).catch(() => { state.loaded = true; state.degraded = true; render(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
