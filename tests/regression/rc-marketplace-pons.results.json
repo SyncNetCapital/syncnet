@@ -1,0 +1,176 @@
+{
+  "passed": 34,
+  "failed": 0,
+  "results": [
+    {
+      "name": "framing: SUPPORTED ORIGINS · PAR · PONS V2, no endorsement implied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "framing: no \"all projects\" claim",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no launchpad selector exists — the user only pastes a token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3 random ERC-20 → UNSUPPORTED PROJECT",
+      "ok": true,
+      "detail": "UNSUPPORTED PROJECT · this address is not a PAR or Pons V2 launch, so it cannot be claimed or listed."
+    },
+    {
+      "name": "Pons V1 → PONS V1 DETECTED · not enabled yet",
+      "ok": true,
+      "detail": "PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet."
+    },
+    {
+      "name": "1 PAR project → DETECTED PAR, facts unchanged",
+      "ok": true,
+      "detail": "DETECTED ORIGIN\nPAR · ON-CHAIN VERIFIED\nPAR FACTORY RECORD\nEXISTS · multi factory\nDEPLOYER (ON-CHAIN)\n0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\nCREATOR-FEE RECIPIENT (ON-CHAIN)\n0x2c7536e3605d9c16a7a3"
+    },
+    {
+      "name": "2 Pons V2 project → DETECTED PONS V2 · ON-CHAIN VERIFIED",
+      "ok": true,
+      "detail": "DETECTED ORIGIN\nPONS V2 · ON-CHAIN VERIFIED\nPONS V2 FACTORY RECORD\nEXISTS · 0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\nPAIR ASSET\nUSDG · 0x5fc5360d0400a0fd4f2af552add042d716f1d168\nLAUNCH PHASE\nBONDING"
+    },
+    {
+      "name": "2 verified Pons facts: pair USDG, BONDING CURVE, creator tax 2%",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "5 deployer evidence names the Pons V2 factory record",
+      "ok": true,
+      "detail": "Evidence found: your wallet is the on-chain deployer (Pons V2 factory record). Sign the operator claim to create the Passport record."
+    },
+    {
+      "name": "5 Pons Passport claimed with one free signature (no transaction)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "8 fee right offerable: the live Pons factory names the seller wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "9/10 Pons listing shows LIVE PONS PROJECT, PAIR · USDG, STATUS · BONDING CURVE",
+      "ok": true,
+      "detail": "LISTING\nPONS ALPHA.\n← ALL LISTINGS\nPons Alpha · $PALPHA\n\n0x7a11000000000000000000000000000000000001\n\n1.2 ETH\nASKING PRICE\nACTIVE\nVERIFIED OPERATOR 0X2C75…5C23\nLIVE PONS PROJECT\nPAIR · USDG\nSTATUS · BONDING CURVE\nCREATOR FEE TRANSFERABLE\nListed 2026-09-26 06:54 UTC\nValid until 2026-10-26 06:54 UTC\n\nL"
+    },
+    {
+      "name": "what is NOT sold names Pons reserves/liquidity and protocol control",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 pending override is shown with its recipient and window",
+      "ok": true,
+      "detail": "DETECTED ORIGIN\nPONS V2 · ON-CHAIN VERIFIED\nPONS V2 FACTORY RECORD\nEXISTS · 0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\nPAIR ASSET\nUSDG · 0x5fc5360d0400a0fd4f2af552add042d716f1d168\nLAUNCH PHASE\nBONDING CURVE\nCREATOR TAX\n1.5%\nBUYBACK\nOFF\nDEPLOYER (ON-CHAIN)\n0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\nC"
+    },
+    {
+      "name": "16 fee-right checkbox disabled and labelled ENCUMBERED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "setup: a PAR listing in the same market",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xba1e8d032b877923d606e0ae395d4c0693a7b91387ebeac2206c0638ffb45cc1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
+    },
+    {
+      "name": "11 ALL shows PAR and PONS listings together",
+      "ok": true,
+      "detail": "2"
+    },
+    {
+      "name": "11 PAR filter shows only PAR",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 PONS filter shows only Pons",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 filter state is announced (aria-pressed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Deal Room names the PONS V2 factory for the fee-right step",
+      "ok": true,
+      "detail": "DEAL ROOM · NON-CUSTODIAL SETTLEMENT\nPONS ALPHA · 1.2 ETH.\n← LISTING\nOPEN\nseller 0x2c75…5c23\nbuyer 0x19e7…ff2a\n2026-09-26 06:54 UTC\nYOU ARE THE SELLER\nOperator transfer (SyncNet Passport)\nPENDING\n\nThe operator handover needs BOTH parties: the seller signs a transfer intent, then the buyer signs the "
+    },
+    {
+      "name": "12 exactly one wallet transaction, sent to the canonical Pons V2 factory",
+      "ok": true,
+      "detail": "[{\"from\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"to\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"data\":\"0x2931861b0000000000000000000000007a1100000000000000000000000000000000000100000000000000000000000019e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"value\":\"0x0\",\"mode\":\"ok\"}]"
+    },
+    {
+      "name": "13 calldata = transferCreatorFeeRecipient(deal token, deal buyer)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "12 the confirmation shown to the seller names the Pons V2 factory address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "14 server re-read verified it: CREATOR-FEE RIGHT step VERIFIED ON-CHAIN",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "19 no approval / permit was ever requested from the wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project Page: PONS V2 LAUNCH · FACTORY RECORD ON-CHAIN (not \"not a PAR launch\")",
+      "ok": true,
+      "detail": "Pons Alpha\n\n0x7a11000000000000000000000000000000000001\n\nPONS V2 LAUNCH · FACTORY RECORD ON-CHAIN\nSYNCNET OPERATOR VERIFIED\nPROJECTS USING THIS CONTRACT AS A MARKET (INDEXER)\n0\nORIGIN · READ FROM THE PONS V2 FACTORY\nORIGIN\nPONS V2 · ON-CHAIN VERIFIED\nTOKEN CONTRACT\n0x7a1100000000000000000000000000000"
+    },
+    {
+      "name": "Project Page: origin, pair, status, contract, Passport operator shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project Page: the listing is linked with its real status (in a deal → OFFER ACCEPTED, not \"for sale\")",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project Page: no PAR analytics or PAR builder action for Pons",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Project Page: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 PAR Project Page unchanged (PAR LAUNCH · FACTORY RECORD ON-CHAIN)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no page errors in the seller browser",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile 390px: marketplace with filter + Pons cards has no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    }
+  ]
+}

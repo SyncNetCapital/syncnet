@@ -1,0 +1,336 @@
+{
+  "passed": 66,
+  "failed": 0,
+  "results": [
+    {
+      "name": "18 EIP-712 Marketplace domain unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "18 OperatorClaim digest vector unchanged (existing signatures stay valid)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "18 Listing digest vector unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "18 no signed structure gained a launchpad/origin field",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2 genuine Pons V2 launch resolves as PONS_V2 via the canonical factory",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2 Pons V2 facts: pair, phase label, creator tax",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2 native-ETH pair (address 0) and graduated phase map truthfully",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "2 transitional \"Swept\" phase is GRADUATING, not graduated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 PAR launch still resolves as PAR from the PAR factory",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3 a random ERC-20 (USDG) is not Pons and not PAR",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pons V1 is identified positively and marked unsupported (not treated as V2)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3 Pons record with exists=false is not Pons",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3 Pons record naming a DIFFERENT token is not accepted for this token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "3 an empty answer (no factory code) is not Pons",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "20 RPC failure while reading the Pons factory THROWS (fail closed, never \"unsupported\")",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 pending override (not yet matured) is ACTIVE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 pending override in its execution window is ACTIVE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 expired override (can no longer execute) is inactive",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 no override → null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 unreadable override answer is treated as ACTIVE (conservative)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "8 Pons wallet recipient → CREATOR FEE TRANSFERABLE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "8 Pons contract recipient is NOT labelled transferable (manual verification)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 Pons wallet recipient with a pending protocol override → ENCUMBERED, not transferable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 PAR vault recipient keeps its exact existing classification",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "12 Pons fee transfer goes ONLY to the canonical Pons V2 factory",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "13 calldata = transferCreatorFeeRecipient(exact token, exact buyer)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "12 a tampered destination is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "12 a Pons project pointed at a PAR factory is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "13 a different token than the verified project is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "13 zero / invalid new recipient refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pons V1 / unsupported origins cannot build a fee transfer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 PAR fee transfer still targets the PAR factory",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 PAR deployer claim works exactly as before (same evidence text)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T06:46:46.281Z\",\"claims\":[{\"id\":\"0xb1de4ab7f76fa6222b968a3523e72dd"
+    },
+    {
+      "name": "5 Pons V2 deployer can create the initial Passport claim",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T06:46:46.290Z\",\"claims\":[{\"id\":\"0x177f14b7fd4c58df7e39717be2c"
+    },
+    {
+      "name": "5 evidence names the venue: \"(Pons V2 factory record)\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "5 Passport records server-derived origin + canonical factory, schema unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "6 current Pons creator-fee recipient WALLET can claim",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T06:46:46.296Z\",\"claims\":[{\"id\":\"0xf31b8b1111e3ba8521ee65c79b9"
+    },
+    {
+      "name": "7 unrelated wallet cannot claim a Pons project (deployer basis)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "7 unrelated wallet cannot claim via fee-recipient",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "3/4 a random ERC-20 with client-supplied launchpad=PONS_V2 is still refused",
+      "ok": true,
+      "detail": "{\"error\":\"This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.\",\"code\":\"not_par\"}"
+    },
+    {
+      "name": "Pons V1 claim → \"PONS V1 DETECTED · not enabled yet\", not \"unsupported/scam\"",
+      "ok": true,
+      "detail": "{\"error\":\"PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.\",\"code\":\"unsupported_origin\"}"
+    },
+    {
+      "name": "8 Pons project with a contract fee recipient can still be claimed by its deployer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000003\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T06:46:46.322Z\",\"claims\":[{\"id\":\"0x6ae2a6d3330265cad14bf62eabc"
+    },
+    {
+      "name": "16 Pons project with a pending override can be claimed by its deployer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T06:46:46.330Z\",\"claims\":[{\"id\":\"0x3aabe6bbdd978804b4398b3a65a"
+    },
+    {
+      "name": "20 no durable store → Pons writes refused (503)",
+      "ok": true,
+      "detail": "{\"error\":\"The Marketplace is not enabled on this deployment.\",\"code\":\"closed\"}"
+    },
+    {
+      "name": "20 RPC down → Pons claim fails closed with 503 and no internal detail",
+      "ok": true,
+      "detail": "{\"error\":\"Robinhood Chain could not be read right now. Try again.\",\"code\":\"unavailable\"}"
+    },
+    {
+      "name": "8 contract fee recipient: including the fee right is refused",
+      "ok": true,
+      "detail": "{\"error\":\"The creator-fee right cannot be included: the current recipient is a contract.\",\"code\":\"fee_right\"}"
+    },
+    {
+      "name": "16 pending override: including the fee right is refused (encumbered)",
+      "ok": true,
+      "detail": "{\"error\":\"The creator-fee right cannot be included: a Pons protocol override of the creator-fee recipient is pending, so the right cannot be handed over cleanly.\",\"code\":\"fee_right\"}"
+    },
+    {
+      "name": "16 pending override: listing WITHOUT the fee right is allowed and shows ENCUMBERED",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x263c22d0db739242d5379a88cbf437e0881783a85c3457c9f3d0a12b683d170e\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
+    },
+    {
+      "name": "9 Pons V2 listing with the fee right works",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x0f8f13fda8795be72c442872d3e7cb46498f575240347f5cfa8f82edb6f70c34\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
+    },
+    {
+      "name": "4 client-supplied origin is ignored: listing origin is server-derived PONS_V2",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "10 listing carries verified Pons facts (pair symbol from chain, phase, tax)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no raw chain record is exposed publicly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "11 one shared market: PAR and PONS listings come from the same listings view",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "17 legacy listing without origin renders as PAR (inferred from its PAR factory)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "17 legacy passport without launchpad reads as PAR, stored record untouched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "offer on a Pons listing",
+      "ok": true,
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0xb9f16fa813a9925543321af9c52135c701201b133c0a31a5e2e00f15ec50c577\",\"listingId\":\"0x0f8f13fda8795be72c442872d3e7cb46498f575240347f5cfa8f82edb6f70c34\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"PENDING\",\"expiry\":1790491606,\"createdAt\":\"2026-09-26T06:46:46.718Z\",\"decidedA"
+    },
+    {
+      "name": "Deal Room opens with the fee-right step required",
+      "ok": true,
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0xb9f16fa813a9925543321af9c52135c701201b133c0a31a5e2e00f15ec50c577\",\"listingId\":\"0x0f8f13fda8795be72c442872d3e7cb46498f575240347f5cfa8f82edb6f70c34\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"ACCEPTED\",\"expiry\":1790491606,\"createdAt\":\"2026-09-26T06:46:46.718Z\",\"decided"
+    },
+    {
+      "name": "Passport transfer is launchpad-independent (same two signatures), origin preserved",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1bb6b7f6665c138013b72d6d9169dd245308366de8fc87bdca52edad05d1004c\",\"listingId\":\"0x0f8f13fda8795be72c442872d3e7cb46498f575240347f5cfa8f82edb6f70c34\",\"offerId\":\"0xb9f16fa813a9925543321af9c52135c701201b133c0a31a5e2e00f15ec50c577\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "15 a fake / unknown tx hash cannot complete the fee-right step",
+      "ok": true,
+      "detail": "{\"error\":\"That transaction has not succeeded on-chain.\",\"code\":\"tx_failed\"}"
+    },
+    {
+      "name": "15 a successful but unrelated tx cannot complete it (factory still names the seller)",
+      "ok": true,
+      "detail": "{\"error\":\"The on-chain creator-fee recipient is not the buyer yet. The transfer is verified from the chain, not from the transaction hash alone.\",\"code\":\"not_transferred\"}"
+    },
+    {
+      "name": "12 the same calldata sent to the PAR factory changes nothing on Pons → not verified",
+      "ok": true,
+      "detail": "{\"error\":\"That transaction has not succeeded on-chain.\",\"code\":\"tx_failed\"}"
+    },
+    {
+      "name": "the canonical Pons factory now names the buyer (mock executes Pons semantics)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "16 override pending AFTER the listing: fee-right step refuses to verify as final",
+      "ok": true,
+      "detail": "{\"error\":\"The buyer is the recipient now, but a Pons protocol override of the creator-fee recipient is pending and would supersede it. This step cannot be verified as final until the override is cancelled or expires.\",\"code\":\"encumbered\"}"
+    },
+    {
+      "name": "14 server re-read of the Pons V2 factory verifies the transfer",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1bb6b7f6665c138013b72d6d9169dd245308366de8fc87bdca52edad05d1004c\",\"listingId\":\"0x0f8f13fda8795be72c442872d3e7cb46498f575240347f5cfa8f82edb6f70c34\",\"offerId\":\"0xb9f16fa813a9925543321af9c52135c701201b133c0a31a5e2e00f15ec50c577\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "19 no approve / permit / increaseAllowance anywhere in the Pons path",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "19 every mocked Pons send was a fee transfer or plain value transfer",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

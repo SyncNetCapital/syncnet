@@ -5,12 +5,14 @@
  *  - every write the user makes here is ONE EIP-712 signature (never a transaction, never an approval);
  *  - the two on-chain steps a Deal can contain are ordinary wallet transactions the USER sends and reviews:
  *      · "Pay seller": a plain value transfer to the seller wallet (no data, no contract);
- *      · "Transfer creator-fee right": PAR's own transferCreatorFeeRecipient(token, buyer) on the PAR factory;
+ *      · "Transfer creator-fee right": the launchpad's own transferCreatorFeeRecipient(token, buyer), sent ONLY to the
+ *        canonical factory of the token's verified origin (PAR or Pons V2) via SyncNetOrigins.feeTransferTx();
+ *  - a project's origin (PAR, Pons V2) is read live from the canonical factories (lib/syncnet-origins.js), never chosen;
  *    both are verified afterwards from the chain by the server, never assumed;
  *  - nothing in this file simulates success. What SyncNet cannot verify is labelled MANUAL / OFF-CHAIN.
  * This file writes NOTHING to browser storage: marketplace records exist only server-side.
  */
-const Core=window.SyncNetCore,Chain=window.SyncNetChain,Market=window.SyncNetMarket,Ipfs=window.SyncNetIpfs;
+const Core=window.SyncNetCore,Chain=window.SyncNetChain,Market=window.SyncNetMarket,Ipfs=window.SyncNetIpfs,Origins=window.SyncNetOrigins;
 const $=id=>document.getElementById(id);
 if(!$('mp-listings'))return;
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -23,7 +25,7 @@ const rpc=Chain.makeRpc(Chain.ROBINHOOD.rpcUrl,{timeoutMs:10000,retries:1});
 const nowSec=()=>Math.floor(Date.now()/1000);
 const nonce=()=>{const a=new Uint8Array(32);crypto.getRandomValues(a);return'0x'+[...a].map(b=>b.toString(16).padStart(2,'0')).join('')};
 const when=t=>{try{return new Date(t).toISOString().replace('T',' ').slice(0,16)+' UTC'}catch{return String(t||'')}};
-const FEE_BADGE={wallet:['CREATOR FEE TRANSFERABLE','transferable'],vault:['CREATOR FEE: NOT TRANSFERABLE (PAR VAULT)','immutable'],contract:['CREATOR FEE: REQUIRES MANUAL VERIFICATION','conditional'],unknown:['CREATOR FEE: REQUIRES MANUAL VERIFICATION','conditional']};
+const FEE_BADGE={encumbered:['CREATOR FEE: ENCUMBERED · PONS OVERRIDE PENDING','conditional'],wallet:['CREATOR FEE TRANSFERABLE','transferable'],vault:['CREATOR FEE: NOT TRANSFERABLE (PAR VAULT)','immutable'],contract:['CREATOR FEE: REQUIRES MANUAL VERIFICATION','conditional'],unknown:['CREATOR FEE: REQUIRES MANUAL VERIFICATION','conditional']};
 const KIND_LABEL={onchain:'ON-CHAIN VERIFIED',syncnet:'SYNCNET-SIGNED',manual:'MANUAL / OFF-CHAIN'};
 const KIND_CLS={onchain:'transferable',syncnet:'transferable',manual:'manual'};
 
@@ -97,26 +99,38 @@ function rerender(){({browse:renderBrowse,sell:renderSellState,mine:renderMine,d
 
 // ---------------------------------------------------------------- shared renderers
 function statusPill(status){const cls={ACTIVE:'transferable',OFFER_ACCEPTED:'conditional',IN_TRANSFER:'conditional',COMPLETED:'transferable',CANCELLED:'immutable',EXPIRED:'immutable',OPEN:'conditional',PENDING:'conditional'}[status]||'manual';return`<strong class="mp-state ${cls}">${esc(status.replace(/_/g,' '))}</strong>`}
+// Origin of a listing: server-derived (listing.origin); records written before multi-origin support are PAR.
+const originOf=l=>{const o=l&&l.origin&&Origins.ORIGINS[l.origin.launchpad]?l.origin:null;return o||{launchpad:'PAR',label:'PAR'}};
+const originBadge=l=>{const o=originOf(l);return`<span class="mp-state transferable">${esc(Origins.ORIGINS[o.launchpad].badge)}</span>`};
+function originFacts(l){
+ const o=originOf(l);if(o.launchpad!=='PONS_V2')return'';
+ const pair=o.pair&&o.pair.native?'ETH':disp(o.pair&&o.pair.symbol||'',16)||short(o.pair&&o.pair.address||'');
+ return`<span class="mp-state manual">PAIR · ${esc(pair)}</span><span class="mp-state manual">STATUS · ${esc(disp(o.phase&&o.phase.label||'',32))}</span>`;
+}
 function projectHead(l){
  const sym=disp(l.snapshot?.symbol||'',16)||'TOKEN';
  const logo=Ipfs.imgHtml(l.snapshot?.logo||'',{letter:sym.charAt(0)});
- return`<div class="example-project">${logo||''}<div><h3>${esc(disp(l.snapshot?.name||'',64)||'PAR project')} · $${esc(sym)}</h3><p class="mono">${esc(l.token)}</p></div></div>`;
+ return`<div class="example-project">${logo||''}<div><h3>${esc(disp(l.snapshot?.name||'',64)||(originOf(l).label+' project'))} · $${esc(sym)}</h3><p class="mono">${esc(l.token)}</p></div></div>`;
 }
 function feeBadge(l){const[label,cls]=FEE_BADGE[l.feeRight?.kind]||FEE_BADGE.unknown;return`<strong class="mp-state ${cls}">${esc(label)}</strong>`}
 function card(l){
  return`<article class="mp-listing-card"><div class="mp-listing-top"><div>${projectHead(l)}</div><div class="mp-price"><strong>${esc(l.price)} ${esc(l.currency)}</strong><span>ASKING PRICE</span></div></div>
- <div class="mp-listing-meta"><span class="mp-state transferable">VERIFIED OPERATOR</span><span class="mp-state transferable">LIVE PAR PROJECT</span>${feeBadge(l)}${statusPill(l.status)}${l.terms.includeFeeRight?'':''}<span>${esc(when(l.createdAt))}</span></div>
+ <div class="mp-listing-meta"><span class="mp-state transferable">VERIFIED OPERATOR</span>${originBadge(l)}${originFacts(l)}${feeBadge(l)}${statusPill(l.status)}${l.terms.includeFeeRight?'':''}<span>${esc(when(l.createdAt))}</span></div>
  <p class="mp-listing-teaser">${esc(disp(l.terms.description,240))}${l.terms.description.length>240?'…':''}</p>
  <div class="actions mp-listing-actions"><a class="btn primary" href="#listing=${esc(l.id)}">OPEN LISTING</a><a class="btn" href="/project/${esc(l.token)}">PROJECT PAGE</a></div></article>`;
 }
+let originFilter='ALL'; // ALL | PAR | PONS_V2 — filters the one shared market, never a second market
+document.querySelectorAll('[data-mp-origin]').forEach(b=>b.addEventListener('click',()=>{originFilter=b.dataset.mpOrigin;document.querySelectorAll('[data-mp-origin]').forEach(x=>{const on=x===b;x.classList.toggle('primary',on);x.setAttribute('aria-pressed',on?'true':'false')});renderBrowse()}));
 async function renderBrowse(){
  const host=$('mp-listings');
  try{
   const j=await api({view:'listings'});
   if(j.enabled===false){note('Marketplace listings are not enabled on this deployment (no durable store is configured). Nothing can be listed or bought here yet.','fail');host.innerHTML='<div class="mp-empty"><strong>MARKETPLACE NOT ENABLED</strong><span>This deployment has no persistent Marketplace storage, so there are no listings to show.</span></div>';return}
   note('');
-  const rows=(j.listings||[]).filter(l=>l.status==='ACTIVE');
-  const rest=(j.listings||[]).filter(l=>l.status!=='ACTIVE').slice(0,6);
+  const all=(j.listings||[]).filter(l=>originFilter==='ALL'||originOf(l).launchpad===originFilter);
+  const rows=all.filter(l=>l.status==='ACTIVE');
+  const rest=all.filter(l=>l.status!=='ACTIVE').slice(0,6);
+  if(!rows.length&&!rest.length&&originFilter!=='ALL'){host.innerHTML=`<div class="mp-empty"><strong>NO ${esc(Origins.ORIGINS[originFilter].label)} PROJECTS LISTED</strong><span>Switch the filter to ALL to see every listing.</span></div>`;return}
   if(!rows.length&&!rest.length){host.innerHTML='<div class="mp-empty"><strong>NO PROJECTS LISTED YET</strong><span>The Marketplace shows only real, operator-signed listings. When a project is listed, it appears here for every visitor.</span><button class="btn primary mp-empty-action" type="button" data-mp-view="sell">SELL A PROJECT</button></div>';host.querySelector('[data-mp-view]')?.addEventListener('click',()=>go('sell'));return}
   host.innerHTML=rows.map(card).join('')+(rest.length?`<details class="technical-details mp-past"><summary>Past listings (${rest.length})</summary>${rest.map(card).join('')}</details>`:'');
  }catch(e){host.innerHTML=`<div class="network-empty">${esc(String(e.message||e))}</div>`}
@@ -133,7 +147,7 @@ async function renderDetail(id,flash){
  const history=(p?.history||[]).slice(-8).reverse().map(h=>`<li><span class="mono">${esc(when(h.at))}</span> ${esc(h.type.replace(/-/g,' '))}${h.from?` · ${esc(short(h.from))} → ${esc(short(h.to))}`:h.operator?` · ${esc(short(h.operator))}`:''}</li>`).join('');
  host.innerHTML=`<div class="mp-panel-head"><div><div class="eyebrow">Listing</div><h2 class="section-title">${esc(disp(l.snapshot?.name||'PROJECT',40)).toUpperCase()}.</h2></div><div class="mp-panel-actions"><a class="btn" href="#">← ALL LISTINGS</a></div></div>
  <article class="mp-listing-card"><div class="mp-listing-top"><div>${projectHead(l)}</div><div class="mp-price"><strong>${esc(l.price)} ${esc(l.currency)}</strong><span>ASKING PRICE</span></div></div>
- <div class="mp-listing-meta">${statusPill(l.status)}<span class="mp-state transferable">VERIFIED OPERATOR ${esc(short(l.seller))}</span>${feeBadge(l)}<span>Listed ${esc(when(l.createdAt))}</span><span>Valid until ${esc(when(l.expiry*1000))}</span></div>
+ <div class="mp-listing-meta">${statusPill(l.status)}<span class="mp-state transferable">VERIFIED OPERATOR ${esc(short(l.seller))}</span>${originBadge(l)}${originFacts(l)}${feeBadge(l)}<span>Listed ${esc(when(l.createdAt))}</span><span>Valid until ${esc(when(l.expiry*1000))}</span></div>
  <p class="mp-listing-teaser">${esc(l.terms.description)}</p>
  <div class="mp-card-package-head"><strong>WHAT THE BUYER GETS</strong><span>Signed by the seller · evidence levels are SyncNet’s, not the seller’s</span></div>
  <div class="mp-listing-package">${included}
@@ -198,14 +212,15 @@ async function renderDeal(id){
  const host=$('mpDeal');host.innerHTML='<div class="network-empty">Loading the deal…</div>';
  let j;try{j=await api({view:'deal',id})}catch(e){host.innerHTML=`<div class="network-empty">${esc(String(e.message||e))}</div>`;return}
  const d=j.deal,l=j.listing;
+ const dealOriginId=originOf(l).launchpad,dealOrigin=Origins.ORIGINS[dealOriginId].label; // server-derived; PAR for older records
  const role=account?(same(account,d.buyer)?'buyer':same(account,d.seller)?'seller':''):'';
  const c=d.checklist;
  const step=(title,state,cls,body)=>`<div class="mp-deal-step"><div class="mp-deal-step-head"><strong>${esc(title)}</strong><strong class="mp-state ${cls}">${esc(state)}</strong></div>${body||''}</div>`;
  const both=(conf)=>`buyer ${conf.buyer?'✓':'—'} · seller ${conf.seller?'✓':'—'}`;
  const opDone=c.operatorTransfer.done,intent=d.transfer&&d.transfer.intent;
  const feeStep=c.feeRight.required?step('Creator-fee right → buyer (on-chain)',c.feeRight.done?'VERIFIED ON-CHAIN':'PENDING',c.feeRight.done?'transferable':'conditional',
-  c.feeRight.done?`<p class="field-help">Verified: the PAR factory now names the buyer as creator-fee recipient. Tx <span class="mono">${esc(shortHash(c.feeRight.txHash))}</span></p>`
-  :role==='seller'?`<p class="field-help">Sends PAR’s own <span class="mono">transferCreatorFeeRecipient(token, buyer)</span> from your wallet to the PAR factory. SyncNet then verifies the recipient from the chain — the transaction hash alone proves nothing.</p><div class="actions"><button class="btn primary" data-act="fee-send" type="button">TRANSFER FEE RIGHT · WALLET TRANSACTION</button></div><div class="asset-entry"><input class="input mono" id="mpFeeTx" placeholder="already sent? paste the 0x… transaction hash"><button class="btn" data-act="fee-verify" type="button">VERIFY ON-CHAIN</button></div>`
+  c.feeRight.done?`<p class="field-help">Verified: the ${esc(dealOrigin)} factory now names the buyer as creator-fee recipient. Tx <span class="mono">${esc(shortHash(c.feeRight.txHash))}</span></p>`
+  :role==='seller'?`<p class="field-help">Sends ${esc(dealOrigin)}’s own <span class="mono">transferCreatorFeeRecipient(token, buyer)</span> from your wallet to the ${esc(dealOrigin)} factory. SyncNet then verifies the recipient from the chain — the transaction hash alone proves nothing.</p><div class="actions"><button class="btn primary" data-act="fee-send" type="button">TRANSFER FEE RIGHT · WALLET TRANSACTION</button></div><div class="asset-entry"><input class="input mono" id="mpFeeTx" placeholder="already sent? paste the 0x… transaction hash"><button class="btn" data-act="fee-verify" type="button">VERIFY ON-CHAIN</button></div>`
   :`<p class="field-help">Waiting for the seller to transfer the fee right on-chain. Anyone can then verify it:</p><div class="asset-entry"><input class="input mono" id="mpFeeTx" placeholder="0x… transaction hash"><button class="btn" data-act="fee-verify" type="button">VERIFY ON-CHAIN</button></div>`):'';
  const payStep=c.payment.required?step(`Payment · ${esc(d.price)} ${esc(d.currency)}`,c.payment.done?(c.payment.kind==='onchain'?'VERIFIED ON-CHAIN':'CONFIRMED BY BOTH'):'PENDING',c.payment.done?'transferable':'conditional',
   c.payment.kind==='onchain'
@@ -244,13 +259,16 @@ async function renderDeal(id){
     st('Waiting for the acceptance signature…');
     await post({action:'transfer-accept',...message,signature:await signTyped('TransferAccept',message)});
    }else if(act==='fee-send'){
-    const launch=await Chain.readLaunch(rpc,d.token);
-    if(!launch)throw Error('The PAR record could not be read right now. Nothing was sent.');
-    if(!same(launch.creatorFeeRecipient,account))throw Error('Your wallet ('+short(account)+') is not the current on-chain fee recipient ('+short(launch.creatorFeeRecipient)+'). Nothing was sent.');
-    const data=Core.functionSelector('transferCreatorFeeRecipient(address,address)')+Core.abiEncode(['address','address'],[d.token,d.buyer]).slice(2);
-    if(!confirm('Send transferCreatorFeeRecipient to the PAR factory '+launch.factory+'?\n\ntoken: '+d.token+'\nnew recipient (buyer): '+d.buyer+'\nvalue: 0 ETH\n\nThis is irreversible.'))throw Error('Cancelled. Nothing was sent.');
+    // Fresh live read of the token's canonical factory; destination + calldata come ONLY from Origins.feeTransferTx.
+    let project=null;try{project=await Origins.resolveProject(rpc,d.token)}catch{project=null}
+    if(!project||!project.supported)throw Error('The launch record could not be read right now. Nothing was sent.');
+    if(project.origin!==dealOriginId)throw Error('The on-chain origin of this project does not match the listing. Nothing was sent.');
+    if(project.pendingOverride&&project.pendingOverride.active)throw Error('A Pons protocol override of the creator-fee recipient is pending, so the right cannot be handed over cleanly right now. Nothing was sent.');
+    if(!same(project.creatorFeeRecipient,account))throw Error('Your wallet ('+short(account)+') is not the current on-chain fee recipient ('+short(project.creatorFeeRecipient)+'). Nothing was sent.');
+    const tx=Origins.feeTransferTx(project,d.token,d.buyer);
+    if(!confirm('Send transferCreatorFeeRecipient to the '+project.label+' factory '+tx.to+'?\n\ntoken: '+d.token+'\nnew recipient (buyer): '+d.buyer+'\nvalue: 0 ETH\n\nThis is irreversible.'))throw Error('Cancelled. Nothing was sent.');
     st('Confirm the transaction in your wallet…');
-    const hash=await provider.request({method:'eth_sendTransaction',params:[{from:account,to:launch.factory,data,value:'0x0'}]});
+    const hash=await provider.request({method:'eth_sendTransaction',params:[{from:account,to:tx.to,data:tx.data,value:'0x0'}]});
     st('Transaction sent ('+shortHash(hash)+'). Verifying the new recipient on-chain…');
     await new Promise(r=>setTimeout(r,1500));
     await post({action:'fee-right-evidence',dealId:d.id,txHash:hash});
@@ -308,29 +326,37 @@ function renderFeeRow(){
  const fr=claimCheck.feeRight;
  if(fr.kind==='wallet'&&same(fr.recipient,account)){cb.disabled=false;state.textContent='ON-CHAIN TRANSFERABLE · YOUR WALLET IS THE RECIPIENT';state.className='mp-state transferable'}
  else if(fr.kind==='vault'){cb.disabled=true;cb.checked=false;state.textContent='NOT TRANSFERABLE · FIXED TO A PAR VAULT';state.className='mp-state immutable'}
+ else if(fr.kind==='encumbered'){cb.disabled=true;cb.checked=false;state.textContent='ENCUMBERED · A PONS PROTOCOL OVERRIDE OF THE FEE RECIPIENT IS PENDING';state.className='mp-state conditional'}
  else if(fr.kind==='wallet'){cb.disabled=true;cb.checked=false;state.textContent='HELD BY ANOTHER WALLET ('+short(fr.recipient).toUpperCase()+') · CANNOT BE INCLUDED';state.className='mp-state conditional'}
  else{cb.disabled=true;cb.checked=false;state.textContent='RECIPIENT IS A CONTRACT · REQUIRES MANUAL VERIFICATION';state.className='mp-state conditional'}
 }
 async function checkProject(){
  const token=lc(String($('mpToken').value||'').trim());claimCheck=null;renderSellState();$('mpSignClaim').disabled=true;$('mpClaimFacts').hidden=true;
  if(!/^0x[0-9a-f]{40}$/.test(token)){sellStatus('Enter a valid 0x token contract.','fail');return}
- sellStatus('Reading the PAR factory record on Robinhood Chain…');
- let launch=null;try{launch=await Chain.readLaunch(rpc,token)}catch{sellStatus('Robinhood Chain could not be read right now. Try again.','fail');return}
- if(!launch){sellStatus('This address is not a PAR launch, so it cannot be claimed or listed.','fail');return}
+ sellStatus('Reading the canonical launchpad factories (PAR, Pons V2) on Robinhood Chain…');
+ // Origin is DETECTED from live factory reads — the user never chooses it and the server re-verifies everything.
+ let launch=null;try{launch=await Origins.resolveProject(rpc,token)}catch{sellStatus('Robinhood Chain could not be read right now. Try again.','fail');return}
+ if(launch&&launch.origin==='PONS_V1'){sellStatus('PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.','fail');return}
+ if(!launch){sellStatus('UNSUPPORTED PROJECT · this address is not a PAR or Pons V2 launch, so it cannot be claimed or listed.','fail');return}
  let passport=null;try{passport=(await api({view:'passport',token})).passport}catch{}
- let recipientKind='unknown';try{const code=String(await Chain.getCode(rpc,launch.creatorFeeRecipient)).toLowerCase();recipientKind=code==='0x'||code.startsWith('0xef0100')?'wallet':'contract'}catch{}
- const VA={[lc(Chain.ROBINHOOD.holderVault)]:'holders',[lc(Chain.ROBINHOOD.burnVault)]:'burn',[lc(Chain.ROBINHOOD.floorVault)]:'floor'};
- const vault=VA[lc(launch.creatorFeeRecipient)];
- const feeRight={recipient:lc(launch.creatorFeeRecipient),kind:vault?'vault':recipientKind,vault};
+ const feeRight=await Origins.classifyFeeRight(rpc,launch);
+ const vault=feeRight.vault;
+ const walletRecipient=feeRight.kind==='wallet'||feeRight.kind==='encumbered';
  let basis='';
  if(account&&passport&&same(passport.operator,account))basis='operator';
  else if(account&&same(launch.deployer,account))basis='deployer';
- else if(account&&same(launch.creatorFeeRecipient,account)&&feeRight.kind==='wallet')basis='fee-recipient';
+ else if(account&&same(launch.creatorFeeRecipient,account)&&walletRecipient)basis='fee-recipient';
  claimCheck={token,launch,feeRight,basis,passport,claimed:Boolean(account&&passport&&same(passport.operator,account))};
+ const isPons=launch.origin==='PONS_V2';
+ let pair=null;if(isPons){try{pair=await Origins.pairInfo(rpc,launch.pair.address)}catch{pair=null}}
+ const pend=launch.pendingOverride;
  const rows=[
-  ['PAR factory record','EXISTS · '+launch.kind+' factory','ok'],
+  ['Detected origin',(isPons?'PONS V2':'PAR')+' · ON-CHAIN VERIFIED','ok'],
+  [isPons?'Pons V2 factory record':'PAR factory record',isPons?'EXISTS · '+launch.factory:'EXISTS · '+launch.kind+' factory','ok'],
+  ...(isPons?[['Pair asset',pair?(pair.native?'ETH (native)':(pair.symbol||'ERC-20')+' · '+pair.address):launch.pair.address,''],['Launch phase',launch.state.label,''],['Creator tax',(launch.creatorTaxBps/100)+'%',''],['Buyback',launch.buybackEnabled?'ENABLED':'OFF','']]:[]),
   ['Deployer (on-chain)',launch.deployer,account&&same(launch.deployer,account)?'ok':''],
-  ['Creator-fee recipient (on-chain)',launch.creatorFeeRecipient+(vault?' · PAR '+vault+' vault':feeRight.kind==='wallet'?' · wallet':' · contract'),account&&same(launch.creatorFeeRecipient,account)?'ok':''],
+  ['Creator-fee recipient (on-chain)',launch.creatorFeeRecipient+(vault?' · PAR '+vault+' vault':walletRecipient?' · wallet':' · contract'),account&&same(launch.creatorFeeRecipient,account)?'ok':''],
+  ...(pend&&pend.active?[['Pending fee-recipient override','PONS PROTOCOL OVERRIDE → '+pend.newRecipient+' · executable '+new Date(pend.effectiveAt*1000).toISOString().slice(0,10)+' – '+new Date(pend.expiresAt*1000).toISOString().slice(0,10),'']]:[]),
   ['Recognised operator (SyncNet)',passport?passport.operator:'none recorded yet',claimCheck.claimed?'ok':''],
   ['Your wallet',account||'not connected',basis?'ok':''],
  ];
@@ -340,7 +366,7 @@ async function checkProject(){
  if(claimCheck.claimed){sellStatus('This wallet is already the recognised operator ✓ — continue to step 02.','pass');renderSellState();return}
  if(passport&&!basis){sellStatus('An operator is already recognised for this project ('+short(passport.operator)+'). It can only change hands through a Marketplace transfer.','fail');return}
  if(!basis){sellStatus('This wallet is neither the deployer nor the current fee-recipient wallet, so it cannot claim this project.','fail');return}
- sellStatus('Evidence found: your wallet is the on-chain '+(basis==='deployer'?'deployer':'creator-fee recipient')+'. Sign the operator claim to create the Passport record.','pass');
+ sellStatus('Evidence found: your wallet is the on-chain '+(basis==='deployer'?'deployer':'creator-fee recipient')+' ('+(isPons?'Pons V2':'PAR')+' factory record). Sign the operator claim to create the Passport record.','pass');
  $('mpSignClaim').disabled=false;
  renderSellState();
 }
@@ -376,7 +402,8 @@ $('mpCreateListing').addEventListener('click',async()=>{
   String($('mpCustomAssets').value||'').split('\n').map(s=>s.trim()).filter(Boolean).slice(0,10).forEach(s=>included.push({label:s.slice(0,140),kind:'manual'}));
   const includeFeeRight=$('mpIncludeFee').checked&&!$('mpIncludeFee').disabled;
   if(includeFeeRight)included.push({label:'Creator-fee right (transferCreatorFeeRecipient to the buyer)',kind:'onchain'});
-  const terms={description,included,notIncluded:['Token supply and holders’ tokens','Locked PAR launch liquidity','Immutable token metadata','X account / handle'].concat(includeFeeRight?[]:['Creator-fee right']),includeFeeRight};
+  const venueExcluded=cc.launch&&cc.launch.origin==='PONS_V2'?['Bonding-curve reserves and locked Pons liquidity','Pons protocol control']:['Locked PAR launch liquidity'];
+  const terms={description,included,notIncluded:['Token supply and holders’ tokens'].concat(venueExcluded,['Immutable token metadata','X account / handle'],includeFeeRight?[]:['Creator-fee right']),includeFeeRight};
   const t=Market.normalizeTerms(terms);
   if(!t.ok)throw Error('Listing terms: '+t.error+'.');
   const message={token:cc.token,seller:account,price,currency,termsHash:Market.hashJson(t.terms),nonce:nonce(),expiry:nowSec()+Number($('mpExpiry').value)*86400};

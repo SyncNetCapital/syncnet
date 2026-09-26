@@ -1,3 +1,18 @@
+# Marketplace: Pons V2 as a supported origin (`feature/syncnet-economies-v0`): 26 Sep 2026
+
+The Project Marketplace is now launchpad-agnostic, with two supported origins: **PAR** (unchanged) and **PONS V2**.
+
+- `lib/syncnet-origins.js` (new, browser + server): resolves a token's origin ONLY from live reads of the canonical factories
+  (PAR multi/single; PonsV2LaunchFactory `0x7eD598BcEf8bd9Edd8C97A195C6d13f40801EC7e`, verified against ponsdotdev/pons-labs
+  `162310f`); positively detects Pons V1 as not yet supported; classifies the creator-fee right (vault / contract / unknown /
+  encumbered / wallet); single validated fee-transfer builder whose destinations are exactly the canonical factories.
+- Server: claims, listings and fee-right settlement use the resolver; origin is server-derived and never signed; Pons evidence
+  texts name "(Pons V2 factory record)"; an active Pons protocol fee-recipient override blocks including/settling the fee right.
+  EIP-712 domain and structures unchanged; legacy records read as PAR without migration.
+- UI: automatic origin detection in SELL A PROJECT, LIVE PAR / LIVE PONS PROJECT badges, Pons PAIR/STATUS facts, ALL/PAR/PONS
+  filter over the one shared market, "SUPPORTED ORIGINS · PAR · PONS V2"; Project Pages show a Pons V2 origin block.
+- No Pons launching, trading, fees or splitter. Tests: `tests/server/marketplace-pons.test.mjs`, `tests/regression/rc-marketplace-pons.mjs`.
+
 # V2.5 Economies V0 (`feature/syncnet-economies-v0`): 25 Sep 2026
 
 Additive. Marketplace, Registry, the launch engine, LaunchIntent and the send path are untouched.
