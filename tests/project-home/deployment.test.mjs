@@ -93,7 +93,7 @@ async function mustRefuse(label, arrange, over = {}) {
 await mustRefuse('PROJECT_HOME_SINK_ADDRESS not in the reviewed deployments', () => {}, { env: { ...ENV, PROJECT_HOME_SINK_ADDRESS: OTHER } });
 await mustRefuse('treasury address used as sink (reviewed file refuses it)', () => {}, { env: { ...ENV, PROJECT_HOME_SINK_ADDRESS: TREASURY_FIXTURE }, deploymentFile: { ...DEPLOYMENT, deployments: [{ sink: TREASURY_FIXTURE, converter: CONVERTER }] } });
 await mustRefuse('reviewed deployment file invalid (non-canonical router)', () => {}, { deploymentFile: { ...DEPLOYMENT, router: OTHER } });
-await mustRefuse('empty reviewed deployments (the committed production state)', () => {}, { deploymentFile: { ...DEPLOYMENT, deployments: [] } });
+await mustRefuse('empty reviewed deployments', () => {}, { deploymentFile: { ...DEPLOYMENT, deployments: [] } });
 
 // ===================================================================== on-chain refusals
 const EOA = '0x' + '5e'.repeat(20);
@@ -152,7 +152,7 @@ check('RPC outage is logged as unavailable (not as a pass)', down.log && down.lo
   const prod = Dep.loadDeployment();
   check('committed file: canonical SYNC / USDG / router / market 1', prod.sync === lc(SYNC) && prod.usdg === lc(USDG) && prod.router === lc(PAR_ROUTER) && prod.market === 1);
   check('committed file: the approved treasury is the ONLY accepted converter TREASURY()', prod.treasury === '0x65fac39a7a672afebba404aecddb34a1eddc879b');
-  check('committed file: no reviewed deployment yet (payments stay closed until one is reviewed)', prod.deployments.size === 0);
+  check('committed file: exactly one reviewed deployment — the verified V3 canary sink + converter', prod.deployments.size === 1 && prod.deployments.get('0xc32fb194a0a2bc5fa313febd2de5096ca467213d') === '0xd917bd053d3152e6de10ad8279ddbaf20302a403');
 }
 
 console.log(`${results.length - failures}/${results.length} deployment validation checks passed`);

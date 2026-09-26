@@ -518,3 +518,18 @@ time; the editor shows why).
 * `GET /api/project-home?view=homes&tokens=…` (≤100): batch HOME state (`live | awaiting | unpublished | paused | none`).
 
 No write path, signature domain, atomic transition, entitlement or image rule changed.
+
+## 15. V3 canary deployment (Robinhood Chain 4663) — deployed, payments still OFF
+
+| | Address | Transaction | Block |
+|---|---|---|---|
+| Treasury Converter | `0xd917bd053d3152e6de10ad8279ddbaf20302a403` | `0x47365dce78ed9cb1c7ecc17583c90680042ebeed4296d564f113059677ea5572` | 73343761 |
+| Project Home Sink | `0xc32fb194a0a2bc5fa313febd2de5096ca467213d` | `0x70b7e2069e8c989bac4a6f5e99e5c8196025f3fd452dfe4dae56953e28eb7575` | 73343786 |
+
+Deployer `0xd0ef7d4ffffaf82f59e105c40ea97d8857b633c3` (converter nonce 0, then sink nonce 1). Treasury
+`0x65FAc39A7A672afEbba404aecdDB34a1Eddc879B` (EOA, no code). Verified on-chain: both creation inputs equal the audited
+initcode plus the exact constructor arguments; the reviewed validator passes (immutable-aware runtime fingerprints,
+every immutable word, every getter: converter SYNC/USDG/ROUTER/MARKET=1/TREASURY, sink SYNC/BURN_PERCENT=60/
+TREASURY_CONVERTER). Recorded in `syncnet-project-home-deployment.json`. Blockscout source verification could not be
+submitted from the CI environment (Cloudflare challenge); run `forge verify-contract --verifier blockscout` from an
+operator machine. Payments stay CLOSED: no reference rate, no payment flag, no sink env on any deployment.

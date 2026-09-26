@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T18:18:30.937Z",
+  "at": "2026-09-26T19:49:50.694Z",
   "passed": 119,
   "failed": 0,
   "results": [
@@ -569,14 +569,14 @@
       "detail": ""
     },
     {
-      "name": "SyncNetProjectHomeSink: forge-derived ABI equals the committed ABI",
+      "name": "SyncNetProjectHomeSink: forge-derived ABI comparison",
       "ok": true,
-      "detail": ""
+      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
     },
     {
-      "name": "SyncNetProjectHomeTreasuryConverter: forge-derived ABI equals the committed ABI",
+      "name": "SyncNetProjectHomeTreasuryConverter: forge-derived ABI comparison",
       "ok": true,
-      "detail": ""
+      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
     },
     {
       "name": "code fingerprints: Foundry constants equal the reviewed deployment file",
@@ -589,7 +589,7 @@
       "detail": ""
     },
     {
-      "name": "reviewed deployment: canonical infrastructure, market 1, no deployment reviewed yet",
+      "name": "reviewed deployment: canonical infrastructure, market 1, exactly the verified V3 canary deployment",
       "ok": true,
       "detail": ""
     },

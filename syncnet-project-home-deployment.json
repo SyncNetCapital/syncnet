@@ -2,7 +2,7 @@
   "schema": "syncnet.project-home.deployment.v1",
   "notes": [
     "Reviewed Project Home payment deployment. The server quotes a payment ONLY after verifying on-chain that PROJECT_HOME_SINK_ADDRESS is one of the deployments below and that its code and every immutable match this file (netlify/lib/project-home-deployment.js). Anything else keeps payments CLOSED.",
-    "Addresses are added here in a reviewed commit AFTER an explicitly authorised deployment (contracts/project-home-sink/script/DeployProjectHome.s.sol). Nothing is deployed yet: deployments is empty, so payments stay closed.",
+    "Addresses are added here in a reviewed commit AFTER an explicitly authorised deployment (contracts/project-home-sink/script/DeployProjectHome.s.sol) and after on-chain verification. Payments additionally require SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED, a reviewed reference rate and PROJECT_HOME_SINK_ADDRESS; none of those is set by this file.",
     "code: immutable-aware runtime fingerprints of the audited build (keccak256 of the runtime with every immutable range zeroed). Verified against a fresh compilation by tests/project-home/code-fingerprint.mjs.",
     "treasury: the approved SyncNet Protocol Treasury (public address). It is the ONLY accepted converter TREASURY()."
   ],
@@ -186,5 +186,17 @@
       }
     }
   },
-  "deployments": []
+  "deployments": [
+    {
+      "sink": "0xc32fb194a0a2bc5fa313febd2de5096ca467213d",
+      "converter": "0xd917bd053d3152e6de10ad8279ddbaf20302a403",
+      "label": "V3 canary (chain 4663)",
+      "deployer": "0xd0ef7d4ffffaf82f59e105c40ea97d8857b633c3",
+      "converterTx": "0x47365dce78ed9cb1c7ecc17583c90680042ebeed4296d564f113059677ea5572",
+      "converterBlock": 73343761,
+      "sinkTx": "0x70b7e2069e8c989bac4a6f5e99e5c8196025f3fd452dfe4dae56953e28eb7575",
+      "sinkBlock": 73343786,
+      "verified": "creation inputs == audited initcode + constructor args; runtime fingerprints, immutable words and getters PASS (netlify/lib/project-home-deployment.js)"
+    }
+  ]
 }
