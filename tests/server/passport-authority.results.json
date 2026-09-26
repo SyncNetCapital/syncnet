@@ -5,27 +5,27 @@
     {
       "name": "PAR 1 current wallet fee recipient establishes the FIRST Passport",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8000000000000000000000000000000000000000\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:41.820Z\",\"claims\":[{\"id\":\"0x754cb1b6a01435d2df506577b7f8ee6"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8000000000000000000000000000000000000000\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:11.683Z\",\"claims\":[{\"id\":\"0x61c17149ff4fd07b8cfa48ceb1fc59e"
     },
     {
       "name": "PAR 2 deployer establishes the FIRST Passport",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:41.838Z\",\"claims\":[{\"id\":\"0x02b5d99d053e329b2163100acf28fdd"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.701Z\",\"claims\":[{\"id\":\"0x9c72d13a1de8cb5a86b7c6253a52036"
     },
     {
       "name": "PAR 3 existing operator refreshes (basis operator)",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:41.838Z\",\"claims\":[{\"id\":\"0x02b5d99d053e329b2163100acf28fdd"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.701Z\",\"claims\":[{\"id\":\"0x9c72d13a1de8cb5a86b7c6253a52036"
     },
     {
       "name": "PAR 3 existing operator refreshes (basis deployer) without changing anything",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:41.838Z\",\"claims\":[{\"id\":\"0x02b5d99d053e329b2163100acf28fdd"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.701Z\",\"claims\":[{\"id\":\"0x9c72d13a1de8cb5a86b7c6253a52036"
     },
     {
       "name": "PAR setup: fee recipient W2 establishes the Passport where W is deployer",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8111111111111111111111111111111111111111\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:41.877Z\",\"claims\":[{\"id\":\"0xfb94321f9abaec6abe4369da61aa155"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8111111111111111111111111111111111111111\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:11.733Z\",\"claims\":[{\"id\":\"0x069e41d4a242eea2f64ffc3d0521758"
     },
     {
       "name": "PAR 4 a different deployer cannot supersede the operator (409 operator_exists)",
@@ -80,7 +80,7 @@
     {
       "name": "PAR 8 buyer remains operator and can refresh",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8222222222222222222222222222222222222222\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:41.951Z\",\"claims\":[{\"id\":\"0x674d192a82769b34ac281c7c76d4a30"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8222222222222222222222222222222222222222\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:11.797Z\",\"claims\":[{\"id\":\"0xf15b4a7b096d62ad431c8fd8ab616ab"
     },
     {
       "name": "PAR 8 history is exactly claim → listed → operator-transfer → buyer refresh (no supersession)",
@@ -105,7 +105,7 @@
     {
       "name": "PAR deal window: the included fee right then completes normally",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xed6fc670e1f5095f7cf6ed819c6429b7f6842afaa3344f1d23588a0c74de66b3\",\"listingId\":\"0x6a878cb85923e803a5edaa87ba153ab9886c119dcf807a3cc36dabac165eda9b\",\"offerId\":\"0xce4f7d6c7efc0b0f87ab88722a3f9e16d735befaba30a5857dceee350272c3e8\",\"token\":\"0x8333333333333333333333333333333333333333\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xadb7300ed16d031e7d95c37c5048346746afec1cb4708a23440032b7f78f1ac7\",\"listingId\":\"0xc77aad4380ddd907d4a629058717a4479b461d9cba4ffe44002e6e2baa636350\",\"offerId\":\"0x7c02a05418a9d807292fb4a88723f63791bd15eaf5a6c041e28f0a14e3cc65ec\",\"token\":\"0x8333333333333333333333333333333333333333\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "PAR after the deal: seller (deployer) still cannot reclaim",
@@ -115,27 +115,27 @@
     {
       "name": "PONS_V2 1 current wallet fee recipient establishes the FIRST Passport",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:42.109Z\",\"claims\":[{\"id\":\"0x870dec02edab357e4a5de9718d3"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:11.914Z\",\"claims\":[{\"id\":\"0x2032cd69d06d76fdd3e22781db4"
     },
     {
       "name": "PONS_V2 2 deployer establishes the FIRST Passport",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:42.118Z\",\"claims\":[{\"id\":\"0x92b48f6bd25a65e722cb544050c"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.923Z\",\"claims\":[{\"id\":\"0xf34816f0d840afbf1b2903ff41c"
     },
     {
       "name": "PONS_V2 3 existing operator refreshes (basis operator)",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:42.118Z\",\"claims\":[{\"id\":\"0x92b48f6bd25a65e722cb544050c"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.923Z\",\"claims\":[{\"id\":\"0xf34816f0d840afbf1b2903ff41c"
     },
     {
       "name": "PONS_V2 3 existing operator refreshes (basis deployer) without changing anything",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:42.118Z\",\"claims\":[{\"id\":\"0x92b48f6bd25a65e722cb544050c"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:11.923Z\",\"claims\":[{\"id\":\"0xf34816f0d840afbf1b2903ff41c"
     },
     {
       "name": "PONS_V2 setup: fee recipient W2 establishes the Passport where W is deployer",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000010\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:42.146Z\",\"claims\":[{\"id\":\"0xcf470c87c9fe7e6bb3799b5c148"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000010\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:11.950Z\",\"claims\":[{\"id\":\"0x249849a4c337288402a74052a98"
     },
     {
       "name": "PONS_V2 4 a different deployer cannot supersede the operator (409 operator_exists)",
@@ -190,7 +190,7 @@
     {
       "name": "PONS_V2 8 buyer remains operator and can refresh",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000011\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T19:50:42.222Z\",\"claims\":[{\"id\":\"0x8e4fc25679015eb4e31b5fe44dd"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000011\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T20:24:12.018Z\",\"claims\":[{\"id\":\"0x8099df69de21cbcf87428c409e9"
     },
     {
       "name": "PONS_V2 8 history is exactly claim → listed → operator-transfer → buyer refresh (no supersession)",
@@ -215,7 +215,7 @@
     {
       "name": "PONS_V2 deal window: the included fee right then completes normally",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xb1e3c797d7a4b4ecd8e93eb25ab3d76a4937656af71a3f62380bb444248234e2\",\"listingId\":\"0xaffe29ad0bac09d903d75e6c4e60d231217ff03c5e3a8d849cb129528943be54\",\"offerId\":\"0x35e87bfe4637a710ab0111346748c0fcf802fef2b267b8293256a3016b36c590\",\"token\":\"0x7a11000000000000000000000000000000000012\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xe6329a4513ab601efef23e41ddc529e8e7de45ce39e53609df69d654d22d068b\",\"listingId\":\"0x9f56b24786448766f399a61022022be35c1a14ac5ac527a2efd15942284932d6\",\"offerId\":\"0x4d29212554c9423619e5456a0172e3a73bfe0c703eee803bd3e186c7308fd39c\",\"token\":\"0x7a11000000000000000000000000000000000012\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "PONS_V2 after the deal: seller (deployer) still cannot reclaim",
@@ -245,7 +245,7 @@
     {
       "name": "PAR the same nonce is still usable for a later legitimate action",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xb5bf58346d069ff0fb32ed2c2725d1f4cf7076668699ba3c9b04996fb9784aa9\",\"token\":\"0x8555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2\",\"currency\":\"USD\",\"terms\":{\"description\":\"Another project of the same wallet, listed with the same nonce.\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x28c89a86"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xd9b7652e203338ca95d3e83d4bc64efa54a4449b0eb483735f93a07b121611f7\",\"token\":\"0x8555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2\",\"currency\":\"USD\",\"terms\":{\"description\":\"Another project of the same wallet, listed with the same nonce.\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x28c89a86"
     },
     {
       "name": "PONS_V2 rejected takeover answers 409 operator_exists",
@@ -260,7 +260,7 @@
     {
       "name": "PONS_V2 the same nonce is still usable for a later legitimate action",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xcc01ea5cfda62ef9267cf02a30f228ff830035c7dc7b4de08c8d7fb695e9eff1\",\"token\":\"0x7a11000000000000000000000000000000000015\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2\",\"currency\":\"USD\",\"terms\":{\"description\":\"Another project of the same wallet, listed with the same nonce.\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x28c89a86"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x9fc03e53b7999adf9ef4ea5594507f16b5becb24d8d56ee335bf1613c9045f24\",\"token\":\"0x7a11000000000000000000000000000000000015\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2\",\"currency\":\"USD\",\"terms\":{\"description\":\"Another project of the same wallet, listed with the same nonce.\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x28c89a86"
     },
     {
       "name": "9 pending Pons override: the proposed recipient has no claim",
@@ -275,7 +275,7 @@
     {
       "name": "9 the recognised operator keeps control and can refresh after the override",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000013\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T19:50:42.511Z\",\"claims\":[{\"id\":\"0x29a11dae4d1265492afd10b4064"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000013\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T20:24:12.268Z\",\"claims\":[{\"id\":\"0x204153075ec3d1da6cf1b45c763"
     },
     {
       "name": "10 PAR vault fee recipient still gives no claim (422)",
