@@ -55,7 +55,7 @@
     {
       "name": "setup: $SYNC Passport claimed through the unchanged Marketplace claim",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-25T08:46:11.176Z\",\"claims\":[{\"id\":\"0x8e8617470ca85f53d4d33a942c462f04635c15695864eed47"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T09:31:34.987Z\",\"claims\":[{\"id\":\"0x5525298dbc13237e2e0ce2e4aebc10c"
     },
     {
       "name": "curator: the Passport operator is shown as the $SYNC operator",
@@ -115,7 +115,7 @@
     {
       "name": "outside index: labelled CONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW, not as indexer-confirmed",
       "ok": true,
-      "detail": "0x8000…0000\nname not in current index data\nPARENT-RECOGNIZED\nCONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW\n\n0x8000000000000000000000000000000000000000\n\nRECOGNIZED BY $SYNC OPERATOR · 0x2c75…5c23 · signed 2026-09-25 · the on-chain market was verified by SyncNet when this recognition was recorded\n\nPROJECT PAGE"
+      "detail": "0x8000…0000\nname not in current index data\nPARENT-RECOGNIZED\nCONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW\n\n0x8000000000000000000000000000000000000000\n\nRECOGNIZED BY $SYNC OPERATOR · 0x2c75…5c23 · signed 2026-09-26 · the on-chain market was verified by SyncNet when this recognition was recorded\n\nPROJECT PAGE"
     },
     {
       "name": "indexer down: recognitions stay visible, labelled INDEXER UNAVAILABLE, never as connected-now",
