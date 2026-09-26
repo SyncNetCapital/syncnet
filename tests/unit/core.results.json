@@ -214,7 +214,7 @@
     },
     {
       "section": "keccak256",
-      "name": "keccak256 hashes 1 MiB in 95 ms",
+      "name": "keccak256 hashes 1 MiB in 104 ms",
       "ok": true
     },
     {
@@ -1129,7 +1129,7 @@
     },
     {
       "section": "secp256k1",
-      "name": "recovery takes < 50 ms per signature (avg 2.76 ms, max 4.69 ms)",
+      "name": "recovery takes < 50 ms per signature (avg 3.1 ms, max 4.99 ms)",
       "ok": true
     },
     {
@@ -1404,12 +1404,12 @@
     },
     {
       "section": "text policy",
-      "name": "all 1,112,064 scalar values classified as specified (multiline=false, 138034 flagged, 286 ms)",
+      "name": "all 1,112,064 scalar values classified as specified (multiline=false, 138034 flagged, 434 ms)",
       "ok": true
     },
     {
       "section": "text policy",
-      "name": "all 1,112,064 scalar values classified as specified (multiline=true, 138033 flagged, 738 ms)",
+      "name": "all 1,112,064 scalar values classified as specified (multiline=true, 138033 flagged, 564 ms)",
       "ok": true
     },
     {
@@ -1669,14 +1669,14 @@
     }
   ],
   "timings": {
-    "pythonKeccakBatchMs": 649,
-    "keccakMiBPerSec": 10.6,
-    "keccak32BytesUs": 15.7,
-    "decodeLaunchCalldata_direct_ms": 0.43,
-    "decodeLaunchCalldata_router_ms": 0.44,
-    "signAvgMs": 1.95,
-    "recoverAvgMs": 2.76,
-    "recoverMaxMs": 4.69
+    "pythonKeccakBatchMs": 75,
+    "keccakMiBPerSec": 9.6,
+    "keccak32BytesUs": 16.9,
+    "decodeLaunchCalldata_direct_ms": 0.61,
+    "decodeLaunchCalldata_router_ms": 0.58,
+    "signAvgMs": 2.25,
+    "recoverAvgMs": 3.1,
+    "recoverMaxMs": 4.99
   },
-  "seed": 329414599
+  "seed": 876903348
 }

@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T13:57:42.257Z",
+  "at": "2026-09-26T14:15:34.469Z",
   "failures": 0,
   "passed": 100,
   "total": 100,
@@ -172,7 +172,7 @@
     {
       "name": "3d BLOCK: both gateways hang -> strict timeout (8000 ms) -> unreachable",
       "ok": true,
-      "detail": "8006 ms"
+      "detail": "8002 ms"
     },
     {
       "name": "3e BLOCK: a failure is never cached (a previous pass does not hide a later outage once the cache is cleared)",
@@ -317,7 +317,7 @@
     {
       "name": "6c BLOCK: PNG of 5000x5000 px in 72971 bytes -> too_large (dimension cap before inflating)",
       "ok": true,
-      "detail": "{\"ok\":false,\"reason\":\"too_large\"} 3 ms"
+      "detail": "{\"ok\":false,\"reason\":\"too_large\"} 2 ms"
     },
     {
       "name": "6d BLOCK: both gateways stream 6 MiB -> too_large",
@@ -502,7 +502,7 @@
     {
       "name": "server log records gateway failures (for the operator) without them reaching the client",
       "ok": true,
-      "detail": "[{\"ts\":\"2026-09-26T13:57:42.256Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":152}]"
+      "detail": "[{\"ts\":\"2026-09-26T14:15:34.468Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":151}]"
     }
   ]
 }
