@@ -69,6 +69,9 @@ await suite('Explore · first viewport, search, filters, For sale', async () => 
   check('Explore: no box-shadow or text-shadow anywhere', await page.evaluate(() => [...document.querySelectorAll('body *')].every((e) => { const s = getComputedStyle(e); return s.boxShadow === 'none' && s.textShadow === 'none'; })));
   // Only $SYNC itself may show the SyncNet mark (it is that token's own logo); fallbacks are the project's initial.
   check('Explore: fallback logos are the project initial, never the SyncNet mark', await page.$$eval('#exploreList .sn-row', (rows, sync) => rows.every((r) => r.getAttribute('href') === '/project/' + sync || !r.querySelector('.sn-logo img[src*="syncnet-logo"]')), lc(A.SYNC)) && await page.$$eval('#exploreList .sn-logo:not(:has(img))', (l) => l.every((x) => /^[A-Z0-9·]$/.test(x.textContent.trim()))));
+  const fake = (await page.locator(`#exploreList a[href="/project/${lc(A.FAKESYNC)}"]`).innerText().catch(() => '')).replace(/\s+/g, ' ');
+  const real = (await page.locator(`#exploreList a[href="/project/${lc(A.SYNC)}"]`).innerText().catch(() => '')).replace(/\s+/g, ' ');
+  check('Explore: a same-ticker impostor says "Not the canonical $SYNC"; the canonical row does not', /Not the canonical \$SYNC/.test(fake) && real && !/Not the canonical/.test(real), fake + ' || ' + real);
   // search by name / ticker
   await page.fill('#exploreQ', 'OPLIVE'); await page.waitForTimeout(500);
   const rows = await page.$$eval('#exploreList .sn-row', (r) => r.map((x) => x.getAttribute('href')));

@@ -19,7 +19,7 @@
   const HUB = 3; // used as a market by at least this many launches → "Network hub"
   const PAGE = 30;
   const NEW_DAYS = 7;
-  const state = { rows: new Map(), passports: {}, homes: {}, filter: 'all', q: '', shown: PAGE, loaded: false, error: '' };
+  const state = { rows: new Map(), canonical: new Map(), passports: {}, homes: {}, filter: 'all', q: '', shown: PAGE, loaded: false, error: '' };
 
   const rowsOf = (b) => { if (Array.isArray(b)) return b; for (const k of ['launches', 'items', 'data', 'rows', 'results']) if (Array.isArray(b && b[k])) return b[k]; return []; };
   const tokenOf = (x) => lc((x && (x.token || x.tokenAddress || x.address)) || '');
@@ -53,6 +53,7 @@
     }
     for (const p of registry) {
       const t = lc(p.token);
+      if (isAddr(t) && p.registry && p.registry.canonical === true && Core) state.canonical.set(Core.confusableSkeleton(String(p.symbol || '').toUpperCase()), { token: t, symbol: String(p.symbol || '').toUpperCase() });
       if (!isAddr(t) || !(p.registry && p.registry.canonical !== false)) continue;
       upsert(t, { name: disp((p.profile && p.profile.name) || p.name, 48), symbol: disp(p.symbol, 16).toUpperCase(), logo: logoOk(p.profile && p.profile.image), featured: true });
     }
@@ -112,12 +113,15 @@
     const home = state.homes[r.token];
     const conn = (r.markets ? r.markets.length : 0) + (r.usedBy || 0);
     const hub = r.usedBy >= HUB;
-    const market = [r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : ''].filter(Boolean).join(' · ');
+    // Same ticker as a canonical SyncNet asset but a different contract (confusable-aware): say so on the row.
+    const canon = Core && r.symbol ? state.canonical.get(Core.confusableSkeleton(r.symbol)) : null;
+    const impostor = canon && canon.token !== r.token ? `<span class="sn-flag">Not the canonical $${esc(canon.symbol)}</span>` : '';
+    const market = [impostor, r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : ''].filter(Boolean).join(' · ');
     const connText = hub ? `Network hub · <span class="sn-num">${conn}</span>` : conn ? `<span class="sn-num">${conn}</span>` : '—';
-    const mobileFacts = [r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : '', hub ? 'Network hub' : conn ? `${conn} connection${conn === 1 ? '' : 's'}` : ''].filter(Boolean).slice(0, 2).join(' · ');
+    const mobileFacts = [impostor, r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : '', hub ? 'Network hub' : conn ? `${conn} connection${conn === 1 ? '' : 's'}` : ''].filter(Boolean).slice(0, 2).join(' · ');
     const name = r.name || r.symbol || UI.short(r.token);
     const letter = (r.symbol || r.name || '·').charAt(0);
-    const label = `${name}${r.symbol ? ' ($' + r.symbol + ')' : ''}, ${UI.LABEL[syncState]}${r.listing ? ', for sale' : ''}`;
+    const label = `${name}${r.symbol ? ' ($' + r.symbol + ')' : ''}, ${UI.LABEL[syncState]}${impostor ? ', not the canonical $' + canon.symbol : ''}${r.listing ? ', for sale' : ''}`;
     return `<li><a class="sn-row" href="/project/${esc(r.token)}" aria-label="${esc(label)}">
 <span class="sn-proj">${UI.logoHtml(r.logo, letter)}<span class="sn-m-main"><span class="sn-proj-name">${esc(name)}</span>${r.symbol ? `<span class="sn-proj-ticker">$${esc(r.symbol)}</span>` : ''}${r.origin ? `<span class="sn-proj-origin sn-d-col">${esc(r.origin)}</span>` : ''}
 <span class="sn-m-only">${UI.stateHtml(syncState)}</span>${mobileFacts ? `<span class="sn-m-only sn-small sn-dim">${mobileFacts}</span>` : ''}</span></span>

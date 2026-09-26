@@ -17,7 +17,7 @@
   /* legacy v2.css tokens remapped onto the same palette */
   --bg:var(--ink);--fg:var(--bone);--muted:var(--bone-3);--faint:#5d584f;--cyan:var(--accent);--cyan-dim:#1f3436;--panel:var(--ink-2);
 }
-html{background:var(--ink)}
+html{background:var(--ink);scroll-padding-top:calc(var(--top) + 12px)} /* focus / scroll targets never sit under the sticky bar */
 body{background:var(--ink);color:var(--bone);font-family:var(--sans);font-size:16px;line-height:1.5}
 /* The design language has no shadows or glows (focus rings are outlines, below). */
 body *,body *::before,body *::after{box-shadow:none!important;text-shadow:none!important}
@@ -29,7 +29,8 @@ a:focus-visible,button:focus-visible{border-radius:var(--r)}
 .mono,.sn-mono{font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:0}
 .sn-num{font-variant-numeric:tabular-nums}
 .sn-wrap{width:min(calc(100% - 40px),var(--wrap));margin:0 auto}
-.sn-copper{color:var(--copper)}.sn-accent{color:var(--accent)}
+.sn-copper{color:var(--copper)}
+.sn-flag{color:var(--warn)}.sn-flag::before{content:"! ";font-weight:700} /* shape + words, never colour alone */.sn-accent{color:var(--accent)}
 
 /* ------------------------------------------------------------------ top bar */
 .sn-top{position:sticky;top:0;z-index:60;background:var(--ink);border-bottom:1px solid var(--line)}
@@ -43,13 +44,14 @@ a:focus-visible,button:focus-visible{border-radius:var(--r)}
 .sn-top-search button{width:40px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--bone-2);cursor:pointer;font-size:16px}
 .sn-top-search button:hover{color:var(--bone)}
 .sn-nav{display:flex;align-items:center;gap:4px;margin-left:auto}
-.sn-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--bone-2);font-size:14px;border-bottom:1px solid transparent}
+.sn-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;color:var(--bone-2);font-size:14px;border-bottom:1px solid transparent;white-space:nowrap}
 .sn-nav a:hover{color:var(--bone)}
 .sn-nav a[aria-current="page"]{color:var(--bone);border-bottom-color:var(--bone)}
 .sn-wallet{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 14px;border:1px solid var(--line-2);border-radius:var(--r);background:transparent;color:var(--bone);font-size:14px;cursor:pointer;white-space:nowrap}
 .sn-wallet:hover{border-color:var(--line-3)}
 .sn-wallet .sn-mono{font-size:13px;color:var(--bone-2)}
 .sn-nav .sn-you[hidden]{display:none}
+@media (min-width:760px) and (max-width:1023px){.sn-top-inner{gap:16px}.sn-top-search{display:none}.sn-nav a{padding:0 10px}}
 
 /* ------------------------------------------------------------------ mobile tab bar: three destinations only */
 .sn-tabbar{display:none}
@@ -58,6 +60,7 @@ a:focus-visible,button:focus-visible{border-radius:var(--r)}
   .sn-top-search,.sn-nav{display:none}
   .sn-wallet{margin-left:auto;min-height:44px}
   body{padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom))}
+  html{scroll-padding-bottom:calc(var(--tab) + env(safe-area-inset-bottom) + 12px)} /* …nor under the fixed tab bar */
   .sn-tabbar{display:grid;grid-template-columns:repeat(3,1fr);position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--ink);border-top:1px solid var(--line-2);padding-bottom:env(safe-area-inset-bottom)}
   .sn-tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:var(--tab);color:var(--bone-3);font-size:13px;border-top:2px solid transparent;margin-top:-1px}
   .sn-tabbar a[aria-current="page"]{color:var(--bone);border-top-color:var(--bone)}
@@ -303,4 +306,5 @@ a.sn-row:hover{background:linear-gradient(var(--ink-2),var(--ink-2))}
 .he-controls[hidden]{display:none}
 .he-review[hidden]{display:none}
 .sn-steps li[data-done="true"]::before{content:"✓ ";color:var(--bone-3)}
-@media (max-width:959px){.he-grid{grid-template-columns:1fr;gap:8px}.he-preview{position:static}.he-preview iframe{height:560px}}
+.he-jump{display:none;margin:0}.he-jump a{display:inline-flex;align-items:center;min-height:44px;color:var(--bone-2);font-size:14px}
+@media (max-width:959px){.sn-editor .he-jump{display:block}.he-grid{grid-template-columns:1fr;gap:8px}.he-preview{position:static}.he-preview iframe{height:560px}}

@@ -360,12 +360,12 @@
     {
       "name": "mobile 320px: notice fits the viewport",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":300,\"top\":246.921875,\"bottom\":653.078125,\"vw\":320,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":300,\"top\":240.09375,\"bottom\":659.90625,\"vw\":320,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 320px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":300,\"top\":246.921875,\"bottom\":653.078125,\"vw\":320,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":300,\"top\":240.09375,\"bottom\":659.90625,\"vw\":320,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 320px: no horizontal overflow",
@@ -375,12 +375,12 @@
     {
       "name": "mobile 360px: notice fits the viewport",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":340,\"top\":266.71875,\"bottom\":633.28125,\"vw\":360,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":340,\"top\":254.125,\"bottom\":645.859375,\"vw\":360,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 360px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":340,\"top\":266.71875,\"bottom\":633.28125,\"vw\":360,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":340,\"top\":254.125,\"bottom\":645.859375,\"vw\":360,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 360px: no horizontal overflow",
@@ -390,12 +390,12 @@
     {
       "name": "mobile 390px: notice fits the viewport",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":370,\"top\":302.515625,\"bottom\":597.484375,\"vw\":390,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":370,\"top\":290.171875,\"bottom\":609.8125,\"vw\":390,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 390px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
       "ok": true,
-      "detail": "{\"left\":20,\"right\":370,\"top\":302.515625,\"bottom\":597.484375,\"vw\":390,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+      "detail": "{\"left\":20,\"right\":370,\"top\":290.171875,\"bottom\":609.8125,\"vw\":390,\"vh\":900,\"minH\":44.5,\"overflow\":0,\"topIsRetry\":true}"
     },
     {
       "name": "mobile 390px: no horizontal overflow",

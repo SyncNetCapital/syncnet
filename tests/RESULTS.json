@@ -1,7 +1,7 @@
 {
-  "at": "2026-09-26T12:50:29.381Z",
+  "at": "2026-09-26T14:09:04.786Z",
   "node": "v22.22.2",
-  "site": "sha256:4b5f401c90e94c0eaf1d507d8874cbd629c4493220cfbae63abdcb6b31f2b4ac (81 deployable files)",
+  "site": "sha256:b585d10cc3c82379e372511f0a8afac71b7f5196ba51dea0276980d454d91d6c (90 deployable files)",
   "suites": [
     {
       "suite": "static audit",
@@ -14,14 +14,14 @@
       "suite": "core unit (keccak, secp256k1, EIP-712, ABI, text policy)",
       "command": "node tests/unit/core.test.mjs",
       "exit": 0,
-      "seconds": 3,
+      "seconds": 4,
       "summary": "333 passed, 0 failed"
     },
     {
       "suite": "image sanitizer",
       "command": "node tests/server/image-sanitize.test.mjs",
       "exit": 0,
-      "seconds": 7,
+      "seconds": 8,
       "summary": "129 passed, 0 failed"
     },
     {
@@ -60,7 +60,7 @@
       "summary": "66/66 passport authority checks passed"
     },
     {
-      "suite": "server Marketplace \u00d7 Pons V2 (origins)",
+      "suite": "server Marketplace × Pons V2 (origins)",
       "command": "node tests/server/marketplace-pons.test.mjs",
       "exit": 0,
       "seconds": 1,
@@ -77,25 +77,25 @@
       "suite": "server Economies /api/economies (V0)",
       "command": "node tests/server/economies.test.mjs",
       "exit": 0,
-      "seconds": 2,
+      "seconds": 3,
       "summary": "100/100 economies server checks passed"
     },
     {
-      "suite": "audit PoCs \u00b7 engine (AFTER)",
+      "suite": "audit PoCs · engine (AFTER)",
       "command": "node tests/audit/poc-engine.mjs",
       "exit": 0,
       "seconds": 0,
       "summary": "11/28 reproduced"
     },
     {
-      "suite": "audit PoCs \u00b7 server (AFTER)",
+      "suite": "audit PoCs · server (AFTER)",
       "command": "node tests/audit/poc-server.mjs",
       "exit": 0,
       "seconds": 0,
       "summary": "0/11 reproduced"
     },
     {
-      "suite": "audit PoCs \u00b7 pages (AFTER)",
+      "suite": "audit PoCs · pages (AFTER)",
       "command": "node tests/audit/poc-e2e.mjs",
       "exit": 0,
       "seconds": 50,
@@ -105,21 +105,21 @@
       "suite": "E2E (existing product suites, updated)",
       "command": "node tests/e2e/run.mjs",
       "exit": 0,
-      "seconds": 110,
-      "summary": "297/297 checks passed"
+      "seconds": 122,
+      "summary": "320/320 checks passed"
     },
     {
-      "suite": "required regressions R01\u2013R28",
+      "suite": "required regressions R01–R28",
       "command": "node tests/regression/rc-regressions.mjs",
       "exit": 0,
-      "seconds": 226,
+      "seconds": 234,
       "summary": "206/206 regression checks passed"
     },
     {
       "suite": "IPFS display (canonical utility, PONSYNC CID)",
       "command": "node tests/regression/rc-ipfs-display.mjs",
       "exit": 0,
-      "seconds": 12,
+      "seconds": 11,
       "summary": "23/23 ipfs-display checks passed"
     },
     {
@@ -130,7 +130,7 @@
       "summary": "45/45 marketplace walkthrough checks passed"
     },
     {
-      "suite": "Marketplace \u00d7 Pons V2 walkthrough (detect, claim, list, fee right)",
+      "suite": "Marketplace × Pons V2 walkthrough (detect, claim, list, fee right)",
       "command": "node tests/regression/rc-marketplace-pons.mjs",
       "exit": 0,
       "seconds": 22,
@@ -140,71 +140,78 @@
       "suite": "Marketplace wallet selection (multi-wallet chooser)",
       "command": "node tests/regression/rc-wallet-select.mjs",
       "exit": 0,
-      "seconds": 18,
+      "seconds": 19,
       "summary": "32/32 wallet-selection checks passed"
     },
     {
       "suite": "Phantom EVM-account notice (Solana-only account)",
       "command": "node tests/regression/rc-wallet-evm.mjs",
       "exit": 0,
-      "seconds": 62,
+      "seconds": 65,
       "summary": "80/80 wallet EVM-account checks passed"
     },
     {
       "suite": "mobile 320/360/390/430",
       "command": "node tests/regression/rc-mobile.mjs",
-      "exit": 0,
-      "seconds": 62,
-      "summary": "112/112 mobile checks passed"
+      "exit": 1,
+      "seconds": 38,
+      "summary": "Node.js v22.22.2"
     },
     {
       "suite": "Economy walkthrough (derived membership, recognize/revoke)",
       "command": "node tests/regression/rc-economy.mjs",
       "exit": 0,
-      "seconds": 9,
+      "seconds": 10,
       "summary": "32/32 economy walkthrough checks passed"
     },
     {
-      "suite": "Project Home \u00b7 contracts: sink + converter (Foundry, incl. fuzzing)",
+      "suite": "Project Home · contracts: sink + converter (Foundry, incl. fuzzing)",
       "command": "node tests/project-home/foundry.mjs",
       "exit": 0,
-      "seconds": 7,
-      "summary": "70 foundry tests passed, 0 failed, 0 skipped"
+      "seconds": 1,
+      "summary": "74 foundry tests passed, 0 failed, 0 skipped"
     },
     {
-      "suite": "Project Home \u00b7 contract static/ABI audit (sink + converter)",
+      "suite": "Project Home · contract static/ABI audit (sink + converter)",
       "command": "node tests/project-home/sink-static-audit.mjs",
       "exit": 0,
       "seconds": 1,
-      "summary": "113/113 sink static audit checks passed"
+      "summary": "115/115 sink static audit checks passed"
     },
     {
-      "suite": "Project Home \u00b7 pricing ($39 USD, fixed point, tags, gate)",
+      "suite": "Project Home · pricing ($39 USD, fixed point, tags, gate)",
       "command": "node tests/project-home/pricing.test.mjs",
       "exit": 0,
       "seconds": 0,
       "summary": "81/81 project-home pricing checks passed"
     },
     {
-      "suite": "Project Home \u00b7 site schema, EIP-712, renderer audit",
+      "suite": "Project Home · site schema, EIP-712, renderer audit",
       "command": "node tests/project-home/site.test.mjs",
       "exit": 0,
       "seconds": 2,
       "summary": "149/149 project-home site checks passed"
     },
     {
-      "suite": "Project Home \u00b7 server (intents, activation, sites)",
+      "suite": "Project Home · server (intents, activation, sites)",
       "command": "node tests/project-home/server.test.mjs",
       "exit": 0,
       "seconds": 2,
       "summary": "180/180 project-home server checks passed"
     },
     {
-      "suite": "Project Home \u00b7 atomic commit on real Redis",
+      "suite": "Project Home · atomic commit on real Redis",
       "command": "node tests/project-home/redis-atomic.test.mjs",
       "exit": 0,
       "seconds": 1,
       "summary": "17/17 project-home real-Redis checks passed"
+    },
+    {
+      "suite": "Phase 2 UI · Explore, Project Page, You, Project Home editor/payment/adoption",
+      "command": "node tests/e2e/phase2-ui.mjs",
+      "exit": 0,
+      "seconds": 65,
+      "summary": "110/110 phase 2 UI checks passed"
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T12:47:24.175Z",
+  "at": "2026-09-26T14:05:17.787Z",
   "failures": 0,
   "passed": 45,
   "total": 45,
@@ -7,7 +7,7 @@
     {
       "name": "production: no LAB / LOCAL TEST / NO REAL PAYMENTS / simulation wording anywhere",
       "ok": true,
-      "detail": "LABS"
+      "detail": "and everything SyncNet cannot verify is labelled exactly that."
     },
     {
       "name": "production: the non-custodial model is stated on the page (hero + settlement card)",
@@ -87,12 +87,12 @@
     {
       "name": "inbox: the seller sees exactly ONE offer (the double-click made no duplicate)",
       "ok": true,
-      "detail": "C listed2026-09-26 12:46 UTC operator claim · 0x2c75…5c23\n \n \n CANCEL LISTING · SIGN\n \n \n OFFERS (1)Accept or reject — both are signatures\n 0x19e7…ff2a2.31 ETHPENDING2026-09-26 12:46 UTCACCEPTREJECT\n "
+      "detail": "C listed2026-09-26 14:04 UTC operator claim · 0x2c75…5c23\n \n \n CANCEL LISTING · SIGN\n \n \n OFFERS (1)Accept or reject — both are signatures\n 0x19e7…ff2a2.31 ETHPENDING2026-09-26 14:04 UTCACCEPTREJECT\n "
     },
     {
       "name": "deal: acceptance (signed) opened a persistent deal room",
       "ok": true,
-      "detail": "Deal room · non-custodial settlementOPERATOR LIVE · 2.31 ETH.← LISTING\n \n OPENseller 0x2c75…5c23buyer 0x19e7…ff2a2026-09-26 12:47 UTCYOU ARE THE SELLER\n \n Operator transfer (SyncNet Passport)PENDINGTh"
+      "detail": "Deal room · non-custodial settlementOPERATOR LIVE · 2.31 ETH.← LISTING\n \n OPENseller 0x2c75…5c23buyer 0x19e7…ff2a2026-09-26 14:04 UTCYOU ARE THE SELLER\n \n Operator transfer (SyncNet Passport)PENDINGTh"
     },
     {
       "name": "deal: completion is blocked until every step is done",
