@@ -1,0 +1,406 @@
+{
+  "passed": 80,
+  "failed": 0,
+  "results": [
+    {
+      "name": "marketplace: Phantom Solana-only account shows EVM ACCOUNT REQUIRED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: wording — Robinhood Chain, Solana-only account, switch; never \"unsupported/broken/invalid\" Phantom",
+      "ok": true,
+      "detail": "Robinhood Chain · EVMEVM ACCOUNT REQUIREDSyncNet runs on Robinhood Chain.Your selected Phantom account is Solana-only. Switch to an Ethereum-compatible account and try again.In Phantom, switch accounts and choose one that has an Ethereum address. Robinhood Chain is EVM-compatible.TRY AGAINDISMISS"
+    },
+    {
+      "name": "marketplace: the wallet chooser is closed, so the notice is not underneath it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: TRY AGAIN has focus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: no generic error shown alongside the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: TRY AGAIN reconnects the same wallet and the notice disappears",
+      "ok": true,
+      "detail": "0x2222…2222"
+    },
+    {
+      "name": "marketplace: nothing beyond account/chain reads was requested (no signing, no chain switch)",
+      "ok": true,
+      "detail": "ph:eth_accounts,mm:eth_accounts,ph:eth_requestAccounts,ph:eth_requestAccounts,ph:eth_chainId"
+    },
+    {
+      "name": "marketplace: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: DISMISS closes the notice and returns focus to Connect wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Escape closes the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: no page reload happened",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Phantom \"empty\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "marketplace: Phantom \"empty\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Phantom \"unsupported-4001\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "marketplace: Phantom \"unsupported-4001\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Phantom \"rejected\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "marketplace: Phantom \"rejected\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Phantom \"unauthorized\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "marketplace: Phantom \"unauthorized\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: MetaMask still connects normally",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: a non-Phantom wallet error never shows the Phantom notice (generic path kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: Phantom with an EVM account connects directly (no notice)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "marketplace: wallet disconnect still resets the page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom Solana-only account shows EVM ACCOUNT REQUIRED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: wording — Robinhood Chain, Solana-only account, switch; never \"unsupported/broken/invalid\" Phantom",
+      "ok": true,
+      "detail": "Robinhood Chain · EVMEVM ACCOUNT REQUIREDSyncNet runs on Robinhood Chain.Your selected Phantom account is Solana-only. Switch to an Ethereum-compatible account and try again.In Phantom, switch accounts and choose one that has an Ethereum address. Robinhood Chain is EVM-compatible.TRY AGAINDISMISS"
+    },
+    {
+      "name": "economy: the wallet chooser is closed, so the notice is not underneath it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: TRY AGAIN has focus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: no generic error shown alongside the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: TRY AGAIN reconnects the same wallet and the notice disappears",
+      "ok": true,
+      "detail": "0x2222…2222"
+    },
+    {
+      "name": "economy: nothing beyond account/chain reads was requested (no signing, no chain switch)",
+      "ok": true,
+      "detail": "ph:eth_requestAccounts,ph:eth_requestAccounts"
+    },
+    {
+      "name": "economy: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: DISMISS closes the notice and returns focus to Connect wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Escape closes the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: no page reload happened",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom \"empty\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "economy: Phantom \"empty\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom \"unsupported-4001\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "economy: Phantom \"unsupported-4001\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom \"rejected\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "economy: Phantom \"rejected\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom \"unauthorized\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "economy: Phantom \"unauthorized\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: MetaMask still connects normally",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: a non-Phantom wallet error never shows the Phantom notice (generic path kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: Phantom with an EVM account connects directly (no notice)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: wallet disconnect still resets the page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom Solana-only account shows EVM ACCOUNT REQUIRED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: wording — Robinhood Chain, Solana-only account, switch; never \"unsupported/broken/invalid\" Phantom",
+      "ok": true,
+      "detail": "Robinhood Chain · EVMEVM ACCOUNT REQUIREDSyncNet runs on Robinhood Chain.Your selected Phantom account is Solana-only. Switch to an Ethereum-compatible account and try again.In Phantom, switch accounts and choose one that has an Ethereum address. Robinhood Chain is EVM-compatible.TRY AGAINDISMISS"
+    },
+    {
+      "name": "builder: the wallet chooser is closed, so the notice is not underneath it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: TRY AGAIN has focus",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: no generic error shown alongside the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: TRY AGAIN reconnects the same wallet and the notice disappears",
+      "ok": true,
+      "detail": "0x2222…2222"
+    },
+    {
+      "name": "builder: nothing beyond account/chain reads was requested (no signing, no chain switch)",
+      "ok": true,
+      "detail": "ph:eth_requestAccounts,ph:eth_requestAccounts,ph:eth_chainId"
+    },
+    {
+      "name": "builder: no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: DISMISS closes the notice and returns focus to Connect wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Escape closes the notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: no page reload happened",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom \"empty\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "builder: Phantom \"empty\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom \"unsupported-4001\" → EVM notice",
+      "ok": true,
+      "detail": "notice=true generic=false"
+    },
+    {
+      "name": "builder: Phantom \"unsupported-4001\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom \"rejected\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "builder: Phantom \"rejected\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom \"unauthorized\" → existing generic error, no notice",
+      "ok": true,
+      "detail": "notice=false generic=true"
+    },
+    {
+      "name": "builder: Phantom \"unauthorized\" leaves the wallet disconnected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: MetaMask still connects normally",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: a non-Phantom wallet error never shows the Phantom notice (generic path kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: Phantom with an EVM account connects directly (no notice)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: wallet disconnect still resets the page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: wrong network is reported after connecting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "builder: SWITCH TO ROBINHOOD CHAIN still switches the wallet (wallet_switchEthereumChain 0x1237)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile 320px: notice fits the viewport",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":300,\"top\":246.921875,\"bottom\":653.078125,\"vw\":320,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 320px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":300,\"top\":246.921875,\"bottom\":653.078125,\"vw\":320,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 320px: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    },
+    {
+      "name": "mobile 360px: notice fits the viewport",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":340,\"top\":266.71875,\"bottom\":633.28125,\"vw\":360,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 360px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":340,\"top\":266.71875,\"bottom\":633.28125,\"vw\":360,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 360px: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    },
+    {
+      "name": "mobile 390px: notice fits the viewport",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":370,\"top\":302.515625,\"bottom\":597.484375,\"vw\":390,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 390px: buttons are tappable (≥ 40 px) and nothing covers TRY AGAIN",
+      "ok": true,
+      "detail": "{\"left\":20,\"right\":370,\"top\":302.515625,\"bottom\":597.484375,\"vw\":390,\"vh\":900,\"minH\":44,\"overflow\":0,\"topIsRetry\":true}"
+    },
+    {
+      "name": "mobile 390px: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow 0"
+    }
+  ]
+}

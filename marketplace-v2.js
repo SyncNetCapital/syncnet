@@ -51,8 +51,10 @@ function openWallet(){
  providers.forEach(d=>{const b=document.createElement('button');b.className='provider';b.type='button';b.textContent=d.name;b.addEventListener('click',()=>connectTo(d.provider));host.appendChild(b)});
  $('mpWalletModal').classList.add('open');requestAnimationFrame(()=>(host.querySelector('button')||$('mpCloseWallet'))?.focus());
 }
+// Phantom with a Solana-only account selected cannot expose an EVM account: explained by wallet-evm-notice.js; every other error keeps the generic note.
+const walletInfo=p=>providers.find(x=>x.provider===p)||null;
 async function connectTo(p){
- try{provider=p;bind(p);const accounts=await p.request({method:'eth_requestAccounts'});account=lc(accounts?.[0]||'');chainId=Number(await p.request({method:'eth_chainId'}));note('');closeWalletModal()}catch{provider=null;account='';chainId=null;note('Wallet connection did not complete.','fail')}
+ try{provider=p;bind(p);const accounts=await p.request({method:'eth_requestAccounts'});window.SyncNetEvmNotice?.check(p,walletInfo(p),accounts);account=lc(accounts?.[0]||'');chainId=Number(await p.request({method:'eth_chainId'}));note('');window.SyncNetEvmNotice?.hide();closeWalletModal()}catch(e){provider=null;account='';chainId=null;if(window.SyncNetEvmNotice?.matches(p,walletInfo(p),e)){note('');closeWalletModal();window.SyncNetEvmNotice.show({onRetry:()=>connectTo(p),returnFocus:$('mpConnect')})}else note('Wallet connection did not complete.','fail')}
  renderWallet();rerender();
 }
 function renderWallet(){

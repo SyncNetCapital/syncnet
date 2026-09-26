@@ -23,6 +23,7 @@ const SUITES = [
   ['IPFS display (canonical utility, PONSYNC CID)', 'node', ['tests/regression/rc-ipfs-display.mjs'], /(\d+)\/(\d+) ipfs-display checks passed/],
   ['Marketplace walkthrough (two browsers, full deal)', 'node', ['tests/regression/rc-marketplace.mjs'], /(\d+)\/(\d+) marketplace walkthrough checks passed/],
   ['Marketplace wallet selection (multi-wallet chooser)', 'node', ['tests/regression/rc-wallet-select.mjs'], /(\d+)\/(\d+) wallet-selection checks passed/],
+  ['Phantom EVM-account notice (Solana-only account)', 'node', ['tests/regression/rc-wallet-evm.mjs'], /(\d+)\/(\d+) wallet EVM-account checks passed/],
   ['mobile 320/360/390/430', 'node', ['tests/regression/rc-mobile.mjs'], /(\d+)\/(\d+) mobile checks passed/],
   ['Economy walkthrough (derived membership, recognize/revoke)', 'node', ['tests/regression/rc-economy.mjs'], /(\d+)\/(\d+) economy walkthrough checks passed/],
 ];
