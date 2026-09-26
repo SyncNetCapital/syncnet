@@ -29,6 +29,9 @@
 /api/ipfs-check /.netlify/functions/ipfs-check 200
 /api/marketplace /.netlify/functions/marketplace 200
 /api/economies /.netlify/functions/economies 200
+/api/project-home /.netlify/functions/project-home 200
+/site/* /.netlify/functions/site 200!
+/site-img/* /.netlify/functions/site-img 200!
 /economy /economy.html 200
 /project/* /token.html 200
 /token/* /token.html 200

@@ -1,0 +1,13 @@
+{
+  "schema": "syncnet.project-home.pricing.v1",
+  "notes": [
+    "PROJECT HOME ACTIVATION is priced in USD and paid exclusively in $SYNC at the SYNCNET REFERENCE RATE.",
+    "The reference rate is server-controlled and reviewed in git. It is not an oracle.",
+    "Versions are immutable: never edit a published price or rate entry. Add a new version and point the deployment at it.",
+    "No rate is approved yet: with an empty rates list, payments stay CLOSED (fail closed)."
+  ],
+  "prices": [
+    { "priceVersion": 1, "priceUsdCents": 4900, "product": "PROJECT HOME ACTIVATION (one-time, per token)" }
+  ],
+  "rates": []
+}

@@ -159,6 +159,11 @@ async function handler(event = {}, deps = {}) {
   }
   const secondary = await pinSecondary(cid, `syncnet-${sha256.slice(0, 16)}`, env, doFetch);
   log(FN, 'pinned', { scope: session.scope, subject: hashId(subject), ip: ipHash, cid, type: clean.type, bytesIn: input.length, bytesOut: clean.buffer.length, width: clean.width, height: clean.height, secondary });
+  // Project Home may reference ONLY images that passed this sanitizer (site:img:v1:<cid>). Recording is best effort:
+  // if it fails, the upload still succeeds and the image simply cannot be used on a Project Home (fail closed).
+  try {
+    if (store.durable) await store.set(`site:img:v1:${cid}`, JSON.stringify({ sha256, type: clean.type, width: clean.width, height: clean.height, bytes: clean.buffer.length, at: new Date().toISOString() }));
+  } catch (err) { logError(FN, 'image-allowlist-failed', err, { cid }); }
   return json(200, {
     cid,
     uri: `ipfs://${cid}`,

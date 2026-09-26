@@ -143,7 +143,7 @@
 [functions]
   directory = "netlify/functions"
   # Shared browser/server modules and the canonical registry used by the functions.
-  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "syncnet-projects.json", "syncnet-economies.json"]
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "lib/syncnet-site.js", "lib/syncnet-project-home-pricing.js", "syncnet-projects.json", "syncnet-economies.json", "syncnet-project-home-pricing.json"]
 
 [[redirects]]
   from = "/api/canary-auth"
@@ -202,6 +202,25 @@
 [[redirects]]
   from = "/api/economies"
   to = "/.netlify/functions/economies"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/project-home"
+  to = "/.netlify/functions/project-home"
+  status = 200
+  force = true
+
+# Project Home public renderer and its image route. Both answer 404 unless SYNCNET_PROJECT_HOME_ENABLED=true.
+[[redirects]]
+  from = "/site/*"
+  to = "/.netlify/functions/site"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/site-img/*"
+  to = "/.netlify/functions/site-img"
   status = 200
   force = true
 
