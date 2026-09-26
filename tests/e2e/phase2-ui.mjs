@@ -418,6 +418,57 @@ await suite('P1-1 · impostor of a protected canonical ticker is visibly flagged
   await c.close();
 });
 
+
+// ================================================================= V3 positioning: NET only where it is real (rendered text only)
+await suite('NET visibility · derived from real markets / fee flows, never invented', async () => {
+  fresh({});
+  const loaded = (p) => p.waitForFunction(() => document.querySelector('#projectRows [data-row]'), null, { timeout: 20000 }).then(() => p.waitForTimeout(400));
+  const row = (p, r) => p.innerText(`[data-row="${r}"]`).then((t) => t.replace(/\s+/g, ' ')).catch(() => '');
+  const c = await ctx(); const p = await c.newPage();
+  // $SYNC: its factory markets are NET and USDG → shown as Markets, each linking to that asset's own page
+  await p.goto(BASE + '/project/' + lc(A.SYNC)); await loaded(p);
+  const conn = await row(p, 'connections');
+  check('$SYNC: CONNECTIONS names its real direct markets NET · USDG', /Markets · NET · USDG/.test(conn), conn);
+  check('$SYNC: each market links to that asset (by contract)', (await p.getAttribute('[data-row="connections"] a.pj-asset >> nth=0', 'href')) === '/project/' + lc(A.NET) && (await p.getAttribute('[data-row="connections"] a.pj-asset >> nth=1', 'href')) === '/project/' + lc(A.USDG));
+  const eco = await row(p, 'economy');
+  check('$SYNC (fixture fee mode: creator wallet): ECONOMY states the fee flow and claims NO NET rewards', /Creator fees · to a wallet/.test(eco) && !/NET/.test(eco), eco);
+  check('NET never appears in the sync state', !/NET/.test(await p.innerText('#pjSub')));
+  // SYNCAT: fees to the PAR holder vault, markets CASHCAT + SYNC → holder rewards in exactly those assets, no NET
+  await p.goto(BASE + '/project/' + lc(A.SYNCAT)); await loaded(p);
+  const eco2 = await row(p, 'economy');
+  check('holder-vault project: rewards listed in its real traded assets + itself, with the mechanism and "not guaranteed"', /Holder rewards · CASHCAT · SYNC · \$SYNCAT/.test(eco2) && /PAR’s distributor/.test(eco2) && /Not guaranteed/.test(eco2), eco2);
+  check('project without any NET relationship: no NET anywhere on the page', !/\bNET\b/.test(await p.innerText('main')));
+  await p.goto(BASE + '/project/' + lc(A.CREATORLIVE)); await loaded(p);
+  check('another project without NET: no invented NET', !/\bNET\b/.test(await p.innerText('main')) && /Markets · CASHCAT/.test(await row(p, 'connections')));
+  // Pons V2: truthful origin, its single pair shown, no PAR fee-flow claims
+  await p.goto(BASE + '/project/' + lc(A.PONS2)); await loaded(p);
+  check('Pons V2: origin stays "Pons V2 launch"; its pair is its market; no PAR holder-reward claim', /Pons V2 launch/.test(await p.innerText('#pjSub')) && /Markets · USDG/.test(await row(p, 'connections')) && !/Holder rewards|PAR’s holder vault/.test(await p.innerText('main')));
+  await c.close();
+  // Independent dimensions: Synced + For sale + NET markets at the same time, none overwriting another
+  const d = await ctx(); const q = await d.newPage();
+  await q.route('**/api/marketplace?view=passport&token=*', (r) => r.fulfill({ json: { enabled: true, passport: { operator: lc(A.WALLET2), operatorSince: '2026-09-01T00:00:00Z', history: [] }, listing: { id: '0x' + 'cd'.repeat(32), status: 'ACTIVE', price: '2', currency: 'ETH' } } }));
+  await q.goto(BASE + '/project/' + lc(A.SYNC)); await loaded(q);
+  check('Synced (CONTROL) + For sale (MARKET) + NET (CONNECTIONS) coexist independently', /Synced/.test(await row(q, 'control')) && /For sale/.test(await row(q, 'market')) && /Markets · NET · USDG/.test(await row(q, 'connections')) && !/NET/.test(await row(q, 'control')) && !/NET/.test(await row(q, 'market')));
+  await d.close();
+  // Homepage: one factual line about $SYNC, never "every project uses NET"
+  const h = await ctx(); const hp = await h.newPage();
+  await hp.goto(BASE + '/'); await hp.waitForSelector('#exploreList .sn-row', { timeout: 20000 });
+  const line = (await hp.innerText('#exploreContext')).trim();
+  check('homepage: exactly one factual NET/USDG line, about $SYNC only', line === '$SYNC, the network asset, has direct markets with NET and USDG.' && (await hp.$$eval('.sn-intro p', (ps) => ps.filter((x) => /\bNET\b/.test(x.innerText)).length)) === 1, line);
+  check('homepage: no promotional / universal NET claim', !/powered by|built for|every project|all projects|NET ecosystem/i.test(await hp.innerText('main')));
+  check('Explore rows: no NET column or reward claim added', !/NET|Earns/i.test(await hp.innerText('.sn-list-head')) && !/earns? NET/i.test(await hp.innerText('#exploreList')));
+  check('homepage: first viewport still holds headline, search, filters and the first row', await hp.evaluate(() => document.querySelector('#exploreList .sn-row').getBoundingClientRect().bottom < innerHeight));
+  await h.close();
+  // Mobile 375: $SYNC page stays clean; Explore rows keep identity + sync state primary (no extra line per row)
+  const m = await ctx({ width: 375, height: 740 }); const mp = await m.newPage();
+  await mp.goto(BASE + '/project/' + lc(A.SYNC)); await loaded(mp);
+  check('375px $SYNC: markets visible, no horizontal overflow', await mp.locator('[data-row="connections"] a.pj-asset').first().isVisible() && (await mp.evaluate(() => document.documentElement.scrollWidth - innerWidth)) <= 1);
+  await mp.goto(BASE + '/'); await mp.waitForSelector('#exploreList .sn-row', { timeout: 20000 });
+  check('375px Explore: at most two secondary lines per row (unchanged)', await mp.$$eval('#exploreList .sn-row', (rs) => rs.every((r) => r.querySelectorAll('.sn-m-only').length <= 2)));
+  await shot(mp, 'net-explore-375');
+  await m.close();
+});
+
 await browser.close(); srv.close();
 console.log(`\n${results.length - results.filter((r) => !r.ok).length}/${results.length} phase 2 UI checks passed`);
 process.exit(failures ? 1 : 0);

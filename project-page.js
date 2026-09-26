@@ -130,28 +130,47 @@
     return '';
   }
 
+  /** The project's DIRECT markets as read from its factory record (never inferred): quote-asset labels, each linking to
+   *  that asset's own Project Page. A quote that imitates a protected canonical ticker is marked, never passed off. */
+  function marketLabels() {
+    return (Array.isArray(P.markets) ? P.markets : []).map((m) => `<a class="pj-asset" href="/project/${esc(m.address)}">${esc(m.symbol)}</a>${m.notCanonical ? ' <span class="sn-flag">not canonical</span>' : ''}`);
+  }
   function connectionsRow() {
     const n = P.directMarkets || 0, u = P.usedBy || 0;
     if (!n && !u) return '';
-    const parts = [];
-    if (n) parts.push(`<span class="sn-num">${n}</span> direct market${n === 1 ? '' : 's'}`);
-    if (u) parts.push(`used by <span class="sn-num">${u}</span> project${u === 1 ? '' : 's'}`);
-    const hub = u >= HUB ? '<small>Network hub</small>' : '';
+    const named = marketLabels();
+    let value = named.length ? `Markets · ${named.join('<span class="sep" aria-hidden="true"> · </span>')}` : n ? `<span class="sn-num">${n}</span> direct market${n === 1 ? '' : 's'}` : '';
+    const used = u ? `Used by <span class="sn-num">${u}</span> project${u === 1 ? '' : 's'}${u >= HUB ? ' · Network hub' : ''}` : '';
+    if (!value) { value = used; }
+    const small = value === used ? '' : used ? `<small>${used}</small>` : '';
     const links = [];
     // Never offer "connect to $TICKER" on a contract that only imitates a protected ticker.
     if (P.origin === 'PAR' && !P.impostorOf) links.push(`<a href="/build.html?with=${esc(P.token)}">Create a project connected to $${esc(P.symbol)} →</a>`);
-    if (u && !economyRow()) links.push(`<a href="/economy.html?root=${esc(P.token)}">Economy view →</a>`); // derived membership, even before curation
-    const note = links.join('<span class="sep" aria-hidden="true"> · </span>');
-    return rowHtml('connections', 'Connections', parts.join(' · ').replace(/^./, (c) => c.toUpperCase()) + hub, `<a href="/network.html?token=${esc(P.token)}">View network →</a>`, note);
+    return rowHtml('connections', 'Connections', value + small, `<a href="/network.html?token=${esc(P.token)}">View network →</a>`, links.join(''));
   }
 
+  /** Where the project's creator fees go, from the LIVE factory record (PAR only), plus curated-economy facts. */
+  function feeFlow() {
+    const assets = (Array.isArray(P.markets) ? P.markets : []).filter((m) => !m.notCanonical).map((m) => esc(m.symbol));
+    switch (P.feeMode) {
+      case 'holders': return { value: `Holder rewards · ${[...assets, '$' + esc(P.symbol)].join(' · ')}`, note: 'Creator fees go to PAR’s holder vault. PAR’s distributor pays holders in the traded assets, in rounds. Not guaranteed.' };
+      case 'burn': return { value: 'Creator fees · buyback &amp; burn', note: 'Sent to PAR’s burn vault. Buyback rounds are run by PAR.' };
+      case 'floor': return { value: 'Creator fees · price floor', note: 'Sent to PAR’s floor vault.' };
+      case 'creator': return { value: 'Creator fees · to a wallet', note: `Recipient <span class="sn-mono">${esc(short(P.feeRecipient))}</span>` };
+      default: return null;
+    }
+  }
   function economyRow() {
     const e = S.economy;
     const n = e && e.recognized ? e.recognized.length : 0;
-    // Meaningful when projects are recognised, or when this operator (the curator) has connected projects to curate.
-    if (!e || !(n || (role() === 'operator' && (P.usedBy || 0) > 0))) return '';
-    const who = e.curator && e.curator.address ? `Curated by <span class="sn-mono">${esc(short(e.curator.address))}</span>` : 'No curator yet';
-    return rowHtml('economy', 'Economy', `<span class="sn-num">${n}</span> recognised project${n === 1 ? '' : 's'}<small>${who}</small>`, `<a href="/economy.html?root=${esc(P.token)}">View economy →</a>`);
+    // Curation is meaningful when projects are recognised, or when this operator (the curator) has projects to curate.
+    const curated = Boolean(e && (n || (role() === 'operator' && (P.usedBy || 0) > 0)));
+    const fee = feeFlow();
+    if (!fee && !curated) return '';
+    const who = curated ? `<span class="sn-num">${n}</span> recognised project${n === 1 ? '' : 's'} · ${e.curator && e.curator.address ? `curated by <span class="sn-mono">${esc(short(e.curator.address))}</span>` : 'no curator yet'}` : '';
+    const value = fee ? fee.value + `<small>${fee.note}</small>` + (who ? `<small>${who}</small>` : '') : who;
+    const act = curated || (P.usedBy || 0) > 0 ? `<a href="/economy.html?root=${esc(P.token)}">View economy →</a>` : '';
+    return rowHtml('economy', 'Economy', value, act);
   }
 
   function render() {
