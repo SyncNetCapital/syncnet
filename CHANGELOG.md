@@ -7,6 +7,10 @@
   A token without `launchFactory()` (revert) is not V1; any other read failure throws (fail closed).
 - V1 stays UNSUPPORTED: no Passport claim, listing, fee transfer, trading or settlement. The Project Page badge says
   "PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN" for LEGACY launches.
+- Pre-PR clarity fixes (copy only): the Pons V1 message no longer implies future support ("PONS V1 DETECTED · This
+  earlier Pons launch generation is not supported by the Marketplace."); a Pons V1 Project Page explains that the
+  launch is recognised but unsupported instead of repeating "could not verify this contract as a PAR launch"; the
+  Marketplace hero says Passports are for projects from a *supported* launchpad (was: "launched across Robinhood Chain").
 - Tests: 46 new server checks (V1-1 … V1-10, including the real PONS answers), 5 new walkthrough checks, and
   `tests/live/pons-step3-live.mjs` (real network, not in `run-all`): live Pons V2 bytecode == Blockscout-verified
   bytecode; TEST → PONS_V2 bonding curve / native ETH; PONSI → PONS_V2 graduated / native ETH; WETH → unsupported;

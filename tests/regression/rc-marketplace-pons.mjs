@@ -61,9 +61,9 @@ await S.page.goto(BASE + '/marketplace.html'); await S.page.waitForTimeout(800);
   let st = await checkToken(S.page, A.USDG);
   check('3 random ERC-20 → UNSUPPORTED PROJECT', /UNSUPPORTED PROJECT/.test(st), st);
   st = await checkToken(S.page, A.PONS1);
-  check('Pons V1 → PONS V1 DETECTED · not enabled yet', /PONS V1 DETECTED/.test(st), st);
+  check('Pons V1 → PONS V1 DETECTED · not supported (no "yet")', /PONS V1 DETECTED/.test(st) && /not supported by the Marketplace/.test(st) && !/\byet\b/.test(st), st);
   st = await checkToken(S.page, A.PONS1_LEGACY);
-  check('Pons V1 (LEGACY factory) → PONS V1 DETECTED · not enabled yet, no claim step', /PONS V1 DETECTED/.test(st) && !/Evidence found/.test(st), st);
+  check('Pons V1 (LEGACY factory) → PONS V1 DETECTED · not supported, no claim step', /PONS V1 DETECTED/.test(st) && !/Evidence found/.test(st), st);
   st = await checkToken(S.page, A.CREATORLIVE);
   const parFacts = await text(S.page, '#mpClaimFacts');
   check('1 PAR project → DETECTED PAR, facts unchanged', /PAR · ON-CHAIN VERIFIED/.test(parFacts) && /EXISTS · multi factory/.test(parFacts) && /Evidence found/.test(st), parFacts.slice(0, 200));
@@ -172,7 +172,8 @@ let LISTING_ID = '';
   for (const [tok, re, name] of [[A.PONS1, /PONS V1 LAUNCH · FACTORY RECORD ON-CHAIN/, 'ACTIVE'], [A.PONS1_LEGACY, /PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN/, 'LEGACY']]) {
     await P.page.goto(BASE + '/project/' + lc(tok)); await P.page.waitForTimeout(2500);
     const v1card = await text(P.page, '#tokenCard');
-    check(`Project Page: Pons V1 (${name}) recognised truthfully, not "not a PAR launch"`, re.test(v1card) && !/NOT VERIFIED AS A PAR LAUNCH/.test(v1card), v1card.slice(0, 300));
+    check(`Project Page: Pons V1 (${name}) recognised truthfully, not "not a PAR launch"`, re.test(v1card) && !/NOT VERIFIED AS A PAR LAUNCH/.test(v1card) && !/could not verify this contract as a PAR launch/.test(v1card), v1card.slice(0, 300));
+    check(`Project Page: Pons V1 (${name}) explains it is recognised but not supported (no Passport / listing)`, /earlier-generation Pons launch/.test(v1card) && /does not support this launch generation/.test(v1card) && (name === 'LEGACY') === /legacy Pons V1 factory/.test(v1card), v1card.slice(0, 400));
     check(`Project Page: Pons V1 (${name}) offers no Passport / listing / PAR builder action`, !/SYNCNET OPERATOR VERIFIED/.test(v1card) && !(await P.page.$('#tokenCard a[href^="/marketplace.html#listing="]')) && !(await P.page.$('#tokenCard a[href^="/build.html?with="]')), v1card.slice(0, 300));
   }
   await P.c.close();

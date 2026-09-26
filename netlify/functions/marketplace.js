@@ -115,7 +115,7 @@ async function liveProject(rpc, token) {
 }
 const NOT_SUPPORTED = 'This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.';
 function unsupportedAnswer(live) {
-  if (live.unsupported && live.unsupported.origin === 'PONS_V1') return publicError(422, 'unsupported_origin', 'PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.');
+  if (live.unsupported && live.unsupported.origin === 'PONS_V1') return publicError(422, 'unsupported_origin', 'PONS V1 DETECTED · This earlier Pons launch generation is not supported by the Marketplace.');
   return publicError(422, 'not_par', NOT_SUPPORTED);
 }
 /** Origin facts for records written before multi-origin support (always verified PAR launches). */

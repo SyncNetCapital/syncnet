@@ -336,7 +336,7 @@ async function checkProject(){
  sellStatus('Reading the canonical launchpad factories (PAR, Pons V2) on Robinhood Chain…');
  // Origin is DETECTED from live factory reads — the user never chooses it and the server re-verifies everything.
  let launch=null;try{launch=await Origins.resolveProject(rpc,token)}catch{sellStatus('Robinhood Chain could not be read right now. Try again.','fail');return}
- if(launch&&launch.origin==='PONS_V1'){sellStatus('PONS V1 DETECTED · Marketplace support for this launch generation is not enabled yet.','fail');return}
+ if(launch&&launch.origin==='PONS_V1'){sellStatus('PONS V1 DETECTED · This earlier Pons launch generation is not supported by the Marketplace.','fail');return}
  if(!launch){sellStatus('UNSUPPORTED PROJECT · this address is not a PAR or Pons V2 launch, so it cannot be claimed or listed.','fail');return}
  let passport=null;try{passport=(await api({view:'passport',token})).passport}catch{}
  const feeRight=await Origins.classifyFeeRight(rpc,launch);

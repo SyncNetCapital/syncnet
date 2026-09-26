@@ -146,7 +146,7 @@ resetChain();
   r = await claim(USDG, SELLER, 'deployer', { launchpad: 'PONS_V2', origin: { launchpad: 'PONS_V2' }, factory: PONS_FACTORY });
   check('3/4 a random ERC-20 with client-supplied launchpad=PONS_V2 is still refused', r.statusCode === 422 && /not a PAR launch/.test(J(r).error), r.body);
   r = await claim(PONS1, SELLER, 'deployer');
-  check('Pons V1 claim → "PONS V1 DETECTED · not enabled yet", not "unsupported/scam"', r.statusCode === 422 && J(r).code === 'unsupported_origin' && /PONS V1 DETECTED/.test(J(r).error), r.body);
+  check('Pons V1 claim → "PONS V1 DETECTED · … not supported", no roadmap promise, not "unsupported/scam"', r.statusCode === 422 && J(r).code === 'unsupported_origin' && /PONS V1 DETECTED/.test(J(r).error) && /not supported by the Marketplace/.test(J(r).error) && !/\byet\b/.test(J(r).error), r.body);
   r = await claim(PONS_CONTRACT, SELLER, 'deployer');
   check('8 Pons project with a contract fee recipient can still be claimed by its deployer', r.statusCode === 200, r.body);
   r = await claim(PONS_PENDING, SELLER, 'deployer');
