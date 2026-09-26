@@ -77,7 +77,12 @@ check('expiresAt <= effectiveAt → invalid', throwsCode(() => P.loadTable({ ...
 check('unknown schema → invalid', throwsCode(() => P.loadTable({ ...good, schema: 'x' }), 'config_invalid'));
 const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-pricing.json'), 'utf8'));
 check('repo pricing file: price v1 = 3900 cents ($39 USD) — the initial launch price', P.loadTable(repo).prices.get(1).priceUsdCents === 3900 && P.loadTable(repo).prices.size === 1);
-check('repo pricing file ships NO approved rate (payments closed until one is reviewed in)', P.loadTable(repo).rates.size === 0);
+// V3 canary: exactly ONE reviewed SYNCNET REFERENCE RATE (v1), short-lived (≤ 6 h), never an oracle claim.
+const repoRate = P.loadTable(repo).rates.get(1);
+check('repo pricing file: exactly one reviewed rate — v1 = 0.0000457 USD/SYNC (canary SYNCNET REFERENCE RATE)', P.loadTable(repo).rates.size === 1 && repo.rates[0].syncUsd === '0.0000457' && repoRate.rateUsdE18 === (457n * 10n ** 11n).toString());
+check('repo rate v1 window: 2026-09-26T20:15Z → 2026-09-27T02:15Z (6 h, the 30-min quote lock is separate)', repoRate.rateEffectiveAt === '2026-09-26T20:15:00.000Z' && repoRate.rateExpiresAt === '2026-09-27T02:15:00.000Z' && Date.parse(repoRate.rateExpiresAt) - Date.parse(repoRate.rateEffectiveAt) === 6 * 3600e3);
+check('repo rate source is labelled SYNCNET REFERENCE RATE and never claims to be an oracle', /SYNCNET REFERENCE RATE/.test(repo.rates[0].source) && !/oracle/i.test(repo.rates[0].source.replace(/not an oracle/gi, '')));
+check('$39 at rate v1 = 853,391.684901531728665208 SYNC (rounded UP, never undercharges)', BigInt(P.baseSyncWei(3900, repoRate.rateUsdE18)) === 853391684901531728665208n);
 check('repo pricing file has no fixed-SYNC price anywhere', !/1,?000,?000|syncAmount|priceSync/i.test(JSON.stringify(repo.prices)));
 
 // ---------------------------------------------------------------- rollout gate (fail closed)
@@ -92,7 +97,14 @@ const gate = (env, extra = {}) => projectHomeConfig({ env, store: durable, file:
 check('fully configured → site and payments open', gate(ENV).siteEnabled && gate(ENV).paymentsEnabled);
 check('sink not in the reviewed deployments → payments closed (site unaffected)', gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).siteEnabled && !gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).paymentsEnabled && gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).sink === null);
 check('empty environment → everything closed', !projectHomeConfig({ env: {}, store: durable }).siteEnabled && !projectHomeConfig({ env: {}, store: durable }).paymentsEnabled);
-check('repo defaults (real pricing file, env set) → payments closed: no approved rate', !projectHomeConfig({ env: ENV, store: durable, now: () => T }).paymentsEnabled);
+check('repo defaults (real pricing file, env set) before rate v1 is effective → payments closed', !projectHomeConfig({ env: ENV, store: durable, now: () => T }).paymentsEnabled);
+// The real canary configuration: repo pricing file + repo reviewed deployment + the canary sink.
+const CANARY_ENV = { ...ENV, PROJECT_HOME_SINK_ADDRESS: '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' };
+const canary = (iso, env = CANARY_ENV) => projectHomeConfig({ env, store: durable, now: () => Date.parse(iso) });
+check('canary config inside the rate v1 window → payments open, sink = reviewed canary sink, rate v1', canary('2026-09-26T21:00:00Z').paymentsEnabled && canary('2026-09-26T21:00:00Z').sink === '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' && String(canary('2026-09-26T21:00:00Z').rate.rateVersion) === '1');
+check('canary config 1 s before rate v1 effectiveAt → payments closed', !canary('2026-09-26T20:14:59Z').paymentsEnabled);
+check('canary config at rate v1 expiresAt → payments closed (expired rate never charges)', !canary('2026-09-27T02:15:00Z').paymentsEnabled);
+check('canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed', !canary('2026-09-26T21:00:00Z', { ...CANARY_ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: undefined }).paymentsEnabled);
 check('no durable store → closed', !projectHomeConfig({ env: ENV, store: { durable: false }, file: good, now: () => T }).siteEnabled);
 for (const k of Object.keys(ENV)) { const e = { ...ENV }; delete e[k]; check('missing ' + k + ' → payments closed', !gate(e).paymentsEnabled); }
 check('SYNCNET_PROJECT_HOME_ENABLED=TRUE-ish values other than "true" stay closed', !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: '1' }).siteEnabled && !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: 'yes' }).siteEnabled);

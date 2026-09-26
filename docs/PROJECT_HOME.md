@@ -86,7 +86,7 @@ This gives the following properties:
   re-approval instead of silently charging a stale rate.
 - On the first use of a version the server stores an immutable snapshot (`site:rate:v1:<v>`, `site:price:v1:<v>`). If
   the same version number later appears with different values, intent creation **fails closed** (`config_conflict`).
-- The file ships with **no rate**, so payments stay closed until a rate is reviewed in.
+- A missing or expired rate keeps payments closed. The V3 canary ships exactly one short-lived rate (v1, §16).
 - To replace the provider later (for example with a real oracle), implement the same `{rateVersion,
   syncUsdReferenceRate, rateUsdE18, rateEffectiveAt}` shape. The sink, the entitlement records, the activation registry
   and the site architecture do not change, because every intent and activation already records the exact rate and
@@ -532,4 +532,35 @@ initcode plus the exact constructor arguments; the reviewed validator passes (im
 every immutable word, every getter: converter SYNC/USDG/ROUTER/MARKET=1/TREASURY, sink SYNC/BURN_PERCENT=60/
 TREASURY_CONVERTER). Recorded in `syncnet-project-home-deployment.json`. Blockscout source verification could not be
 submitted from the CI environment (Cloudflare challenge); run `forge verify-contract --verifier blockscout` from an
-operator machine. Payments stay CLOSED: no reference rate, no payment flag, no sink env on any deployment.
+operator machine. Payments stay CLOSED on every deployment until the preview-only configuration of §16 is set.
+
+## 16. First SYNCNET REFERENCE RATE (v1) and the preview-only canary configuration
+
+**Rate v1 = 0.0000457 USD per SYNC** (≈ 21,881.84 SYNC per USD). Valid 2026-09-26T20:15:00Z → 2026-09-27T02:15:00Z
+(6 h). The 30-minute quote lock is unchanged. This is a canary SYNCNET REFERENCE RATE, not an oracle.
+
+Derivation (read-only, bounded): the canonical PAR SYNC/USDG market 1 (PoolManager `0x8366…0951`, pool
+`0xeaff358a…13792`, dynamic fee 2.098%) at block 73363740 (2026-09-26T20:19:11Z). Mid from `sqrtPriceX96`
+= 0.00004572 USD/SYNC. A simulated 1,000-SYNC sale executes at 0.000044761 USDG/SYNC, which is the mid less the fee. The last
+swaps printed 4.52e-5–4.57e-5 over ~1.5 h and 4.90e-5 ~5 h earlier (−7%). Depth: an 800k-SYNC sale adds ~0.6% price
+impact. Activity is thin (14 swaps in ~5.5 h). The mid is rounded **down** to 0.0000457 so SyncNet charges slightly more
+SYNC, never less.
+
+$39 at v1 = base **853,391.684901531728665208 SYNC** (rounded up). Each quote adds a random tag of less than 2×10⁻⁶ SYNC.
+
+Rules: re-check the live mid immediately before the canary payment. If it moved more than 3%, or the rate has expired, add
+rate v2 (never edit v1) and redeploy the preview. An expired rate closes payments automatically.
+
+Preview-only configuration (Netlify UI → Environment variables → scope to **Deploy Previews / branch deploys of
+`feature/syncnet-project-home` only**; production values stay unset; `netlify.toml` is not used for these):
+
+| Variable | Value |
+|---|---|
+| `SYNCNET_PROJECT_HOME_ENABLED` | `true` |
+| `SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED` | `true` |
+| `PROJECT_HOME_PRICE_VERSION` | `1` |
+| `PROJECT_HOME_PRICE_USD_CENTS` | `3900` |
+| `PROJECT_HOME_RATE_VERSION` | `1` |
+| `PROJECT_HOME_SINK_ADDRESS` | `0xc32fb194a0a2bc5fa313febd2de5096ca467213d` |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | a durable store (preferably a preview-only database) |
+

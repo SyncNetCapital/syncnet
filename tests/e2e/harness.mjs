@@ -464,7 +464,7 @@ const BASE_ENV = {
 const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
   'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
 /** Project Home test fixtures: a sink that is never deployed and a TEST reference rate added in memory only (the
- *  reviewed repo file itself ships with no rate). */
+ *  reviewed repo file's own short-lived canary rate would expire during long-lived test runs). */
 export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
 export const PH_TEST_RATE = Object.freeze({ rateVersion: 900, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z', source: 'E2E TEST FIXTURE — never deployed' });
 const PRICING = require(path.join(ROOT, 'syncnet-project-home-pricing.json'));

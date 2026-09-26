@@ -279,7 +279,15 @@ _price=_je.loads((root/'syncnet-project-home-pricing.json').read_text())
 assert "name: 'SyncNet Website'" in _site_lib and "name: 'SyncNet Marketplace'" not in _site_lib and "name: 'SyncNet Economies'" not in _site_lib
 assert "truthy(env.SYNCNET_PROJECT_HOME_ENABLED)" in _phcfg and "truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED)" in _phcfg  # exact "true" only
 assert 'siteEnabled && paymentsRequested && Boolean(price && rate && sink)' in _phcfg
-assert _price['rates']==[] and [p['priceUsdCents'] for p in _price['prices']]==[3900]  # $39 USD; no rate approved yet
+assert [p['priceUsdCents'] for p in _price['prices']]==[3900]  # $39 USD
+# Reference rates: short-lived reviewed versions only. The first (V3 canary) is pinned exactly; every version must be a
+# plain decimal, carry a source, and be valid for at most 6 hours (a stale rate can never be left open).
+import datetime as _dt
+_iso=lambda v:_dt.datetime.strptime(v,'%Y-%m-%dT%H:%M:%SZ')
+assert [r['rateVersion'] for r in _price['rates']]==[1] and _price['rates'][0]['syncUsd']=='0.0000457'
+for _r in _price['rates']:
+    assert _r['source'] and 'oracle' not in _r['source'].lower().replace('not an oracle','')
+    assert 0 < (_iso(_r['expiresAt'])-_iso(_r['effectiveAt'])).total_seconds() <= 6*3600
 assert '/api/project-home /.netlify/functions/project-home 200' in red and '/site/:token /.netlify/functions/site?token=:token 200!' in red and '/site-img/:cid /.netlify/functions/site-img?cid=:cid 200!' in red
 assert '/contracts/* /404.html 404!' in red and 'from = "/contracts/*"' in toml
 assert 'lib/syncnet-site.js' in toml and 'lib/syncnet-project-home-pricing.js' in toml and 'syncnet-project-home-pricing.json' in toml

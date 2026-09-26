@@ -1,5 +1,13 @@
 # Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
 
+## Project Home V3 canary: first SYNCNET REFERENCE RATE (v1): 26 Sep 2026
+
+- `syncnet-project-home-pricing.json`: rate **v1 = 0.0000457 USD/SYNC**, effective 2026-09-26T20:15Z, expires
+  2026-09-27T02:15Z (6 h), derived read-only from the canonical PAR SYNC/USDG market 1 at block 73363740. This is not
+  an oracle. $39 = 853,391.684901531728665208 SYNC base. The price, the 30-minute lock and the contracts are unchanged.
+- Payments remain closed everywhere unless the preview-only environment (docs/PROJECT_HOME.md §16) is set. Production
+  is untouched.
+
 Unreleased branch: nothing was ever deployed or enabled, so no production price, intent or entitlement changes.
 
 - **Price:** the initial launch price is **$39 USD** (`priceVersion 1` = 3900 cents; previously drafted at $49 and never

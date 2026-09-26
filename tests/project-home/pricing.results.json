@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-26T20:01:27.003Z",
-  "passed": 82,
+  "at": "2026-09-26T20:23:11.896Z",
+  "passed": 89,
   "failed": 0,
   "results": [
     {
@@ -294,7 +294,22 @@
       "detail": ""
     },
     {
-      "name": "repo pricing file ships NO approved rate (payments closed until one is reviewed in)",
+      "name": "repo pricing file: exactly one reviewed rate — v1 = 0.0000457 USD/SYNC (canary SYNCNET REFERENCE RATE)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo rate v1 window: 2026-09-26T20:15Z → 2026-09-27T02:15Z (6 h, the 30-min quote lock is separate)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo rate source is labelled SYNCNET REFERENCE RATE and never claims to be an oracle",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$39 at rate v1 = 853,391.684901531728665208 SYNC (rounded UP, never undercharges)",
       "ok": true,
       "detail": ""
     },
@@ -319,7 +334,27 @@
       "detail": ""
     },
     {
-      "name": "repo defaults (real pricing file, env set) → payments closed: no approved rate",
+      "name": "repo defaults (real pricing file, env set) before rate v1 is effective → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canary config inside the rate v1 window → payments open, sink = reviewed canary sink, rate v1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canary config 1 s before rate v1 effectiveAt → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canary config at rate v1 expiresAt → payments closed (expired rate never charges)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed",
       "ok": true,
       "detail": ""
     },
