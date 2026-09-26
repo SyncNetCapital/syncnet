@@ -50,7 +50,7 @@ function normalize(draft){
  const description=field('description',draft.description,'Description',{multiline:true});
  if(!TAX_OPTIONS.includes(Number(draft.tax)))throw Error('Invalid creator tax.');
  const raw=Array.isArray(draft.quotes)?draft.quotes:[];
- if(raw.length<1||raw.length>5)throw Error('Choose between 1 and 5 assets to sync with.');
+ if(raw.length<1||raw.length>5)throw Error('Choose between 1 and 5 assets to connect to.');
  const seen=new Set(),quotes=[];
  for(const q of raw){const a=String(q.address||'').trim();if(!address.test(a)||/^0x0{40}$/i.test(a))throw Error('One selected asset has an invalid contract address.');const k=a.toLowerCase();if(seen.has(k))throw Error('Each synced asset can only be selected once.');seen.add(k);if(equal(k,R.weth))throw Error('WETH cannot be a PAR market asset (PAR uses native ETH for that).');quotes.push({address:a,symbol:Core.sanitizeForDisplay(String(q.symbol||'TOKEN'),{maxLength:16}).toUpperCase()||'TOKEN',intent:Core.sanitizeForDisplay(String(q.intent||''),{maxLength:160})});}
  const feeMode=String(draft.feeMode||'');

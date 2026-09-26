@@ -72,7 +72,7 @@ Chain: Robinhood Chain (chain id 4663), launched through PAR${f.token?`\nToken c
 One-line idea: ${f.tagline||'(not provided — ask me for one before writing)'}
 Description:
 ${f.description||'(not provided — ask me for it before writing)'}
-Synced with (direct markets opened by the PAR launch):
+Connected to (direct markets opened by the PAR launch):
 ${connectionLines(f)}
 Links:
 ${linkLines(f)}${f.logo?`\nProject image: ${f.logo}`:''}`}
@@ -85,7 +85,7 @@ ${brief(f)}
 DESIGN
 - Tone: ${f.tone}. Language: ${f.lang}.
 - Dark, clean and legible: near-black background, off-white text, accent colour ${f.accent}. Body text at least 16px, no text under 12px, strong contrast.
-- Sections: hero (name, $${f.symbol}, one-line idea${f.logo?', project image':''}), About, "Synced with" (one card per connection, each saying "Direct market: ${f.symbol} / TOKEN" plus the reason), Links, and a risk footer.
+- Sections: hero (name, $${f.symbol}, one-line idea${f.logo?', project image':''}), About, "Connected to" (one card per connection, each saying "Direct market: ${f.symbol} / TOKEN" plus the reason), Links, and a risk footer.
 - Mobile-first, no horizontal scrolling at 360px width, buttons at least 44px tall, visible keyboard focus, meaningful alt text.
 - Fast: no frameworks, no web fonts from other domains, images compressed.
 

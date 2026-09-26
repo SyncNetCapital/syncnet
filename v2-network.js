@@ -345,7 +345,7 @@ async function loadTopology(address,opts={}){
     const bottom=childUnique.length?childUnique.map(c=>node(c,'child')).join(''):'<div class="topology-empty">No projects using this contract as a market were found in the currently indexed PAR history.</div>';
     if($('topologyGraph')) $('topologyGraph').innerHTML=`
       <div class="topology-tree">
-        <div class="topology-label">THIS TOKEN IS SYNCED WITH</div>
+        <div class="topology-label">THIS TOKEN IS CONNECTED TO</div>
         <div class="topology-row">${top}</div>
         <div class="topology-line"><span>MARKET</span></div>
         <a class="topology-root" href="/project/${esc(address)}"><strong>${esc(rootLabel)}</strong><span>${esc(short(address))}</span>${provenanceMarkup(rootMeta)}</a>
@@ -485,7 +485,7 @@ async function searchTokensInner(raw,seq){
 // Images: window.SyncNetIpfs is the one canonical renderer (Pinata → ipfs.io → dweb.link → placeholder).
 function card(d){
   const token=tokenAddr(d),sym=tokenSym(d),name=safeName(d.name||d.tokenName)||sym||'Token',logoHtml=window.SyncNetIpfs.imgHtml(d.logoUrl||d.logo,{letter:(sym||'S').charAt(0)}),ms=markets(d);
-  return `<article class="network-card"><div class="network-card-top"><div class="network-card-logo">${logoHtml||'SYNC'}</div><div><h3>${esc(name)}</h3><div class="ticker">$${esc(sym)}</div></div></div><div class="chip-row">${ms.map(m=>`<span class="chip">${esc(sym)} / ${esc(pairSym(m)||'TOKEN')}</span>`).join('')}</div><p>Observable market connection on PAR. No affiliation is implied.</p><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(token)}">MAP</a><a class="btn" href="/build.html?with=${esc(token)}">SYNC WITH IT</a></div></article>`;
+  return `<article class="network-card"><div class="network-card-top"><div class="network-card-logo">${logoHtml||'SYNC'}</div><div><h3>${esc(name)}</h3><div class="ticker">$${esc(sym)}</div></div></div><div class="chip-row">${ms.map(m=>`<span class="chip">${esc(sym)} / ${esc(pairSym(m)||'TOKEN')}</span>`).join('')}</div><p>Observable market connection on PAR. No affiliation is implied.</p><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(token)}">MAP</a><a class="btn" href="/build.html?with=${esc(token)}">CREATE WITH IT</a></div></article>`;
 }
 async function loadRecentSync(){
   const grid=$('networkGrid');if(!grid)return;
