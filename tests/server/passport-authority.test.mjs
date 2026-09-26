@@ -31,7 +31,7 @@ const rnd = () => '0x' + [...crypto.getRandomValues(new Uint8Array(32))].map((b)
 const exp = (s) => Math.floor(Date.now() / 1000) + s;
 const sg = (k, m, a) => signDigest(a, Market.digest(k, m));
 const W = lc(A.WALLET), W2 = lc(A.WALLET2), X = lc(A.ATTACKER), OWNER = lc(A.SAFE_OWNER);
-const claim = (token, operator, basis) => { const m = { token, operator, basis, nonce: rnd(), expiry: exp(600) }; return call('POST', { action: 'claim', ...m, signature: sg('OperatorClaim', m, operator) }); };
+const claim = (token, operator, basis, nonce = rnd()) => { const m = { token, operator, basis, nonce, expiry: exp(600) }; return call('POST', { action: 'claim', ...m, signature: sg('OperatorClaim', m, operator) }); };
 const passportOf = async (token) => (await call('GET', null, { view: 'passport', token })).j.passport;
 resetChain();
 
@@ -49,6 +49,10 @@ const PONS_SAME = lc(A.PONS2); // deployer = recipient = W
 const PONS_SALE = ponsAdd('11', { deployer: W, creatorFeeRecipient: W });
 const PONS_DEAL = ponsAdd('12', { deployer: W, creatorFeeRecipient: W });
 const PONS_OVR = ponsAdd('13', { deployer: W, creatorFeeRecipient: W });
+const PAR_NONCE = '0x8' + '4'.repeat(39); catRow(4).deployer = W; catRow(4).creatorFeeRecipient = W; // nonce-not-consumed
+const PAR_NONCE2 = '0x8' + '5'.repeat(39); catRow(5).deployer = W; catRow(5).creatorFeeRecipient = W;
+const PONS_NONCE = ponsAdd('14', { deployer: W, creatorFeeRecipient: W });
+const PONS_NONCE2 = ponsAdd('15', { deployer: W, creatorFeeRecipient: W });
 const setRecipient = (token, addr) => { if (chain.pons.has(token)) chain.pons.get(token).creatorFeeRecipient = addr; else LAUNCHES.find((l) => lc(l.token) === token).creatorFeeRecipient = addr; };
 const rpc = Chain.makeRpc(Chain.ROBINHOOD.rpcUrl, { retries: 0 });
 
@@ -131,6 +135,27 @@ for (const [O, T] of [['PAR', { FR: PAR_FR, SPLIT: PAR_SPLIT, SAME: PAR_SAME, SA
   check(`${O} deal window: the included fee right then completes normally`, r.s === 200 && r.j.deal.checklist.feeRight.done === true, r.body);
   r = await claim(T.DEAL, W, 'deployer');
   check(`${O} after the deal: seller (deployer) still cannot reclaim`, r.s === 409 && (await passportOf(T.DEAL)).operator === W2, r.body);
+}
+
+// EIP-712 unchanged: vectors pinned from lib/syncnet-market.js at 6d067d5 (any change would invalidate signatures)
+{
+  check('EIP-712 OperatorClaim digest vector unchanged', Market.digest('OperatorClaim', { token: '0x' + '11'.repeat(20), operator: '0x' + '22'.repeat(20), basis: 'deployer', nonce: '0x' + '33'.repeat(32), expiry: 1790000000 }) === '0x7790d95fb4c12e0286633a25084dec49b1c631496b35d950c4cd5d21168e3f64');
+  check('EIP-712 Listing digest vector unchanged', Market.digest('Listing', { token: '0x' + '11'.repeat(20), seller: '0x' + '22'.repeat(20), price: '1.5', currency: 'ETH', termsHash: '0x' + '44'.repeat(32), nonce: '0x' + '33'.repeat(32), expiry: 1790000000 }) === '0xbe3068bae2eb1eb8b576dffee6ee02386e5886dda9349dd0afa5781e607d6e5a');
+}
+
+// a rejected takeover does not consume the nonce (both origins)
+for (const [O, T, T2] of [['PAR', PAR_NONCE, PAR_NONCE2], ['PONS_V2', PONS_NONCE, PONS_NONCE2]]) {
+  await claim(T, W, 'deployer');
+  await sellPassport(T, W, W2, false);
+  const N = rnd();
+  const r = await claim(T, W, 'fee-recipient', N);
+  check(`${O} rejected takeover answers 409 operator_exists`, r.s === 409 && r.j.code === 'operator_exists', r.body);
+  check(`${O} rejected takeover did not consume the nonce (no nonce record written)`, !MAP.has(`mp:nonce:v1:${W}:${N}`));
+  const t = Market.normalizeTerms({ description: 'Another project of the same wallet, listed with the same nonce.', included: [], notIncluded: [], includeFeeRight: false }).terms;
+  await claim(T2, W, 'deployer');
+  const lm = { token: T2, seller: W, price: '2', currency: 'USD', termsHash: Market.hashJson(t), nonce: N, expiry: exp(86400) };
+  const L = await call('POST', { action: 'list', ...lm, terms: t, signature: sg('Listing', lm, W) });
+  check(`${O} the same nonce is still usable for a later legitimate action`, L.s === 200, L.body);
 }
 
 // 9. Pons protocol override — pending or executed — never changes the Passport operator

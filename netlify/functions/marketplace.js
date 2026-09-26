@@ -290,7 +290,7 @@ async function write(b, ctx) {
     // PASSPORT AUTHORITY (same rule for every origin): deployer / fee-recipient evidence can only ESTABLISH the first
     // Passport. Once a Passport exists, only its recognised operator may claim again (refresh). Operational control
     // then changes ONLY through the signed Marketplace transfer (seller TransferIntent + buyer TransferAccept);
-    // holding or receiving the creator-fee right on-chain never moves it.
+    // holding or receiving the creator-fee right on-chain never moves it. Refused before the nonce is consumed.
     if (passport && lc(passport.operator) !== operator) {
       log(FN, 'claim-refused-operator-exists', { token, basis: b.basis });
       return publicError(409, 'operator_exists', 'An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.');
