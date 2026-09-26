@@ -359,6 +359,15 @@ let ACT1;
   pc.mode = 'down';
   check('C40 reconcile with RPC down → 503, no change', (await reconcile(T1)).s === 503 && JSON.parse(MAP.get('site:entitlement:v1:' + T1).value).status === 'ACTIVE');
   pc.mode = 'ok';
+  const e1b = JSON.parse(MAP.get('site:entitlement:v1:' + T1).value);
+  const savedHead = pc.head; pc.head = BigInt(e1b.blockNumber) - 1n;
+  const lag = await reconcile(T1);
+  pc.head = savedHead;
+  check('C40b lagging RPC node that does not know the block → 503, never an invalidation', lag.s === 503 && JSON.parse(MAP.get('site:entitlement:v1:' + T1).value).status === 'ACTIVE');
+  let flip = 0;
+  const flappy = async (method, params) => (method === 'eth_getBlockByNumber' && /^0x/.test(params[0]) && BigInt(params[0]) === BigInt(e1b.blockNumber) ? { number: params[0], hash: Core.keccak256Utf8('flap' + (flip++)), timestamp: '0x1' } : rpc(method, params));
+  const fl = await reconcile(T1, { rpc: flappy });
+  check('C40c two reads of the block disagree → 503, no invalidation', fl.s === 503 && JSON.parse(MAP.get('site:entitlement:v1:' + T1).value).status === 'ACTIVE');
   // reorg of T1's SAFE payment
   const e1 = JSON.parse(MAP.get('site:entitlement:v1:' + T1).value);
   reorg(e1.blockNumber);
@@ -377,6 +386,42 @@ let ACT1;
   pc.receipts.set(tx, r); setTags({ safe: n });
   const re = await verify(e1.requestId, tx);
   check('C44 the re-included payment re-activates the same request (previous entitlement recorded)', re.s === 200 && re.j.entitlement.status === 'ACTIVE' && re.j.entitlement.previous && re.j.entitlement.previous.txHash === tx, re.body);
+}
+
+// ---- an observed (not yet SAFE) payment blocks new quotes, but not forever
+{
+  const T10 = lc(A.PONS2_ETH); seedPassport(T10, W);
+  const iq = (await request(T10, W)).j.intent;
+  const pp = pay({ amount: BigInt(iq.exactTaggedSyncAmount) }); setTags({ safe: pp.blockNumber - 1n });
+  const pend = await verify(iq.requestId, pp.txHash);
+  clock.advance(1900);
+  const blocked = await request(T10, W);
+  check('C45 a payment awaiting SAFE blocks a second quote for the project (duplicate-payment guard)', pend.j.status === 'PENDING_CONFIRMATION' && blocked.s === 409 && blocked.j.code === 'payment_pending', blocked.body);
+  clock.advance(6 * 3600);
+  const unblocked = await request(T10, W);
+  check('C46 …for a bounded time only (a payment that never confirms cannot lock the project forever)', unblocked.s === 201, unblocked.body);
+  setTags({ safe: pp.blockNumber });
+  const late = await verify(iq.requestId, pp.txHash);
+  check('C47 the original payment (mined inside its lock) still activates once SAFE', late.s === 200 && late.j.status === 'ACTIVE', late.body);
+}
+
+// ---- re-inclusion after a reorg, in a block later than the lock
+{
+  const T10 = lc(A.PONS2_ETH);
+  const e = JSON.parse(MAP.get('site:entitlement:v1:' + T10).value);
+  reorg(e.blockNumber);
+  const inv = await reconcile(T10);
+  const it = JSON.parse(MAP.get('site:intent:v1:' + e.requestId).value);
+  const lateTs = BigInt(it.expiresAtSec) + 600n;
+  const other = pay({ amount: BigInt(it.exactTaggedSyncAmount), timestamp: lateTs }); setTags({ safe: other.blockNumber });
+  const otherV = await verify(e.requestId, other.txHash);
+  check('C48 after a reorg, a DIFFERENT late payment still cannot use the expired lock', inv.j.status === 'INVALIDATED_BY_REORG' && otherV.s === 409 && otherV.j.code === 'mined_after_expiry', otherV.body);
+  const tx = e.txHash, n = pc.head + 2n, h = Core.keccak256Utf8('reinc|' + tx);
+  pc.blocks.set(n, { number: n, hash: h, timestamp: lateTs + 5n }); pc.head = n;
+  pc.receipts.set(tx, { transactionHash: tx, status: '0x1', blockNumber: hex(n), blockHash: h, logs: [{ address: SYNC, topics: [Core.keccak256Utf8('Transfer(address,address,uint256)'), '0x' + '0'.repeat(24) + W.slice(2), '0x' + '0'.repeat(24) + SINK.slice(2)], data: '0x' + BigInt(e.exactAmount).toString(16).padStart(64, '0'), logIndex: '0x0', transactionHash: tx }] });
+  setTags({ safe: n });
+  const re = await verify(e.requestId, tx);
+  check('C49 the SAME transaction re-included after the lock re-activates (it was broadcast in time)', re.s === 200 && re.j.status === 'ACTIVE' && re.j.entitlement.previous.txHash === tx, re.body);
 }
 
 // ============================================================================================ D. site writes + renderer
@@ -401,7 +446,7 @@ let ACT1;
   check('D07 current operator + active entitlement + sanitised image → published', p1.s === 200 && p1.j.site.state === 'PUBLISHED' && p1.j.url === '/site/' + T1, p1.body);
   const pg = await site('/site/' + T1);
   check('D08 /site/<token> renders 200 with the authority label', pg.statusCode === 200 && pg.body.includes(Site.AUTHORITY_LABEL) && !/official website/i.test(pg.body));
-  check('D09 verified facts rendered from the server: name, ticker, contract, origin, Passport', pg.body.includes('Operator Live') && pg.body.includes('$OPLIVE') && pg.body.includes(T1) && pg.body.includes('PAR') && pg.body.includes('Operator <code>' + W));
+  check('D09 verified facts rendered from the server: name, ticker, contract, origin, Passport', pg.body.includes('Operator Live') && pg.body.includes('$OPLIVE') && pg.body.includes(T1) && pg.body.includes('PAR') && pg.body.includes('Operator <code>' + W) && /paired with \$[A-Z]+ <code>0x[0-9a-f]{40}<\/code>/.test(pg.body));
   check('D10 on-chain website field shown truthfully, separately and NOT as a link', pg.body.includes('On-chain website field') && pg.body.includes('oplive.example') && !pg.body.includes('href="https://oplive.example'));
   check('D11 operator links clickable for the current operator', pg.body.includes('href="https://app.example.org/trade?t&#61;1"') && pg.body.includes('href="https://x.com/syncnet"'));
   const csp = pg.headers['content-security-policy'];
@@ -414,6 +459,10 @@ let ACT1;
   const upper = await site('/site/' + A.SYNCAT);
   check('D17 non-lowercase token → 301 to /site/<lowercase>', /[A-F]/.test(A.SYNCAT) && upper.statusCode === 301 && upper.headers.location === '/site/' + lc(A.SYNCAT));
   check('D18 unpublished / unknown token → 404', (await site('/site/' + T8)).statusCode === 404 && (await site('/site/0x1234')).statusCode === 404 && (await site('/site/' + T1 + '/../x')).statusCode === 404);
+  const viaRewrite = await siteFn._handler({ httpMethod: 'GET', path: '/.netlify/functions/site', queryStringParameters: { token: T1 }, headers: {} }, { store, env: envNow });
+  check('D18b Netlify rewrite form (/.netlify/functions/site?token=) renders the same page', viaRewrite.statusCode === 200 && viaRewrite.body.includes(Site.AUTHORITY_LABEL));
+  const badRewrite = await siteFn._handler({ httpMethod: 'GET', path: '/.netlify/functions/site', queryStringParameters: { token: '<script>' }, headers: {} }, { store, env: envNow });
+  check('D18c hostile ?token= → 404, never reflected', badRewrite.statusCode === 404 && !badRewrite.body.includes('<script>'));
   check('D19 kill switch: Project Home disabled → /site is 404', (await site('/site/' + T1, { env: {} })).statusCode === 404);
   check('D20 HEAD works without a body', (await site('/site/' + T1, { method: 'HEAD' })).body === '');
   // images
@@ -424,6 +473,8 @@ let ACT1;
   check('D22 gateway returns different bytes → 404 (never served)', img2.statusCode === 404);
   const img3 = await imgFn._handler({ httpMethod: 'GET', path: '/site-img/b' + 'c'.repeat(58), headers: {} }, { store, env: envNow, fetch: async () => new Response(imgBytes, { status: 200 }) });
   check('D23 CID not on the sanitizer allowlist → 404', img3.statusCode === 404);
+  const img5 = await imgFn._handler({ httpMethod: 'GET', path: '/.netlify/functions/site-img', queryStringParameters: { cid: withImg.logoCid }, headers: {} }, { store, env: envNow, fetch: async () => new Response(imgBytes, { status: 200 }) });
+  check('D23b image route works in the Netlify rewrite form (?cid=)', img5.statusCode === 200);
   const img4 = await imgFn._handler({ httpMethod: 'GET', path: '/site-img/' + withImg.logoCid, headers: {} }, { store, env: {}, fetch: async () => new Response(imgBytes, { status: 200 }) });
   check('D24 image route closed when Project Home is disabled', img4.statusCode === 404);
   // nonce reuse, issuedAt regression, cross-domain replay, wrong chain

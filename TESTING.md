@@ -6,7 +6,7 @@
 node tests/run-all.mjs        # every suite below, in order; writes tests/RESULTS.json
 ```
 
-Requirements: Node ≥ 20, Python 3, and Playwright with Chromium (`PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs` if it is not resolvable). Nothing touches a real network:
+Requirements: Node ≥ 20, Python 3, and Playwright with Chromium (`PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs` if it is not resolvable). The Project Home suites also need `forge` and `redis-server`. The core suite's independent keccak check needs a `keccak.py` exposing `keccak256(bytes)` in `KECCAK_PY_DIR`, and the image sanitizer suite needs `sharp` and Pillow. Nothing touches a real network:
 
 - The chain is a stateful mock of PAR on Robinhood Chain: factory, router, pricer, launches, receipts, indexer.
 - The wallet is an EIP-1193 mock that signs with real secp256k1 keys (EIP-712 and `personal_sign`) and can be told to broadcast-then-throw, lag, switch accounts or chains, or return no hash.
@@ -23,6 +23,13 @@ Requirements: Node ≥ 20, Python 3, and Playwright with Chromium (`PLAYWRIGHT_M
 | E2E | `tests/e2e/run.mjs` | Every page and product flow (home, build, network, registry, marketplace, project pages, kit, labs, rehearsal, uploads, wallet flows). |
 | Required regressions | `tests/regression/rc-regressions.mjs` | R01–R20 from the release brief, plus R21 (final review = wallet request), R22 (two-tab race), R23 (imported evidence is neutral), R24 (wallet disconnect and reconnect) and R25 (hostile HTML in metadata stays inert text on every page). |
 | Mobile | `tests/regression/rc-mobile.mjs` | The real launch and recovery flow at 320/360/390/430 px: overflow, viewport, tap targets, text size. It also sweeps every page at 320 px. The E2E suite covers every page at 375 px. |
+
+| Project Home · sink (Foundry) | `tests/project-home/foundry.mjs` | `forge test` in `contracts/project-home-sink`: 60/40 split, rounding, zero balance, unsolicited transfers, reverting burn/transfer, no admin/rescue/ETH paths, deploy gate. Needs `forge` (`npm i -g @foundry-rs/forge`); `SOLC_PATH` may point at a local solc 0.8.28. |
+| Project Home · sink audit | `tests/project-home/sink-static-audit.mjs` | Source and ABI prove there is no owner, setter, rescue, delegatecall, upgrade, arbitrary call, approval or payable surface. |
+| Project Home · pricing | `tests/project-home/pricing.test.mjs` | $49 USD → SYNC in BigInt fixed point (round up), rate/price versions, payment tag, fail-closed gate. |
+| Project Home · site | `tests/project-home/site.test.mjs` | Schema, EIP-712 domain separation, URL/text policy, and 6,000 hostile renders with no script/iframe/`javascript:`/`on*=`/`style=`. |
+| Project Home · server | `tests/project-home/server.test.mjs` | Intents, verification (wrong token/sink/amount/chain, fake logs, expiry by block time), atomic activation races, reorg and finality, RPC outage and 429, publish/unpublish/restore/adopt, Passport transfer, `/site` CSP, `/site-img`, metrics. |
+| Project Home · real Redis | `tests/project-home/redis-atomic.test.mjs` | Runs the production Upstash adapter and `cas()` Lua script against a throwaway local `redis-server`, including a 24-way two-project race over one payment. Needs `redis-server` on PATH. |
 
 Run a single suite with `node <file>`. `SHOTS=/tmp/shots` saves screenshots for the E2E and mobile suites.
 

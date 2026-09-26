@@ -71,6 +71,7 @@ const CLOCK_SKEW = 120; // tolerated difference between the server clock and blo
 const AMOUNT_TTL = LOCK + 2 * CLOCK_SKEW + 600; // an exact amount stays reserved beyond any window it could match in
 const INTENT_TTL = 90 * 86400; // unconsumed intents; activations are copied into the durable registry
 const NONCE_TTL = 90 * 86400;
+const OBSERVED_HOLD = 6 * 3600; // an observed, not-yet-SAFE payment blocks new quotes for this long
 const MAX_REVISIONS = 200;
 const MAX_EXPORT = 2000;
 const PAID_STATES = new Set(['ACTIVE', 'FINALIZED']);
@@ -322,7 +323,8 @@ async function createIntent(b, { store, rpc, cfg, now, random }) {
   // A payment already seen on-chain for ANY recent intent blocks a new quote (aggressive duplicate-payment prevention).
   for (const id of (await store.smembers(K.intentsOf(token))).slice(0, 50)) {
     const i = (await getJson(store, K.intent(id))).value;
-    if (i && i.observed && (i.status === 'OPEN' || i.status === 'REORGED')) return publicError(409, 'payment_pending', 'A payment for this project is awaiting confirmation. Verify it before requesting a new quote.');
+    const fresh = i && i.observed && now() - Date.parse(i.observed.at) < OBSERVED_HOLD * 1000;
+    if (fresh && (i.status === 'OPEN' || i.status === 'REORGED')) return publicError(409, 'payment_pending', 'A payment for this project is awaiting confirmation. Verify it before requesting a new quote.');
   }
   const openRaw = await store.get(K.open(token));
   if (openRaw) {
@@ -409,13 +411,16 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
     blk = await PhChain.block(r, height);
     if (!blk || blk.hash !== lc(rcpt.blockHash)) return json(202, { ok: false, status: 'REORG_IN_PROGRESS', message: 'The block is being reorganised. Verify again shortly.' });
     if (!(height > BigInt(intent.createdBlock)) || blk.timestamp < BigInt(intent.createdAtSec - CLOCK_SKEW)) return publicError(409, 'mined_before_intent', 'That payment was mined before this payment intent existed.');
-    if (blk.timestamp > BigInt(intent.expiresAtSec)) {
+    // The SAME transaction re-included after a reorg was provably broadcast inside its lock (it had been mined there
+    // before), so only its re-inclusion is exempt from the expiry check. Any other late payment is refused.
+    const reinclusion = intent.status === 'REORGED' && entNow.value && entNow.value.status === 'INVALIDATED_BY_REORG' && entNow.value.requestId === requestId && entNow.value.txHash === txHash;
+    if (blk.timestamp > BigInt(intent.expiresAtSec) && !reinclusion) {
       log(FN, 'mined-after-expiry', { token, requestId: requestId.slice(0, 18) });
       return publicError(409, 'mined_after_expiry', 'That payment was mined after the 30-minute rate lock expired, so it cannot activate at the locked rate. It is not refundable by the protocol.');
     }
     safe = await PhChain.block(r, 'safe');
     if (!safe || safe.number < height) {
-      await recordObserved(store, it, txHash, height);
+      await recordObserved(store, it, txHash, height, now());
       return json(202, { ok: false, status: 'PENDING_CONFIRMATION', message: 'Payment found. Waiting for the SAFE confirmation state on Robinhood Chain.' });
     }
     try { fin = await PhChain.block(r, 'finalized'); } catch { fin = null; } // optional: activation needs SAFE only
@@ -480,9 +485,9 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
   return json(200, { ok: true, idempotent: false, status: entitlement.status, entitlement: publicEntitlement(entitlement) });
 }
 
-async function recordObserved(store, it, txHash, height) {
+async function recordObserved(store, it, txHash, height, nowMs) {
   if (!it.value || it.value.observed) return;
-  const next = { ...it.value, observed: { txHash, blockNumber: height.toString(), at: new Date().toISOString() } };
+  const next = { ...it.value, observed: { txHash, blockNumber: height.toString(), at: new Date(nowMs).toISOString() } };
   try { await store.cas({ expect: [[K.intent(it.value.requestId), it.raw]], set: [[K.intent(it.value.requestId), JSON.stringify(next), INTENT_TTL]] }); } catch { /* hint only */ }
 }
 
@@ -496,24 +501,28 @@ async function reconcile(b, { store, rpc, now }) {
   const e = ent.value;
   if (!e) return publicError(404, 'not_found', 'No entitlement for this project.');
   if (e.kind !== 'paid' || e.status === 'FINALIZED' || e.status === 'INVALIDATED_BY_REORG') return json(200, { ok: true, changed: false, status: e.status, entitlement: publicEntitlement(e) });
-  const r = PhChain.bounded(rpc, 5);
-  let canonical, rcpt, fin;
+  const r = PhChain.bounded(rpc, 6);
+  let canonical, rcpt, fin, confirm;
   try {
     await PhChain.assertChain(r);
     canonical = await PhChain.block(r, BigInt(e.blockNumber));
-    if (!canonical || canonical.hash !== e.blockHash) rcpt = await PhChain.receipt(r, e.txHash);
-    else fin = await PhChain.block(r, 'finalized');
+    // A node that does not (yet) know the block proves nothing: fail closed, never invalidate on missing data.
+    if (!canonical) return publicError(503, 'chain_unavailable', CHAIN_DOWN);
+    if (canonical.hash !== e.blockHash) {
+      rcpt = await PhChain.receipt(r, e.txHash);
+      confirm = await PhChain.block(r, BigInt(e.blockNumber)); // a second, independent read must agree
+    } else fin = await PhChain.block(r, 'finalized');
   } catch (err) {
     logError(FN, 'chain-unavailable', err, { token });
     return publicError(503, 'chain_unavailable', CHAIN_DOWN);
   }
   const at = new Date(now()).toISOString();
   let next = null, event = null;
-  if (!canonical || canonical.hash !== e.blockHash) {
-    if (rcpt && lc(rcpt.blockHash) === e.blockHash) return publicError(503, 'chain_inconsistent', CHAIN_DOWN); // node views disagree: change nothing
+  if (canonical.hash !== e.blockHash) {
+    if ((rcpt && lc(rcpt.blockHash) === e.blockHash) || !confirm || confirm.hash !== canonical.hash) return publicError(503, 'chain_inconsistent', CHAIN_DOWN); // node views disagree: change nothing
     // The SAFE payment is no longer in the canonical chain: keep every record, mark the entitlement invalidated,
     // reopen the SAME intent for re-verification (a re-included transaction can reactivate it; nothing is deleted).
-    next = { ...e, status: 'INVALIDATED_BY_REORG', invalidatedAt: at, invalidation: { canonicalHashAtHeight: canonical ? canonical.hash : null, receiptBlockHash: rcpt ? lc(rcpt.blockHash) : null } };
+    next = { ...e, status: 'INVALIDATED_BY_REORG', invalidatedAt: at, invalidation: { canonicalHashAtHeight: canonical.hash, receiptBlockHash: rcpt ? lc(rcpt.blockHash) : null } };
     event = { type: 'invalidated-by-reorg', token, txHash: e.txHash, logIndex: e.logIndex, blockHash: e.blockHash, at };
   } else if (fin && fin.number >= BigInt(e.blockNumber)) {
     next = { ...e, status: 'FINALIZED', finalizedAt: at };
@@ -544,10 +553,11 @@ async function projectFacts(rpc, token) {
   } else if (live.origin && live.origin.pair) {
     markets = [{ pairToken: lc(live.origin.pair.address), symbol: Core.sanitizeForDisplay(String(live.origin.pair.symbol || ''), { maxLength: 16 }) }];
   }
-  for (const m of markets) {
+  for (const m of markets) { // one symbol() read per pair (<= 5), best effort
     if (!m.symbol && isAddr(m.pairToken) && !/^0x0{40}$/.test(m.pairToken)) {
-      const md = await Chain.readTokenMetadata(rpc, m.pairToken).catch(() => null);
-      m.symbol = md && md.symbol ? Core.sanitizeForDisplay(String(md.symbol), { maxLength: 16 }) : '';
+      let sym = '';
+      try { const hex = await Chain.ethCall(rpc, m.pairToken, Chain.SEL.symbol); sym = hex && hex !== '0x' ? String(Core.abiDecode(['string'], hex)[0]) : ''; } catch { sym = ''; }
+      m.symbol = Core.sanitizeForDisplay(sym, { maxLength: 16 });
     }
   }
   const website = live.meta && live.meta.socials ? String(live.meta.socials.website || '') : '';

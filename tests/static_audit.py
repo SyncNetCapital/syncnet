@@ -255,3 +255,28 @@ _mpsrv=(root/'netlify/functions/marketplace.js').read_text()
 assert "type: 'operator-superseded'" not in _mpsrv, 'no fee-recipient takeover of a Passport'
 assert "if (passport && lc(passport.operator) !== operator)" in _mpsrv, 'existing Passport: only its operator may claim'
 print('SyncNet Economies V0 static audit: PASS')
+
+# Project Home foundation: closed by default, own EIP-712 domain, no UI/nav, strict renderer, reviewed pricing, no deploy
+_ph=(root/'netlify/functions/project-home.js').read_text(); _site_fn=(root/'netlify/functions/site.js').read_text()
+_site_lib=(root/'lib/syncnet-site.js').read_text(); _phcfg=(root/'netlify/lib/project-home-config.js').read_text()
+_price=_je.loads((root/'syncnet-project-home-pricing.json').read_text())
+assert "name: 'SyncNet Website'" in _site_lib and "name: 'SyncNet Marketplace'" not in _site_lib and "name: 'SyncNet Economies'" not in _site_lib
+assert "truthy(env.SYNCNET_PROJECT_HOME_ENABLED)" in _phcfg and "truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED)" in _phcfg  # exact "true" only
+assert 'siteEnabled && paymentsRequested && Boolean(price && rate && sink)' in _phcfg
+assert _price['rates']==[] and [p['priceUsdCents'] for p in _price['prices']]==[4900]  # $49 USD; no rate approved yet
+assert '/api/project-home /.netlify/functions/project-home 200' in red and '/site/:token /.netlify/functions/site?token=:token 200!' in red and '/site-img/:cid /.netlify/functions/site-img?cid=:cid 200!' in red
+assert '/contracts/* /404.html 404!' in red and 'from = "/contracts/*"' in toml
+assert 'lib/syncnet-site.js' in toml and 'lib/syncnet-project-home-pricing.js' in toml and 'syncnet-project-home-pricing.json' in toml
+assert "default-src 'none'; style-src ${STYLE_HASH}; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'" in _site_fn
+assert "'cache-control': 'no-store'" in _site_fn and 'authority: { signer: rev.signer }' in _site_fn
+assert not _re3.search(r'store\.(set|del|sadd)\(', _ph) and 'store.cas(' in _ph and 'eth_getLogs' not in _ph
+assert 'OFFICIAL WEBSITE' not in _site_lib.upper().replace("'OFFICIALWEBSITE'", '') or 'officialwebsite' in _site_lib  # only as a refused claim
+for _pg in _gl.glob(str(root/'*.html')):
+    _t=open(_pg,encoding='utf-8').read()
+    assert 'project-home' not in _t and '/site/' not in _t and 'Websites' not in _t, 'no Project Home UI / nav yet: '+_pg
+for _f in _gl.glob(str(root/'*.js')):
+    assert '/api/project-home' not in open(_f,encoding='utf-8').read(), 'no browser client for Project Home yet: '+_f
+_sink=(root/'contracts/project-home-sink/src/SyncNetProjectHomeSink.sol').read_text()
+assert 'immutable SYNC' in _sink and 'immutable TREASURY' in _sink and 'BURN_PERCENT = 60' in _sink and 'delegatecall' not in _sink
+assert not list((root/'contracts/project-home-sink').glob('broadcast/**/*.json')), 'no deployment broadcast may exist'
+print('SyncNet Project Home foundation static audit: PASS')

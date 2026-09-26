@@ -213,14 +213,14 @@
 
 # Project Home public renderer and its image route. Both answer 404 unless SYNCNET_PROJECT_HOME_ENABLED=true.
 [[redirects]]
-  from = "/site/*"
-  to = "/.netlify/functions/site"
+  from = "/site/:token"
+  to = "/.netlify/functions/site?token=:token"
   status = 200
   force = true
 
 [[redirects]]
-  from = "/site-img/*"
-  to = "/.netlify/functions/site-img"
+  from = "/site-img/:cid"
+  to = "/.netlify/functions/site-img?cid=:cid"
   status = 200
   force = true
 

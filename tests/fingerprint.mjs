@@ -1,5 +1,5 @@
 // Prints the fingerprint of the deployable SyncNet site: SHA-256 over the sorted list of "<sha256>  <path>" lines
-// for every file that is served or runs on Netlify. Excluded: tests/, docs/, *.md, .git/, .gitignore.
+// for every file that is served or runs on Netlify. Excluded: tests/, docs/, contracts/ (never served: 404), *.md, .git/, .gitignore.
 // Documentation and test results can change without changing the fingerprint; any change to a page, script,
 // style, asset, function or config changes it. Run: node tests/fingerprint.mjs   (--list prints every line)
 import crypto from 'node:crypto';
@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const skip = (rel) => rel === '.gitignore' || rel.startsWith('.git/') || rel.startsWith('tests/') || rel.startsWith('docs/') || rel.endsWith('.md') || rel.split('/').includes('node_modules') || rel.endsWith('.DS_Store');
+const skip = (rel) => rel === '.gitignore' || rel.startsWith('.git/') || rel.startsWith('tests/') || rel.startsWith('docs/') || rel.startsWith('contracts/') || rel.endsWith('.md') || rel.split('/').includes('node_modules') || rel.endsWith('.DS_Store');
 const files = [];
 (function walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

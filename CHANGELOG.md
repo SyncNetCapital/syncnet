@@ -1,3 +1,40 @@
+# SyncNet Project Home: secure foundation (`feature/syncnet-project-home`): 26 Sep 2026
+
+Closed by default. No UI, no navigation entry, and no deployed contract. See `docs/PROJECT_HOME.md`.
+
+- **M0 refactor (behaviour-preserving):** added `netlify/lib/sig-verify.js`, which verifies ECDSA and then EIP-1271 for
+  Marketplace, Economies and Project Home. Added `netlify/lib/live-project.js` (moved `liveProject`/`feeRightOf` from
+  the Marketplace, plus a read-only `readPassport`).
+- **Sink:** added `contracts/project-home-sink` with `SyncNetProjectHomeSink`. It has an immutable token and treasury,
+  and a permissionless, parameterless `settle()` that burns floor(60%) with `SYNC.burn()` and sends the remainder to
+  the treasury. There is no admin, setter, rescue, proxy, arbitrary call, approval or payable surface. Includes 34
+  Foundry tests and a deploy script gated on chain 4663, the canonical SYNC, and an explicit, confirmed treasury that is
+  neither the deployer nor the token. The contract is not deployed.
+- **Pricing:** PROJECT HOME ACTIVATION costs $49 USD (`priceVersion 1`) and is paid only in $SYNC at the versioned,
+  git-reviewed SYNCNET REFERENCE RATE, which is not an oracle. Amounts use BigInt fixed point, round up, and add a
+  10^12-wei payment tag reserved server-side. `syncnet-project-home-pricing.json` ships no rate, so payments stay
+  closed until one is approved.
+- **Payments:** `/api/project-home`:
+  - intents can be created only by the current Passport operator (EIP-712 `SyncNet Website`), and clients cannot
+    override any economic field;
+  - verification uses targeted, bounded chain reads. The rate lock is judged by block time, and activation happens at
+    SAFE;
+  - activation is ONE atomic compare-and-set: a fixed Lua script via `store.cas()` claims the log, creates the
+    entitlement, consumes the intent and writes the registry record together;
+  - `reconcile` moves an entitlement to FINALIZED or INVALIDATED_BY_REORG and keeps the history.
+  There are no refunds. Metrics separate verified activation payments from everything else the sink received.
+- **Sites:**
+  - `lib/syncnet-site.js` holds the V1 schema, canonical `configHash`, the EIP-712 types
+    (`SitePublish`/`SiteUnpublish`/`ActivationRequest`) and the pure zero-JS renderer.
+  - Publish, edit, unpublish, restore and adopt require the current operator. The Passport is checked atomically at
+    commit and again at render time. After a Passport transfer, every operator-authored link loses its `href` until
+    the new operator adopts the site.
+  - `/site/<token>` uses CSP `default-src 'none'` with a hashed stylesheet. `/site-img/<cid>` serves only sanitised,
+    hash-verified images. `ipfs-upload` now records sanitised CIDs.
+- **Tests:** added 6 suites to `tests/run-all.mjs`: Foundry (34), sink static/ABI audit (46), pricing (80), site and
+  renderer audit (149), server (169) and real-Redis atomicity (17). Static-audit additions cover Project Home.
+  `/contracts/*` is not served, and `tests/fingerprint.mjs` excludes `contracts/`.
+
 # Pons V1 strict detection + live Step 3 verification (`feature/syncnet-economies-v0`): 26 Sep 2026
 
 - Pons V1 detection now knows both canonical factory generations from the official Pons docs: ACTIVE

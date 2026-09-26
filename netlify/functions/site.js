@@ -48,9 +48,12 @@ const notFound = () => page(404, 'Not found', 'No SyncNet Project Home is publis
 
 function tokenFromEvent(event) {
   const q = event && event.queryStringParameters && typeof event.queryStringParameters.token === 'string' ? event.queryStringParameters.token : '';
-  const p = String((event && (event.path || event.rawUrl)) || '');
-  const m = /\/site\/([^/?#]+)\/?(?:[?#].*)?$/.exec(p);
-  return m ? m[1] : q;
+  // The original request path when Netlify provides it; otherwise the :token the rewrite passed as a query parameter.
+  for (const p of [String((event && event.path) || ''), String((event && event.rawUrl) || '')]) {
+    const m = /\/site\/([^/?#]+)\/?(?:[?#].*)?$/.exec(p);
+    if (m) return m[1];
+  }
+  return q;
 }
 
 async function getJson(store, key) {

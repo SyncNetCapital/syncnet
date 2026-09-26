@@ -30,8 +30,8 @@
 /api/marketplace /.netlify/functions/marketplace 200
 /api/economies /.netlify/functions/economies 200
 /api/project-home /.netlify/functions/project-home 200
-/site/* /.netlify/functions/site 200!
-/site-img/* /.netlify/functions/site-img 200!
+/site/:token /.netlify/functions/site?token=:token 200!
+/site-img/:cid /.netlify/functions/site-img?cid=:cid 200!
 /economy /economy.html 200
 /project/* /token.html 200
 /token/* /token.html 200

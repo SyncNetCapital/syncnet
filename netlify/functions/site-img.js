@@ -40,8 +40,9 @@ async function handler(event = {}, deps = {}) {
   const store = deps.store || getStore();
   const cfg = projectHomeConfig({ env: deps.env || process.env, store });
   if (!cfg.siteEnabled) return miss(404);
-  const m = /\/site-img\/([^/?#]+)$/.exec(String(event.path || event.rawUrl || ''));
-  const cid = m ? m[1] : '';
+  const m = /\/site-img\/([^/?#]+)$/.exec(String(event.path || '')) || /\/site-img\/([^/?#]+)(?:[?#]|$)/.exec(String(event.rawUrl || ''));
+  const q = event.queryStringParameters && typeof event.queryStringParameters.cid === 'string' ? event.queryStringParameters.cid : '';
+  const cid = m ? m[1] : q;
   if (!CID.test(cid)) return miss(404);
   try {
     const rl = await limit(store, { bucket: 'ph-img', id: clientIp(event), limit: 120, windowSeconds: 60 });
