@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T12:35:29.417Z",
+  "at": "2026-09-26T12:50:24.988Z",
   "passed": 113,
   "failed": 0,
   "results": [
@@ -559,14 +559,14 @@
       "detail": ""
     },
     {
-      "name": "SyncNetProjectHomeSink: forge-derived ABI comparison",
+      "name": "SyncNetProjectHomeSink: forge-derived ABI equals the committed ABI",
       "ok": true,
-      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
+      "detail": ""
     },
     {
-      "name": "SyncNetProjectHomeTreasuryConverter: forge-derived ABI comparison",
+      "name": "SyncNetProjectHomeTreasuryConverter: forge-derived ABI equals the committed ABI",
       "ok": true,
-      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
+      "detail": ""
     }
   ]
 }

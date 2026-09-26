@@ -65,7 +65,7 @@
     {
       "name": "9/10 Pons listing shows LIVE PONS PROJECT, PAIR · USDG, STATUS · BONDING CURVE",
       "ok": true,
-      "detail": "LISTING\nPONS ALPHA.\n← ALL LISTINGS\nPons Alpha · $PALPHA\n\n0x7a11000000000000000000000000000000000001\n\n1.2 ETH\nASKING PRICE\nACTIVE\nVERIFIED OPERATOR 0X2C75…5C23\nLIVE PONS PROJECT\nPAIR · USDG\nSTATUS · BONDING CURVE\nCREATOR FEE TRANSFERABLE\nListed 2026-09-26 12:05 UTC\nValid until 2026-10-26 12:05 UTC\n\nL"
+      "detail": "LISTING\nPONS ALPHA.\n← ALL LISTINGS\nPons Alpha · $PALPHA\n\n0x7a11000000000000000000000000000000000001\n\n1.2 ETH\nASKING PRICE\nACTIVE\nVERIFIED OPERATOR 0X2C75…5C23\nLIVE PONS PROJECT\nPAIR · USDG\nSTATUS · BONDING CURVE\nCREATOR FEE TRANSFERABLE\nListed 2026-09-26 12:47 UTC\nValid until 2026-10-26 12:47 UTC\n\nL"
     },
     {
       "name": "what is NOT sold names Pons reserves/liquidity and protocol control",
@@ -85,7 +85,7 @@
     {
       "name": "setup: a PAR listing in the same market",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x836768dacb3619da24d6af7f5c6ed56674400fcb9300b224f8b75be9d8da6c71\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x8ad31d35c0e13a12e04dcb0333449b4ccc2acba630cf3d6829779898d8f8f44b\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c2"
     },
     {
       "name": "11 ALL shows PAR and PONS listings together",
@@ -110,7 +110,7 @@
     {
       "name": "Deal Room names the PONS V2 factory for the fee-right step",
       "ok": true,
-      "detail": "DEAL ROOM · NON-CUSTODIAL SETTLEMENT\nPONS ALPHA · 1.2 ETH.\n← LISTING\nOPEN\nseller 0x2c75…5c23\nbuyer 0x19e7…ff2a\n2026-09-26 12:05 UTC\nYOU ARE THE SELLER\nOperator transfer (SyncNet Passport)\nPENDING\n\nThe operator handover needs BOTH parties: the seller signs a transfer intent, then the buyer signs the "
+      "detail": "DEAL ROOM · NON-CUSTODIAL SETTLEMENT\nPONS ALPHA · 1.2 ETH.\n← LISTING\nOPEN\nseller 0x2c75…5c23\nbuyer 0x19e7…ff2a\n2026-09-26 12:47 UTC\nYOU ARE THE SELLER\nOperator transfer (SyncNet Passport)\nPENDING\n\nThe operator handover needs BOTH parties: the seller signs a transfer intent, then the buyer signs the "
     },
     {
       "name": "12 exactly one wallet transaction, sent to the canonical Pons V2 factory",

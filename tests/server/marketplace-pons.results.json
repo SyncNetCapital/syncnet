@@ -165,12 +165,12 @@
     {
       "name": "1 PAR deployer claim works exactly as before (same evidence text)",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T11:57:37.565Z\",\"claims\":[{\"id\":\"0xbe8b4c21dbd5dd49394e7e7a052d80d"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T12:40:12.541Z\",\"claims\":[{\"id\":\"0xc72354c54097b4e2bd40c09f5b79df8"
     },
     {
       "name": "5 Pons V2 deployer can create the initial Passport claim",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T11:57:37.574Z\",\"claims\":[{\"id\":\"0xec48d8b44371a84e254d0852f2f"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T12:40:12.551Z\",\"claims\":[{\"id\":\"0xa813d591f81189abf46290cd064"
     },
     {
       "name": "5 evidence names the venue: \"(Pons V2 factory record)\"",
@@ -185,7 +185,7 @@
     {
       "name": "6 current Pons creator-fee recipient WALLET can claim",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T11:57:37.581Z\",\"claims\":[{\"id\":\"0xdca9d1aae883a5daad7487ffe12"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T12:40:12.559Z\",\"claims\":[{\"id\":\"0xee43102fbd9f9b6c6703c1c4041"
     },
     {
       "name": "7 unrelated wallet cannot claim a Pons project (deployer basis)",
@@ -210,12 +210,12 @@
     {
       "name": "8 Pons project with a contract fee recipient can still be claimed by its deployer",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000003\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T11:57:37.611Z\",\"claims\":[{\"id\":\"0x3a310551c3efcbf4921954445ba"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000003\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T12:40:12.592Z\",\"claims\":[{\"id\":\"0xbb6e7f52111e8c3e70b9aad951f"
     },
     {
       "name": "16 Pons project with a pending override can be claimed by its deployer",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T11:57:37.617Z\",\"claims\":[{\"id\":\"0xafbb6c72881beb9600f7c6237fc"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"chainId\":4663,\"launchpad\":\"PONS_V2\",\"factory\":\"0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T12:40:12.599Z\",\"claims\":[{\"id\":\"0xd40900595706d20815832ab850e"
     },
     {
       "name": "20 no durable store → Pons writes refused (503)",
@@ -240,12 +240,12 @@
     {
       "name": "16 pending override: listing WITHOUT the fee right is allowed and shows ENCUMBERED",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x2ca792167f2447f0e024237ddb550f2d83304b9aa959395697c191d84e4bd5ec\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xa7c4a34cec4514478472ba1b79497d7808e266a87443c0fee6f6b2c58d9cc2b7\",\"token\":\"0x7a11000000000000000000000000000000000004\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
     },
     {
       "name": "9 Pons V2 listing with the fee right works",
       "ok": true,
-      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x085b86a49cc3693b089199bb82d03c0f44d8d99930151e8c5a0cda0b134fb976\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0x721d9df2d17c04af37713c1e9814df0a1596b51a637beb3a2de8a25206d1a512\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"1.5\",\"currency\":\"ETH\",\"terms\":{\"description\":\"Operational control of a live Pons V2 project, community and site included.\",\"included\":[{\"id\":\"a1\",\"label\":\"Website + domain\",\"kind\":\"manual\""
     },
     {
       "name": "4 client-supplied origin is ignored: listing origin is server-derived PONS_V2",
@@ -280,17 +280,17 @@
     {
       "name": "offer on a Pons listing",
       "ok": true,
-      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x7e696caabb7014f14f23695f722f608197fea5620f1ac32957f6a891a48af3ba\",\"listingId\":\"0x085b86a49cc3693b089199bb82d03c0f44d8d99930151e8c5a0cda0b134fb976\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"PENDING\",\"expiry\":1790510258,\"createdAt\":\"2026-09-26T11:57:38.007Z\",\"decidedA"
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0xad4e30d13ce2bdb858eb467a67a56f5b598ae02fc13bbf1bd7ebc640c7a7d376\",\"listingId\":\"0x721d9df2d17c04af37713c1e9814df0a1596b51a637beb3a2de8a25206d1a512\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"PENDING\",\"expiry\":1790512813,\"createdAt\":\"2026-09-26T12:40:13.008Z\",\"decidedA"
     },
     {
       "name": "Deal Room opens with the fee-right step required",
       "ok": true,
-      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0x7e696caabb7014f14f23695f722f608197fea5620f1ac32957f6a891a48af3ba\",\"listingId\":\"0x085b86a49cc3693b089199bb82d03c0f44d8d99930151e8c5a0cda0b134fb976\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"ACCEPTED\",\"expiry\":1790510258,\"createdAt\":\"2026-09-26T11:57:38.007Z\",\"decided"
+      "detail": "{\"ok\":true,\"offer\":{\"id\":\"0xad4e30d13ce2bdb858eb467a67a56f5b598ae02fc13bbf1bd7ebc640c7a7d376\",\"listingId\":\"0x721d9df2d17c04af37713c1e9814df0a1596b51a637beb3a2de8a25206d1a512\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"buyer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"amount\":\"1.5\",\"currency\":\"ETH\",\"status\":\"ACCEPTED\",\"expiry\":1790512813,\"createdAt\":\"2026-09-26T12:40:13.008Z\",\"decided"
     },
     {
       "name": "Passport transfer is launchpad-independent (same two signatures), origin preserved",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x7959a4691b130c52ed33d8e4b23c5cd4d4163f32de4479c2a5ceb0266979abc7\",\"listingId\":\"0x085b86a49cc3693b089199bb82d03c0f44d8d99930151e8c5a0cda0b134fb976\",\"offerId\":\"0x7e696caabb7014f14f23695f722f608197fea5620f1ac32957f6a891a48af3ba\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1e0e717f9ce164f388e803547e3bc40de10d15eccb960c40dd7e0490c67294a4\",\"listingId\":\"0x721d9df2d17c04af37713c1e9814df0a1596b51a637beb3a2de8a25206d1a512\",\"offerId\":\"0xad4e30d13ce2bdb858eb467a67a56f5b598ae02fc13bbf1bd7ebc640c7a7d376\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "15 a fake / unknown tx hash cannot complete the fee-right step",
@@ -320,7 +320,7 @@
     {
       "name": "14 server re-read of the Pons V2 factory verifies the transfer",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x7959a4691b130c52ed33d8e4b23c5cd4d4163f32de4479c2a5ceb0266979abc7\",\"listingId\":\"0x085b86a49cc3693b089199bb82d03c0f44d8d99930151e8c5a0cda0b134fb976\",\"offerId\":\"0x7e696caabb7014f14f23695f722f608197fea5620f1ac32957f6a891a48af3ba\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x1e0e717f9ce164f388e803547e3bc40de10d15eccb960c40dd7e0490c67294a4\",\"listingId\":\"0x721d9df2d17c04af37713c1e9814df0a1596b51a637beb3a2de8a25206d1a512\",\"offerId\":\"0xad4e30d13ce2bdb858eb467a67a56f5b598ae02fc13bbf1bd7ebc640c7a7d376\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "V1 allowlist is exactly ACTIVE 0xA5aAb3… + LEGACY 0x0c37a2…",

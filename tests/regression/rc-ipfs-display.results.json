@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T12:04:32.324Z",
+  "at": "2026-09-26T12:46:53.329Z",
   "failures": 0,
   "passed": 23,
   "total": 23,
@@ -7,7 +7,7 @@
     {
       "name": "launcher regression: simulation + metadata preflight PASS with the real PONSYNC CID",
       "ok": true,
-      "detail": "a8ada322e48556dd5b58a08f9ff2d849c036fda57689417\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "f9483292cbbf19edf0071a9baec8bcb9f51884dd2aebf11\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "launcher regression: final review shows the immutable ipfs:// URI (never a gateway URL)",
@@ -117,7 +117,7 @@
     {
       "name": "My Launches: the PONSYNC record still lists and re-verifies (no launch history lost)",
       "ok": true,
-      "detail": "LAUNCH RECORDS IN THIS BROWSER · 1RE-VERIFY ALLFULLY VERIFIED$PONSYNC0x333d4f1c5198c88320dfef379d24cd9a3b712756tx 0xc56b4cd1…67e4beRE-VERIFYEXPORT\n Verified on-chain and listed by the PAR indexer.\n PR"
+      "detail": "LAUNCH RECORDS IN THIS BROWSER · 1RE-VERIFY ALLFULLY VERIFIED$PONSYNC0x0fbff72add9a4aa7c3d878c02a2fc0e63f303e12tx 0x9fcfc4e3…a44ab2RE-VERIFYEXPORT\n Verified on-chain and listed by the PAR indexer.\n PR"
     }
   ]
 }
