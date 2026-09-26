@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:19:07.664Z",
+  "at": "2026-09-26T16:33:15.459Z",
   "forge": "forge Version: 1.7.1",
   "summary": "76 tests passed, 0 failed, 0 skipped",
   "tests": [
@@ -9,66 +9,6 @@
     },
     {
       "name": "test_sinkRuntimeMatchesPinnedFingerprint",
-      "ok": true
-    },
-    {
-      "name": "test_acceptsExactConfiguration",
-      "ok": true
-    },
-    {
-      "name": "test_contractTreasuryMustHaveCode",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsDeployerAsTreasury",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsEoaTreasuryWithCode",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsInfrastructureAsTreasury",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsNonCanonicalRouter",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsNonCanonicalSync",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsNonCanonicalUsdg",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsUnconfirmedTreasury",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsUndeclaredTreasuryKind",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsWrongChain",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsWrongDeclaredChain",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsWrongMarket",
-      "ok": true
-    },
-    {
-      "name": "test_rejectsZeroTreasury",
-      "ok": true
-    },
-    {
-      "name": "test_treasuryEoaMustHaveNoCode",
       "ok": true
     },
     {
@@ -305,6 +245,66 @@
     },
     {
       "name": "test_thirdPartyCannotForceLowMinOut",
+      "ok": true
+    },
+    {
+      "name": "test_acceptsExactConfiguration",
+      "ok": true
+    },
+    {
+      "name": "test_contractTreasuryMustHaveCode",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsDeployerAsTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsEoaTreasuryWithCode",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsInfrastructureAsTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsNonCanonicalRouter",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsNonCanonicalSync",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsNonCanonicalUsdg",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsUnconfirmedTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsUndeclaredTreasuryKind",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsWrongChain",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsWrongDeclaredChain",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsWrongMarket",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsZeroTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_treasuryEoaMustHaveNoCode",
       "ok": true
     }
   ]

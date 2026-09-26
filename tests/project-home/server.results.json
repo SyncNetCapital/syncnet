@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:16:48.383Z",
+  "at": "2026-09-26T16:33:20.704Z",
   "passed": 180,
   "failed": 0,
   "results": [
@@ -71,7 +71,7 @@
     {
       "name": "B02 fixture: Marketplace claim establishes W as T1 operator",
       "ok": true,
-      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T16:16:46.783Z\",\"claims\":[{\"id\":\"0x22a99f01dae96a65b3e7485df85e2ae"
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T16:33:19.138Z\",\"claims\":[{\"id\":\"0x29cb65306154b95943263985c1a0cf8"
     },
     {
       "name": "B03 a different wallet is refused (only the CURRENT operator)",
@@ -81,7 +81,7 @@
     {
       "name": "B04 operator creates an intent (201)",
       "ok": true,
-      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xeab5f5b5484b5ef4c181ceddbed11bc18c5c591de91ca14fe9f6bb6d2c0fa624\",\"token\":\"0x5555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xb67d418be66546aec1f658b2407df658de62192e080d4b906b6bd44b54048e0d\",\"token\":\"0x5555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
     },
     {
       "name": "B05 intent records price $39 / v1, rate 0.00005 / v1 / effectiveAt",
@@ -211,7 +211,7 @@
     {
       "name": "B17 EIP-1271 contract-wallet operator (Safe) can request",
       "ok": true,
-      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xe3ef6e08e17621e75649e83b3d5acb4e0012d5cedbee1d475478f2aea4139b56\",\"token\":\"0x8111111111111111111111111111111111111111\",\"operatorAtRequest\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xdeb29d3f1fc9cb31b555dd880136c1090faa6cdf1b24d6be26f5a0deb7b88f91\",\"token\":\"0x8111111111111111111111111111111111111111\",\"operatorAtRequest\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
     },
     {
       "name": "B18 not a supported launch → 403/422, never an intent",
@@ -261,7 +261,7 @@
     {
       "name": "B27 an exact amount is never issued twice while reserved (collision → new tag)",
       "ok": true,
-      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x19556b4856961192feb32ad81b77538184905e65c7c4af0c2c30dcbf50e68921\",\"token\":\"0x8555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xa0a8cdca695b7f2d951d622f3effe85d15477b2bd5c7bc84e547d798c3b970a4\",\"token\":\"0x8555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
     },
     {
       "name": "C01 unknown requestId → 404",
@@ -351,7 +351,7 @@
     {
       "name": "C16 payment mined inside the lock but verified 2 h later → ACTIVE",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x75dffeb563ad2d5732f263d48525983caec87f300f4c96821bf1ddbab27c69c7\",\"logIndex\":0,\"blockNumber\":\"1008\",\"blockHash\":\"0x9ec978e83cdc32d06efb1bc9da21a04e6091a82c3e08a91f45567c94c981d13"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x9feaa45b83bd44cabe03906b41ddf2fe899dfcc5560d546e45d163f4e264b875\",\"logIndex\":0,\"blockNumber\":\"1008\",\"blockHash\":\"0x9ec978e83cdc32d06efb1bc9da21a04e6091a82c3e08a91f45567c94c981d13"
     },
     {
       "name": "C17 entitlement: kind paid, payer = gifting wallet, operatorAtActivation = history only",
@@ -401,7 +401,7 @@
     {
       "name": "C26 payment mined exactly at the lock boundary → ACTIVE",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x991995a18abf6516ee641c5b87960f9d6de7d2b4bbb314a9999a0eb558d3cf81\",\"logIndex\":0,\"blockNumber\":\"1010\",\"blockHash\":\"0x5493cd5d2880f017bf6dd8a78e6a63192350a55a90ad669acda8a53b54de83f"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x15e89a45f0ea3a296e6261b8b224ebfcbf84773eb78d8da98e4fc8e956ea0546\",\"logIndex\":0,\"blockNumber\":\"1010\",\"blockHash\":\"0x5493cd5d2880f017bf6dd8a78e6a63192350a55a90ad669acda8a53b54de83f"
     },
     {
       "name": "C27 fixture: second intent for T2 after the first expired",
@@ -426,7 +426,7 @@
     {
       "name": "C31 two projects racing for one payment: exactly one wins, the other 409 payment_already_used",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x8333333333333333333333333333333333333333\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x9d750353cf2a6725151387625765d05f5cf731aa2ed84ab1b40f2fec81bf30b2\",\"logIndex\":0,\"blockNumber\":\"1014\",\"blockHash\":\"0x721b9dacd5a8f5557344632edb47f6e92e44f20bdd511c32c72f5cf4e9691af"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x8333333333333333333333333333333333333333\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x1c0ce431be5b9f22d26de2e539b6c1de18697d9a908abe24ede08f6b006f4313\",\"logIndex\":0,\"blockNumber\":\"1014\",\"blockHash\":\"0x721b9dacd5a8f5557344632edb47f6e92e44f20bdd511c32c72f5cf4e9691af"
     },
     {
       "name": "C32 only one of the two projects is entitled",
@@ -501,7 +501,7 @@
     {
       "name": "C44 the re-included payment re-activates the same request (previous entitlement recorded)",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x75dffeb563ad2d5732f263d48525983caec87f300f4c96821bf1ddbab27c69c7\",\"logIndex\":0,\"blockNumber\":\"1019\",\"blockHash\":\"0xb4f256e9192069004e1855923588702e5ac97def62cb82e467feb60b8a44c64"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x9feaa45b83bd44cabe03906b41ddf2fe899dfcc5560d546e45d163f4e264b875\",\"logIndex\":0,\"blockNumber\":\"1019\",\"blockHash\":\"0xb8b5f18d5309fe925e579e549c32b322aa9e5684d06dc178c64ead60fab2ddf"
     },
     {
       "name": "C45 a payment awaiting SAFE blocks a second quote for the project (duplicate-payment guard)",
@@ -511,12 +511,12 @@
     {
       "name": "C46 …for a bounded time only (a payment that never confirms cannot lock the project forever)",
       "ok": true,
-      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x63c54163718afe7aae48fb327177da28230a65c071e61042172430e259aaa539\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x2ee8856821d7286b9c445d046ea07a1da9add01019719e0247d60fafe371d626\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":3900,\"priceUsd\":\"39.0"
     },
     {
       "name": "C47 the original payment (mined inside its lock) still activates once SAFE",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x5fa87ea419c1d9f857a39835ef5133d326c000dfcfc3faf0dcca1503e4c29269\",\"logIndex\":0,\"blockNumber\":\"1020\",\"blockHash\":\"0x59bed0e26f6810af5883f804fdbbc6e9ab383173c67a369147c0f26d945acc4"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xed351faaaaf70ab884304fd8213ca4918b8bb75ee6737051b4c3b473bbcbc8c4\",\"logIndex\":0,\"blockNumber\":\"1020\",\"blockHash\":\"0x59bed0e26f6810af5883f804fdbbc6e9ab383173c67a369147c0f26d945acc4"
     },
     {
       "name": "C48 after a reorg, a DIFFERENT late payment still cannot use the expired lock",
@@ -526,7 +526,7 @@
     {
       "name": "C49 the SAME transaction re-included after the lock re-activates (it was broadcast in time)",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x5fa87ea419c1d9f857a39835ef5133d326c000dfcfc3faf0dcca1503e4c29269\",\"logIndex\":0,\"blockNumber\":\"1023\",\"blockHash\":\"0xeba66ec714eac8d0c2138554fb0f5af796caedf6a51dcf4d36ee1a3238bccf0"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xed351faaaaf70ab884304fd8213ca4918b8bb75ee6737051b4c3b473bbcbc8c4\",\"logIndex\":0,\"blockNumber\":\"1023\",\"blockHash\":\"0xf9847716c01c6f72518b062b76b7ff071cc80784a06f7ebb786c9c31a4e0b5b"
     },
     {
       "name": "D01 publish without an activation → 402 activation_required",
@@ -561,7 +561,7 @@
     {
       "name": "D07 current operator + active entitlement + sanitised image → published",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x5e13cc119342769e4c590e500930bbdd69e6128cc3b4b404a15e71a7855f73e0\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790473906,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x555"
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x1a4f76e7fc67c0b0e3b0e5122d0abfacad2651405dcab016e7b3054f7cbe3538\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790474899,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x555"
     },
     {
       "name": "D08 /site/<token> renders 200 with the authority label",
@@ -666,7 +666,7 @@
     {
       "name": "D25 edits are free; nonce reuse → 409 replay",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xeb5e3183aba3def3e90631e882bf9da7156f4f8c73e0a4398ce12123be014dbb\",\"configHash\":\"0xfa8718f3222c0bc4d4c3ecfdd58489029d705692ce05354f71f01150b7843a18\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790473907,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x555"
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x4bf52f8ca321112132b31e32a7eb695dfdb8b91bae7396a10386e81852d363bf\",\"configHash\":\"0xfa8718f3222c0bc4d4c3ecfdd58489029d705692ce05354f71f01150b7843a18\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790474900,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x555"
     },
     {
       "name": "D26 issuedAt regression (older than the current revision) → 409 stale_issued_at",
@@ -701,17 +701,17 @@
     {
       "name": "D32 restore an earlier revision by configHash with a NEW signature (no payment)",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"restore\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x6b62e2249933ce3efa2d0160e8a77702b33b2ff434f9d12104cb93f1aaa3766f\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790473912,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x555"
+      "detail": "{\"ok\":true,\"kind\":\"restore\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x70aedfc0c3a4dd2a80b1f815b868574c8b316775e71e739f8c728f1a8a385c22\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790474905,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x555"
     },
     {
       "name": "D33 EIP-1271 contract-wallet operator publishes",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x8111111111111111111111111111111111111111\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x28c703f2030c8455dba4908bf9d790b66be7a53f9118a3034d6fbb451103a95b\",\"configHash\":\"0x75ea00f14cccf744a4566063a9967a3f30679609e42023f45c6bdc097403e72f\",\"signer\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"issuedAt\":1790473906,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x811"
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x8111111111111111111111111111111111111111\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x1e2c1774b0e728483ef6a753ef155cb92dc84b3c81a3c6a9d97196960ef7ad90\",\"configHash\":\"0x75ea00f14cccf744a4566063a9967a3f30679609e42023f45c6bdc097403e72f\",\"signer\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"issuedAt\":1790474899,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x811"
     },
     {
       "name": "E01 fixture: Passport of T1 transferred W → W2 via the Marketplace",
       "ok": true,
-      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x665cc4a99bad6dd865710bc747307b8ebab61126f30b3b2c3faa587b275618c4\",\"listingId\":\"0xd3963ebc9ef047a3da169a49ada576bf20905d5f3313826219d184dc45449d00\",\"offerId\":\"0xdc1558a06dc3cfa2399ff964d14a14749df5382a5f297415539c532d95256213\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x3dcec3fdd28a6c37d0d21e6b9c9e648a056d152b8eeda7b635e76c05e0721e83\",\"listingId\":\"0x7175c02dddf27e3d38ffa3251ecb8d97e186492814164ea5d526a7179965946a\",\"offerId\":\"0x65a07cb2f2a69f0b669035bd8dbeb7ad58a615446fcec84d6fe871555e7af286\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
     },
     {
       "name": "E02 site stays up, labelled PUBLISHED BY PREVIOUS OPERATOR · AWAITING CONFIRMATION",
@@ -741,7 +741,7 @@
     {
       "name": "E07 the new operator ADOPTS the exact current config with a new signature, free",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"adopt\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xc45f960c705442d787cca663905bb8f1fa988a4914d6af4fbda765daf259a382\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"issuedAt\":1790473929,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x55555"
+      "detail": "{\"ok\":true,\"kind\":\"adopt\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x67c1f922138142c1bd850e68005331fa09979c114a70f348a115a70cba2bfdd0\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"issuedAt\":1790474922,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x55555"
     },
     {
       "name": "E08 after adoption: authority label back, links clickable again",
@@ -796,12 +796,12 @@
     {
       "name": "F06 metrics: sink stage from the contract — in sink, actually burned, forwarded to converter; unsolicited 5 SYNC isolated",
       "ok": true,
-      "detail": "{\"address\":\"0x5111c0000000000000000000000000000000beef\",\"syncCurrentlyInSink\":\"6000000000000000000\",\"totalSettledSync\":\"6239999000003553133283808\",\"syncActuallyBurned\":\"3743999400002131879970284\",\"syncForwardedToTreasuryConverter\":\"2495999600001421253313524\",\"totalSyncReceivedBySink\":\"6240005000003553133283808\",\"unattributedInflow\":\"5000000000000000000\",\"unattributedNote\":\"SYNC received by the sin"
+      "detail": "{\"address\":\"0x5111c0000000000000000000000000000000beef\",\"syncCurrentlyInSink\":\"6000000000000000000\",\"totalSettledSync\":\"6239999000001991355322465\",\"syncActuallyBurned\":\"3743999400001194813193479\",\"syncForwardedToTreasuryConverter\":\"2495999600000796542128986\",\"totalSyncReceivedBySink\":\"6240005000001991355322465\",\"unattributedInflow\":\"5000000000000000000\",\"unattributedNote\":\"SYNC received by the sin"
     },
     {
       "name": "F06b metrics: converter stage read via the sink's immutable TREASURY_CONVERTER — awaiting, converted, real USDG out, delivered",
       "ok": true,
-      "detail": "{\"address\":\"0xc0417e2700000000000000000000000000000c0e\",\"treasury\":\"0x0000000000000000000000000000000000007ea5\",\"syncAwaitingConversion\":\"1248002800000710626656762\",\"syncActuallyConverted\":\"1247999800000710626656762\",\"usdgFromConversions\":\"12345678\",\"usdgDeliveredToTreasury\":\"12345778\",\"usdgDecimals\":6,\"unsolicitedSyncInflow\":\"3000000000000000000\",\"note\":\"usdgDeliveredToTreasury also includes any "
+      "detail": "{\"address\":\"0xc0417e2700000000000000000000000000000c0e\",\"treasury\":\"0x0000000000000000000000000000000000007ea5\",\"syncAwaitingConversion\":\"1248002800000398271064493\",\"syncActuallyConverted\":\"1247999800000398271064493\",\"usdgFromConversions\":\"12345678\",\"usdgDeliveredToTreasury\":\"12345778\",\"usdgDecimals\":6,\"unsolicitedSyncInflow\":\"3000000000000000000\",\"note\":\"usdgDeliveredToTreasury also includes any "
     },
     {
       "name": "F06c metrics: SYNC sent straight to the converter is isolated as unsolicited (3 SYNC)",
@@ -851,12 +851,12 @@
     {
       "name": "H02 a SAFE payment activates while the sink is unsettled and the converter unreachable",
       "ok": true,
-      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000003\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xa87f811f52d04d7fefae7b8a57d6dc8dbf08e8352728c85f2d87d539e63d5134\",\"logIndex\":0,\"blockNumber\":\"1024\",\"blockHash\":\"0x35ca6212ded863a71bb0400d6c5d40052ec5e78e763b2def487e4ecc139cc10"
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000003\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x1b8ed6d0886f7a778fd1e92519918deb086fd9e08728a31c9c999fd2560ad0c9\",\"logIndex\":0,\"blockNumber\":\"1024\",\"blockHash\":\"0x35ca6212ded863a71bb0400d6c5d40052ec5e78e763b2def487e4ecc139cc10"
     },
     {
       "name": "H03 …and the project can publish immediately (no conversion, no settlement required)",
       "ok": true,
-      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x7a11000000000000000000000000000000000003\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xac71c3ad0b4014d0381ce4d6e44cb3aeb7fb1038c037c2531ed221b74f2ec8c1\",\"configHash\":\"0x33ffede23d524927e74fdb85dfb8834fb035fb4b6f687a6775e755b2136aa07d\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790473906,\"at\":\"2026-09-27T01:51:46.000Z\"},\"url\":\"/site/0x7a1"
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x7a11000000000000000000000000000000000003\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xd6923ab6882dc4a673b624bfdbf5a8dad8be555596b9de3470faeb8b56a03b98\",\"configHash\":\"0x33ffede23d524927e74fdb85dfb8834fb035fb4b6f687a6775e755b2136aa07d\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790474899,\"at\":\"2026-09-27T02:08:19.000Z\"},\"url\":\"/site/0x7a1"
     },
     {
       "name": "H04 the customer payment is ONE canonical SYNC transfer to the sink (no approval, no burn, no USDG transaction)",

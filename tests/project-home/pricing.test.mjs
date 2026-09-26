@@ -85,8 +85,12 @@ const SINK = '0x' + '5e'.repeat(20);
 const durable = { durable: true };
 const ENV = { SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK };
 const T = Date.parse('2026-06-01T00:00:00Z');
-const gate = (env, extra = {}) => projectHomeConfig({ env, store: durable, file: good, now: () => T, ...extra });
+// P1-2: a fully configured gate also needs the sink to be a REVIEWED deployment (on-chain validation happens per quote).
+const REVIEWED_DEPLOYMENT = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-deployment.json'), 'utf8'));
+const reviewed = { ...REVIEWED_DEPLOYMENT, deployments: [{ sink: SINK, converter: '0x' + 'c0'.repeat(20) }] };
+const gate = (env, extra = {}) => projectHomeConfig({ env, store: durable, file: good, deploymentFile: reviewed, now: () => T, ...extra });
 check('fully configured → site and payments open', gate(ENV).siteEnabled && gate(ENV).paymentsEnabled);
+check('sink not in the reviewed deployments → payments closed (site unaffected)', gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).siteEnabled && !gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).paymentsEnabled && gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).sink === null);
 check('empty environment → everything closed', !projectHomeConfig({ env: {}, store: durable }).siteEnabled && !projectHomeConfig({ env: {}, store: durable }).paymentsEnabled);
 check('repo defaults (real pricing file, env set) → payments closed: no approved rate', !projectHomeConfig({ env: ENV, store: durable, now: () => T }).paymentsEnabled);
 check('no durable store → closed', !projectHomeConfig({ env: ENV, store: { durable: false }, file: good, now: () => T }).siteEnabled);

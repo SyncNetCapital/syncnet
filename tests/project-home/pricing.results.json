@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-26T14:26:29.066Z",
-  "passed": 81,
+  "at": "2026-09-26T16:34:56.676Z",
+  "passed": 82,
   "failed": 0,
   "results": [
     {
@@ -305,6 +305,11 @@
     },
     {
       "name": "fully configured → site and payments open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink not in the reviewed deployments → payments closed (site unaffected)",
       "ok": true,
       "detail": ""
     },
