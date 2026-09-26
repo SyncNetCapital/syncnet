@@ -161,10 +161,12 @@ let LISTING_ID = '';
   check('Project Page: origin, pair, status, contract, Passport operator shown', /PONS V2 · ON-CHAIN VERIFIED/.test(card) && /USDG/.test(card) && /BONDING CURVE/.test(card) && card.includes(PONS) && /SYNCNET OPERATOR/.test(card));
   check('Project Page: the listing is linked with its real status (in a deal → OFFER ACCEPTED, not "for sale")', /LISTING · OFFER ACCEPTED/.test(card) && !/FOR SALE/.test(card) && Boolean(await P.page.$('#tokenCard a[href^="/marketplace.html#listing="]')));
   check('Project Page: no PAR analytics or PAR builder action for Pons', !/Direct markets · read from the PAR factory/.test(card) && !(await P.page.$('#tokenCard a[href^="/build.html?with="]')));
+  check('J Project Page: no PAR-indexer-derived market/project counts for Pons', !/using this contract as a market/i.test(card) && !/PAR launches using/i.test(card) && !/\(indexer\)/i.test(card) && !/NETWORK HUB/.test(card), card.slice(0, 400));
   check('Project Page: no page errors', P.page.__errors.length === 0, P.page.__errors.join(' | '));
   await shot(P.page, 'pons-05-project-page');
   await P.page.goto(BASE + '/project/' + lc(A.CREATORLIVE)); await P.page.waitForTimeout(2500);
   check('1 PAR Project Page unchanged (PAR LAUNCH · FACTORY RECORD ON-CHAIN)', /PAR LAUNCH · FACTORY RECORD ON-CHAIN/.test(await text(P.page, '#tokenCard')));
+  check('J PAR Project Page keeps its indexer facts (Projects using this token as a market)', /Projects using this token as a market/i.test(await text(P.page, '#tokenCard')));
   await P.c.close();
 }
 check('no page errors in the seller browser', S.page.__errors.length === 0, S.page.__errors.join(' | '));

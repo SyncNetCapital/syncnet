@@ -11,6 +11,7 @@ The Project Marketplace is now launchpad-agnostic, with two supported origins: *
   EIP-712 domain and structures unchanged; legacy records read as PAR without migration.
 - UI: automatic origin detection in SELL A PROJECT, LIVE PAR / LIVE PONS PROJECT badges, Pons PAIR/STATUS facts, ALL/PAR/PONS
   filter over the one shared market, "SUPPORTED ORIGINS · PAR · PONS V2"; Project Pages show a Pons V2 origin block.
+  Pons Project Pages show no PAR-indexer-derived market/project counts (PAR pages unchanged).
 - **Passport authority fix (PAR and Pons):** deployer / fee-recipient evidence only establishes the FIRST Passport; afterwards only
   the recognised operator may claim (refresh) and control changes only via the signed Marketplace transfer. The retired
   fee-recipient takeover (`operator-superseded`) let a seller who sold only the Passport take it back; legacy entries stay
