@@ -17,7 +17,9 @@
  *  - NON-CUSTODIAL: this function never holds funds, never asks for approvals, never fakes settlement.
  *    ETH payments are verified from a submitted transaction hash against the chain (buyer -> seller,
  *    value >= agreed price); everything off-chain needs explicit both-party confirmation.
- * Passport operator history is APPEND-ONLY: operators are superseded, never deleted.
+ * Passport operator history is APPEND-ONLY. Claims only establish the FIRST Passport or refresh the current operator;
+ * the operator changes only through the two-signature Marketplace transfer. Historical 'operator-superseded' entries
+ * (from the retired fee-recipient takeover rule) stay readable and are annotated as conferring no authority.
  */
 const Core = require('../../lib/syncnet-core.js');
 const Chain = require('../../lib/syncnet-chain.js');
@@ -130,7 +132,11 @@ const publicListing = (l) => l && {
   snapshot: l.snapshot, feeRight: l.feeRight, operatorVerified: true,
 };
 const publicOffer = (o, l) => o && { id: o.id, listingId: o.listingId, token: o.token, buyer: o.buyer, amount: o.amount, currency: o.currency, status: offerStatus(o, l), expiry: o.expiry, createdAt: o.createdAt, decidedAt: o.decidedAt || null };
-const publicPassport = (p) => p && { ...p, recordHash: Market.hashJson({ token: p.token, operator: p.operator, history: p.history }) };
+// Historical 'operator-superseded' entries (retired fee-recipient takeover rule) are shown as history only. The
+// annotation is added to the public VIEW; the stored record and its recordHash are computed from the untouched history.
+const LEGACY_SUPERSESSION = 'Recorded under a retired rule that let the creator-fee recipient take over the Passport. Kept as history; it grants no authority today.';
+const annotateHistory = (h) => (Array.isArray(h) ? h.map((e) => (e && e.type === 'operator-superseded' ? { ...e, legacy: true, note: LEGACY_SUPERSESSION } : e)) : h);
+const publicPassport = (p) => p && { ...p, history: annotateHistory(p.history), recordHash: Market.hashJson({ token: p.token, operator: p.operator, history: p.history }) };
 function publicDeal(d) {
   if (!d) return null;
   return { ...d, completeHash: Market.completeHash(d), checklistState: Market.checklistState(d) };
@@ -268,6 +274,14 @@ async function write(b, ctx) {
     else if (b.basis === 'fee-recipient' && operator === lc(live.launch.creatorFeeRecipient) && live.feeRight.kind === 'wallet') evidence = 'wallet is the current on-chain creator-fee recipient';
     else if (b.basis === 'operator' && passport && lc(passport.operator) === operator) evidence = 'wallet is the already-recognised SyncNet operator';
     if (!evidence) return publicError(422, 'no_evidence', 'This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).');
+    // PASSPORT AUTHORITY: deployer / fee-recipient evidence can only ESTABLISH the first Passport. Once a Passport
+    // exists, only its recognised operator may claim again (refresh). Operational control then changes ONLY through
+    // the signed Marketplace transfer (seller TransferIntent + buyer TransferAccept); holding or receiving the
+    // creator-fee right on-chain never moves it. Refused before the nonce is consumed.
+    if (passport && lc(passport.operator) !== operator) {
+      log(FN, 'claim-refused-operator-exists', { token, basis: b.basis });
+      return publicError(409, 'operator_exists', 'An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.');
+    }
     if (!(await consumeNonce(store, operator, b.nonce))) return publicError(409, 'replay', 'This nonce was already used.');
     const claim = { id: Market.digest('OperatorClaim', message), operator, basis: b.basis, evidence, signature: b.signature, nonce: lc(b.nonce), expiry, at: iso() };
     let p = passport;
@@ -277,12 +291,8 @@ async function write(b, ctx) {
       p.claims = [...(p.claims || []), claim].slice(-20);
       p.history = [...p.history, { type: 'operator-claim-refresh', operator, basis: b.basis, claimId: claim.id, at: claim.at }];
       p.updatedAt = iso();
-    } else if (b.basis === 'fee-recipient') {
-      // the fee right verifiably moved on-chain to this wallet: supersede, never delete (append-only history)
-      p.history = [...p.history, { type: 'operator-superseded', from: p.operator, to: operator, basis: 'fee-recipient', evidence, claimId: claim.id, at: claim.at }];
-      p.operator = operator; p.operatorSince = claim.at; p.claims = [...(p.claims || []), claim].slice(-20); p.updatedAt = iso();
     } else {
-      return publicError(409, 'operator_exists', 'An operator is already recognised for this project. Acquire it through a Marketplace transfer.');
+      return publicError(409, 'operator_exists', 'An operator is already recognised for this project.'); // unreachable: refused above
     }
     await putJson(store, K.passport(token), p);
     await indexWallet(store, operator, 'P:' + token);

@@ -1,3 +1,13 @@
+# Security fix: Project Passport authority (main): 26 Sep 2026
+
+- **Fixed:** a seller who sold only the Project Passport (creator-fee right not included) could make a fee-recipient claim
+  and supersede the buyer (`operator-superseded`), taking operational control back. Deployer / fee-recipient evidence now
+  only establishes the FIRST Passport; afterwards only the recognised operator may claim (refresh), any other wallet gets
+  `409 operator_exists` before its nonce is consumed, and the operator changes only through the signed Marketplace transfer
+  (TransferIntent + TransferAccept). Legacy `operator-superseded` entries stay readable and are annotated as granting no
+  authority. EIP-712 structures and settlement unchanged. Client no longer invites a conflicting wallet to sign a claim.
+- Tests: `tests/server/passport-authority.test.mjs` (36 checks; 16 fail on the unpatched code).
+
 # V2.5 Economies V0 (`feature/syncnet-economies-v0`): 25 Sep 2026
 
 Additive. Marketplace, Registry, the launch engine, LaunchIntent and the send path are untouched.

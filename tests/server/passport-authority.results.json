@@ -1,0 +1,186 @@
+{
+  "passed": 36,
+  "failed": 0,
+  "results": [
+    {
+      "name": "EIP-712 domain unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "EIP-712 OperatorClaim digest vector unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "EIP-712 Listing digest vector unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "first Passport via the current wallet creator-fee recipient",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8000000000000000000000000000000000000000\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x1234567890123456789012345678901234567890\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:40:27.268Z\",\"claims\":[{\"id\":\"0x90c96674057b0a8d306f745a92ad64678425097ada9c73050"
+    },
+    {
+      "name": "first Passport via the on-chain deployer (evidence text unchanged)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:40:27.280Z\",\"claims\":[{\"id\":\"0x369208ff26cde192b33179036ab03dcda8d9a5718484657a7"
+    },
+    {
+      "name": "current operator refresh (basis operator)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:40:27.280Z\",\"claims\":[{\"id\":\"0x369208ff26cde192b33179036ab03dcda8d9a5718484657a7"
+    },
+    {
+      "name": "current operator refresh with its deployer evidence",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T07:40:27.280Z\",\"claims\":[{\"id\":\"0x369208ff26cde192b33179036ab03dcda8d9a5718484657a7"
+    },
+    {
+      "name": "a different deployer cannot reclaim an existing Passport (409 operator_exists)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "a new creator-fee recipient cannot reclaim an existing Passport (409)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "refusals write nothing (no operator-superseded entry)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "buyer is operator after the signed Marketplace transfer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "seller still holds the (unsold) fee right on-chain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "seller who kept the fee right cannot reclaim (basis fee-recipient)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "seller who kept the fee right cannot reclaim (basis deployer)",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "seller who kept the fee right cannot reclaim (basis operator)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "setup: seller later moved the fee right to a third wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the new fee recipient cannot take the Passport either",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "buyer remains operator and can refresh",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x8222222222222222222222222222222222222222\",\"chainId\":4663,\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"operatorSince\":\"2026-09-26T07:40:27.335Z\",\"claims\":[{\"id\":\"0xf8cedf2038df4db8b52962adf53ea72e5797e7a2d0645269b"
+    },
+    {
+      "name": "history: operator-transfer present, no operator-superseded",
+      "ok": true,
+      "detail": "operator-claim,listed,operator-transfer,operator-claim-refresh"
+    },
+    {
+      "name": "deal window setup: buyer operator, fee-right step pending, seller still recipient",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "deal window: seller cannot reclaim with still-current fee-recipient status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "deal window: seller cannot reclaim with still-current deployer status",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "deal window: the included fee right then settles normally (unchanged behaviour)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0x9908cf141d9bceaa4c201975aa429470d78913a625d93737bf556399ba41fc90\",\"listingId\":\"0x3d587781449620a87b901b55e16937f2680f86e0f5df33c6f5354e8a0e29cbb3\",\"offerId\":\"0x53fa955bf1267e013b3a226ddfaed7b8feb257cb5021215cdaed68af62f7484b\",\"token\":\"0x8333333333333333333333333333333333333333\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "rejected takeover answers 409 operator_exists",
+      "ok": true,
+      "detail": "{\"error\":\"An operator is already recognised for this project. Operational control changes only through a Marketplace Passport transfer signed by the current operator and the new one; creator-fee rights do not transfer it.\",\"code\":\"operator_exists\"}"
+    },
+    {
+      "name": "rejected takeover did not consume the nonce (no nonce record written)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the same nonce is still usable for a later legitimate action",
+      "ok": true,
+      "detail": "{\"ok\":true,\"listing\":{\"id\":\"0xc80ce27a2e815f83ff935d22df10356321720168a5488e30cf2c6d4a9dccbfa4\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"price\":\"2\",\"currency\":\"USD\",\"terms\":{\"description\":\"Another project of the same wallet, listed with the same nonce.\",\"included\":[],\"notIncluded\":[],\"includeFeeRight\":false},\"termsHash\":\"0x28c89a86"
+    },
+    {
+      "name": "PAR vault fee recipient still gives no claim (422 no_evidence)",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "unrelated wallet still 422 no_evidence",
+      "ok": true,
+      "detail": "{\"error\":\"This wallet could not prove a claimable relationship (deployer, current fee-recipient wallet, or recognised operator).\",\"code\":\"no_evidence\"}"
+    },
+    {
+      "name": "non-PAR token still 422 not_par",
+      "ok": true,
+      "detail": "{\"error\":\"This address is not a PAR launch, so it cannot be claimed.\",\"code\":\"not_par\"}"
+    },
+    {
+      "name": "signature check still first (401 for a wrong signer)",
+      "ok": true,
+      "detail": "{\"error\":\"The signature does not verify for this claim.\",\"code\":\"bad_signature\"}"
+    },
+    {
+      "name": "historical record readable: operator as recorded, full history present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "historical operator-superseded entry annotated as granting no authority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "stored record untouched (no rewrite, no migration)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "recordHash still over the untouched stored history",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no code path writes an operator-superseded entry",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "existing-operator refusal precedes nonce consumption",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
