@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T18:10:51.820Z",
+  "at": "2026-09-26T19:53:41.379Z",
   "failures": 0,
   "results": [
     {
@@ -360,7 +360,7 @@
     {
       "name": "simulation passed",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x007c0C83C7B74Ee4a7458004f580F6FE1D9255b3\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 2.5%\nPAR base fee: 1% · protocol "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xAdb5d7932ae4B2f301eCa104c663c2069d10BD25\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 2.5%\nPAR base fee: 1% · protocol "
     },
     {
       "name": "sim: creator recipient = connected wallet in calldata",
@@ -455,7 +455,7 @@
     {
       "name": "founder: sim + metadata preflight pass",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x48cE515A892f7B2c48636311f04ab61Af69950ab\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → Creator / operator wallet: 0x2c753"
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x07de81B46Fc44D8aBA9B801C5D6B82A5d01Cab4E\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → Creator / operator wallet: 0x2c753"
     },
     {
       "name": "founder: launch locked before signature",
@@ -495,7 +495,7 @@
     {
       "name": "founder: live launch confirmed + verified",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xf177e215b03c1770be7d431528eb103aff4a03f0\nTransaction: 0x5bc16756ad3ee1c84b2841771bbf594e95eb7a5272223cc89cdff1ea4ed39384\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x2001459fd9f11462bf8ae14e3c3c7c5c0a4c5649eb7fbd84e2e82e68bf4568b4 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — exp"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x584232371de2b4bd79686f116d60756c2c0f292c\nTransaction: 0xc2c04795213840532d5b84b3c8d828adef978a92583de5769595935f7e512e59\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x790a7e1fa3893667d4ef235dbccf853099e481d9efc4f32594b7073e04299d86 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — exp"
     },
     {
       "name": "founder: tx carries explicit chainId",
@@ -535,7 +535,7 @@
     {
       "name": "mismatch: factory record failure surfaced, tx hash kept",
       "ok": true,
-      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0xd068d5197ba2c308ed72b2373c56b1d466c02f66\nTransaction: 0xdbed7d1ce693299a4b5d4dc768ae923b7ffef4daa5f886a78a8ffd33dfb425a8\nState: MINED\nOn-chain factory record + markets + metadata: MISMATCH in Creator-fee recipient — do not launch again; inspec"
+      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0x63a8b278a662ddb65e0fecc862e08fa24d8ac82f\nTransaction: 0x9678b3df704a5935bfc983ec38254455c4681698d98752ca3c0fdaab7102adb0\nState: MINED\nOn-chain factory record + markets + metadata: MISMATCH in Creator-fee recipient — do not launch again; inspec"
     },
     {
       "name": "mismatch: further launches locked",
@@ -775,7 +775,7 @@
     {
       "name": "buy: simulation passes through PAR router",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xA9980E93978A7AA5CE4d055Ba13CDa6a45e1D031\nMarkets: BUYT / SYNC · BUYT / PONS\nPAR launch fee: 0.0001 ETH\nOpening buy: 0.05 ETH → ≈20,000,000 BUYT (2.0% of supply) · minimum 19,800,000 · via PAR router 0x458D2a59c2F3dd32775a64eE72004561440d64Df\nSent from wallet: 0.0501 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → C"
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xD2aab6f417458095EA4a41732F54fE5E175B7140\nMarkets: BUYT / SYNC · BUYT / PONS\nPAR launch fee: 0.0001 ETH\nOpening buy: 0.05 ETH → ≈20,000,000 BUYT (2.0% of supply) · minimum 19,800,000 · via PAR router 0x458D2a59c2F3dd32775a64eE72004561440d64Df\nSent from wallet: 0.0501 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → C"
     },
     {
       "name": "buy: two legs, equal split, sum = buy",
@@ -855,7 +855,7 @@
     {
       "name": "buy: launch confirmed + verified through router path",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xe99dfe777b012b91870d0c0032aae0ced399db70\nTransaction: 0xb1cf22c5fede27385d7790001370b294585e511b25816db60f7c509a67e63583\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0x33992474879d2d0d4d0134554193370563a0c905"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x7ec572fa7e9deb05d307140d2cd573ff0c3d6f74\nTransaction: 0x90589cae0d8235c1148336c8870ba1af1e0c512be123dec2550e513ca3d7f627\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xe85301486f4e6cada90d2eafbcf90eb53a12f744"
     },
     {
       "name": "buy: tx sent to router with fee + buy",
@@ -865,7 +865,7 @@
     {
       "name": "buy: post-launch balance meets minimum",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xe99dfe777b012b91870d0c0032aae0ced399db70\nTransaction: 0xb1cf22c5fede27385d7790001370b294585e511b25816db60f7c509a67e63583\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0x33992474879d2d0d4d0134554193370563a0c905e4eeb5d1fed9c0cc2a87aa13 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — export the proof and add it to syncnet-projects.json to publish.\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x7ec572fa7e9deb05d307140d2cd573ff0c3d6f74\nTransaction: 0x90589cae0d8235c1148336c8870ba1af1e0c512be123dec2550e513ca3d7f627\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xe85301486f4e6cada90d2eafbcf90eb53a12f744eefb7a887cf665b38edf6ec9 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — export the proof and add it to syncnet-projects.json to publish.\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
     },
     {
       "name": "buy: record holds the opening buy, the exact value and the met minimum",
@@ -935,7 +935,7 @@
     {
       "name": "rehearsal: full launch confirmed on fork",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xcb486f243adbbbf08a5bbd7eabcea991fca4d126\nTransaction: 0x9539f6913e3c33b12266e1840bfa521a834d77ee150260a12ad559f550b53ada\nState: INDEXER_PENDING\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: pending (on-chain is authoritative; RE-VERIFY later "
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xe46f0b17f55c7ef107afa7c257789b9f65ce64c6\nTransaction: 0xdb9b3059e65a1af32021a0fbbcd36e1e23d98e7c267ab9d9fb0ea7dbc340e70e\nState: INDEXER_PENDING\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: pending (on-chain is authoritative; RE-VERIFY later "
     },
     {
       "name": "rehearsal: tx chainId is the fork",

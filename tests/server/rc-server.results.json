@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T18:07:35.757Z",
+  "at": "2026-09-26T19:50:31.839Z",
   "failures": 0,
   "passed": 82,
   "total": 82,
@@ -62,7 +62,7 @@
     {
       "name": "upload-auth: challenge issued (wallet, purpose, expiry, nonce, MAC)",
       "ok": true,
-      "detail": "SyncNet upload session\nWallet: 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\nPurpose: image upload for a token launch\nExpires: 1790446654\nNonce: 709feb8abc445640\nCheck: 0704a90ce25912e9ea9b63e0365409e8298c2686582139735deb23692f6ce306"
+      "detail": "SyncNet upload session\nWallet: 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\nPurpose: image upload for a token launch\nExpires: 1790452830\nNonce: 53bf234ce985b363\nCheck: ff7e71a8d1cfa8a99ebc977066f18eca49b421f1e8568b417d89e72f302a195f"
     },
     {
       "name": "upload-auth: valid signature → 30-minute wallet session bound to that wallet",
@@ -352,7 +352,7 @@
     {
       "name": "registry: a proof that verifies on-chain is published",
       "ok": true,
-      "detail": "{\"status\":\"VERIFIED\",\"token\":\"0x52590b887ab62504579db14689b3b0e313b565f0\"}"
+      "detail": "{\"status\":\"VERIFIED\",\"token\":\"0x2d1a7a245c0ca5cba2f57402143b771bd087f565\"}"
     },
     {
       "name": "registry: GET lists it with the proof material for live re-verification",

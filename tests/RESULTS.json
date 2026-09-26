@@ -1,7 +1,7 @@
 {
-  "at": "2026-09-26T18:19:55.682Z",
+  "at": "2026-09-26T20:02:51.997Z",
   "node": "v22.22.2",
-  "site": "sha256:729c59b79475e237ca0f83e9a6ede82281aee821ad3c4db1a2236561dd73e6b9 (92 deployable files)",
+  "site": "sha256:6ef5811c92985e7065e6ff24ae55147b273ef7eb8d735ebfbca62e03f5a4e8b2 (92 deployable files)",
   "suites": [
     {
       "suite": "static audit",
@@ -14,14 +14,14 @@
       "suite": "core unit (keccak, secp256k1, EIP-712, ABI, text policy)",
       "command": "node tests/unit/core.test.mjs",
       "exit": 0,
-      "seconds": 4,
+      "seconds": 5,
       "summary": "333 passed, 0 failed"
     },
     {
       "suite": "image sanitizer",
       "command": "node tests/server/image-sanitize.test.mjs",
       "exit": 0,
-      "seconds": 6,
+      "seconds": 7,
       "summary": "129 passed, 0 failed"
     },
     {
@@ -91,35 +91,35 @@
       "suite": "audit PoCs · server (AFTER)",
       "command": "node tests/audit/poc-server.mjs",
       "exit": 0,
-      "seconds": 1,
+      "seconds": 0,
       "summary": "0/11 reproduced"
     },
     {
       "suite": "audit PoCs · pages (AFTER)",
       "command": "node tests/audit/poc-e2e.mjs",
       "exit": 0,
-      "seconds": 54,
+      "seconds": 52,
       "summary": "0/35 vulnerability checks reproduced"
     },
     {
       "suite": "E2E (existing product suites, updated)",
       "command": "node tests/e2e/run.mjs",
       "exit": 0,
-      "seconds": 126,
+      "seconds": 122,
       "summary": "320/320 checks passed"
     },
     {
       "suite": "required regressions R01–R28",
       "command": "node tests/regression/rc-regressions.mjs",
       "exit": 0,
-      "seconds": 230,
+      "seconds": 237,
       "summary": "206/206 regression checks passed"
     },
     {
       "suite": "IPFS display (canonical utility, PONSYNC CID)",
       "command": "node tests/regression/rc-ipfs-display.mjs",
       "exit": 0,
-      "seconds": 11,
+      "seconds": 12,
       "summary": "23/23 ipfs-display checks passed"
     },
     {
@@ -154,7 +154,7 @@
       "suite": "mobile 320/360/390/430",
       "command": "node tests/regression/rc-mobile.mjs",
       "exit": 0,
-      "seconds": 71,
+      "seconds": 68,
       "summary": "112/112 mobile checks passed"
     },
     {
@@ -210,21 +210,21 @@
       "suite": "Project Home · payment deployment validation (P1-2, adversarial)",
       "command": "node tests/project-home/deployment.test.mjs",
       "exit": 0,
-      "seconds": 1,
+      "seconds": 0,
       "summary": "104/104 deployment validation checks passed"
     },
     {
       "suite": "Project Home · code identity (immutable-aware fingerprints vs fresh build)",
       "command": "node tests/project-home/code-fingerprint.mjs",
       "exit": 0,
-      "seconds": 5,
+      "seconds": 4,
       "summary": "8/8 code fingerprint checks passed"
     },
     {
       "suite": "Phase 2 UI · Explore, Project Page, You, Project Home editor/payment/adoption",
       "command": "node tests/e2e/phase2-ui.mjs",
       "exit": 0,
-      "seconds": 74,
+      "seconds": 75,
       "summary": "157/157 phase 2 UI checks passed"
     }
   ]
