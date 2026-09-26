@@ -134,8 +134,9 @@
 
   function economyRow() {
     const e = S.economy;
-    if (!e || (!e.curator && !(e.recognized && e.recognized.length))) return '';
-    const n = (e.recognized || []).length;
+    const n = e && e.recognized ? e.recognized.length : 0;
+    // Meaningful when projects are recognised, or when this operator (the curator) has connected projects to curate.
+    if (!e || !(n || (role() === 'operator' && (P.usedBy || 0) > 0))) return '';
     const who = e.curator && e.curator.address ? `Curated by <span class="sn-mono">${esc(short(e.curator.address))}</span>` : 'No curator yet';
     return rowHtml('economy', 'Economy', `<span class="sn-num">${n}</span> recognised project${n === 1 ? '' : 's'}<small>${who}</small>`, `<a href="/economy.html?root=${esc(P.token)}">View economy →</a>`);
   }

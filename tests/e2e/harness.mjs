@@ -500,6 +500,16 @@ function upstashExec(cmd) {
     case 'DEL': return U.delete(key) ? 1 : 0;
     case 'SADD': { const e = live(key) || { set: new Set(), exp: 0 }; const had = e.set.has(rest[0]); e.set.add(rest[0]); U.set(key, e); return had ? 0 : 1; }
     case 'SMEMBERS': { const e = live(key); return e && e.set ? [...e.set] : []; }
+    case 'EVAL': {
+      // Emulates netlify/lib/store.js CAS_SCRIPT exactly (the only script SyncNet runs): all-or-nothing compare-and-set.
+      // JS is single-threaded here, so the whole block runs without interleaving, like Redis running the Lua script.
+      const n = Number(rest[0]); const keys = rest.slice(1, 1 + n); const argv = rest.slice(1 + n); // key = the script text
+      const [ne, ns, na] = argv.slice(0, 3).map(Number); let a = 3;
+      for (let i = 0; i < ne; i++) { const e = live(keys[i]); const cur = e && !e.set ? e.v : null; const mode = argv[a], want = argv[a + 1]; a += 2; if (mode === 'nil' ? cur !== null : cur !== want) return 0; }
+      for (let i = 0; i < ns; i++) { const ttl = Number(argv[a + 1]); U.set(keys[ne + i], { v: argv[a], exp: ttl > 0 ? t + ttl * 1000 : 0 }); a += 2; }
+      for (let i = 0; i < na; i++) { const k = keys[ne + ns + i]; const e = live(k) || { set: new Set(), exp: 0 }; e.set.add(argv[a]); U.set(k, e); a += 1; }
+      return 1;
+    }
     default: return null;
   }
 }

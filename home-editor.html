@@ -1,0 +1,60 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0c0b"><title>Project Home — SyncNet</title><meta name="description" content="Edit, preview, activate and publish a Project Home."><meta name="robots" content="noindex"><link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png"></head><body class="sn-editor">
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><img src="/assets/syncnet-logo-thumb.webp" width="28" height="28" alt=""><span>SyncNet</span></a><form class="sn-top-search" action="/" method="get" role="search"><input name="q" aria-label="Search projects by name, ticker or contract" placeholder="Search name, ticker or contract" autocomplete="off" spellcheck="false"><button type="submit" aria-label="Open">→</button></form><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<main class="sn-main" id="main"><div class="sn-wrap">
+<a class="sn-back" id="heBack" href="/">← Project</a>
+<header class="he-head"><h1 class="sn-h2 he-title" id="heTitle">Project Home</h1>
+<ol class="sn-steps" id="heSteps" aria-label="Progress"><li data-step="edit" aria-current="step">1 · Edit</li><li data-step="activate">2 · Activate</li><li data-step="publish">3 · Publish</li></ol></header>
+<p class="sn-status" id="heStatus" role="status" aria-live="polite"></p>
+<div id="heGate" class="sn-panel" hidden></div>
+
+<section id="heReview" class="he-review" hidden aria-labelledby="heReviewTitle">
+<h2 class="sn-h2" id="heReviewTitle">Review &amp; adopt</h2>
+<p class="sn-dim" id="heReviewNote"></p>
+<div class="he-bar"><button class="sn-btn primary" type="button" id="heAdopt">ADOPT HOME</button><button class="sn-textbtn" type="button" id="heEditInstead">Edit instead</button></div>
+<p class="sn-small sn-muted">Adopting signs this exact version with your wallet. It is free: no payment and no transaction.</p>
+</section>
+
+<div class="he-grid" id="heGrid" hidden>
+<form class="he-controls" id="heForm" novalidate>
+<fieldset class="he-group"><legend>Style</legend>
+<div class="he-field"><span class="he-label" id="lblPreset">Preset</span><div class="he-seg" role="radiogroup" aria-labelledby="lblPreset">
+<label><input type="radio" name="preset" value="CLEAN" checked><span>Clean</span></label><label><input type="radio" name="preset" value="DARK"><span>Dark</span></label><label><input type="radio" name="preset" value="TERMINAL"><span>Terminal</span></label></div></div>
+<div class="he-field"><label class="he-label" for="heAccent">Accent</label><select class="sn-select" id="heAccent" name="accent"><option value="BLUE">Blue</option><option value="GREEN">Green</option><option value="AMBER">Amber</option><option value="RED">Red</option><option value="VIOLET">Violet</option><option value="SLATE">Slate</option></select></div>
+</fieldset>
+<fieldset class="he-group"><legend>Content</legend>
+<div class="he-field"><label class="he-label" for="heHeadline">Headline</label><input class="sn-input" id="heHeadline" name="headline" maxlength="80" autocomplete="off"><span class="he-hint" id="heHeadlineCount">0 / 80</span></div>
+<div class="he-field"><label class="he-label" for="heAbout">About</label><textarea class="sn-textarea" id="heAbout" name="about" maxlength="800" rows="6"></textarea><span class="he-hint" id="heAboutCount">0 / 800 · plain text · a blank line starts a new paragraph</span></div>
+<div class="he-field he-image" data-kind="logo"><span class="he-label">Logo</span><div class="he-img-row"><span class="he-img-name" id="heLogoName">None</span><label class="sn-btn he-file"><input type="file" accept="image/png,image/jpeg,image/gif,image/webp" id="heLogoFile" class="sr-only">Upload</label><button type="button" class="sn-textbtn sn-small" data-clear="logoCid">Remove</button></div></div>
+<div class="he-field he-image" data-kind="hero"><span class="he-label">Hero image</span><div class="he-img-row"><span class="he-img-name" id="heHeroName">None</span><label class="sn-btn he-file"><input type="file" accept="image/png,image/jpeg,image/gif,image/webp" id="heHeroFile" class="sr-only">Upload</label><button type="button" class="sn-textbtn sn-small" data-clear="heroCid">Remove</button></div></div>
+<p class="he-hint" id="heImgNote">Images are re-encoded by SyncNet’s sanitizer before they can appear on a Project Home.</p>
+</fieldset>
+<fieldset class="he-group"><legend>Links</legend>
+<div class="he-field"><label class="he-label" for="heCtaLabel">Button</label><select class="sn-select" id="heCtaLabel"><option value="">No button</option><option>TRADE</option><option>BUY</option><option>VIEW APP</option><option>READ DOCS</option><option>JOIN COMMUNITY</option><option>LEARN MORE</option></select></div>
+<div class="he-field"><label class="he-label" for="heCtaUrl">Button link</label><input class="sn-input" id="heCtaUrl" type="url" inputmode="url" placeholder="https://" autocomplete="off" spellcheck="false"></div>
+<div class="he-field"><label class="he-label" for="heX">X handle</label><input class="sn-input" id="heX" data-social="x" placeholder="@handle" autocomplete="off" spellcheck="false"></div>
+<div class="he-field"><label class="he-label" for="heTelegram">Telegram</label><input class="sn-input" id="heTelegram" data-social="telegram" placeholder="@channel" autocomplete="off" spellcheck="false"></div>
+<div class="he-field"><label class="he-label" for="heDiscord">Discord invite code</label><input class="sn-input" id="heDiscord" data-social="discord" placeholder="invite-code" autocomplete="off" spellcheck="false"></div>
+<div class="he-field"><label class="he-label" for="heFarcaster">Farcaster</label><input class="sn-input" id="heFarcaster" data-social="farcaster" placeholder="name" autocomplete="off" spellcheck="false"></div>
+</fieldset>
+<fieldset class="he-group"><legend>Sections</legend>
+<div class="he-checks"><label><input type="checkbox" data-section="hero" checked> Hero</label><label><input type="checkbox" data-section="about" checked> About</label><label><input type="checkbox" data-section="tokenFacts" checked> Token facts</label><label><input type="checkbox" data-section="origin" checked> Origin / markets</label><label><input type="checkbox" data-section="socials" checked> Socials</label><label><input type="checkbox" data-section="passport" checked> Project Passport</label></div>
+</fieldset>
+<ul class="he-errors" id="heErrors" aria-live="polite"></ul>
+</form>
+<div class="he-preview" aria-labelledby="hePreviewLabel"><p class="sn-label" id="hePreviewLabel">Preview · not published</p><iframe id="hePreview" sandbox="allow-same-origin" title="Preview of this Project Home. Not published." referrerpolicy="no-referrer"></iframe></div>
+</div>
+
+<div class="he-bar" id="heBar" hidden><button class="sn-btn primary" type="button" id="hePrimary">Continue</button><button class="sn-textbtn" type="button" id="heUnpublish" hidden>Unpublish</button><span class="sn-small sn-muted" id="heBarNote"></span></div>
+
+<section class="he-pay" id="hePay" hidden aria-labelledby="hePayTitle">
+<h2 class="sn-h2" id="hePayTitle">Activate Project Home</h2>
+<p class="he-price"><span class="sn-price">$39</span> <span class="sn-label">One-time</span></p>
+<p class="sn-dim">Pay with $SYNC · 60% burned · 40% converted to USDG for SyncNet treasury</p>
+<ol class="sn-steps" id="hePaySteps" aria-label="Payment progress"><li data-p="quote">Quote ready</li><li data-p="seen">Payment seen</li><li data-p="active">Activated</li><li data-p="final">Finalized</li></ol>
+<div id="heQuote"></div>
+<p class="sn-status" id="hePayStatus" role="status" aria-live="polite"></p>
+<details class="he-recover"><summary>Already paid? Recover a payment</summary><div class="he-field"><label class="he-label" for="heTxHash">Transaction hash</label><input class="sn-input sn-mono" id="heTxHash" placeholder="0x…" autocomplete="off" spellcheck="false"></div><button class="sn-btn" type="button" id="heRecover">Check payment</button></details>
+</section>
+</div></main>
+<footer class="sn-foot"><div class="sn-wrap sn-foot-inner"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a><a href="/network.html">Network</a><a href="/for-sale">For sale</a><a href="/registry.html">Registry</a><a href="/labs.html">Labs</a><a href="/kit.html">Project Kit</a><a href="/launches.html">My launches</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><p class="sn-foot-note">Independent software on Robinhood Chain. A connection between projects is not an affiliation. SyncNet never holds your keys.</p></div></footer><nav class="sn-tabbar" aria-label="Primary"><a href="/" data-nav="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>Explore</a><a href="/build.html" data-nav="create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</a><a href="/you.html" data-nav="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>You</a></nav>
+<script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-ipfs.js" defer></script><script src="/lib/syncnet-chain.js" defer></script><script src="/lib/syncnet-origins.js" defer></script><script src="/lib/syncnet-site.js" defer></script><script src="/sn-wallet.js" defer></script><script src="/sn-ui.js" defer></script><script src="/home-editor.js" defer></script></body></html>
