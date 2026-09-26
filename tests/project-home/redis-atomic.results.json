@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:33:21.713Z",
+  "at": "2026-09-26T16:46:18.575Z",
   "passed": 17,
   "failed": 0,
   "results": [
@@ -66,7 +66,7 @@
     {
       "name": "R13 intents created through the Upstash adapter on real Redis",
       "ok": true,
-      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x73816d7a460e910e94123ee4ee148d92811bd9c78f69035f13dda14a80b1656a\",\"token\":\"0x8000000000000000000000000000000000000000\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb202"
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xb88ef298756b5526418080db9b7b651853a6a0f7521a3c13af039699eb56948f\",\"token\":\"0x8000000000000000000000000000000000000000\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb202"
     },
     {
       "name": "R14 the two concurrent intents received different exact amounts (tag reservation)",

@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:29:25.496Z",
+  "at": "2026-09-26T16:42:19.645Z",
   "failures": 0,
   "passed": 206,
   "total": 206,
@@ -12,7 +12,7 @@
     {
       "name": "R01 page reports the launch as executed, never as \"not sent\"",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x30fb4b8ea1cf1531c2e83230e2dc907a1a72198c\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0xf9792f"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x3db5563181e86a0eb8624b76dc014c00ed84653c\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0xcc203e"
     },
     {
       "name": "R01 record resolved from the chain to a verified state",
@@ -27,7 +27,7 @@
     {
       "name": "R01 transaction hash recovered from the indexer and confirmed on-chain",
       "ok": true,
-      "detail": "0x87d70eb89c3daf434ae29b862b25e37534cc40801e51abf16b18d7ab3db3cc93"
+      "detail": "0xa1a0b4af580fa50f7af78ef915947ce1fe170e12192a00840745c52a21f2a149"
     },
     {
       "name": "R01 only ONE eth_sendTransaction",
@@ -237,7 +237,7 @@
     {
       "name": "R09 launch confirmed from the chain while the indexer lags",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x6cd3284487f89b8366fa0530c06938c93f368df7\nTransaction: 0x63a14a2a6b499204d72336d1b152640549b3cbc3d67048a30b1795465bd3599e\nState: INDEXER_PENDING\nOn-chain factory recor"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xaf0dcaff1c7a02ac2eca47f1a4506f0a2d48291e\nTransaction: 0x4e9efb16c4cb318b25f965f9bc6ec9282cccea9f0730c5084250922ee5c8f145\nState: INDEXER_PENDING\nOn-chain factory recor"
     },
     {
       "name": "R09 state INDEXER_PENDING (on-chain verified, indexer secondary)",
@@ -267,12 +267,12 @@
     {
       "name": "R11a pre-send check refuses: the predicted token already exists; nothing sent",
       "ok": true,
-      "detail": "A token already exists at the predicted address 0x1A6Bb6ef4D78D8c3fcd6472A5F938ABb67fdea63. This launch was already executed. Nothing was sent."
+      "detail": "A token already exists at the predicted address 0x87ad72FF23c129435c5455564ED06b8E9033A8bb. This launch was already executed. Nothing was sent."
     },
     {
       "name": "R11b the first $DUPE launch completes",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x349d240b39eecb1578b6d6d74eac002300e073a4\nTransaction: 0x8acb24c5fffea19c600388bee09515ce653b96a9caa02955626d7325d35df738\nState: FULLY_VERIFIED\nOn-chain factory record"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xae00a2c49414436f9375e2cfe42b9f75dbda9589\nTransaction: 0xce1659ceee04788c1bfaa4069f12db89e78e0cf46be67cd9b3a14a16f9117e9c\nState: FULLY_VERIFIED\nOn-chain factory record"
     },
     {
       "name": "R11b guard reports the existing $DUPE from this wallet",
@@ -697,7 +697,7 @@
     {
       "name": "R20 launch published to the Registry after server-side on-chain verification",
       "ok": true,
-      "detail": "xer: found\nIntent: recordHash 0x9092d91c99295906bec66548882c5df8246a9d73484bfdad0af4bea6a686f2fc committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nSyncNet Registry: VERIFIED and published ✓\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
+      "detail": "xer: found\nIntent: recordHash 0x71e84c9253fcbe39c638073bac07c8226ace2daa9c054ac8c1a53c4e078dd7c1 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nSyncNet Registry: VERIFIED and published ✓\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
     },
     {
       "name": "R20 proof verifies: intent→recordHash→salt, deployer signature, salt in tx, TokenLaunched, factory record",
@@ -792,7 +792,7 @@
     {
       "name": "R22 tab B is refused at send time (launch appeared since its review)",
       "ok": true,
-      "detail": "A $TWO launch from this wallet appeared since your review (0xd570e5371777cb3afd40ad0cd586eddb65f407cd). Nothing was sent — simulate again and check MY LAUNCHES."
+      "detail": "A $TWO launch from this wallet appeared since your review (0x065837685d1fab9d66c369b537bf049f581e7a3d). Nothing was sent — simulate again and check MY LAUNCHES."
     },
     {
       "name": "R22 exactly one launch transaction in total",
@@ -877,7 +877,7 @@
     {
       "name": "R25 launch with hostile metadata confirmed (the text policy allows < > as ordinary characters)",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xcaf9edd94bf72f3fb89e9f697d300a2b681b329e\nTransaction: 0x246077f3d9e45eb4fdd845673d5216a3ff97ec91136e9047e93e160edf04a10f\nState: FULLY_VERIFIED\nOn-chain factory record"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x0a8f196172b07097fc066d9a7887b170e349d448\nTransaction: 0xd3461afc8fa47ac9663e0ad74f0ed3069606137595600f2375156c07d88ca3f2\nState: FULLY_VERIFIED\nOn-chain factory record"
     },
     {
       "name": "R25 builder (review, final review, status): no injected element, no script ran",
@@ -897,7 +897,7 @@
     {
       "name": "R25 project page: the hostile token is rendered (name) as plain text",
       "ok": true,
-      "detail": "SyncNet\n→\nExplore\nCreate\nConnect\n← Explore\n<img src=x onerror=window.__xss=1>\n\n$XSSX\n·\nPAR launch\n·\nUnclaimed\n\n0xcaf9edd94bf72f3fb89e9f697d300a2b681b329e\nCopy\n\nTrade on PAR ↗\nView on explorer ↗\nCONTRO"
+      "detail": "SyncNet\n→\nExplore\nCreate\nConnect\n← Explore\n<img src=x onerror=window.__xss=1>\n\n$XSSX\n·\nPAR launch\n·\nUnclaimed\n\n0x0a8f196172b07097fc066d9a7887b170e349d448\nCopy\n\nTrade on PAR ↗\nView on explorer ↗\nCONTRO"
     },
     {
       "name": "R25 MY LAUNCHES: no injected element, no script ran",
@@ -947,7 +947,7 @@
     {
       "name": "R26 metadata preflight PASS although the browser cannot load the image from either gateway",
       "ok": true,
-      "detail": "08fd0c0776abda1f148d3532bc67d0f4f2d02a29ad587441ca50b766824\nPAR salt commitment: 0x890e4426f32f17d37d3b0ad77cb677109c83124db244a09a06a771a424b47bc1\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "c2d1afa69f2eb0da11cd6e88b26aa5a767f55abb267d3f40565e55d3470\nPAR salt commitment: 0xa659cd2679cea1e0a327fdd872af78b7ed21c1ed67a2f6f77709295fdb2fab8f\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "R26 the preflight asked the same-origin server check for exactly the logo URI",
@@ -972,7 +972,7 @@
     {
       "name": "R26 the launch completes and verifies on-chain (logo = the checked URI)",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xe767971c0e9a3f4319270f9a6ef489ae3dcc2981\nTransaction: 0xc24b45e49e91c0ca418f2cb2b27c3d4c441390237c08cdfa040627c7e39f2317\nState"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x94f51f087f8af58f9b7f13152e15f2daf1a59aad\nTransaction: 0x22a9dad55fab5b4b73066a9f8652a05d7596535dcde72bb930a068b86e86faf3\nState"
     },
     {
       "name": "R27 all server-side gateways down: metadata preflight FAILED with a clear reason",
@@ -987,7 +987,7 @@
     {
       "name": "R27 gateways answer with an HTML page: metadata preflight FAILED with a clear reason",
       "ok": true,
-      "detail": "0d158331ddff17b360538b943f\nMetadata preflight: FAILED — The IPFS gateways returned content that is not a PNG, JPEG, GIF or WebP image.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "e180a4839d92174fe805839ab0\nMetadata preflight: FAILED — The IPFS gateways returned content that is not a PNG, JPEG, GIF or WebP image.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "R27 gateways answer with an HTML page: metadata check shows FAIL, signing disabled, LAUNCH LIVE disabled",
@@ -997,7 +997,7 @@
     {
       "name": "R27 logo is not a valid CID: metadata preflight FAILED with a clear reason",
       "ok": true,
-      "detail": "23a0fae5f61bc2f16da4e621958bafc91fb52a07246c\nMetadata preflight: FAILED — The logo is not a valid ipfs:// CID. Upload the image again.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "e26cb6031a1859077bb377b02934cc5cf488003b8af4\nMetadata preflight: FAILED — The logo is not a valid ipfs:// CID. Upload the image again.\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "R27 logo is not a valid CID: metadata check shows FAIL, signing disabled, LAUNCH LIVE disabled",
@@ -1017,7 +1017,7 @@
     {
       "name": "R28 metadata preflight PASS with both public gateways rate-limited",
       "ok": true,
-      "detail": "d8e1f7cd4d4f784f265\nPAR salt commitment: 0x92c1d0622989a9b73bd4ae4878d9537f4909bca84841494c7ec91c967098dc3d\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
+      "detail": "ca40d369cbec8defd3f\nPAR salt commitment: 0xa2364c7f91a0f2f76973f3ab9a21211d72645210b5a49ead59f6ee119380a09b\nMetadata preflight: PASS ✓\n\nSimulation itself did not request or broadcast a transaction. Next: duplicate check, sign the intent, read the final review."
     },
     {
       "name": "R28 the server tried Pinata and both public gateways",

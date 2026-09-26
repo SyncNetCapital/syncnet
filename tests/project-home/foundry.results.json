@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:33:15.459Z",
+  "at": "2026-09-26T16:46:11.840Z",
   "forge": "forge Version: 1.7.1",
   "summary": "76 tests passed, 0 failed, 0 skipped",
   "tests": [
@@ -12,115 +12,63 @@
       "ok": true
     },
     {
-      "name": "testFuzz_settle_noResidue",
+      "name": "test_acceptsExactConfiguration",
       "ok": true
     },
     {
-      "name": "testFuzz_split_conservesAndFloors",
+      "name": "test_contractTreasuryMustHaveCode",
       "ok": true
     },
     {
-      "name": "test_constructor_rejectsConverterEqualToToken",
+      "name": "test_rejectsDeployerAsTreasury",
       "ok": true
     },
     {
-      "name": "test_constructor_rejectsZeroConverter",
+      "name": "test_rejectsEoaTreasuryWithCode",
       "ok": true
     },
     {
-      "name": "test_constructor_rejectsZeroSync",
+      "name": "test_rejectsInfrastructureAsTreasury",
       "ok": true
     },
     {
-      "name": "test_constructor_setsImmutables",
+      "name": "test_rejectsNonCanonicalRouter",
       "ok": true
     },
     {
-      "name": "test_converterAndTokenUnchangedAfterActivity",
+      "name": "test_rejectsNonCanonicalSync",
       "ok": true
     },
     {
-      "name": "test_forwardsExactRemainderToConverterAsSync",
+      "name": "test_rejectsNonCanonicalUsdg",
       "ok": true
     },
     {
-      "name": "test_immutablesLiveInCodeNotStorage",
+      "name": "test_rejectsUnconfirmedTreasury",
       "ok": true
     },
     {
-      "name": "test_noAdminOrRescueSurface",
+      "name": "test_rejectsUndeclaredTreasuryKind",
       "ok": true
     },
     {
-      "name": "test_noDexOrPriceSurface",
+      "name": "test_rejectsWrongChain",
       "ok": true
     },
     {
-      "name": "test_noPayableReceiveOrFallback",
+      "name": "test_rejectsWrongDeclaredChain",
       "ok": true
     },
     {
-      "name": "test_pendingIsNotBurned",
+      "name": "test_rejectsWrongMarket",
       "ok": true
     },
     {
-      "name": "test_settle_anyoneCanSettle",
+      "name": "test_rejectsZeroTreasury",
       "ok": true
     },
     {
-      "name": "test_settle_callerCannotRedirectFunds",
-      "ok": true
-    },
-    {
-      "name": "test_settle_cumulativeTotals",
-      "ok": true
-    },
-    {
-      "name": "test_settle_emitsSettled",
-      "ok": true
-    },
-    {
-      "name": "test_settle_falseTransferReverts",
-      "ok": true
-    },
-    {
-      "name": "test_settle_reentryCannotDoubleCount",
-      "ok": true
-    },
-    {
-      "name": "test_settle_repeatedAfterZeroIsSafe",
-      "ok": true
-    },
-    {
-      "name": "test_settle_revertingBurnRevertsEverything",
-      "ok": true
-    },
-    {
-      "name": "test_settle_revertingTransferRevertsEverything",
-      "ok": true
-    },
-    {
-      "name": "test_settle_zeroBalanceIsNoop",
-      "ok": true
-    },
-    {
-      "name": "test_split_exact6040",
-      "ok": true
-    },
-    {
-      "name": "test_split_maxUintNoOverflow",
-      "ok": true
-    },
-    {
-      "name": "test_split_oddBalanceSettles",
-      "ok": true
-    },
-    {
-      "name": "test_split_tinyBalances",
-      "ok": true
-    },
-    {
-      "name": "test_unsolicitedTransfersAreSettledToo",
+      "name": "test_treasuryEoaMustHaveNoCode",
       "ok": true
     },
     {
@@ -248,63 +196,115 @@
       "ok": true
     },
     {
-      "name": "test_acceptsExactConfiguration",
+      "name": "testFuzz_settle_noResidue",
       "ok": true
     },
     {
-      "name": "test_contractTreasuryMustHaveCode",
+      "name": "testFuzz_split_conservesAndFloors",
       "ok": true
     },
     {
-      "name": "test_rejectsDeployerAsTreasury",
+      "name": "test_constructor_rejectsConverterEqualToToken",
       "ok": true
     },
     {
-      "name": "test_rejectsEoaTreasuryWithCode",
+      "name": "test_constructor_rejectsZeroConverter",
       "ok": true
     },
     {
-      "name": "test_rejectsInfrastructureAsTreasury",
+      "name": "test_constructor_rejectsZeroSync",
       "ok": true
     },
     {
-      "name": "test_rejectsNonCanonicalRouter",
+      "name": "test_constructor_setsImmutables",
       "ok": true
     },
     {
-      "name": "test_rejectsNonCanonicalSync",
+      "name": "test_converterAndTokenUnchangedAfterActivity",
       "ok": true
     },
     {
-      "name": "test_rejectsNonCanonicalUsdg",
+      "name": "test_forwardsExactRemainderToConverterAsSync",
       "ok": true
     },
     {
-      "name": "test_rejectsUnconfirmedTreasury",
+      "name": "test_immutablesLiveInCodeNotStorage",
       "ok": true
     },
     {
-      "name": "test_rejectsUndeclaredTreasuryKind",
+      "name": "test_noAdminOrRescueSurface",
       "ok": true
     },
     {
-      "name": "test_rejectsWrongChain",
+      "name": "test_noDexOrPriceSurface",
       "ok": true
     },
     {
-      "name": "test_rejectsWrongDeclaredChain",
+      "name": "test_noPayableReceiveOrFallback",
       "ok": true
     },
     {
-      "name": "test_rejectsWrongMarket",
+      "name": "test_pendingIsNotBurned",
       "ok": true
     },
     {
-      "name": "test_rejectsZeroTreasury",
+      "name": "test_settle_anyoneCanSettle",
       "ok": true
     },
     {
-      "name": "test_treasuryEoaMustHaveNoCode",
+      "name": "test_settle_callerCannotRedirectFunds",
+      "ok": true
+    },
+    {
+      "name": "test_settle_cumulativeTotals",
+      "ok": true
+    },
+    {
+      "name": "test_settle_emitsSettled",
+      "ok": true
+    },
+    {
+      "name": "test_settle_falseTransferReverts",
+      "ok": true
+    },
+    {
+      "name": "test_settle_reentryCannotDoubleCount",
+      "ok": true
+    },
+    {
+      "name": "test_settle_repeatedAfterZeroIsSafe",
+      "ok": true
+    },
+    {
+      "name": "test_settle_revertingBurnRevertsEverything",
+      "ok": true
+    },
+    {
+      "name": "test_settle_revertingTransferRevertsEverything",
+      "ok": true
+    },
+    {
+      "name": "test_settle_zeroBalanceIsNoop",
+      "ok": true
+    },
+    {
+      "name": "test_split_exact6040",
+      "ok": true
+    },
+    {
+      "name": "test_split_maxUintNoOverflow",
+      "ok": true
+    },
+    {
+      "name": "test_split_oddBalanceSettles",
+      "ok": true
+    },
+    {
+      "name": "test_split_tinyBalances",
+      "ok": true
+    },
+    {
+      "name": "test_unsolicitedTransfersAreSettledToo",
       "ok": true
     }
   ]

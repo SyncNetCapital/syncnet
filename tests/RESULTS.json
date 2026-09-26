@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:34:36.922Z",
+  "at": "2026-09-26T16:47:34.879Z",
   "node": "v22.22.2",
   "site": "sha256:253c0c6d63608f610aee59af0dde7002b741b909cdfc3772de228120e35c67b8 (92 deployable files)",
   "suites": [
@@ -21,7 +21,7 @@
       "suite": "image sanitizer",
       "command": "node tests/server/image-sanitize.test.mjs",
       "exit": 0,
-      "seconds": 7,
+      "seconds": 6,
       "summary": "129 passed, 0 failed"
     },
     {
@@ -98,28 +98,28 @@
       "suite": "audit PoCs · pages (AFTER)",
       "command": "node tests/audit/poc-e2e.mjs",
       "exit": 0,
-      "seconds": 51,
+      "seconds": 49,
       "summary": "0/35 vulnerability checks reproduced"
     },
     {
       "suite": "E2E (existing product suites, updated)",
       "command": "node tests/e2e/run.mjs",
       "exit": 0,
-      "seconds": 123,
+      "seconds": 124,
       "summary": "320/320 checks passed"
     },
     {
       "suite": "required regressions R01–R28",
       "command": "node tests/regression/rc-regressions.mjs",
       "exit": 0,
-      "seconds": 218,
+      "seconds": 232,
       "summary": "206/206 regression checks passed"
     },
     {
       "suite": "IPFS display (canonical utility, PONSYNC CID)",
       "command": "node tests/regression/rc-ipfs-display.mjs",
       "exit": 0,
-      "seconds": 13,
+      "seconds": 14,
       "summary": "23/23 ipfs-display checks passed"
     },
     {
@@ -154,7 +154,7 @@
       "suite": "mobile 320/360/390/430",
       "command": "node tests/regression/rc-mobile.mjs",
       "exit": 0,
-      "seconds": 69,
+      "seconds": 70,
       "summary": "112/112 mobile checks passed"
     },
     {
@@ -175,15 +175,15 @@
       "suite": "Project Home · contract static/ABI audit (sink + converter)",
       "command": "node tests/project-home/sink-static-audit.mjs",
       "exit": 0,
-      "seconds": 1,
+      "seconds": 2,
       "summary": "119/119 sink static audit checks passed"
     },
     {
       "suite": "Project Home · pricing ($39 USD, fixed point, tags, gate)",
       "command": "node tests/project-home/pricing.test.mjs",
-      "exit": 1,
+      "exit": 0,
       "seconds": 0,
-      "summary": "80/81 project-home pricing checks passed"
+      "summary": "82/82 project-home pricing checks passed"
     },
     {
       "suite": "Project Home · site schema, EIP-712, renderer audit",
@@ -224,7 +224,7 @@
       "suite": "Phase 2 UI · Explore, Project Page, You, Project Home editor/payment/adoption",
       "command": "node tests/e2e/phase2-ui.mjs",
       "exit": 0,
-      "seconds": 70,
+      "seconds": 71,
       "summary": "142/142 phase 2 UI checks passed"
     }
   ]

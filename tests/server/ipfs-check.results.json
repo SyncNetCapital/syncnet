@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-26T16:22:45.792Z",
+  "at": "2026-09-26T16:35:28.633Z",
   "failures": 0,
   "passed": 100,
   "total": 100,
@@ -67,7 +67,7 @@
     {
       "name": "2b PASS: dweb.link hangs, ipfs.io answers; the check does not wait for the slow gateway",
       "ok": true,
-      "detail": "1 ms"
+      "detail": "2 ms"
     },
     {
       "name": "2c PASS: ipfs.io network error, dweb.link serves the image",
@@ -82,7 +82,7 @@
     {
       "name": "2e PASS: ipfs.io hangs, dweb.link answers quickly",
       "ok": true,
-      "detail": "1 ms"
+      "detail": "2 ms"
     },
     {
       "name": "2P PASS: ipfs.io=429 + dweb.link=429 + gateway.pinata.cloud=200 (valid PNG) -> {ok:true}",
@@ -172,7 +172,7 @@
     {
       "name": "3d BLOCK: both gateways hang -> strict timeout (8000 ms) -> unreachable",
       "ok": true,
-      "detail": "8001 ms"
+      "detail": "8002 ms"
     },
     {
       "name": "3e BLOCK: a failure is never cached (a previous pass does not hide a later outage once the cache is cleared)",
@@ -502,7 +502,7 @@
     {
       "name": "server log records gateway failures (for the operator) without them reaching the client",
       "ok": true,
-      "detail": "[{\"ts\":\"2026-09-26T16:22:45.791Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":151}]"
+      "detail": "[{\"ts\":\"2026-09-26T16:35:28.632Z\",\"fn\":\"ipfs-check\",\"event\":\"pass\",\"ip\":\"be7ea2485e6ea0fc\",\"cid\":\"bafkreifj2f6mbj3l4acl4r2m423xlprqpmq2hrsntj42jhk5rowo7tdbqu\",\"gateway\":\"ipfs.io\",\"format\":\"png\",\"bytes\":151,\"ms\":151}]"
     }
   ]
 }
