@@ -1,0 +1,407 @@
+{
+  "at": "2026-09-26T12:07:55.431Z",
+  "passed": 80,
+  "failed": 0,
+  "results": [
+    {
+      "name": "$49 at $0.00005 = exactly 980,000 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$49 at $0.0005 = exactly 98,000 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$49 at $0.005 = exactly 9,800 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "non-terminating quotient rounds UP (never undercharges)",
+      "ok": true,
+      "detail": "1324324324324324324324325"
+    },
+    {
+      "name": "rounding up: $49 / $0.03 = 1633.333… → 1633.333333333333333334 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "exact division is not bumped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$0.01 at $1e-12 would exceed the range cap → refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "smallest accepted rate still quotes a small price",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "max rate $1,000,000: $49 = 0.000049 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate above $1,000,000 refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate with 18 decimals parses exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "1 wei-of-rate (1e-18) is syntactically exact but refused by the range bound",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate below 1e-12 refused (range)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "zero rate refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"-0.1\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"1e-5\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"0.1e1\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \".5\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"5.\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"0x10\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \" 0.5\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"0.5 \"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"0,5\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"NaN\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"Infinity\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"00.5\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"0.0000000000000000001\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed rate refused: \"12345678\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "non-string rate (a JS number) refused — no floating point anywhere",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "formatRate(parseRate(x)) is canonical",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: 0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: -1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: 4900.5",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: 10000001",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: NaN",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid price cents refused: 4900",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "negative / zero rateUsdE18 refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no Number() / parseFloat / Math in the arithmetic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "property (2000 random quotes): q = ceil(price·10^34 / rate) exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tag lives in the 12 lowest decimals; exact > base",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "base not on a tag boundary is rounded UP before tagging",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tag 0 refused (would allow exact == base)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tag == modulus refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economic difference < 2e-6 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "exact amount displays as a finite 18-decimal string",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "5000 CSPRNG tags all in [1, 10^12-1]",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "5000 CSPRNG tags: no collision (uniqueness is still enforced by reservation)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rejection sampling rejects out-of-range draws (no modulo bias)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a broken RNG fails closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "valid table loads",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate rateVersion → whole table invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "duplicate priceVersion → invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "non-canonical rate text → invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate written as a JSON number → invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "expiresAt <= effectiveAt → invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown schema → invalid",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo pricing file: price v1 = 4900 cents ($49 USD)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo pricing file ships NO approved rate (payments closed until one is reviewed in)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo pricing file has no fixed-SYNC price anywhere",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fully configured → site and payments open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "empty environment → everything closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "repo defaults (real pricing file, env set) → payments closed: no approved rate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no durable store → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing SYNCNET_PROJECT_HOME_ENABLED → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing PROJECT_HOME_PRICE_VERSION → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing PROJECT_HOME_PRICE_USD_CENTS → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing PROJECT_HOME_RATE_VERSION → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "missing PROJECT_HOME_SINK_ADDRESS → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SYNCNET_PROJECT_HOME_ENABLED=TRUE-ish values other than \"true\" stay closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "price cents env must equal the reviewed price",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown price version → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown rate version → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate not yet effective → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate expired → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink = zero address → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink = the SYNC token → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "malformed sink → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid pricing file → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "rate env with junk → closed",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

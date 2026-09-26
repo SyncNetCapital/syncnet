@@ -1,0 +1,143 @@
+{
+  "at": "2026-09-26T12:07:54.826Z",
+  "forge": "forge Version: 1.7.1",
+  "summary": "34 tests passed, 0 failed, 0 skipped",
+  "tests": [
+    {
+      "name": "test_acceptsExactConfiguration",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsDeployerAsTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsNonCanonicalSync",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsTokenAsTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsUnconfirmedTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsWrongChain",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsWrongDeclaredChain",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsZeroTreasury",
+      "ok": true
+    },
+    {
+      "name": "testFuzz_settle_noResidue",
+      "ok": true
+    },
+    {
+      "name": "testFuzz_split_conservesAndFloors",
+      "ok": true
+    },
+    {
+      "name": "test_constructor_rejectsTreasuryEqualToToken",
+      "ok": true
+    },
+    {
+      "name": "test_constructor_rejectsZeroSync",
+      "ok": true
+    },
+    {
+      "name": "test_constructor_rejectsZeroTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_constructor_setsImmutables",
+      "ok": true
+    },
+    {
+      "name": "test_immutablesLiveInCodeNotStorage",
+      "ok": true
+    },
+    {
+      "name": "test_noAdminOrRescueSurface",
+      "ok": true
+    },
+    {
+      "name": "test_noPayableReceiveOrFallback",
+      "ok": true
+    },
+    {
+      "name": "test_pendingIsNotBurned",
+      "ok": true
+    },
+    {
+      "name": "test_settle_anyoneCanSettle",
+      "ok": true
+    },
+    {
+      "name": "test_settle_callerCannotRedirectFunds",
+      "ok": true
+    },
+    {
+      "name": "test_settle_cumulativeTotals",
+      "ok": true
+    },
+    {
+      "name": "test_settle_emitsSettled",
+      "ok": true
+    },
+    {
+      "name": "test_settle_falseTransferReverts",
+      "ok": true
+    },
+    {
+      "name": "test_settle_reentryCannotDoubleCount",
+      "ok": true
+    },
+    {
+      "name": "test_settle_repeatedAfterZeroIsSafe",
+      "ok": true
+    },
+    {
+      "name": "test_settle_revertingBurnRevertsEverything",
+      "ok": true
+    },
+    {
+      "name": "test_settle_revertingTransferRevertsEverything",
+      "ok": true
+    },
+    {
+      "name": "test_settle_zeroBalanceIsNoop",
+      "ok": true
+    },
+    {
+      "name": "test_split_exact6040",
+      "ok": true
+    },
+    {
+      "name": "test_split_maxUintNoOverflow",
+      "ok": true
+    },
+    {
+      "name": "test_split_oddBalanceSettles",
+      "ok": true
+    },
+    {
+      "name": "test_split_tinyBalances",
+      "ok": true
+    },
+    {
+      "name": "test_treasuryAndTokenUnchangedAfterActivity",
+      "ok": true
+    },
+    {
+      "name": "test_unsolicitedTransfersAreSettledToo",
+      "ok": true
+    }
+  ]
+}

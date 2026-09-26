@@ -1,0 +1,752 @@
+{
+  "at": "2026-09-26T12:07:56.698Z",
+  "passed": 149,
+  "failed": 0,
+  "results": [
+    {
+      "name": "domain is SyncNet Website v1 on chain 4663",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "domain differs from the Marketplace and Economy domains",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SitePublish type is exactly (token, operator, configHash, issuedAt, nonce)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SiteUnpublish type is exactly (token, operator, issuedAt, nonce)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "identical struct → different digest in the Marketplace domain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a Marketplace signature never recovers to its signer over a Website digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a Website signature recovers correctly in its own domain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown struct names are refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "normalize fills explicit defaults (preset CLEAN, accent BLUE, all sections on, no CTA)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "normalize is idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "validate accepts a canonical config and returns its hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "configHash is independent of key order",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "validate refuses a non-canonical config (e.g. lowercase preset)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changing any content changes the hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "fixed section order",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sections can be toggled, not reordered or added",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: html",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: css",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: js",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: script",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: iframe",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: embed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: svg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: lore",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: faq",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: analytics",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: domain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: customDomain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: subdomain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: order",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: markdown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: theme",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: style",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: images",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forbidden/unknown field rejected: imageUrl",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "presets are CLEAN / DARK / TERMINAL only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "accent from the fixed palette only (no colour strings)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "token must be an address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "schema other than v1 refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "headline <= 80 characters (code points)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "headline counts emoji as one character each",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "about <= 800 characters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "oversized input is refused before normalisation work",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: RLO U+202E",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: RLO U+202E",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: LRI U+2066",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: LRI U+2066",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: ALM U+061C",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: ALM U+061C",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: ZWSP U+200B",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: ZWSP U+200B",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: ZWJ U+200D",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: ZWJ U+200D",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: BOM U+FEFF",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: BOM U+FEFF",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: soft hyphen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: soft hyphen",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: NUL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: NUL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: BEL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: BEL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: DEL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: DEL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: C1 U+0085",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: C1 U+0085",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: private use",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: private use",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in headline: tag char",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unsafe character rejected in about: tag char",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "newline is allowed in about, not in headline (collapsed to a space)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "NFC normalisation (e + combining acute → é)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: OFFICIAL WEBSITE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: Official Site",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: 0ffіcial website",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: Verified by SyncNet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: S Y N C N E T  V E R I F I E D",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: passport operator verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "authority claims (incl. confusables/spacing) refused in operator text: ОFFICIAL WEBSITE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "non-string text rejected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CTA URL refused: javascript:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: JaVaScRiPt:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: javascript with whitespace",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: data:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: vbscript:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: http (not https)",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: protocol-relative",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: backslash trick",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: userinfo",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"userinfo\"}]"
+    },
+    {
+      "name": "CTA URL refused: userinfo @ confusion",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"userinfo\"}]"
+    },
+    {
+      "name": "CTA URL refused: IPv4 literal",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"ip_literal\"}]"
+    },
+    {
+      "name": "CTA URL refused: decimal IP",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"ip_literal\"}]"
+    },
+    {
+      "name": "CTA URL refused: hex IP",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"ip_literal\"}]"
+    },
+    {
+      "name": "CTA URL refused: octal-ish IP",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"ip_literal\"}]"
+    },
+    {
+      "name": "CTA URL refused: IPv6 literal",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"port\"}]"
+    },
+    {
+      "name": "CTA URL refused: port 8443",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"port\"}]"
+    },
+    {
+      "name": "CTA URL refused: port 0",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"port\"}]"
+    },
+    {
+      "name": "CTA URL refused: localhost",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"host\"}]"
+    },
+    {
+      "name": "CTA URL refused: *.local",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"reserved_host\"}]"
+    },
+    {
+      "name": "CTA URL refused: *.internal",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"reserved_host\"}]"
+    },
+    {
+      "name": "CTA URL refused: single label",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"host\"}]"
+    },
+    {
+      "name": "CTA URL refused: raw Unicode host (must be punycode)",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"non_ascii\"}]"
+    },
+    {
+      "name": "CTA URL refused: bidi in URL",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"non_ascii\"}]"
+    },
+    {
+      "name": "CTA URL refused: zero-width in URL",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"non_ascii\"}]"
+    },
+    {
+      "name": "CTA URL refused: space",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"non_ascii\"}]"
+    },
+    {
+      "name": "CTA URL refused: newline",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"non_ascii\"}]"
+    },
+    {
+      "name": "CTA URL refused: too long",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"length\"}]"
+    },
+    {
+      "name": "CTA URL refused: empty",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"length\"}]"
+    },
+    {
+      "name": "CTA URL refused: non-string",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"type\"}]"
+    },
+    {
+      "name": "CTA URL refused: file:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: ftp:",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"https_only\"}]"
+    },
+    {
+      "name": "CTA URL refused: trailing-dot host",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"host\"}]"
+    },
+    {
+      "name": "CTA URL refused: underscore host",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"host\"}]"
+    },
+    {
+      "name": "CTA URL refused: numeric TLD",
+      "ok": true,
+      "detail": "[{\"field\":\"cta.url\",\"code\":\"unparseable\"}]"
+    },
+    {
+      "name": "CTA https URL accepted and canonicalised",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "default port 443 is normalised away, other ports refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "punycode (IDN) accepted and DISPLAYED in ASCII with a notice",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CTA label must be one of the fixed labels",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CTA with extra keys (e.g. target, rel, onclick) refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: x=\"evil.com/phish\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: x=\"aaaaaaaaaaaaaaaa\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: telegram=\"ab\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: telegram=\"../../x\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: discord=\"https://discord.gg/abc\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: farcaster=\"Bad Name\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: x=\"javascript:alert(1)\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "social handle refused: x=\"user​\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown social network refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "@ prefix stripped; URLs built by SyncNet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid image CIDs refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a well-formed CID renders as a same-origin /site-img/ source",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "an imageSrc hook returning a remote URL is dropped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "current operator → authority label + clickable links (rel=nofollow noopener noreferrer)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "signer ≠ current operator → PREVIOUS OPERATOR label, zero hrefs, noindex",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "preview: watermark PREVIEW · NOT PUBLISHED, noindex, no authority, no clickable link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Markdown links render as literal, inert text (scheme colon encoded), never as links",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "HTML in about is escaped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "verified identity comes before any operator content",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "operator content is labelled as such",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Passport disclaimer: authority, not original-team identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "product wording: active for as long as SyncNet operates the service (no perpetual promise)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "never OFFICIAL WEBSITE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "invalid config → no operator content at all",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hostile on-chain metadata (name, symbol, website, market symbols, origin) stays inert text",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "on-chain website field is never a link, even when it looks like one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "static render audit: 6000 hostile renders, no script/iframe/object/svg/form/link/base/meta-refresh/javascript:/data:/on*=/style=",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the static stylesheet contains no url(), @import or expression()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "renderer source never emits a style= attribute or <script",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

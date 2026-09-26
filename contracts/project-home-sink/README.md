@@ -47,6 +47,19 @@ node ../../tests/project-home/sink-static-audit.mjs   # source + ABI audit (from
 
 Offline sandboxes without a native solc can point forge at any solc 0.8.28 with `--use <path>`.
 
+### Fork rehearsal (local only, never broadcasts)
+
+`fork/SinkFork.t.sol` deploys the sink on an in-memory fork of Robinhood Chain and settles against the **real**
+canonical `$SYNC` bytecode. This proves that `SYNC.burn()` called by the sink reduces `totalSupply`, that the treasury
+receives the exact remainder, and that no residue is left. The sink's balance is written into the fork's state (the
+OpenZeppelin `_balances` slot, confirmed through `balanceOf`), and the test uses a fixture treasury.
+
+```
+ROBINHOOD_FORK_URL=https://rpc.mainnet.chain.robinhood.com forge test --contracts fork --match-path 'fork/*'
+```
+
+The rehearsal passed on 26 Sep 2026. It is not part of `run-all`, because it needs the network.
+
 ## Deployment (NOT in this phase)
 
 `script/DeploySyncNetProjectHomeSink.s.sol` refuses to run unless **all** of these are set explicitly:

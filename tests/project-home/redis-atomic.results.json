@@ -1,0 +1,92 @@
+{
+  "at": "2026-09-26T12:07:59.036Z",
+  "passed": 17,
+  "failed": 0,
+  "results": [
+    {
+      "name": "R01 the production Upstash adapter is under test (durable, kind upstash)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 expect-nil set on an absent key succeeds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R03 expect-nil on an existing key fails and writes nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 expect-eq compare-and-set",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R05 multi-key all-or-nothing: one failing expectation blocks every write",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R06 TTL is applied with EX",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R07 keys and values are data (a Lua-looking value is stored verbatim, nothing executed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R08 a Redis error inside the script surfaces as StoreUnavailable (fail closed) and writes nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R09 the script text is fixed: no key or value is interpolated into it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R10 300 concurrent claims of one payment log over 8 connections: exactly one wins",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "R11 the winner is the only one whose entitlement exists (no partial writes by losers)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R12 400 random multi-key operations: the Redis Lua script and the in-memory adapter agree exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R13 intents created through the Upstash adapter on real Redis",
+      "ok": true,
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x9a5374b92da10b13814ac197b26f588fbbac85413b04f470b9de209a291c074c\",\"token\":\"0x8000000000000000000000000000000000000000\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb202"
+    },
+    {
+      "name": "R14 the two concurrent intents received different exact amounts (tag reservation)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R15 24 concurrent verifications, two projects, one payment: exactly ONE activation",
+      "ok": true,
+      "detail": "409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:payment_already_used,200,409:paymen"
+    },
+    {
+      "name": "R16 exactly one project is entitled; the claim, registry and intent agree with it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R17 every loser got a truthful answer (idempotent 200 for the winner request, 409 payment_already_used for the other project)",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

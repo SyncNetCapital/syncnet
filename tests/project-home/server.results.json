@@ -1,0 +1,862 @@
+{
+  "at": "2026-09-26T12:07:58.327Z",
+  "passed": 171,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A01 config: payments open with full configuration",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A02 config: price is $49 USD, version 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A03 config: SYNCNET REFERENCE RATE, version + update time, explicitly not an oracle",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A04 config: indicative quote ≈ 980,000 SYNC, 30-minute lock, 60/40",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A05 config: never says OFFICIAL WEBSITE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A06 SYNCNET_PROJECT_HOME_ENABLED unset → every write 503 closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A07 default config view: disabled, payments disabled, no sink",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A08 missing sink address → intent 503 payments_closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A09 payments flag off → intent 503",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A10 no approved rate → intent 503 (fail closed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A11 zero rate in the pricing file → whole table invalid → 503",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A12 no durable store → closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 non-operator (no Passport for T1 yet) cannot create an intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 fixture: Marketplace claim establishes W as T1 operator",
+      "ok": true,
+      "detail": "{\"ok\":true,\"passport\":{\"schema\":\"syncnet.passport.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"chainId\":4663,\"launchpad\":\"PAR\",\"factory\":\"0x3ea29975a79900179f3e1aef93347ba4210c29c1\",\"deployer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operator\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"operatorSince\":\"2026-09-26T12:07:56.902Z\",\"claims\":[{\"id\":\"0x4934582f83d0220985c4c2d5f06e00e"
+    },
+    {
+      "name": "B03 a different wallet is refused (only the CURRENT operator)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 operator creates an intent (201)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x491d2cce99f011eaa7ac1d63e8c8b6b4ff2093c60961deabeb44bb08c6c05a0f\",\"token\":\"0x5555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":4900,\"priceUsd\":\"49.0"
+    },
+    {
+      "name": "B05 intent records price $49 / v1, rate 0.00005 / v1 / effectiveAt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 base amount = exactly 980,000 SYNC (18 decimals)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B07 tagged amount > base, difference < 2e-6 SYNC, tag in the low 12 decimals",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B08 intent binds chain 4663, canonical SYNC, configured sink, operatorAtRequest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B09 rate locked for 30 minutes; createdBlock = chain head",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B10 intent is displayable (exact 18-decimal string) and states 60/40 and non-refundable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B11 a second request while the first is open returns the SAME intent (no second amount)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B12 client cannot supply/override priceUsdCents (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: priceUsdCents. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override priceVersion (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: priceVersion. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override syncUsdReferenceRate (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: syncUsdReferenceRate. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override rate (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: rate. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override rateVersion (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: rateVersion. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override baseSyncAmount (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: baseSyncAmount. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override exactTaggedSyncAmount (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: exactTaggedSyncAmount. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override amount (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: amount. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override sink (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: sink. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override chainId (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: chainId. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override tag (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: tag. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override canonicalSync (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: canonicalSync. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override facts (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: facts. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B12 client cannot supply/override paymentToken (400)",
+      "ok": true,
+      "detail": "{\"error\":\"Unexpected field: paymentToken. The server derives it.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "B13 signature by another wallet → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B14 same struct signed in the Marketplace domain → 401 (no cross-domain replay)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B15 wrong EIP-712 chainId → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B16 issuedAt outside ±300 s → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B17 EIP-1271 contract-wallet operator (Safe) can request",
+      "ok": true,
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xeaae6d19267924c0c2e00632779bb1b651d71477bb5c2b904e228e4cc170e65f\",\"token\":\"0x8111111111111111111111111111111111111111\",\"operatorAtRequest\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":4900,\"priceUsd\":\"49.0"
+    },
+    {
+      "name": "B18 not a supported launch → 403/422, never an intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B19 nonce reuse → 409 replay",
+      "ok": true,
+      "detail": "{\"error\":\"This nonce was already used.\",\"code\":\"replay\"}"
+    },
+    {
+      "name": "B20 after expiry a NEW intent (new amount, new lock) can be created",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B21 rate version 2 ($0.0005) → 98,000 SYNC base",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B22 an existing intent keeps its locked rate after the active rate changes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B23 product price version 2 ($59) is recorded on the intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B24 rateVersion 1 reused with a DIFFERENT value → fail closed (503 config_conflict)",
+      "ok": true,
+      "detail": "{\"error\":\"Project Home activation payments are not open on this deployment.\",\"code\":\"config_conflict\"}"
+    },
+    {
+      "name": "B25 immutable rate snapshot keeps the first-seen value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B26 priceVersion 1 reused with a different price → fail closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B27 an exact amount is never issued twice while reserved (collision → new tag)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0xaca832218e4e250ea637297fe7f8deb5a2110a162dcee792371cc96586e20139\",\"token\":\"0x8555555555555555555555555555555555555555\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":4900,\"priceUsd\":\"49.0"
+    },
+    {
+      "name": "C01 unknown requestId → 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 malformed requestId → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 unknown tx → 202 NOT_MINED (lock judged by block time)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 failed transaction → 409 tx_failed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 Transfer emitted by a non-canonical token → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 transfer to another address → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 wrong amount (exact - 1) → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 wrong amount (exact + 1) → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 wrong amount (base amount (untagged)) → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 fake Transfer shapes (ERC-721 layout, Approval topic, removed log) → 409",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 payment mined at/before the intent block → 409 mined_before_intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 RPC on the wrong chain → 503, nothing changed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 mined but not SAFE → 202 PENDING_CONFIRMATION, no entitlement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C12 the observed payment is recorded on the intent (recovery hint)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 RPC outage → 503, no state change",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C14 persistent 429 → 503 within a bounded number of RPC calls",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "C15 real RPC client: 429 retried at most 2 times with backoff, then fail closed",
+      "ok": true,
+      "detail": "3"
+    },
+    {
+      "name": "C16 payment mined inside the lock but verified 2 h later → ACTIVE",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xf5b5e7e01580c0a01fab4df9eeed111426ac976e0be44eda3f35bcac9537e99a\",\"logIndex\":0,\"blockNumber\":\"1008\",\"blockHash\":\"0x9ec978e83cdc32d06efb1bc9da21a04e6091a82c3e08a91f45567c94c981d13"
+    },
+    {
+      "name": "C17 entitlement: kind paid, payer = gifting wallet, operatorAtActivation = history only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C18 entitlement records tx, logIndex, block number/hash, sink, SYNC, amounts, price/rate versions, requestId, safeAt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C19 activation registry has the record (token, requestId, tx, logIndex, amount, price/rate versions, block)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C20 intent is CONSUMED and the log is claimed by this request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C21 re-verifying the same payment is idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C22 an activated project never gets a second intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C23 the payer gains no Passport authority (operator is still W)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C24 one payment can never activate a second project (409 payment_already_used)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C25 payment mined 1 s after the lock expired → 409 mined_after_expiry, not consumed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C26 payment mined exactly at the lock boundary → ACTIVE",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000001\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xe1b135ca1e3449b775119c7a93b6a54eb9cb32aa46f848f1acae94b505bc5c3e\",\"logIndex\":0,\"blockNumber\":\"1010\",\"blockHash\":\"0x5493cd5d2880f017bf6dd8a78e6a63192350a55a90ad669acda8a53b54de83f"
+    },
+    {
+      "name": "C27 fixture: second intent for T2 after the first expired",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C28 duplicate project activation refused: second payment not consumed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C29 12 concurrent verifications of one payment: exactly one activation, all 200",
+      "ok": true,
+      "detail": "200:false,200:true,200:true,200:true,200:true,200:true,200:true,200:true,200:true,200:true,200:true,200:true"
+    },
+    {
+      "name": "C30 exactly one registry record for that payment",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C31 two projects racing for one payment: exactly one wins, the other 409 payment_already_used",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x8333333333333333333333333333333333333333\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0x23e64c0b427aa4d4072ef098df84dd167bbfacded362236b53dd451c4beb35af\",\"logIndex\":0,\"blockNumber\":\"1014\",\"blockHash\":\"0x721b9dacd5a8f5557344632edb47f6e92e44f20bdd511c32c72f5cf4e9691af"
+    },
+    {
+      "name": "C32 only one of the two projects is entitled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C33 durable store fails at the atomic commit → 503 and NO partial state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C34 retry after the crash activates (a valid payment is never lost)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C35 store read failure → 503",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C36 after a browser crash the open intent (requestId, exact amount) is recoverable from status",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C37 … and verifies later",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C38 reconcile before finality: unchanged ACTIVE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C39 reconcile once finalized → FINALIZED with finalizedAt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C40 reconcile with RPC down → 503, no change",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C40b lagging RPC node that does not know the block → 503, never an invalidation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C40c two reads of the block disagree → 503, no invalidation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C41 SAFE payment removed by a reorg → INVALIDATED_BY_REORG (history kept)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C42 audit trail has activated + invalidated-by-reorg",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C43 paid publication disabled while invalidated (409)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C44 the re-included payment re-activates the same request (previous entitlement recorded)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x5555555555555555555555555555555555555555\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xf5b5e7e01580c0a01fab4df9eeed111426ac976e0be44eda3f35bcac9537e99a\",\"logIndex\":0,\"blockNumber\":\"1019\",\"blockHash\":\"0x20844d226d8905393440c4229a26dac6a78a7ef4d495a57e447142090a07a3a"
+    },
+    {
+      "name": "C45 a payment awaiting SAFE blocks a second quote for the project (duplicate-payment guard)",
+      "ok": true,
+      "detail": "{\"error\":\"A payment for this project is awaiting confirmation. Verify it before requesting a new quote.\",\"code\":\"payment_pending\"}"
+    },
+    {
+      "name": "C46 …for a bounded time only (a payment that never confirms cannot lock the project forever)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"reused\":false,\"intent\":{\"requestId\":\"0x4f683a4433ed6a8c6d238fd30720758a3c2a266b573c7372ac21413a5ba42490\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"operatorAtRequest\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":4663,\"canonicalSync\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"sink\":\"0x5111c0000000000000000000000000000000beef\",\"priceUsdCents\":4900,\"priceUsd\":\"49.0"
+    },
+    {
+      "name": "C47 the original payment (mined inside its lock) still activates once SAFE",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xec58796be582ea54e696e9dfc6144e391d74f6da85e68a532aeedc1994ac5208\",\"logIndex\":0,\"blockNumber\":\"1020\",\"blockHash\":\"0x59bed0e26f6810af5883f804fdbbc6e9ab383173c67a369147c0f26d945acc4"
+    },
+    {
+      "name": "C48 after a reorg, a DIFFERENT late payment still cannot use the expired lock",
+      "ok": true,
+      "detail": "{\"error\":\"That payment was mined after the 30-minute rate lock expired, so it cannot activate at the locked rate. It is not refundable by the protocol.\",\"code\":\"mined_after_expiry\"}"
+    },
+    {
+      "name": "C49 the SAME transaction re-included after the lock re-activates (it was broadcast in time)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"idempotent\":false,\"status\":\"ACTIVE\",\"entitlement\":{\"schema\":\"syncnet.project-home.entitlement.v1\",\"token\":\"0x7a11000000000000000000000000000000000002\",\"status\":\"ACTIVE\",\"kind\":\"paid\",\"chainId\":4663,\"txHash\":\"0xec58796be582ea54e696e9dfc6144e391d74f6da85e68a532aeedc1994ac5208\",\"logIndex\":0,\"blockNumber\":\"1023\",\"blockHash\":\"0x004c51a76ad9ff9bbc06972e262e8c34276713490cbfaa0d4af3a5800761414"
+    },
+    {
+      "name": "D01 publish without an activation → 402 activation_required",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D02 unknown/forbidden config fields (html) → 400 invalid_config",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D03 non-canonical config → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D04 the payer (gift) cannot publish (403 not_operator)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D05 a random wallet cannot publish",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D06 image CID that never passed the sanitizer → 422",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D07 current operator + active entitlement + sanitised image → published",
+      "ok": true,
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xcb298eed0f26ae5b2bdde2c7cad647b4507f5c8519ab6f304811b64c72dd0695\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790458500,\"at\":\"2026-09-26T21:35:00.000Z\"},\"url\":\"/site/0x555"
+    },
+    {
+      "name": "D08 /site/<token> renders 200 with the authority label",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D09 verified facts rendered from the server: name, ticker, contract, origin, Passport",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D10 on-chain website field shown truthfully, separately and NOT as a link",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D11 operator links clickable for the current operator",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D12 CSP: default-src none, hashed style only, same-origin images, no scripts/frames/forms",
+      "ok": true,
+      "detail": "default-src 'none'; style-src 'sha256-kwTUvsB3sBiLM4WO9u6yex+pFHcvVfcUGFcUEGlnspQ='; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    },
+    {
+      "name": "D13 the inline stylesheet matches the CSP hash exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D14 security headers: nosniff, DENY, no-referrer, no-store",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D15 zero JavaScript, no inline style attributes, no event handlers",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D16 image served same-origin through /site-img/<cid>",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D17 non-lowercase token → 301 to /site/<lowercase>",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D18 unpublished / unknown token → 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D18b Netlify rewrite form (/.netlify/functions/site?token=) renders the same page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D18c hostile ?token= → 404, never reflected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D19 kill switch: Project Home disabled → /site is 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D20 HEAD works without a body",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D21 /site-img serves the sanitised bytes (hash-verified) as image/png with a sandbox CSP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D22 gateway returns different bytes → 404 (never served)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D23 CID not on the sanitizer allowlist → 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D23b image route works in the Netlify rewrite form (?cid=)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D24 image route closed when Project Home is disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D25 edits are free; nonce reuse → 409 replay",
+      "ok": true,
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xa5d2f4096cdab28175fe44a6375f9a9c3d8e0885a6f20809204783554c00f072\",\"configHash\":\"0xfa8718f3222c0bc4d4c3ecfdd58489029d705692ce05354f71f01150b7843a18\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790458501,\"at\":\"2026-09-26T21:35:00.000Z\"},\"url\":\"/site/0x555"
+    },
+    {
+      "name": "D26 issuedAt regression (older than the current revision) → 409 stale_issued_at",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D27 SitePublish signed in the Marketplace domain → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D28 SitePublish for another chainId → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D29 a real Marketplace signature pasted into a site write → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D30 unpublish → tombstone; site 404; entitlement untouched",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D31 revision history survives unpublish",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D32 restore an earlier revision by configHash with a NEW signature (no payment)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"kind\":\"restore\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xa721c8e98a4253544dca9615250185ae5a002ea41a20327b8da938e8d26e78f7\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790458506,\"at\":\"2026-09-26T21:35:00.000Z\"},\"url\":\"/site/0x555"
+    },
+    {
+      "name": "D33 EIP-1271 contract-wallet operator publishes",
+      "ok": true,
+      "detail": "{\"ok\":true,\"kind\":\"publish\",\"site\":{\"token\":\"0x8111111111111111111111111111111111111111\",\"state\":\"PUBLISHED\",\"revisionId\":\"0x71b73d49f1779cf84642aa6991b44dc682573d80406631cb9237015af76643ea\",\"configHash\":\"0x75ea00f14cccf744a4566063a9967a3f30679609e42023f45c6bdc097403e72f\",\"signer\":\"0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe\",\"issuedAt\":1790458500,\"at\":\"2026-09-26T21:35:00.000Z\"},\"url\":\"/site/0x811"
+    },
+    {
+      "name": "E01 fixture: Passport of T1 transferred W → W2 via the Marketplace",
+      "ok": true,
+      "detail": "{\"ok\":true,\"deal\":{\"schema\":\"syncnet.deal.v1\",\"id\":\"0xff4e3bc50f8a1b6d7c55331bdf7c1c50ef7d0939d2b9193fde9ae55ab5609fd4\",\"listingId\":\"0x46e9c8fd5b0bb836ab9a4efd94ba403753d5db0bfe1a14e8d1e1adad7e45a5b2\",\"offerId\":\"0x8b67b874c5f611e8c2221bf6c3152d2f2b0fa3f8b6892f559ad80b3e6b2f9571\",\"token\":\"0x5555555555555555555555555555555555555555\",\"seller\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"buyer\":\"0x19"
+    },
+    {
+      "name": "E02 site stays up, labelled PUBLISHED BY PREVIOUS OPERATOR · AWAITING CONFIRMATION",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E03 every operator-authored external link is NON-CLICKABLE (no href at all)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E04 text and verified facts remain visible; new operator shown; page noindex",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E05 entitlement survives the transfer unchanged (no second payment)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E06 the old operator fails EVERY site write immediately (publish, unpublish, restore)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E07 the new operator ADOPTS the exact current config with a new signature, free",
+      "ok": true,
+      "detail": "{\"ok\":true,\"kind\":\"adopt\",\"site\":{\"token\":\"0x5555555555555555555555555555555555555555\",\"state\":\"PUBLISHED\",\"revisionId\":\"0xe0fd0e42189bf62e4a780cae7f0161185d02fbe19e376899c8a4d6810ec4e83c\",\"configHash\":\"0x312149d62c92a8e2c86b287dacb8bed9cc321e1220794b5fac67ce73d3b1439f\",\"signer\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"issuedAt\":1790458523,\"at\":\"2026-09-26T21:35:00.000Z\"},\"url\":\"/site/0x55555"
+    },
+    {
+      "name": "E08 after adoption: authority label back, links clickable again",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E09 adoption did not touch the entitlement or create a payment",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E10 publish racing a Passport transfer is rejected atomically (409 conflict, nothing written)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E11 …and render-time authority immediately disables the links for the new operator X",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E12 no Passport at render time → not operator-verified, links disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F01 complimentary entitlement is labelled COMPLIMENTARY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F02 a complimentary entitlement permits publication",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F03 complimentary never overwrites an existing entitlement",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F04 metrics: activations counted from the registry (complimentary excluded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F05 metrics: SYNC paid for verified activations = registry sum",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F06 metrics: sink figures come from the contract; unsolicited inflow isolated (5 SYNC)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F07 metrics wording: committed ≠ burned; unsolicited transfers are not activation payments",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F08 metrics: rate version used per activation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F09 invalidated entitlement → site unavailable (503), nothing operator-authored shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F10 invalidated activation excluded from verified metrics",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F11 metrics with RPC down: registry figures still served, sink marked unavailable (never guessed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F12 store failure at render → 503, nothing rendered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G01 project-home never WRITES the Passport (only an expectation inside cas)",
+      "ok": true,
+      "detail": "pRaw,pRaw,pRaw"
+    },
+    {
+      "name": "G02 the only store mutations are atomic cas() calls",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G03 no unbounded log scans (eth_getLogs never used)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G04 no refund logic exists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G05 operatorAtActivation is never used for authority",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G06 no fixed-SYNC product price anywhere",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
