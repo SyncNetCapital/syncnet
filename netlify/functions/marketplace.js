@@ -2,7 +2,7 @@
 /*
  * SyncNet Marketplace V1 — the persistent, signature-authenticated backend.
  *
- *   GET  /api/marketplace?view=config|listings|listing|passport|deal|wallet
+ *   GET  /api/marketplace?view=config|listings|listing|passport|passports|deal|wallet
  *   POST /api/marketplace {action, ...fields, signature}
  *
  * Trust model (see MARKETPLACE_SECURITY.md):
@@ -184,6 +184,14 @@ async function handler(event = {}, deps = {}) {
         const listing = p && p.listing ? publicListing(await getJson(store, K.listing(p.listing))) : null;
         return json(200, { enabled: on, passport: publicPassport(p), listing: listing && listing.status === 'ACTIVE' ? listing : listing });
       }
+      if (view === 'passports') {
+        // Batch, read-only: the Passport (sync / control state) of up to 100 projects, for Explore and My Projects.
+        const tokens = [...new Set(String(query(event, 'tokens') || '').toLowerCase().split(',').filter(isAddr))].slice(0, 100);
+        const rows = await Promise.all(tokens.map((t) => getJson(store, K.passport(t))));
+        const passports = {};
+        tokens.forEach((t, i) => { const p = rows[i]; if (p && isAddr(p.operator)) passports[t] = { operator: lc(p.operator), operatorSince: p.operatorSince || null, launchpad: p.launchpad || Origins.recordOrigin(p), listing: p.listing || null }; });
+        return json(200, { enabled: on, passports });
+      }
       if (view === 'deal') {
         const d = await getJson(store, K.deal(lc(query(event, 'id'))));
         if (!d) return publicError(404, 'not_found', 'Deal not found.');
@@ -194,14 +202,15 @@ async function handler(event = {}, deps = {}) {
         const w = lc(query(event, 'address'));
         if (!isAddr(w)) return bad('Invalid wallet address.');
         const refs = (await store.smembers(K.wallet(w))).slice(0, 300);
-        const listings = [], offers = [], deals = [];
+        const listings = [], offers = [], deals = [], passports = [];
         for (const ref of refs) {
           const [t, id] = ref.split(':');
+          if (t === 'P') { const p = await getJson(store, K.passport(lc(id))); if (p && lc(p.operator) === w) passports.push({ token: lc(p.token || id), operator: lc(p.operator), operatorSince: p.operatorSince || null, launchpad: p.launchpad || Origins.recordOrigin(p), listing: p.listing || null }); }
           if (t === 'L') { const l = await getJson(store, K.listing(id)); if (l) listings.push(publicListing(l)); }
           if (t === 'O') { const o = await getJson(store, K.offer(id)); if (o) { const l = await getJson(store, K.listing(o.listingId)); offers.push(publicOffer(o, l)); } }
           if (t === 'D') { const d = await getJson(store, K.deal(id)); if (d) deals.push(publicDeal(d)); }
         }
-        return json(200, { enabled: on, listings, offers, deals });
+        return json(200, { enabled: on, listings, offers, deals, passports }); // passports: only those this wallet CURRENTLY operates
       }
       return bad('Unknown view.');
     } catch (err) {

@@ -228,3 +228,9 @@
   from = "/economy"
   to = "/economy.html"
   status = 200
+
+# Explore with the For sale filter (the Marketplace entry point).
+[[redirects]]
+  from = "/for-sale"
+  to = "/index.html"
+  status = 200

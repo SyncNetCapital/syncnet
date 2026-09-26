@@ -1,72 +1,35 @@
 <!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000">
-<title>SyncNet — Make SYNC a verb.</title>
-<meta name="description" content="Map token connections. Create a project. Choose what it syncs with.">
-<meta property="og:title" content="SyncNet — Make SYNC a verb."><meta property="og:description" content="See what any Robinhood Chain token is connected to — then launch your project into that network."><meta property="og:url" content="https://syncnet.capital"><meta property="og:image" content="https://syncnet.capital/assets/syncnet-logo.png">
-<link rel="stylesheet" href="/v2.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png">
-</head><body data-topology-demo="false">
-<header class="site-nav"><div class="wrap nav-inner"><a class="nav-brand" href="/"><span class="nav-mark">S</span><span>SYNCNET</span></a><button class="nav-toggle" type="button" aria-label="Open navigation" aria-expanded="false">MENU</button><nav class="nav-links" aria-label="Primary"><a href="/network.html">Map</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/sync.html">$SYNC token</a><a href="/labs.html">Labs</a><a class="nav-cta" href="/build.html">SYNC A PROJECT</a></nav></div></header>
-<main>
-<section class="page-hero"><div class="wrap hero-inner">
-<div class="hero-sync-mark" role="img" aria-label="SyncNet — two market paths converging into sync">
-<svg class="hero-sync-svg" viewBox="0 0 1200 520" aria-hidden="true" focusable="false">
-<defs>
-  <filter id="syncSoftGlow" x="-30%" y="-30%" width="160%" height="160%">
-    <feGaussianBlur stdDeviation="5" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-</defs>
-<circle class="sync-ring" cx="600" cy="260" r="248"/>
-<path class="sync-base sync-base-cyan" pathLength="1000" d="M78 188 H430 C555 188 585 260 720 260"/>
-<path class="sync-base sync-base-ivory" pathLength="1000" d="M78 332 H430 C555 332 585 260 720 260"/>
-<path class="sync-base sync-base-out" pathLength="1000" d="M720 260 H1122"/>
-<path class="sync-flow sync-flow-cyan" pathLength="1000" d="M78 188 H430 C555 188 585 260 720 260"/>
-<path class="sync-flow sync-flow-ivory" pathLength="1000" d="M78 332 H430 C555 332 585 260 720 260"/>
-<path class="sync-flow sync-flow-out" pathLength="1000" d="M720 260 H1122"/>
-<circle class="sync-point-halo" cx="720" cy="260" r="18"/>
-<circle class="sync-point" cx="720" cy="260" r="4"/>
-</svg>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0c0b">
+<title>SyncNet — Sync your project</title>
+<meta name="description" content="Find a project on Robinhood Chain. Verify control. Give it a home.">
+<meta property="og:title" content="SyncNet — Sync your project"><meta property="og:description" content="Find a project. Verify control. Give it a home."><meta property="og:url" content="https://syncnet.capital"><meta property="og:image" content="https://syncnet.capital/assets/syncnet-logo.png">
+<link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png">
+</head><body class="sn-explore">
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><img src="/assets/syncnet-logo-thumb.webp" width="28" height="28" alt=""><span>SyncNet</span></a><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<main class="sn-main" id="main">
+<section class="sn-wrap sn-intro" aria-labelledby="exploreTitle">
+<h1 class="sn-h1" id="exploreTitle">Sync your project.</h1>
+<p class="sn-lede">Find a project. Verify control. Give it a home.</p>
+<form class="sn-search" id="exploreSearch" role="search" action="/" method="get">
+<svg class="sn-motif" viewBox="0 0 72 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1.5H22C42 1.5 50 15 72 15" stroke="#6fd3df" stroke-opacity=".7"/><path d="M0 28.5H22C42 28.5 50 15 72 15" stroke="#cf9165" stroke-opacity=".7"/></svg>
+<label class="sr-only" for="exploreQ">Search projects by name, ticker or contract</label>
+<input id="exploreQ" name="q" type="search" placeholder="Name, ticker or contract" autocomplete="off" spellcheck="false" enterkeyhint="go">
+<button type="submit" aria-label="Open project">→</button>
+</form>
+<p class="sn-small" style="margin:14px 0 0"><a class="sn-textbtn" href="/build.html">+ Create a new project</a></p>
+<div class="sn-filters" role="toolbar" aria-label="Show projects">
+<button type="button" data-filter="all" aria-pressed="true">All</button>
+<button type="button" data-filter="synced" aria-pressed="false">Synced</button>
+<button type="button" data-filter="sale" aria-pressed="false">For sale</button>
+<button type="button" data-filter="new" aria-pressed="false">New</button>
+<a class="sn-filters-end" href="/network.html">Network →</a>
 </div>
-<div class="eyebrow">Token relationship map · Robinhood Chain</div>
-<h1 class="hero-title">MAKE <span class="cyan">SYNC</span><br>A VERB.</h1>
-<p class="hero-copy"><strong>Map what any Robinhood Chain token is synced with — then sync your project into that network.</strong><br>PAR creates markets. SyncNet makes the relationships and provenance legible.</p>
-<div class="hero-search"><div class="search-box"><input class="input" id="tokenSearch" aria-label="Token name, ticker, or contract" placeholder="Name, ticker or 0x…" autocomplete="off" spellcheck="false"><button class="btn primary" id="mapToken" type="button">MAP</button></div><div class="asset-status" id="searchStatus" role="status" aria-live="polite">Search uses recorded SyncNet identities plus indexed PAR market history. Contract lookup is authoritative.</div><div class="search-matches" id="searchMatches"></div></div>
-<div class="actions"><a class="btn" href="/build.html">SYNC A PROJECT <span aria-hidden="true">→</span></a></div>
-</div></section>
-
-<section class="section compact home-mapper" id="map-token" aria-labelledby="topologyTitle" hidden><div class="wrap">
-<div class="home-topology-head"><div class="eyebrow">Token map</div><h2 class="home-topology-title" id="topologyTitle">A TOKEN IN CONTEXT.</h2><p id="topologyMeta">Map a token above to see its observable relationships.</p><div class="profile-state" id="profileState">No token mapped yet.</div></div>
-<div class="topology-shell" id="topologyGraph"><div class="network-empty">No token mapped yet.</div></div>
-<div class="same-branch" id="sameBranch"></div>
-<p class="coverage-note">SyncNet pages the current PAR launch history when available. Neighbour discovery is first-degree only. Contract lookup remains authoritative when names or tickers collide.</p>
-<div class="actions"><a class="btn primary" id="buildAround" href="/build.html">SYNC A PROJECT WITH IT</a><a class="btn" id="openProjectPage" href="#">OPEN PROJECT PAGE</a></div>
-</div></section>
-
-<section class="section compact home-activity"><div class="wrap"><div class="eyebrow">Live network · last 7 days</div><h2 class="section-title small-title">CONNECTIONS<br><span class="cyan">THIS WEEK.</span></h2><p class="section-copy">The non-hub assets most often used as markets by recent PAR launches. Market use does not imply affiliation.</p><div class="activity-grid" id="recentActivity"><div class="network-empty">Reading current PAR launch history…</div></div></div></section>
-
-<section class="section compact"><div class="wrap">
-<div class="eyebrow">How it works</div><h2 class="section-title">MAP.<br>SYNC. <span class="cyan">RECORD.</span></h2>
-<div class="grid-3">
-<article class="grid-card"><div class="num">01</div><h3>Map</h3><p>Search any token and see what it is synced with: its direct markets, the projects that use it as a market, and its neighbours.</p></article>
-<article class="grid-card"><div class="num">02</div><h3>Sync</h3><p>Sync a new project with up to five eligible tokens. Each connection is a direct market, opened by the PAR launch.</p></article>
-<article class="grid-card"><div class="num">03</div><h3>Record</h3><p>SyncNet commits who launched what, with which connections and why, into the launch itself — provenance that cannot be added later.</p></article>
-</div>
-<p class="verb-note"><strong>To sync</strong> a project with a token means opening a direct market between them. It is not a partnership, endorsement, shared ownership or automatic holder reward.</p>
-</div></section>
-
-<section class="section"><div class="wrap">
-<div class="eyebrow">Real example</div><h2 class="section-title">ONE PROJECT.<br>SYNCED INTO A COMMUNITY.</h2>
-<div class="example-card">
-<div class="example-top"><div class="example-project"><img src="/assets/syncat-thumb.webp" alt="$SYNCAT"><div><h3>$SYNCAT</h3><p>Foundational SyncNet-launched project</p></div></div><div class="badge-stack"><span class="badge registry-badge origin" title="Foundational SyncNet-launched project recorded before the current V2 live-launch flow.">SYNCNET ORIGIN · #001</span><span class="badge">BUILT AROUND CASHCAT</span></div></div>
-<div class="sync-diagram" style="margin-top:26px;grid-template-columns:1fr auto 1.2fr auto 1fr"><div class="sync-node"><strong>CASHCAT</strong><span>existing token</span></div><div class="sync-arrow">↔</div><div class="sync-node center"><strong>SYNCAT</strong><span>new project</span></div><div class="sync-arrow">↔</div><div class="sync-node"><strong>$SYNC</strong><span>existing token</span></div></div>
-<div class="market-preview"><div class="market-preview-title">What “synced” means here</div><div class="market-list"><span class="market-pill">SYNCAT / CASHCAT</span><span class="market-pill">SYNCAT / SYNC</span></div></div>
-<p class="example-copy"><strong>SYNCAT was launched from the SyncNet deployer wallet.</strong> It opened markets with CASHCAT and $SYNC. It is not affiliated with or endorsed by CASHCAT.</p><div class="registry-inline"><span>RECORDED PROVENANCE</span><strong>SYNCNET ORIGIN · #001</strong><small>Foundational SyncNet origin record. Provenance is not an endorsement or safety signal.</small><a href="/registry.html">VIEW PROJECT REGISTRY →</a></div>
-</div>
-<p class="symbiosis-note"><strong>Symbiosis</strong> is one economic connection. <strong>Synchronicity</strong> is what becomes visible when many connections form a network.</p>
-</div></section>
-
+<p class="sn-status sn-small" id="exploreStatus" role="status" aria-live="polite"></p>
+<div class="sn-list-head sn-label" aria-hidden="true"><span>Project</span><span>Sync state</span><span>Market</span><span>Connections</span><span></span></div>
+<ol class="sn-list" id="exploreList" aria-label="Projects"><li class="sn-empty">Loading projects…</li></ol>
+<div class="sn-more"><button class="sn-btn" type="button" id="exploreMore" hidden>Show more</button></div>
+</section>
 </main>
-
-<section class="public-risk"><div class="wrap"><div class="eyebrow">Experimental software · High risk</div><p>SyncNet is experimental, non-custodial software. Cryptoassets are volatile and blockchain transactions may be irreversible. Smart contracts, routing, third-party infrastructure and user-created projects may fail. You may lose some or all assets used through the platform.</p><p>Connection to another asset does not imply endorsement, partnership or official affiliation. Rewards, liquidity, volume, attention or value are never guaranteed.</p><a href="/risk.html">Read the full risk disclosure ↗</a></div></section>
-<footer class="site-footer"><div class="wrap"><nav class="footer-nav"><a href="/kit.html">Project Kit</a><a href="/registry.html">Registry</a><a href="/marketplace.html">Marketplace</a><a href="/labs.html">Labs</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><a href="/contact.html">Contact</a><a href="https://github.com/SyncNetCapital/syncnet" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://x.com/sync_on_par" target="_blank" rel="noreferrer">X ↗</a></nav><p>Official $SYNC contract: <span class="footer-contract mono">0x6368e007b9f0b941560ed1f3bceb20247f5eca37</span></p><p>Independent project. Not affiliated with NET, PAR, CASHCAT or assets selected by creators.</p></div></footer>
-<script src="/v2-common.js" defer></script><script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-ipfs.js" defer></script><script src="/v2-network.js" defer></script></body></html>
+<footer class="sn-foot"><div class="sn-wrap sn-foot-inner"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a><a href="/network.html">Network</a><a href="/for-sale">For sale</a><a href="/registry.html">Registry</a><a href="/labs.html">Labs</a><a href="/kit.html">Project Kit</a><a href="/launches.html">My launches</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><p class="sn-foot-note">Independent software on Robinhood Chain. A connection between projects is not an affiliation. SyncNet never holds your keys.</p></div></footer><nav class="sn-tabbar" aria-label="Primary"><a href="/" data-nav="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>Explore</a><a href="/build.html" data-nav="create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</a><a href="/you.html" data-nav="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>You</a></nav>
+<script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-ipfs.js" defer></script><script src="/sn-wallet.js" defer></script><script src="/sn-ui.js" defer></script><script src="/explore.js" defer></script>
+</body></html>

@@ -35,3 +35,4 @@
 /economy /economy.html 200
 /project/* /token.html 200
 /token/* /token.html 200
+/for-sale /index.html 200

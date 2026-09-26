@@ -94,7 +94,7 @@ function freshChain() {
     txs: new Map(), // hash -> {tx, receipt}
     pending: new Map(), // hash -> {tx, run}  broadcast but not mined
     nonces: new Map(),
-    block: 0x100,
+    block: 0x100, genesisTs: Math.floor(Date.now() / 1000) - 0x100 - 60,
     fees: { launchFee: 100000000000000n, baseFeeBps: 100n, protocolFeeShareBps: 5000n, maxCreatorTaxBps: 1000n },
     configEnabled: true, canLaunch: true, forwarder: null, factoryPricer: null, spotEpoch: 0, curated: new Set(), noRoute: new Set(),
     routeHooks: new Map(), allowedHooks: new Set(), routeNotQualified: new Set(), routeHops: new Map(), balanceWei: 100n * 10n ** 18n, factoryOverride: null,
@@ -306,6 +306,7 @@ function mine(hash, tx, run) {
   chain.block += 1;
   let status = '0x1'; const logs = []; let token = null;
   try { token = run(); } catch (e) { if (!(e instanceof Revert)) throw e; status = '0x0'; }
+  if (token && typeof token === 'object' && Array.isArray(token.logs)) { if (status === '0x1') logs.push(...token.logs.map((l, i) => ({ ...l, logIndex: hex(i), transactionHash: hash, blockNumber: hex(chain.block + 0), blockHash: '0x' + chain.block.toString(16).padStart(64, '0'), removed: false }))); token = null; }
   if (status === '0x1' && token) {
     const x = chain.tokens.get(token);
     logs.push({ address: lc(R.multiFactory), topics: [Chain.TOPIC.multiLaunched, '0x' + token.slice(2).padStart(64, '0'), '0x' + lc(tx.from).slice(2).padStart(64, '0')], data: enc(['uint256', 'uint24', 'address[]'], [0n, Number((x.baseFeeBps + BigInt(x.params.creatorTaxBps)) * 100n), x.pairTokens.map(lc)]), blockNumber: hex(chain.block), transactionHash: hash, logIndex: '0x0' });
@@ -320,6 +321,13 @@ function executeLaunch(tx) {
   const from = lc(tx.from);
   const data = String(tx.data || '0x');
   if (data === '0x' || data === '') return () => null; // plain value transfer (Marketplace payments)
+  if (lc(tx.to) === lc(A.SYNC) && data.startsWith('0xa9059cbb')) { // ERC-20 transfer of $SYNC: emits a canonical Transfer log
+    return () => {
+      const [to, amount] = Core.abiDecode(['address', 'uint256'], '0x' + data.slice(10));
+      if (chain.syncTransferReverts) throw new Revert('ERC20InsufficientBalance');
+      return { logs: [{ address: lc(A.SYNC), topics: [Core.keccak256Utf8('Transfer(address,address,uint256)'), '0x' + lc(from).slice(2).padStart(64, '0'), '0x' + lc(to).slice(2).padStart(64, '0')], data: '0x' + BigInt(amount).toString(16).padStart(64, '0') }] };
+    };
+  }
   if (data.startsWith(S.transferCreatorFeeRecipient)) {
     return () => {
       const [token, newRecipient] = Core.abiDecode(['address', 'address'], '0x' + data.slice(10));
@@ -390,7 +398,7 @@ export function rpcHandle(body, chainHex = '0x1237') {
         case 'eth_getTransactionCount': result = hex(nonceOf(params[0]) + (params[1] === 'pending' ? chain.pending.size : 0)); break;
         case 'eth_getTransactionReceipt': result = chain.txs.get(params[0])?.receipt || null; break;
         case 'eth_getTransactionByHash': { const h = params[0]; const t = chain.txs.get(h); if (t) result = t.tx; else if (chain.pending.has(h)) { const p = chain.pending.get(h).tx; result = { hash: h, from: lc(p.from), to: lc(p.to), input: p.data, value: hex(BigInt(p.value || 0)), nonce: hex(p.nonce), blockNumber: null, blockHash: null, transactionIndex: null }; } else result = null; break; }
-        case 'eth_getBlockByNumber': { const n = params[0] === 'latest' ? chain.block : Number(params[0]); result = { number: hex(n), timestamp: hex(1758600000 + n), hash: '0x' + n.toString(16).padStart(64, '0'), baseFeePerGas: '0x5f5e100', transactions: [] }; break; }
+        case 'eth_getBlockByNumber': { const n = params[0] === 'latest' ? chain.block : params[0] === 'safe' ? chain.block - (chain.safeLag || 0) : params[0] === 'finalized' ? chain.block - (chain.finalLag || 0) : Number(params[0]); if (n > chain.block) { result = null; break; } result = { number: hex(n), timestamp: hex((chain.realTime ? chain.genesisTs : 1758600000) + n), hash: '0x' + n.toString(16).padStart(64, '0'), baseFeePerGas: '0x5f5e100', transactions: [] }; break; }
         case 'eth_feeHistory': result = { oldestBlock: hex(chain.block), baseFeePerGas: ['0x5f5e100', '0x5f5e100'], gasUsedRatio: [0.5], reward: [['0x0']] }; break;
         default: result = null;
       }
@@ -452,8 +460,14 @@ const BASE_ENV = {
   UPSTASH_REDIS_REST_URL: 'https://upstash.mock', UPSTASH_REDIS_REST_TOKEN: 'upstash-test-token',
   SYNCNET_PIN_SECONDARY_URL: 'https://psa.mock', SYNCNET_PIN_SECONDARY_TOKEN: 'psa-token',
 };
-const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED'];
-export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true } = {}) {
+const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
+  'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
+/** Project Home test fixtures: a sink that is never deployed and a TEST reference rate added in memory only (the
+ *  reviewed repo file itself ships with no rate). */
+export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
+export const PH_TEST_RATE = Object.freeze({ rateVersion: 900, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z', source: 'E2E TEST FIXTURE — never deployed' });
+const PRICING = require(path.join(ROOT, 'syncnet-project-home-pricing.json'));
+export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
   if (publicLaunch) process.env.SYNCNET_PUBLIC_LAUNCH = 'true';
@@ -461,6 +475,14 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   if (registry) process.env.SYNCNET_REGISTRY_SUBMISSIONS = 'true';
   if (uploadsDisabled) process.env.SYNCNET_UPLOADS_DISABLED = 'true';
   if (economyCuration) process.env.SYNCNET_ECONOMY_CURATION = 'true';
+  const i = PRICING.rates.findIndex((r) => r.rateVersion === PH_TEST_RATE.rateVersion);
+  if (i >= 0) PRICING.rates.splice(i, 1);
+  chain.realTime = Boolean(projectHome);
+  if (projectHome) {
+    PRICING.rates.push({ ...PH_TEST_RATE });
+    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: String(PH_TEST_RATE.rateVersion), PROJECT_HOME_SINK_ADDRESS: PH_SINK });
+    if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
+  }
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));
   store.getStore(durable ? { env: process.env } : { env: {} });
 }
@@ -500,7 +522,7 @@ async function serverFetch(input, init = {}) {
     const file = init.body.get('file'); const buf = Buffer.from(await file.arrayBuffer());
     const sha = crypto.createHash('sha256').update(buf).digest();
     const cid = cidFor(buf);
-    serverState.pins.push({ type: file.type, size: buf.length, hasExif: buf.includes(Buffer.from('Exif')), hasText: /tEXt|iTXt|zTXt|eXIf/.test(buf.toString('latin1')), cid, auth: (init.headers || {}).Authorization, meta: JSON.parse(init.body.get('pinataMetadata')) });
+    serverState.pins.push({ bytes: buf, type: file.type, size: buf.length, hasExif: buf.includes(Buffer.from('Exif')), hasText: /tEXt|iTXt|zTXt|eXIf/.test(buf.toString('latin1')), cid, auth: (init.headers || {}).Authorization, meta: JSON.parse(init.body.get('pinataMetadata')) });
     return jsonResponse(200, { IpfsHash: cid, PinSize: buf.length });
   }
   if (u.hostname === 'psa.mock') { serverState.secondary.push(JSON.parse(init.body)); return jsonResponse(202, { requestid: 'r1', status: 'queued' }); }
@@ -516,6 +538,7 @@ async function gatewayFetch(u, init = {}) {
   if (mode === 'timeout') return new Promise((_, reject) => { const fail = () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })); if (init.signal?.aborted) fail(); else init.signal?.addEventListener('abort', fail); });
   if (mode === 'down') return new Response('upstream 504: internal gateway trace 0xdeadbeef', { status: 504 });
   if (mode === 'html') return new Response('<!doctype html><html><body>gateway error page</body></html>', { status: 200, headers: { 'content-type': 'text/html' } });
+  { const m = u.pathname.match(/^\/ipfs\/([A-Za-z0-9]+)$/); const pin = m && serverState.pins.find((x) => x.cid === m[1]); if (pin && u.hostname === 'gateway.pinata.cloud') return new Response(pin.bytes, { status: 200, headers: { 'content-type': pin.type, 'content-length': String(pin.bytes.length) } }); }
   if (u.hostname === 'dweb.link') { const m = u.pathname.match(/^\/ipfs\/([A-Za-z0-9]+)(\/.*)?$/); return new Response('', { status: 301, headers: { location: `https://${m[1].toLowerCase()}.ipfs.dweb.link${m[2] || '/'}` } }); }
   return new Response(PNG, { status: 200, headers: { 'content-type': 'image/png', 'content-length': String(PNG.length) } });
 }
@@ -526,7 +549,7 @@ export { realFetch };
 const origLog = console.log;
 console.log = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) { try { serverState.logs.push(JSON.parse(a[0])); } catch { serverState.logs.push(a[0]); } return; } origLog(...a); };
 
-const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies'];
+const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies', 'project-home', 'site', 'site-img'];
 const fnModules = Object.fromEntries(FUNCTIONS.map((n) => [n, require(path.join(ROOT, 'netlify/functions', n + '.js'))]));
 function ipfsCheckFn() { return fnModules['ipfs-check']; }
 let ipCounter = 0;
@@ -534,7 +557,7 @@ async function runFunction(name, req, u, body, res) {
   const ip = serverState.fixedIp || `10.${(ipCounter >> 16) & 255}.${(ipCounter >> 8) & 255}.${ipCounter++ & 255}`;
   const event = { httpMethod: req.method, path: u.pathname, rawUrl: 'http://localhost' + req.url, headers: { ...req.headers, 'x-nf-client-connection-ip': ip }, queryStringParameters: Object.fromEntries(u.searchParams), body: body || null, isBase64Encoded: false };
   const out = await fnModules[name].handler(event);
-  res.writeHead(out.statusCode, out.headers || {}); res.end(out.body || '');
+  res.writeHead(out.statusCode, out.headers || {}); res.end(out.isBase64Encoded ? Buffer.from(out.body || '', 'base64') : out.body || '');
 }
 
 export function startServer(port = 8931) {
@@ -557,6 +580,8 @@ export function startServer(port = 8931) {
       if (/declarer\.example/.test(url)) return json(200, { found: true, origin: 'https://declarer.example', declaration: { schema: 'syncnet.site.v1', token: lc(A.CREATORLIVE) } });
       return json(200, { found: false, origin: url, reason: 'http-404' });
     }
+    if (/^\/site\/[^/]+$/.test(p) || /^\/site-img\/[^/]+$/.test(p)) { const fn = p.startsWith('/site-img/') ? 'site-img' : 'site'; return runFunction(fn, req, u, '', res).catch((e) => { origLog('FUNCTION CRASH', fn, e); json(500, { error: 'crash' }); }); }
+    if (p === '/for-sale') p = '/index.html';
     if (p.startsWith('/project/') || p.startsWith('/token/')) p = '/token.html';
     if (p === '/') p = '/index.html';
     const f = path.join(ROOT, path.normalize(p));

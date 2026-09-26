@@ -4,6 +4,7 @@
  *
  *   GET  /api/project-home?view=config
  *   GET  /api/project-home?view=status&token=0x…        entitlement, current site pointer, open intent
+ *   GET  /api/project-home?view=homes&tokens=0x…,0x…   batch HOME state for list rows
  *   GET  /api/project-home?view=intent&id=0x…
  *   GET  /api/project-home?view=revisions&token=0x…     immutable revision history (audit / recovery)
  *   GET  /api/project-home?view=revision&id=0x…
@@ -217,6 +218,23 @@ async function readView(view, event, { store, rpc, cfg }) {
       enabled: true, token, entitlement: publicEntitlement(ent.value), site: publicCur(cur.value), openIntent: publicIntent(intent),
       intents: recent, passport: passport ? { operator: lc(passport.operator), operatorSince: passport.operatorSince || null } : null,
     });
+  }
+  if (view === 'homes') {
+    // Batch, read-only: the public HOME state of up to 100 projects (Explore / My Projects rows).
+    //   live      published, entitlement ACTIVE/FINALIZED, signed by the CURRENT Passport operator
+    //   awaiting  published by a previous operator (links disabled until the current operator adopts it)
+    //   unpublished / paused (entitlement invalidated by a reorg) / none
+    const tokens = [...new Set(String(query(event, 'tokens') || '').toLowerCase().split(',').filter(isAddr))].slice(0, 100);
+    const homes = {};
+    await Promise.all(tokens.map(async (t) => {
+      const [cur, ent, passport] = await Promise.all([getJson(store, K.cur(t)), getJson(store, K.entitlement(t)), readPassport(store, t)]);
+      const c = cur.value, e = ent.value;
+      let state = 'none';
+      if (c && c.state === 'PUBLISHED') state = !e || !PAID_STATES.has(e.status) ? 'paused' : passport && lc(passport.operator) === c.signer ? 'live' : 'awaiting';
+      else if (c && c.state === 'UNPUBLISHED') state = 'unpublished';
+      if (state !== 'none' || e) homes[t] = { state, activated: Boolean(e && PAID_STATES.has(e.status)) };
+    }));
+    return json(200, { enabled: true, homes });
   }
   if (view === 'intent') {
     const id = lc(query(event, 'id'));
