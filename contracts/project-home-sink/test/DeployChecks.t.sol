@@ -7,6 +7,7 @@ import {DeployChecks} from "../script/DeployChecks.sol";
 /// @dev External wrapper so reverts from the internal library can be asserted with expectRevert.
 contract DeployChecksHarness {
     function check(DeployChecks.Config memory c) external pure { DeployChecks.check(c); }
+    function code(uint256 expectEoa, uint256 len) external pure { DeployChecks.checkTreasuryCode(expectEoa, len); }
 }
 
 contract DeployChecksTest is TestBase {
@@ -76,5 +77,19 @@ contract DeployChecksTest is TestBase {
             vm.expectRevert(DeployChecks.TreasuryIsInfrastructure.selector);
             h.check(c);
         }
+    }
+    function test_treasuryEoaMustHaveNoCode() public view { h.code(1, 0); }
+    function test_rejectsEoaTreasuryWithCode() public {
+        vm.expectRevert(abi.encodeWithSelector(DeployChecks.TreasuryHasCode.selector, uint256(23)));
+        h.code(1, 23); // e.g. an EIP-7702 delegation designator (0xef0100 ‖ address) is 23 bytes of code
+    }
+    function test_contractTreasuryMustHaveCode() public {
+        h.code(0, 100);
+        vm.expectRevert(DeployChecks.TreasuryExpectedContract.selector);
+        h.code(0, 0);
+    }
+    function test_rejectsUndeclaredTreasuryKind() public {
+        vm.expectRevert(abi.encodeWithSelector(DeployChecks.TreasuryKindUndeclared.selector, uint256(2)));
+        h.code(2, 0);
     }
 }

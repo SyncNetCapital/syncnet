@@ -1,14 +1,22 @@
 {
-  "at": "2026-09-26T12:50:23.907Z",
+  "at": "2026-09-26T13:56:19.837Z",
   "forge": "forge Version: 1.7.1",
-  "summary": "70 tests passed, 0 failed, 0 skipped",
+  "summary": "74 tests passed, 0 failed, 0 skipped",
   "tests": [
     {
       "name": "test_acceptsExactConfiguration",
       "ok": true
     },
     {
+      "name": "test_contractTreasuryMustHaveCode",
+      "ok": true
+    },
+    {
       "name": "test_rejectsDeployerAsTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_rejectsEoaTreasuryWithCode",
       "ok": true
     },
     {
@@ -32,6 +40,10 @@
       "ok": true
     },
     {
+      "name": "test_rejectsUndeclaredTreasuryKind",
+      "ok": true
+    },
+    {
       "name": "test_rejectsWrongChain",
       "ok": true
     },
@@ -45,6 +57,10 @@
     },
     {
       "name": "test_rejectsZeroTreasury",
+      "ok": true
+    },
+    {
+      "name": "test_treasuryEoaMustHaveNoCode",
       "ok": true
     },
     {

@@ -421,14 +421,85 @@ If any of these is missing or inconsistent, payments stay closed. Without the du
 
 1. Create a **dedicated** SyncNet protocol treasury wallet. A simple EOA is acceptable for V1; it must never be a
    founder or deployer wallet. Supply its address.
+   **Approved intended V1 treasury (public address only; supplied by the owner, not yet used anywhere on-chain):**
+   `0x65FAc39A7A672afEbba404aecdDB34a1Eddc879B`. It is deliberately NOT written into any contract, script default or
+   application code: it is passed only as `TREASURY` / `TREASURY_CONFIRM` at deploy time. Read-only checks on
+   26 Sep 2026: valid EIP-55 checksum; Robinhood Chain `eth_chainId` = `0x1237` (4663); `eth_getCode` = `0x` (no code:
+   a plain EOA); nonce 0; balance 0. Repeat all four checks immediately before deploying. **Deployment stays blocked
+   until the owner explicitly authorises it.** SyncNet never requests or stores a private key or seed phrase.
 2. Deploy with `script/DeployProjectHome.s.sol`, which deploys the **converter first**, then the **sink pointing at
-   it**. It requires `CHAIN_ID=4663`, the canonical `SYNC`, `USDG` and `PAR_MULTI_ROUTER`, `SYNC_USDG_MARKET=1`, and
-   `TREASURY` plus `TREASURY_CONFIRM`. It refuses the deployer and any infrastructure address as treasury. The
-   converter constructor re-verifies the live route, and the script re-reads every immutable after deployment.
+   it**. It requires `CHAIN_ID=4663`, the canonical `SYNC`, `USDG` and `PAR_MULTI_ROUTER`, `SYNC_USDG_MARKET=1`,
+   `TREASURY` plus `TREASURY_CONFIRM`, and `TREASURY_EXPECT_EOA` (1 = plain wallet, which must have **no code** — this
+   also refuses an EIP-7702 delegated account; 0 = contract wallet, which must have code; no default). It refuses the
+   deployer and any infrastructure address as treasury. The converter constructor re-verifies the live route, and the
+   script re-reads every immutable after deployment.
 3. Verify both contracts on Blockscout.
 4. Set `PROJECT_HOME_SINK_ADDRESS` to the deployed sink. Metrics find the converter through the sink.
 5. Review and commit the first SYNC/USD reference-rate version, with `effectiveAt` and `expiresAt`.
-6. Canary on a preview deploy with the flags on, then build and review the Phase 2 UI.
+6. Canary on a preview deploy with the flags on, using the Phase 2 UI (section 14).
 7. Only then enable production.
 
 Conversion is never part of activation. The treasury converts at its own cadence, in batches, with a floor.
+
+## 14. Product UI (Phase 2)
+
+Global navigation is **Explore / Create / You**. SYNC means one thing: **SYNC PROJECT** = verify control and establish
+the Project Passport (the existing Marketplace `OperatorClaim`, a free EIP-712 signature the server re-verifies against
+the live factory record). A Project Home is reached from the Project Page's HOME row and edited in
+`/home-editor.html?token=0x…` (Edit → Activate → Publish).
+
+### Browser-only preview (how, and why the CSP is unchanged)
+
+The editor renders the draft with **the same pure renderer** the server uses — `SyncNetSite.render({config, facts,
+authority, mode: 'preview'})` — and writes the HTML into `<iframe sandbox="allow-same-origin" srcdoc>`:
+
+* **No script can run.** The sandbox grants no script permission, and the renderer emits zero JavaScript anyway. Forms,
+  popups, top-level navigation and plugins are blocked by the sandbox as well.
+* **Same origin only for images.** `/site-img/<cid>` answers with `Cross-Origin-Resource-Policy: same-origin`; an
+  opaque-origin sandbox would be refused. Keeping that image policy strict mattered more than a fully opaque preview.
+* **The page CSP is untouched.** A `srcdoc` document inherits the embedding page's CSP (`default-src 'self'; script-src
+  'self'; img-src 'self' …`), so the preview is bound by the same policy; the E2E suite serves the editor with the exact
+  `netlify.toml` header and asserts zero CSP violations.
+* **Not published.** Preview mode adds the `PREVIEW · NOT PUBLISHED` watermark and `noindex`, never makes a link
+  clickable, and the document has no URL (`about:srcdoc`): nothing is stored or served by SyncNet. Project facts in the
+  preview are read by the browser from Robinhood Chain; at publish time the server reads its own.
+* **Images** go through the existing path only: `/api/upload-auth` (wallet `personal_sign` session) → `/api/ipfs-upload`
+  (decode, re-encode, strip metadata, pin, record `site:img:v1:<cid>`). Only a CID returned by that sanitizer enters the
+  config, and `publish` refuses any CID that is not recorded.
+
+### Payment UX, recovery and finality
+
+`QUOTE READY → PAYMENT SEEN (confirming) → ACTIVATED → FINALIZED (later)`.
+
+* The quote is a signed `ActivationRequest`; the server returns the exact tagged amount and a 30-minute lock. The UI
+  shows the amount, the sink, the SYNCNET REFERENCE RATE, a countdown and the warning *"Send only the exact quoted amount
+  before the quote expires. Late or duplicate payments cannot be automatically refunded."* It refuses to start a payment
+  in the last 90 seconds of the lock, and refuses any quote whose sink, token, chain or asset differ from the served
+  configuration.
+* One ERC-20 `transfer(sink, exactAmount)` on canonical `$SYNC`. The tx hash is remembered in this browser
+  (`syncnet_home_pay_<token>`) so a second transfer for the same quote is never offered.
+* **Leave and return.** On load the editor resumes from (1) this browser's tx record, or (2) the server's own
+  request state — `view=status` returns the open intent and, once a payment was seen, its `observed.txHash` (while the
+  30-minute open pointer lasts) — so a payment made from another device is picked up too. A manual *Recover a payment* field checks a pasted tx hash
+  against the project's recent requests. All of this calls the existing idempotent `verify`; nothing new on the server.
+* **Finality is UI-triggered.** While an operator has the editor open, it calls the permissionless `reconcile` action
+  (about once a minute, bounded) to move ACTIVE → FINALIZED, or to record an invalidation after a reorg. Trade-off: no
+  scheduled job exists yet, so an entitlement advances only when someone opens the editor (or calls `reconcile`).
+  Activation never waits for it — publishing needs SAFE only — and nothing is lost meanwhile; a scheduled reconciler
+  is listed as a production blocker.
+
+### Adoption
+
+After a Passport transfer, the previous operator's home shows *Awaiting confirmation* to visitors, and its links stay
+disabled (render-time authority check). The new operator sees **REVIEW & ADOPT**: a preview of that exact version and one
+**ADOPT HOME** action — a fresh `SitePublish` over the stored `configHash`. There is no payment (the entitlement belongs to
+the token) and no transaction. The previous operator can no longer edit (the server checks the current operator at write
+time; the editor shows why).
+
+### Backend changes made for the UI (additive, read-only)
+
+* `GET /api/marketplace?view=passports&tokens=…` (≤100): batch sync/control state for list rows.
+* `GET /api/marketplace?view=wallet` additionally returns the Passports that wallet **currently** operates.
+* `GET /api/project-home?view=homes&tokens=…` (≤100): batch HOME state (`live | awaiting | unpublished | paused | none`).
+
+No write path, signature domain, atomic transition, entitlement or image rule changed.

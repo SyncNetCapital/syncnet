@@ -106,7 +106,7 @@ a:focus-visible,button:focus-visible{border-radius:var(--r)}
 
 /* ------------------------------------------------------------------ text filters (no pills) */
 .sn-filters{display:flex;flex-wrap:wrap;align-items:center;gap:4px 22px;margin:26px 0 0;border-bottom:1px solid var(--line)}
-.sn-filters button,.sn-filters a{display:inline-flex;align-items:center;min-height:44px;padding:0;border:0;border-bottom:1px solid transparent;margin-bottom:-1px;background:none;color:var(--bone-3);font-size:15px;cursor:pointer}
+.sn-filters button,.sn-filters a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0;border:0;border-bottom:1px solid transparent;margin-bottom:-1px;background:none;color:var(--bone-3);font-size:15px;cursor:pointer}
 .sn-filters button:hover,.sn-filters a:hover{color:var(--bone)}
 .sn-filters [aria-pressed="true"],.sn-filters [aria-current="page"]{color:var(--bone);border-bottom-color:var(--bone)}
 .sn-filters .sn-filters-end{margin-left:auto}

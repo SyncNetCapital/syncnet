@@ -4,8 +4,8 @@
  * EDIT     the V1 schema only (lib/syncnet-site.js): preset, accent, headline, about, logo, hero, one CTA, socials,
  *          section visibility. No HTML, CSS, Markdown, embeds or scripts. The draft lives in this browser only.
  * PREVIEW  Site.render({mode:'preview'}) — the SAME pure renderer the server uses — written into a sandboxed
- *          <iframe sandbox="allow-same-origin" srcdoc>: scripts, forms, popups and top navigation stay blocked (no
- *          allow-scripts); same-origin only so /site-img's Cross-Origin-Resource-Policy lets sanitised images load.
+ *          <iframe sandbox="allow-same-origin" srcdoc>: scripts, forms, popups and top navigation stay blocked (the
+ *          sandbox grants no script permission); same-origin only so /site-img's Cross-Origin-Resource-Policy lets sanitised images load.
  *          Watermark "PREVIEW · NOT PUBLISHED", no clickable links, nothing stored or served by SyncNet, no public URL.
  *          The page CSP is unchanged and applies to the srcdoc document too (see docs/PROJECT_HOME.md).
  * ACTIVATE one-time $39 activation paid in $SYNC at the SYNCNET REFERENCE RATE: a signed ActivationRequest returns a

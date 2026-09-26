@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-26T12:50:24.988Z",
-  "passed": 113,
+  "at": "2026-09-26T13:56:11.519Z",
+  "passed": 115,
   "failed": 0,
   "results": [
     {
@@ -545,6 +545,16 @@
     },
     {
       "name": "deploy order: converter first, then the sink pointing at it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "deploy script requires an explicit treasury kind and checks its code before broadcasting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the approved treasury address is not hard-coded in contracts, scripts or application code",
       "ok": true,
       "detail": ""
     },

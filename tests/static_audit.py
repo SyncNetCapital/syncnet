@@ -7,11 +7,12 @@ for name in active:
 home=(root/'index.html').read_text(encoding='utf-8')
 build=(root/'build.html').read_text(encoding='utf-8')
 network=(root/'network.html').read_text(encoding='utf-8')
-assert 'MAKE <span class="cyan">SYNC</span>' in home
-assert 'id="tokenSearch"' in home and 'id="topologyGraph"' in home
-assert 'id="mapToken"' in home and 'SYNC A PROJECT' in home
-assert 'pages the current PAR launch history' in home
-assert 'SYNCAT / CASHCAT' in home and 'SYNCAT / SYNC' in home
+# Phase 2 IA: Explore IS the home page (headline, one search, Create link, text filters, project rows).
+assert 'Sync your project.' in home and 'id="exploreSearch"' in home and 'id="exploreQ"' in home and 'id="exploreList"' in home
+assert all(f'data-filter="{f}"' in home for f in ['all', 'synced', 'sale', 'new']) and 'href="/build.html">+ Create a new project' in home
+assert 'aria-label="Open project"' in home and '>SYNC<' not in home  # the search button opens; it never says SYNC
+# the network map moved (unchanged) to /network.html
+assert 'id="tokenSearch"' in network and 'id="mapToken"' in network and 'id="topologyGraph"' in network
 assert build.count('data-preset=') >= 2
 assert 'Fees to holders' in build and 'value="creator"' in build and 'value="burn"' in build and 'value="floor"' in build and 'id="reviewRewards"' in build
 assert 'input type="radio" name="feeMode" value="holders" checked' not in build  # no forced default
@@ -45,7 +46,7 @@ assert (root/'v2-registry.js').exists()
 assert '$10 network fee' not in build
 assert 'waive the planned' not in (root/'builder-v2.js').read_text()
 assert 'PAR INDEXED' in (root/'v2-network.js').read_text()  # RC: label vocabulary
-assert 'id="tokenSearch"' in home and 'id="tokenSearch"' in network
+assert 'id="exploreQ"' in home and 'id="tokenSearch"' in network
 
 assert 'UPLOAD PROJECT IMAGE' in build and 'id="liveCanary"' in build and 'uploadAccessKey' not in build and 'Canary upload key' not in build
 assert (root/'netlify/functions/ipfs-upload.js').exists()
@@ -87,9 +88,17 @@ for a in ['0x4B79B8298cd890A82dC9De1dE5dBb745Cf04353C','0x16c83D36539b6C92E6FC99
 assert "creatorFeeRecipient:draft.feeRecipient" in eng and "creatorFeeRecipient:VAULT" not in eng
 up=(root/'netlify/functions/ipfs-upload.js').read_text()
 assert 'SYNCNET_PUBLIC_UPLOADS' in (root/'netlify/lib/flags.js').read_text() and 'uploadSession.verify' in up and 'Add PINATA_JWT' not in up
-for name in active:
+# Phase 2 IA: global navigation is Explore / Create / You everywhere (desktop: + My Projects when connected; mobile:
+# exactly three tabs, no hamburger). The wallet action is Connect; nothing says "Sign in"; nothing says "Build".
+import re as _navre
+for name in active+['you.html','home-editor.html','economy.html','kit.html','launches.html','404.html']:
     t=(root/name).read_text(encoding='utf-8')
-    assert '>Build</a>' not in t and '>Explore</a>' not in t
+    assert '>Build</a>' not in t and 'sign in' not in t.lower() and 'nav-toggle' not in t, name
+    nav=_navre.search(r'<nav class="sn-nav"[^>]*>(.*?)</nav>', t, _navre.S); assert nav, 'no primary nav: '+name
+    assert _navre.findall(r'data-nav="(\w+)"', nav.group(1))==['explore','create','you'], name
+    tab=_navre.search(r'<nav class="sn-tabbar"[^>]*>(.*?)</nav>', t, _navre.S); assert tab, 'no tab bar: '+name
+    assert _navre.findall(r'data-nav="(\w+)"', tab.group(1))==['explore','create','you'], name
+    assert 'data-wallet>Connect</button>' in t, name
 assert 'verifyDeployment' in (root/'lib/syncnet-chain.js').read_text() and "scrollIntoView" in (root/'v2-network.js').read_text()
 print('SyncNet v2.2 static audit additions: PASS')
 
@@ -151,7 +160,14 @@ site_js=[f for f in _gl.glob(str(root/'*.js'))+_gl.glob(str(root/'lib/*.js'))+_g
 for f in site_js:
     t=open(f,encoding='utf-8').read()
     assert '0x095ea7b3' not in t and 'approve(address' not in t and 'permit(' not in t, 'approval code in '+f
-    if not (f.endswith('builder-v2.js') or f.endswith('marketplace-v2.js')): assert "method:'eth_sendTransaction'" not in t and 'method: \'eth_sendTransaction\'' not in t, 'only the builder and the marketplace deal room may send: '+f
+    if not (f.endswith('builder-v2.js') or f.endswith('marketplace-v2.js') or f.endswith('sn-wallet.js')): assert "method:'eth_sendTransaction'" not in t and 'method: \'eth_sendTransaction\'' not in t, 'only the builder, the marketplace deal room and the shared wallet may send: '+f
+    # the shared wallet's sendTransaction is called ONLY by the Project Home editor (one $SYNC transfer, below)
+    if not (f.endswith('home-editor.js') or f.endswith('sn-wallet.js')): assert '.sendTransaction(' not in t, 'shared-wallet send outside the Project Home editor: '+f
+# Project Home: exactly one send — ERC-20 transfer(sink, exact quoted amount) on canonical $SYNC, never value, never approve
+_he=(root/'home-editor.js').read_text()
+assert _he.count('.sendTransaction(')==1 and "W.sendTransaction({ to: SYNC, data: transferData(i.sink, i.exactTaggedSyncAmount), value: '0x0' })" in _he
+assert "'0xa9059cbb'" in _he and "const SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37'" in _he
+assert 'lc(i.sink) !== lc(S.cfg.sink)' in _he and 'MIN_PAY_SECONDS' in _he  # quote must match the served config; never near expiry
 # the marketplace's two sends are exactly: a plain value transfer to the seller (data '0x') and the launchpad's own
 # fee transfer, built ONLY by SyncNetOrigins.feeTransferTx for a canonical factory (PAR single/multi, Pons V2)
 _mp=(root/'marketplace-v2.js').read_text()
@@ -271,11 +287,28 @@ assert "default-src 'none'; style-src ${STYLE_HASH}; img-src 'self'; base-uri 'n
 assert "'cache-control': 'no-store'" in _site_fn and 'authority: { signer: rev.signer }' in _site_fn
 assert not _re3.search(r'store\.(set|del|sadd)\(', _ph) and 'store.cas(' in _ph and 'eth_getLogs' not in _ph
 assert 'OFFICIAL WEBSITE' not in _site_lib.upper().replace("'OFFICIALWEBSITE'", '') or 'officialwebsite' in _site_lib  # only as a refused claim
+# Phase 2 UI: the Project Home browser clients are exactly these four (read views + the editor's signed actions).
+_ph_clients=sorted(Path(_f).name for _f in _gl.glob(str(root/'*.js')) if '/api/project-home' in open(_f,encoding='utf-8').read())
+assert _ph_clients==['explore.js','home-editor.js','project-page.js','you.js'], _ph_clients
+for _f in ['explore.js','project-page.js','you.js']:
+    assert "method: 'POST'" not in (root/_f).read_text() or _f=='project-page.js', _f  # list pages only read
+assert "'/api/project-home'" not in (root/'project-page.js').read_text()  # the Project Page never POSTs to Project Home
 for _pg in _gl.glob(str(root/'*.html')):
     _t=open(_pg,encoding='utf-8').read()
-    assert 'project-home' not in _t and '/site/' not in _t and 'Websites' not in _t, 'no Project Home UI / nav yet: '+_pg
-for _f in _gl.glob(str(root/'*.js')):
-    assert '/api/project-home' not in open(_f,encoding='utf-8').read(), 'no browser client for Project Home yet: '+_f
+    assert 'Websites' not in _t and 'oracle' not in _t.lower() and '15.60' not in _t, _pg
+_heh=(root/'home-editor.html').read_text(); _hej=(root/'home-editor.js').read_text()
+# preview: the shared pure renderer in preview mode, inside a sandbox that can never run script
+assert _re3.findall(r'<iframe[^>]*>', _heh)==['<iframe id="hePreview" sandbox="allow-same-origin" title="Preview of this Project Home. Not published." referrerpolicy="no-referrer">']
+assert "Site.render({ config, facts, authority: { signer: S.account }, mode: 'preview' })" in _hej and "mode: 'published'" not in _hej
+assert '.srcdoc = ' in _hej and 'allow-scripts' not in _heh + _hej and 'innerHTML = Site.render' not in _hej
+assert 'Site.CID.test(j.cid)' in _hej and "'x-syncnet-upload-session': session" in _hej  # only sanitised CIDs, existing upload path
+# payment copy (exact wording; never "oracle", never a per-activation revenue figure)
+assert '$39' in _heh and 'Pay with $SYNC · 60% burned · 40% converted to USDG for SyncNet treasury' in _heh
+assert 'SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes' in _hej
+assert 'Send only the exact quoted amount before the quote expires. Late or duplicate payments cannot be automatically refunded.' in _hej
+assert 'oracle' not in (_heh+_hej).lower() and '15.60' not in _heh+_hej
+for _step in ['Quote ready','Payment seen','Activated','Finalized']: assert _step in _heh, _step
+assert "action: 'reconcile'" in _hej and 'syncnet_home_pay_' in _hej and "view: 'status'" in _hej  # UI-triggered finality + recovery
 _sink=(root/'contracts/project-home-sink/src/SyncNetProjectHomeSink.sol').read_text()
 assert 'immutable SYNC;' in _sink and 'immutable TREASURY_CONVERTER;' in _sink and 'BURN_PERCENT = 60' in _sink and 'delegatecall' not in _sink
 assert not _re3.search(r'usdg|router|slippage|minOut|oracle', _re3.sub(r'//[^\n]*', '', _sink), _re3.I)  # the sink's code stays DEX-free

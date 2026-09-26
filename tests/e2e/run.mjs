@@ -21,14 +21,13 @@ const inViewport = (page, sel) => page.evaluate((s) => { const el = document.que
 const shot = async (page, name) => { if (SHOTS) await page.screenshot({ path: path.join(SHOTS, name + '.png'), fullPage: false }); };
 
 // ---------------- MAP UX ----------------
-await suite('home map UX', async () => {
+await suite('network map UX (moved from the old home)', async () => {
   const c = await ctx(); const page = await c.newPage(); const errs = trackErrors(page);
-  await page.goto(BASE + '/');
-  check('home: mapper hidden before first map', await page.locator('#map-token').isHidden());
+  await page.goto(BASE + '/network.html'); // the token mapper moved from / to Network (Phase 2 IA)
   await page.fill('#tokenSearch', 'SYNCAT'); await page.click('#mapToken');
   await page.waitForFunction(() => /SYNCAT/.test(document.getElementById('topologyTitle').textContent));
   await page.waitForTimeout(900);
-  check('home: mapper section revealed', await page.locator('#map-token').isVisible());
+  check('network: mapper result visible', await page.locator('#topologyTitle').isVisible());
   check('home: topology title in viewport after MAP', await inViewport(page, '#topologyTitle'));
   check('home: page scrolled', (await page.evaluate(() => scrollY)) > 150);
   check('home: focus moved to result heading', await page.evaluate(() => document.activeElement?.id === 'topologyTitle'));
@@ -72,9 +71,9 @@ await suite('home map UX', async () => {
   await c.close();
 });
 
-await suite('home map UX · reduced motion + race', async () => {
+await suite('network map UX · reduced motion + race', async () => {
   const c = await ctx({ reducedMotion: 'reduce' }); const page = await c.newPage();
-  await page.goto(BASE + '/');
+  await page.goto(BASE + '/network.html'); // the token mapper moved from / to Network (Phase 2 IA)
   await page.fill('#tokenSearch', A.SYNCAT); await page.click('#mapToken');
   const y = await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r(scrollY))));
   check('reduced-motion: jump is immediate (no smooth scroll)', y > 150, 'y=' + y);
@@ -578,7 +577,7 @@ await suite('project kit', async () => {
 // ---------------- PASSPORT PANEL ----------------
 await suite('project page passport', async () => {
   const c = await ctx(); const page = await c.newPage(); const errs = trackErrors(page);
-  await page.goto(BASE + '/project/' + A.CREATORLIVE);
+  await page.goto(BASE + '/project/' + A.CREATORLIVE + '#details') /* evidence lives in DETAILS */;
   await page.waitForSelector('#passportPanel .passport-row');
   const t = await page.textContent('#passportPanel');
   check('passport: token shown as ownerless', /Ownerless · immutable/.test(t));
@@ -590,10 +589,10 @@ await suite('project page passport', async () => {
   await page.fill('#siteUrl', 'https://declarer.example'); await page.click('#checkSite');
   await page.waitForFunction(() => !/Checking/.test(document.getElementById('siteStatus').textContent));
   check('passport: site-only declaration stays unconfirmed', /unconfirmed/.test(await page.textContent('#siteStatus')));
-  await page.goto(BASE + '/project/' + A.SYNCAT);
+  await page.goto(BASE + '/project/' + A.SYNCAT + '#details') /* evidence lives in DETAILS */;
   await page.waitForSelector('#passportPanel .passport-row');
   check('passport: holder-vault token → not transferable', /No — fixed to a PAR vault/.test(await page.textContent('#passportPanel')));
-  await page.goto(BASE + '/project/' + A.PONS_FAKE);
+  await page.goto(BASE + '/project/' + A.PONS_FAKE + '#details') /* evidence lives in DETAILS */;
   await page.waitForFunction(() => /LINKED|unconfirmed|different|No syncnet/.test(document.getElementById('siteStatus')?.textContent || ''));
   check('passport: spoof site declaring another token is flagged', /different token/.test(await page.textContent('#siteStatus')));
   check('passport: no JS errors', errs.length === 0, errs.join(' | '));
@@ -601,7 +600,7 @@ await suite('project page passport', async () => {
 });
 
 // ---------------- other pages / mobile / legibility ----------------
-const PAGES = ['/', '/network.html', '/build.html', '/marketplace.html', '/sync.html', '/registry.html', '/labs.html', '/project/' + A.SYNCAT, '/kit.html', '/launches.html', '/terms.html', '/risk.html', '/privacy.html', '/contact.html'];
+const PAGES = ['/', '/for-sale', '/you.html', '/network.html', '/build.html', '/marketplace.html', '/sync.html', '/registry.html', '/labs.html', '/project/' + A.SYNCAT, '/kit.html', '/launches.html', '/terms.html', '/risk.html', '/privacy.html', '/contact.html'];
 await suite('all pages · desktop + mobile + nav vocabulary', async () => {
   for (const vp of [{ width: 1280, height: 860, name: 'desktop' }, { width: 375, height: 740, name: 'mobile' }]) {
     const c = await ctx({ viewport: { width: vp.width, height: vp.height }, isMobile: vp.name === 'mobile', hasTouch: vp.name === 'mobile' }); const page = await c.newPage(); const errs = trackErrors(page);
@@ -609,9 +608,11 @@ await suite('all pages · desktop + mobile + nav vocabulary', async () => {
       await page.goto(BASE + p); await page.waitForTimeout(700);
       const ov = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
       check(`${vp.name} ${p}: no horizontal overflow`, ov <= 1, 'overflow=' + ov);
-      if (vp.name === 'desktop' && (await page.locator('.nav-links').count())) {
-        const nav = (await page.textContent('.nav-links')).replace(/\s+/g, ' ');
-        check(`${p}: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT`, /Map.*Registry.*Marketplace.*\$SYNC token.*Labs.*SYNC A PROJECT/.test(nav) && !/Build|Explore/.test(nav), nav);
+      if (await page.locator('.sn-nav').count()) {
+        // Phase 2 IA: Explore / Create (+ My Projects once connected) and Connect — nothing else is primary navigation
+        const nav = vp.name === 'desktop' ? (await page.innerText('.sn-nav')).replace(/\s+/g, ' ').trim() : '';
+        if (vp.name === 'desktop') check(`${p}: primary nav is Explore · Create, wallet says Connect`, nav === 'Explore Create' && (await page.innerText('[data-wallet]')).trim() === 'Connect' && !/sign in/i.test(await page.innerText('.sn-top')), nav);
+        else check(`mobile ${p}: bottom nav has exactly Explore · Create · You`, (await page.locator('.sn-tabbar a:visible').allInnerTexts()).map((t) => t.trim()).join('|') === 'Explore|Create|You' && (await page.locator('.nav-toggle').count()) === 0);
       }
       if (vp.name === 'mobile') {
         const small = await page.evaluate(() => [...document.querySelectorAll('a,button,input,select,summary,label.btn')].filter((e) => { const r = e.getBoundingClientRect(); const cs = getComputedStyle(e); return r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && !e.closest('[hidden]') && !e.closest('.footer-nav') && !e.closest('p') && (r.height < 40 || r.width < 24) && e.type !== 'hidden' && !e.classList.contains('file-input-hidden') && !((e.type === 'radio' || e.type === 'checkbox') && e.closest('label')); }).map((e) => (e.id || e.className || e.tagName) + '[' + (e.textContent||'').trim().slice(0,18) + ']:' + Math.round(e.getBoundingClientRect().height)).slice(0, 8));

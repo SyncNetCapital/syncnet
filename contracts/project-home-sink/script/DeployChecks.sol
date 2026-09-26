@@ -23,6 +23,9 @@ library DeployChecks {
     error TreasuryNotConfirmed();
     error TreasuryIsDeployer();
     error TreasuryIsInfrastructure();
+    error TreasuryKindUndeclared(uint256 declared);
+    error TreasuryHasCode(uint256 codeLength);
+    error TreasuryExpectedContract();
 
     struct Config {
         uint256 actualChainId;
@@ -48,5 +51,15 @@ library DeployChecks {
         // Never an implicit founder/deployer wallet: the protocol treasury is a separate, dedicated wallet.
         if (c.treasury == c.deployer) revert TreasuryIsDeployer();
         if (c.treasury == c.sync || c.treasury == c.usdg || c.treasury == c.router) revert TreasuryIsInfrastructure();
+    }
+
+    /// @notice Treasury code gate. The operator must DECLARE what the treasury is (no default):
+    ///         expectEoa = 1 → a plain externally owned account: it must have NO code (this also refuses an EIP-7702
+    ///         delegated account, whose code is 0xef0100…); expectEoa = 0 → a contract wallet (e.g. a multisig): it must
+    ///         have code. `codeLength` is `treasury.code.length` read live by the deploy script, so this stays pure.
+    function checkTreasuryCode(uint256 expectEoa, uint256 codeLength) internal pure {
+        if (expectEoa > 1) revert TreasuryKindUndeclared(expectEoa);
+        if (expectEoa == 1 && codeLength != 0) revert TreasuryHasCode(codeLength);
+        if (expectEoa == 0 && codeLength == 0) revert TreasuryExpectedContract();
     }
 }

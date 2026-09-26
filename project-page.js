@@ -128,7 +128,10 @@
     if (n) parts.push(`<span class="sn-num">${n}</span> direct market${n === 1 ? '' : 's'}`);
     if (u) parts.push(`used by <span class="sn-num">${u}</span> project${u === 1 ? '' : 's'}`);
     const hub = u >= HUB ? '<small>Network hub</small>' : '';
-    const note = P.origin === 'PAR' ? `<a href="/build.html?with=${esc(P.token)}">Create a project connected to $${esc(P.symbol)} →</a>` : '';
+    const links = [];
+    if (P.origin === 'PAR') links.push(`<a href="/build.html?with=${esc(P.token)}">Create a project connected to $${esc(P.symbol)} →</a>`);
+    if (u && !economyRow()) links.push(`<a href="/economy.html?root=${esc(P.token)}">Economy view →</a>`); // derived membership, even before curation
+    const note = links.join('<span class="sep" aria-hidden="true"> · </span>');
     return rowHtml('connections', 'Connections', parts.join(' · ').replace(/^./, (c) => c.toUpperCase()) + hub, `<a href="/network.html?token=${esc(P.token)}">View network →</a>`, note);
   }
 
@@ -208,7 +211,8 @@
     if (W) W.onChange(() => render());
   }
   function init() {
-    if (location.hash === '#details') { const d = $('projectDetails'); if (d) d.open = true; }
+    const openDetails = () => { if (location.hash === '#details') { const d = $('projectDetails'); if (d) { d.open = true; d.scrollIntoView({ block: 'start' }); } } };
+    openDetails(); window.addEventListener('hashchange', openDetails);
     window.addEventListener('syncnet:project', (e) => onProject(e.detail));
     if (window.__snProject) onProject(window.__snProject);
   }

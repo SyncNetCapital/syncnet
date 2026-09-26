@@ -157,7 +157,7 @@ let LISTING_ID = '';
 // ================================================================= Project Page for Pons (extended, not hidden)
 {
   const P = await newCtx(BUYER);
-  await P.page.goto(BASE + '/project/' + PONS); await P.page.waitForTimeout(3000);
+  await P.page.goto(BASE + '/project/' + PONS + '#details'); await P.page.waitForTimeout(3000);
   const card = await text(P.page, '#tokenCard');
   check('Project Page: PONS V2 LAUNCH · FACTORY RECORD ON-CHAIN (not "not a PAR launch")', /PONS V2 LAUNCH · FACTORY RECORD ON-CHAIN/.test(card) && !/NOT VERIFIED AS A PAR LAUNCH/.test(card), card.slice(0, 300));
   check('Project Page: origin, pair, status, contract, Passport operator shown', /PONS V2 · ON-CHAIN VERIFIED/.test(card) && /USDG/.test(card) && /BONDING CURVE/.test(card) && card.includes(PONS) && /SYNCNET OPERATOR/.test(card));
@@ -166,11 +166,11 @@ let LISTING_ID = '';
   check('J Project Page: no PAR-indexer-derived market/project counts for Pons', !/using this contract as a market/i.test(card) && !/PAR launches using/i.test(card) && !/\(indexer\)/i.test(card) && !/NETWORK HUB/.test(card), card.slice(0, 400));
   check('Project Page: no page errors', P.page.__errors.length === 0, P.page.__errors.join(' | '));
   await shot(P.page, 'pons-05-project-page');
-  await P.page.goto(BASE + '/project/' + lc(A.CREATORLIVE)); await P.page.waitForTimeout(2500);
+  await P.page.goto(BASE + '/project/' + lc(A.CREATORLIVE) + '#details'); await P.page.waitForTimeout(2500);
   check('1 PAR Project Page unchanged (PAR LAUNCH · FACTORY RECORD ON-CHAIN)', /PAR LAUNCH · FACTORY RECORD ON-CHAIN/.test(await text(P.page, '#tokenCard')));
   check('J PAR Project Page keeps its indexer facts (Projects using this token as a market)', /Projects using this token as a market/i.test(await text(P.page, '#tokenCard')));
   for (const [tok, re, name] of [[A.PONS1, /PONS V1 LAUNCH · FACTORY RECORD ON-CHAIN/, 'ACTIVE'], [A.PONS1_LEGACY, /PONS V1 LAUNCH · LEGACY FACTORY RECORD ON-CHAIN/, 'LEGACY']]) {
-    await P.page.goto(BASE + '/project/' + lc(tok)); await P.page.waitForTimeout(2500);
+    await P.page.goto(BASE + '/project/' + lc(tok) + '#details'); await P.page.waitForTimeout(2500);
     const v1card = await text(P.page, '#tokenCard');
     check(`Project Page: Pons V1 (${name}) recognised truthfully, not "not a PAR launch"`, re.test(v1card) && !/NOT VERIFIED AS A PAR LAUNCH/.test(v1card) && !/could not verify this contract as a PAR launch/.test(v1card), v1card.slice(0, 300));
     check(`Project Page: Pons V1 (${name}) explains it is recognised but not supported (no Passport / listing)`, /earlier-generation Pons launch/.test(v1card) && /does not support this launch generation/.test(v1card) && (name === 'LEGACY') === /legacy Pons V1 factory/.test(v1card), v1card.slice(0, 400));

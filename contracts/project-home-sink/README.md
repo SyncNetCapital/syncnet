@@ -1,7 +1,9 @@
 # SyncNet Project Home contracts
 
 Isolated Foundry project. Not part of the website runtime and not served (`/contracts/*` → 404).
-**Not deployed.** Deployment is blocked until the dedicated SyncNet protocol treasury wallet address is supplied.
+**Not deployed.** Deployment is blocked until the owner explicitly authorises it. The approved intended V1 treasury is
+recorded in `docs/PROJECT_HOME.md` §13 and is passed only at deploy time (`TREASURY`, `TREASURY_CONFIRM`,
+`TREASURY_EXPECT_EOA=1`); it is never hard-coded.
 
 | Contract | Role |
 |---|---|

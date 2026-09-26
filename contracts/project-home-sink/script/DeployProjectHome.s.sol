@@ -22,6 +22,9 @@ interface VmScript {
 ///           SYNC_USDG_MARKET=1
 ///           TREASURY=<dedicated SyncNet protocol treasury wallet>
 ///           TREASURY_CONFIRM=<the same address again>
+///           TREASURY_EXPECT_EOA=1 (plain wallet: must have no code) or 0 (contract wallet: must have code)
+///         Deployment stays blocked until the owner explicitly authorises it. The treasury is supplied at deploy time
+///         only; it is never hard-coded here or in application logic.
 ///         The converter constructor additionally re-reads the live PAR factory: market 1 must be the hook-less
 ///         SYNC/USDG pool, or deployment reverts.
 contract DeployProjectHome {
@@ -42,6 +45,7 @@ contract DeployProjectHome {
         DeployChecks.check(c);
         c.deployer = tx.origin;
         DeployChecks.check(c);
+        DeployChecks.checkTreasuryCode(vm.envUint("TREASURY_EXPECT_EOA"), c.treasury.code.length);
 
         vm.startBroadcast();
         converter = new SyncNetProjectHomeTreasuryConverter(c.sync, c.usdg, c.treasury, c.router, uint8(c.market));
