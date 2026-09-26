@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-26T12:07:55.329Z",
-  "passed": 46,
+  "at": "2026-09-26T12:35:29.417Z",
+  "passed": 113,
   "failed": 0,
   "results": [
     {
@@ -74,7 +74,27 @@
       "detail": ""
     },
     {
+      "name": "sink source has no any setter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no setOwner",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "sink source has no setTreasury",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no setExecutor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no setRouter",
       "ok": true,
       "detail": ""
     },
@@ -84,17 +104,7 @@
       "detail": ""
     },
     {
-      "name": "sink source has no split setter",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "sink source has no any setter",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "sink source has no approve",
+      "name": "sink source has no setUSDG",
       "ok": true,
       "detail": ""
     },
@@ -149,89 +159,414 @@
       "detail": ""
     },
     {
-      "name": "sink source has no arbitrary target",
+      "name": "sink source has no multicall / execute",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "SYNC is immutable",
+      "name": "converter source has no owner",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "TREASURY is immutable",
+      "name": "converter source has no admin",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "split is a compile-time constant of 60",
+      "name": "converter source has no onlyOwner",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "exactly two assignments to SYNC/TREASURY, both in the constructor",
+      "name": "converter source has no Ownable",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "constructor rejects zero token and zero treasury",
+      "name": "converter source has no delegatecall",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "settle() takes no parameters",
+      "name": "converter source has no upgradeTo",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "only external calls are SYNC.balanceOf / SYNC.burn / SYNC.transfer(TREASURY, …)",
-      "ok": true,
-      "detail": "SYNC.balanceOf( SYNC.balanceOf( SYNC.burn( SYNC.transfer("
-    },
-    {
-      "name": "burn happens through SYNC.burn (real totalSupply reduction), never a transfer to a dead address",
+      "name": "converter source has no proxy / implementation slot",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "treasury remainder = amount - burn (no residue)",
+      "name": "converter source has no low-level call",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "burn share computed without overflow",
+      "name": "converter source has no staticcall",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "accounting before interactions (CEI)",
+      "name": "converter source has no assembly",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "treasury transfer result is checked",
+      "name": "converter source has no selfdestruct",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "committed ABI is exactly the expected public surface",
-      "ok": true,
-      "detail": "constructor (address,address) nonpayable | error TreasuryIsToken() | error TreasuryTransferFailed() | error ZeroAddress() | event Settled(address,uint256,uint256,uint256) | function BURN_PERCENT() view | function SYNC() view | function TREASURY() view | function pending() view | function settle() no"
-    },
-    {
-      "name": "ABI has no payable entry, no receive, no fallback",
+      "name": "converter source has no rescue",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "the only state-changing function is settle()",
+      "name": "converter source has no withdraw",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "forge-derived ABI equals the committed ABI",
+      "name": "converter source has no sweep",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "converter source has no any setter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setOwner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setTreasury",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setExecutor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setRouter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setToken",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no setUSDG",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no transferFrom",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no burnFrom",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no payable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no receive()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no fallback()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no sstore/sload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no initializer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no msg.value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no tx.origin",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no dead address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter source has no multicall / execute",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: SYNC is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: TREASURY_CONVERTER is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: split is a compile-time constant of 60",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: exactly two immutable assignments, both in the constructor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: constructor rejects zero token and zero converter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: settle() takes no parameters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: knows no USDG, router, pool, price, slippage or swap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: only external calls are SYNC.balanceOf / SYNC.burn / SYNC.transfer(TREASURY_CONVERTER, …)",
+      "ok": true,
+      "detail": "SYNC.balanceOf SYNC.balanceOf SYNC.burn SYNC.transfer"
+    },
+    {
+      "name": "sink: burn through SYNC.burn (real totalSupply reduction), never a dead-address transfer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: remainder = amount - burn (no residue)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: burn share computed without overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: accounting before interactions (CEI)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: converter transfer result is checked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: no misleading \"totalTreasury\" name remains",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: SYNC is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: USDG is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: TREASURY is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: ROUTER is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: MARKET is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: every immutable is assigned once, in the constructor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: only ONE state-changing entry point, convert(amount, minOut, deadline)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: convert has no recipient / token / route / pool parameter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: caller must be the immutable TREASURY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: minUsdgOut = 0 is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: deadline enforced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: its own floor on the MEASURED output (independent of the router)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: router is paid out to the converter itself (address(this)), never a caller-chosen address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: USDG only ever transferred to TREASURY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: SYNC is never transferred out (only approved to the fixed ROUTER)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: allowance reset to 0 after every swap",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: the leg uses the immutable MARKET and no hops (direct SYNC/USDG pool)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: route re-verified from the live factory on every conversion and at deployment",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: only external calls are the fixed token/router/factory reads and the one swap",
+      "ok": true,
+      "detail": "SYNC.balanceOf SYNC.balanceOf USDG.balanceOf SYNC.approve ROUTER.sellToQuotes SYNC.approve SYNC.balanceOf USDG.balanceOf USDG.balanceOf USDG.transfer ROUTER.factory"
+    },
+    {
+      "name": "converter: re-entry guard on convert",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: constructor rejects zero and aliased roles",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: no price / oracle / reference-rate logic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SyncNetProjectHomeSink: committed ABI is exactly the expected public surface",
+      "ok": true,
+      "detail": "constructor (address,address) nonpayable | error ConverterIsToken() | error ConverterTransferFailed() | error ZeroAddress() | event Settled(address,uint256,uint256,uint256) | function BURN_PERCENT() view | function SYNC() view | function TREASURY_CONVERTER() view | function pending() view | function"
+    },
+    {
+      "name": "SyncNetProjectHomeSink: no payable entry, no receive, no fallback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SyncNetProjectHomeTreasuryConverter: committed ABI is exactly the expected public surface",
+      "ok": true,
+      "detail": "constructor (address,address,address,address,uint8) nonpayable | error ApproveFailed() | error DeadlineExpired() | error InsufficientSync() | error InvalidConfiguration() | error NotTreasury() | error Reentrancy() | error RouteMismatch() | error SlippageExceeded(uint256,uint256) | error UsdgTransfer"
+    },
+    {
+      "name": "SyncNetProjectHomeTreasuryConverter: no payable entry, no receive, no fallback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink: the only state-changing function is settle()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter: the only state-changing function is convert()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "converter ABI: no function takes an address argument (no recipient, token, router or executor can be passed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "deploy gate pins SYNC, USDG, the PAR multi router and market 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "deploy order: converter first, then the sink pointing at it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "deploy script has no default treasury (env required) and checks before broadcasting",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no deployment broadcast exists",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SyncNetProjectHomeSink: forge-derived ABI comparison",
+      "ok": true,
+      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
+    },
+    {
+      "name": "SyncNetProjectHomeTreasuryConverter: forge-derived ABI comparison",
+      "ok": true,
+      "detail": "SKIPPED: no solc 0.8.28 available offline (set SOLC_PATH)"
     }
   ]
 }

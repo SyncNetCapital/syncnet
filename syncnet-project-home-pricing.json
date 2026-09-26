@@ -7,7 +7,7 @@
     "No rate is approved yet: with an empty rates list, payments stay CLOSED (fail closed)."
   ],
   "prices": [
-    { "priceVersion": 1, "priceUsdCents": 4900, "product": "PROJECT HOME ACTIVATION (one-time, per token)" }
+    { "priceVersion": 1, "priceUsdCents": 3900, "product": "PROJECT HOME ACTIVATION (one-time, per token)" }
   ],
   "rates": []
 }

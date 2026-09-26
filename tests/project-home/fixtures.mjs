@@ -12,6 +12,8 @@ export { A, chain, resetChain, signDigest, ROOT };
 
 export const SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37';
 export const SINK = '0x5111c0000000000000000000000000000000beef'; // fixture sink (never deployed)
+export const CONVERTER = '0xc0417e2700000000000000000000000000000c0e'; // fixture treasury converter (never deployed)
+export const TREASURY_FIXTURE = '0x0000000000000000000000000000000000007ea5'; // fixture treasury wallet
 export const OTHER_SINK = '0x5111c0000000000000000000000000000000dead';
 export const TRANSFER = Core.keccak256Utf8('Transfer(address,address,uint256)');
 export const lc = (v) => String(v == null ? '' : v).toLowerCase();
@@ -21,7 +23,7 @@ export const rnd32 = () => '0x' + crypto.randomBytes(32).toString('hex');
 
 export const PRICING = {
   schema: 'syncnet.project-home.pricing.v1',
-  prices: [{ priceVersion: 1, priceUsdCents: 4900 }, { priceVersion: 2, priceUsdCents: 5900 }],
+  prices: [{ priceVersion: 1, priceUsdCents: 3900 }, { priceVersion: 2, priceUsdCents: 4500 }],
   rates: [
     { rateVersion: 1, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z' },
     { rateVersion: 2, syncUsd: '0.0005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z' },
@@ -29,19 +31,20 @@ export const PRICING = {
 };
 export const ENV = {
   SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1',
-  PROJECT_HOME_PRICE_USD_CENTS: '4900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK,
+  PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK,
 };
 
 /** Controllable clock shared by the functions under test (ms). */
-export const clock = { t: Date.parse('2026-09-26T12:00:00Z'), now() { return clock.t; }, advance(s) { clock.t += s * 1000; } };
+export const clock = { t: Math.floor(Date.now() / 1000) * 1000, // starts at real time: the real Marketplace code under test compares against Date.now()
+   now() { return clock.t; }, advance(s) { clock.t += s * 1000; } };
 
 /** Payment-chain state. Blocks advance one per second of clock time. */
 export const pc = {
   chainHex: '0x1237', head: 1000n, safe: 990n, finalized: 900n, genesisTs: 0n, blocks: new Map(), receipts: new Map(),
-  mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, treasury: 0n }, reorged: new Set(),
+  mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, forwarded: 0n }, converterBalance: 0n, converterTotals: { converted: 0n, produced: 0n, delivered: 0n }, reorged: new Set(),
 };
 export function resetPc() {
-  Object.assign(pc, { chainHex: '0x1237', head: 1000n, safe: 990n, finalized: 900n, blocks: new Map(), receipts: new Map(), mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, treasury: 0n }, reorged: new Set() });
+  Object.assign(pc, { chainHex: '0x1237', head: 1000n, safe: 990n, finalized: 900n, blocks: new Map(), receipts: new Map(), mode: 'ok', fail429: 0, calls: 0, sinkBalance: 0n, sinkTotals: { settled: 0n, burned: 0n, forwarded: 0n }, converterBalance: 0n, converterTotals: { converted: 0n, produced: 0n, delivered: 0n }, reorged: new Set() });
   pc.genesisTs = BigInt(Math.floor(clock.t / 1000)) - pc.head;
 }
 resetPc();
@@ -106,10 +109,16 @@ export async function rpc(method, params = []) {
     case 'eth_getTransactionReceipt': return pc.receipts.get(lc(params[0])) || pc.receipts.get(params[0]) || null;
     case 'eth_call': {
       const to = lc(params[0].to), data = lc(params[0].data);
-      if (to === SYNC && data.startsWith(SEL('balanceOf(address)')) && data.endsWith(lc(SINK).slice(2))) return '0x' + pc.sinkBalance.toString(16).padStart(64, '0');
+      const word = (v) => '0x' + BigInt(v).toString(16).padStart(64, '0');
+      if (to === SYNC && data.startsWith(SEL('balanceOf(address)')) && data.endsWith(lc(SINK).slice(2))) return word(pc.sinkBalance);
+      if (to === SYNC && data.startsWith(SEL('balanceOf(address)')) && data.endsWith(lc(CONVERTER).slice(2))) return word(pc.converterBalance);
       if (to === SINK) {
-        const v = data === SEL('totalSettled()') ? pc.sinkTotals.settled : data === SEL('totalBurned()') ? pc.sinkTotals.burned : data === SEL('totalTreasury()') ? pc.sinkTotals.treasury : null;
-        if (v !== null) return '0x' + v.toString(16).padStart(64, '0');
+        const v = data === SEL('totalSettledSync()') ? pc.sinkTotals.settled : data === SEL('totalBurnedSync()') ? pc.sinkTotals.burned : data === SEL('totalTreasurySyncForwarded()') ? pc.sinkTotals.forwarded : data === SEL('TREASURY_CONVERTER()') ? BigInt(CONVERTER) : null;
+        if (v !== null) return word(v);
+      }
+      if (to === CONVERTER) {
+        const v = data === SEL('totalSyncConverted()') ? pc.converterTotals.converted : data === SEL('totalUsdgFromConversions()') ? pc.converterTotals.produced : data === SEL('totalUsdgDelivered()') ? pc.converterTotals.delivered : data === SEL('TREASURY()') ? BigInt(TREASURY_FIXTURE) : null;
+        if (v !== null) return word(v);
       }
       break;
     }

@@ -18,16 +18,17 @@ const throwsCode = (fn, code) => { try { fn(); return false; } catch (e) { retur
 const E18 = 10n ** 18n;
 
 // ---------------------------------------------------------------- fixed-point conversion
-check('$49 at $0.00005 = exactly 980,000 SYNC', P.baseSyncWei(4900, P.parseRate('0.00005')) === 980000n * E18);
-check('$49 at $0.0005 = exactly 98,000 SYNC', P.baseSyncWei(4900, P.parseRate('0.0005')) === 98000n * E18);
-check('$49 at $0.005 = exactly 9,800 SYNC', P.baseSyncWei(4900, P.parseRate('0.005')) === 9800n * E18);
-const odd = P.baseSyncWei(4900, P.parseRate('0.000037'));
-check('non-terminating quotient rounds UP (never undercharges)', odd * 37n * 10n ** 12n >= 4900n * 10n ** 34n && (odd - 1n) * 37n * 10n ** 12n < 4900n * 10n ** 34n, odd);
-check('rounding up: $49 / $0.03 = 1633.333… → 1633.333333333333333334 SYNC', P.formatUnits(P.baseSyncWei(4900, P.parseRate('0.03'))) === '1633.333333333333333334');
+check('$39 at $0.00005 = exactly 780,000 SYNC', P.baseSyncWei(3900, P.parseRate('0.00005')) === 780000n * E18);
+check('$39 at $0.0005 = exactly 78,000 SYNC', P.baseSyncWei(3900, P.parseRate('0.0005')) === 78000n * E18);
+check('$39 at $0.005 = exactly 7,800 SYNC', P.baseSyncWei(3900, P.parseRate('0.005')) === 7800n * E18);
+const odd = P.baseSyncWei(3900, P.parseRate('0.000037'));
+check('non-terminating quotient rounds UP (never undercharges)', odd * 37n * 10n ** 12n >= 3900n * 10n ** 34n && (odd - 1n) * 37n * 10n ** 12n < 3900n * 10n ** 34n, odd);
+check('rounding up: $39 / $0.07 = 557.142857… → 557.142857142857142858 SYNC', P.formatUnits(P.baseSyncWei(3900, P.parseRate('0.07'))) === '557.142857142857142858');
+check('$39 / $0.03 divides exactly: 1300 SYNC, not bumped', P.formatUnits(P.baseSyncWei(3900, P.parseRate('0.03'))) === '1300');
 check('exact division is not bumped', P.baseSyncWei(100, P.parseRate('1')) === E18);
-check('$0.01 at $1e-12 would exceed the range cap → refused', throwsCode(() => P.baseSyncWei(4900, P.parseRate('0.000000000001')), 'amount_range'));
+check('$0.01 at $1e-12 would exceed the range cap → refused', throwsCode(() => P.baseSyncWei(3900, P.parseRate('0.000000000001')), 'amount_range'));
 check('smallest accepted rate still quotes a small price', P.baseSyncWei(1, P.parseRate('0.000000000001')) === 10n ** 28n);
-check('max rate $1,000,000: $49 = 0.000049 SYNC', P.formatUnits(P.baseSyncWei(4900, P.parseRate('1000000'))) === '0.000049');
+check('max rate $1,000,000: $39 = 0.000039 SYNC', P.formatUnits(P.baseSyncWei(3900, P.parseRate('1000000'))) === '0.000039');
 check('rate above $1,000,000 refused', throwsCode(() => P.parseRate('1000000.000000000000000001'), 'rate_range'));
 check('rate with 18 decimals parses exactly', P.parseRate('0.123456789012345678') === 123456789012345678n);
 check('1 wei-of-rate (1e-18) is syntactically exact but refused by the range bound', throwsCode(() => P.parseRate('0.000000000000000001'), 'rate_range'));
@@ -36,8 +37,8 @@ check('zero rate refused', throwsCode(() => P.parseRate('0'), 'rate_zero') && th
 for (const badRate of ['-0.1', '1e-5', '0.1e1', '.5', '5.', '0x10', ' 0.5', '0.5 ', '0,5', 'NaN', 'Infinity', '00.5', '0.0000000000000000001', '12345678']) check('malformed rate refused: ' + JSON.stringify(badRate), throwsCode(() => P.parseRate(badRate), 'rate_invalid'));
 check('non-string rate (a JS number) refused — no floating point anywhere', throwsCode(() => P.parseRate(0.00005), 'rate_invalid'));
 check('formatRate(parseRate(x)) is canonical', P.formatRate(P.parseRate('0.000050')) === '0.00005' && P.formatRate(P.parseRate('12.5')) === '12.5');
-for (const c of [0, -1, 4900.5, 10_000_001, NaN, '4900']) check('invalid price cents refused: ' + String(c), throwsCode(() => P.baseSyncWei(c, P.parseRate('1')), 'price_invalid'));
-check('negative / zero rateUsdE18 refused', throwsCode(() => P.baseSyncWei(4900, 0n), 'rate_zero') && throwsCode(() => P.baseSyncWei(4900, -5n), 'rate_zero'));
+for (const c of [0, -1, 3900.5, 10_000_001, NaN, '3900']) check('invalid price cents refused: ' + String(c), throwsCode(() => P.baseSyncWei(c, P.parseRate('1')), 'price_invalid'));
+check('negative / zero rateUsdE18 refused', throwsCode(() => P.baseSyncWei(3900, 0n), 'rate_zero') && throwsCode(() => P.baseSyncWei(3900, -5n), 'rate_zero'));
 check('no Number() / parseFloat / Math in the arithmetic', !/parseFloat|Math\.(round|ceil|floor|pow)|toFixed|Number\(/.test(fs.readFileSync(path.join(ROOT, 'lib/syncnet-project-home-pricing.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')));
 // exhaustive-ish random round-up property
 let prop = true;
@@ -51,13 +52,13 @@ for (let i = 0; i < 2000; i++) {
 check('property (2000 random quotes): q = ceil(price·10^34 / rate) exactly', prop);
 
 // ---------------------------------------------------------------- payment tag
-const base = 980000n * E18;
+const base = 780000n * E18;
 check('tag lives in the 12 lowest decimals; exact > base', (() => { const x = P.taggedAmount(base, 123456789n); return x === base + 123456789n && x > base && P.tagOf(x) === 123456789n; })());
 check('base not on a tag boundary is rounded UP before tagging', (() => { const b = base + 1n; const x = P.taggedAmount(b, 1n); return x === base + P.TAG_MODULUS + 1n && x > b; })());
 check('tag 0 refused (would allow exact == base)', throwsCode(() => P.taggedAmount(base, 0n), 'tag_invalid'));
 check('tag == modulus refused', throwsCode(() => P.taggedAmount(base, P.TAG_MODULUS), 'tag_invalid'));
 check('economic difference < 2e-6 SYNC', P.taggedAmount(base + 1n, P.TAG_MODULUS - 1n) - (base + 1n) < 2n * P.TAG_MODULUS);
-check('exact amount displays as a finite 18-decimal string', P.formatUnits(P.taggedAmount(base, 482117093551n)) === '980000.000000482117093551' && P.displaySync(P.taggedAmount(base, 1n)) === '980,000.000000000000000001');
+check('exact amount displays as a finite 18-decimal string', P.formatUnits(P.taggedAmount(base, 482117093551n)) === '780000.000000482117093551' && P.displaySync(P.taggedAmount(base, 1n)) === '780,000.000000000000000001');
 let tagsOk = true; const seen = new Set();
 for (let i = 0; i < 5000; i++) { const t = P.randomTag((n) => crypto.randomBytes(n)); if (t < 1n || t >= P.TAG_MODULUS) tagsOk = false; seen.add(t); }
 check('5000 CSPRNG tags all in [1, 10^12-1]', tagsOk);
@@ -66,7 +67,7 @@ check('rejection sampling rejects out-of-range draws (no modulo bias)', (() => {
 check('a broken RNG fails closed', throwsCode(() => P.randomTag(() => new Uint8Array([255, 255, 255, 255, 255])), 'tag_rng'));
 
 // ---------------------------------------------------------------- versioned configuration
-const good = { schema: 'syncnet.project-home.pricing.v1', prices: [{ priceVersion: 1, priceUsdCents: 4900 }], rates: [{ rateVersion: 1, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-01-01T00:00:00Z' }] };
+const good = { schema: 'syncnet.project-home.pricing.v1', prices: [{ priceVersion: 1, priceUsdCents: 3900 }], rates: [{ rateVersion: 1, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-01-01T00:00:00Z' }] };
 check('valid table loads', P.loadTable(good).rates.get(1).rateUsdE18 === (5n * 10n ** 13n).toString());
 check('duplicate rateVersion → whole table invalid', throwsCode(() => P.loadTable({ ...good, rates: [...good.rates, { ...good.rates[0], syncUsd: '0.0001' }] }), 'config_invalid'));
 check('duplicate priceVersion → invalid', throwsCode(() => P.loadTable({ ...good, prices: [...good.prices, { priceVersion: 1, priceUsdCents: 100 }] }), 'config_invalid'));
@@ -75,14 +76,14 @@ check('rate written as a JSON number → invalid', throwsCode(() => P.loadTable(
 check('expiresAt <= effectiveAt → invalid', throwsCode(() => P.loadTable({ ...good, rates: [{ ...good.rates[0], expiresAt: '2025-01-01T00:00:00Z' }] }), 'config_invalid'));
 check('unknown schema → invalid', throwsCode(() => P.loadTable({ ...good, schema: 'x' }), 'config_invalid'));
 const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-pricing.json'), 'utf8'));
-check('repo pricing file: price v1 = 4900 cents ($49 USD)', P.loadTable(repo).prices.get(1).priceUsdCents === 4900);
+check('repo pricing file: price v1 = 3900 cents ($39 USD) — the initial launch price', P.loadTable(repo).prices.get(1).priceUsdCents === 3900 && P.loadTable(repo).prices.size === 1);
 check('repo pricing file ships NO approved rate (payments closed until one is reviewed in)', P.loadTable(repo).rates.size === 0);
 check('repo pricing file has no fixed-SYNC price anywhere', !/1,?000,?000|syncAmount|priceSync/i.test(JSON.stringify(repo.prices)));
 
 // ---------------------------------------------------------------- rollout gate (fail closed)
 const SINK = '0x' + '5e'.repeat(20);
 const durable = { durable: true };
-const ENV = { SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '4900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK };
+const ENV = { SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK };
 const T = Date.parse('2026-06-01T00:00:00Z');
 const gate = (env, extra = {}) => projectHomeConfig({ env, store: durable, file: good, now: () => T, ...extra });
 check('fully configured → site and payments open', gate(ENV).siteEnabled && gate(ENV).paymentsEnabled);

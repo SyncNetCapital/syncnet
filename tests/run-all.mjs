@@ -31,7 +31,7 @@ const SUITES = [
   ['Economy walkthrough (derived membership, recognize/revoke)', 'node', ['tests/regression/rc-economy.mjs'], /(\d+)\/(\d+) economy walkthrough checks passed/],
   ['Project Home · sink contract (Foundry, incl. fuzzing)', 'node', ['tests/project-home/foundry.mjs'], /(\d+) foundry tests passed, (\d+) failed, (\d+) skipped/],
   ['Project Home · sink static/ABI audit', 'node', ['tests/project-home/sink-static-audit.mjs'], /(\d+)\/(\d+) sink static audit checks passed/],
-  ['Project Home · pricing ($49 USD, fixed point, tags, gate)', 'node', ['tests/project-home/pricing.test.mjs'], /(\d+)\/(\d+) project-home pricing checks passed/],
+  ['Project Home · pricing ($39 USD, fixed point, tags, gate)', 'node', ['tests/project-home/pricing.test.mjs'], /(\d+)\/(\d+) project-home pricing checks passed/],
   ['Project Home · site schema, EIP-712, renderer audit', 'node', ['tests/project-home/site.test.mjs'], /(\d+)\/(\d+) project-home site checks passed/],
   ['Project Home · server (intents, activation, sites)', 'node', ['tests/project-home/server.test.mjs'], /(\d+)\/(\d+) project-home server checks passed/],
   ['Project Home · atomic commit on real Redis', 'node', ['tests/project-home/redis-atomic.test.mjs'], /(\d+)\/(\d+) project-home real-Redis checks passed/],

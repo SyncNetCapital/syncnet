@@ -1,30 +1,35 @@
 {
-  "at": "2026-09-26T12:07:55.431Z",
-  "passed": 80,
+  "at": "2026-09-26T12:37:03.498Z",
+  "passed": 81,
   "failed": 0,
   "results": [
     {
-      "name": "$49 at $0.00005 = exactly 980,000 SYNC",
+      "name": "$39 at $0.00005 = exactly 780,000 SYNC",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "$49 at $0.0005 = exactly 98,000 SYNC",
+      "name": "$39 at $0.0005 = exactly 78,000 SYNC",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "$49 at $0.005 = exactly 9,800 SYNC",
+      "name": "$39 at $0.005 = exactly 7,800 SYNC",
       "ok": true,
       "detail": ""
     },
     {
       "name": "non-terminating quotient rounds UP (never undercharges)",
       "ok": true,
-      "detail": "1324324324324324324324325"
+      "detail": "1054054054054054054054055"
     },
     {
-      "name": "rounding up: $49 / $0.03 = 1633.333… → 1633.333333333333333334 SYNC",
+      "name": "rounding up: $39 / $0.07 = 557.142857… → 557.142857142857142858 SYNC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$39 / $0.03 divides exactly: 1300 SYNC, not bumped",
       "ok": true,
       "detail": ""
     },
@@ -44,7 +49,7 @@
       "detail": ""
     },
     {
-      "name": "max rate $1,000,000: $49 = 0.000049 SYNC",
+      "name": "max rate $1,000,000: $39 = 0.000039 SYNC",
       "ok": true,
       "detail": ""
     },
@@ -164,7 +169,7 @@
       "detail": ""
     },
     {
-      "name": "invalid price cents refused: 4900.5",
+      "name": "invalid price cents refused: 3900.5",
       "ok": true,
       "detail": ""
     },
@@ -179,7 +184,7 @@
       "detail": ""
     },
     {
-      "name": "invalid price cents refused: 4900",
+      "name": "invalid price cents refused: 3900",
       "ok": true,
       "detail": ""
     },
@@ -284,7 +289,7 @@
       "detail": ""
     },
     {
-      "name": "repo pricing file: price v1 = 4900 cents ($49 USD)",
+      "name": "repo pricing file: price v1 = 3900 cents ($39 USD) — the initial launch price",
       "ok": true,
       "detail": ""
     },

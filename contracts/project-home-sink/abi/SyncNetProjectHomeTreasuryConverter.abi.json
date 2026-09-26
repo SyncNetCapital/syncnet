@@ -8,22 +8,50 @@
         "internalType": "address"
       },
       {
-        "name": "treasuryConverter",
+        "name": "usdg",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "treasury",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "router",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "market",
+        "type": "uint8",
+        "internalType": "uint8"
       }
     ],
     "stateMutability": "nonpayable"
   },
   {
     "type": "function",
-    "name": "BURN_PERCENT",
+    "name": "MARKET",
     "inputs": [],
     "outputs": [
       {
         "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ROUTER",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "contract IPairPadMultiRouter"
       }
     ],
     "stateMutability": "view"
@@ -36,14 +64,14 @@
       {
         "name": "",
         "type": "address",
-        "internalType": "contract ISyncToken"
+        "internalType": "contract IERC20Minimal"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "TREASURY_CONVERTER",
+    "name": "TREASURY",
     "inputs": [],
     "outputs": [
       {
@@ -56,39 +84,50 @@
   },
   {
     "type": "function",
-    "name": "pending",
+    "name": "USDG",
     "inputs": [],
     "outputs": [
       {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "toBurn",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "toConverter",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "",
+        "type": "address",
+        "internalType": "contract IERC20Minimal"
       }
     ],
     "stateMutability": "view"
   },
   {
     "type": "function",
-    "name": "settle",
-    "inputs": [],
-    "outputs": [
+    "name": "convert",
+    "inputs": [
       {
-        "name": "burned",
+        "name": "syncAmount",
         "type": "uint256",
         "internalType": "uint256"
       },
       {
-        "name": "forwarded",
+        "name": "minUsdgOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "deadline",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "syncSold",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "usdgOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "delivered",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -97,31 +136,7 @@
   },
   {
     "type": "function",
-    "name": "split",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "toBurn",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "toConverter",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "totalBurnedSync",
+    "name": "pendingSync",
     "inputs": [],
     "outputs": [
       {
@@ -134,7 +149,7 @@
   },
   {
     "type": "function",
-    "name": "totalSettledSync",
+    "name": "totalSyncConverted",
     "inputs": [],
     "outputs": [
       {
@@ -147,7 +162,20 @@
   },
   {
     "type": "function",
-    "name": "totalTreasurySyncForwarded",
+    "name": "totalUsdgDelivered",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalUsdgFromConversions",
     "inputs": [],
     "outputs": [
       {
@@ -160,28 +188,34 @@
   },
   {
     "type": "event",
-    "name": "Settled",
+    "name": "Converted",
     "inputs": [
       {
-        "name": "caller",
+        "name": "executor",
         "type": "address",
         "indexed": true,
         "internalType": "address"
       },
       {
-        "name": "amount",
+        "name": "syncRequested",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
       },
       {
-        "name": "burned",
+        "name": "syncSold",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
       },
       {
-        "name": "forwardedToConverter",
+        "name": "usdgOut",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "usdgDelivered",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -191,17 +225,73 @@
   },
   {
     "type": "error",
-    "name": "ConverterIsToken",
+    "name": "ApproveFailed",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "ConverterTransferFailed",
+    "name": "DeadlineExpired",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientSync",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidConfiguration",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotTreasury",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "Reentrancy",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "RouteMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SlippageExceeded",
+    "inputs": [
+      {
+        "name": "usdgOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "minUsdgOut",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "UsdgTransferFailed",
     "inputs": []
   },
   {
     "type": "error",
     "name": "ZeroAddress",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroMinOut",
     "inputs": []
   }
 ]

@@ -7,7 +7,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {
-  A, ROOT, Core, SYNC, SINK, OTHER_SINK, PRICING, ENV, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex,
+  A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex,
 } from './fixtures.mjs';
 
 const require = createRequire(import.meta.url);
@@ -102,9 +102,9 @@ async function unpublishSite(token, who = W, over = {}) {
 {
   const c = (await api('GET', null, { view: 'config' })).j;
   check('A01 config: payments open with full configuration', c.enabled === true && c.payments === true);
-  check('A02 config: price is $49 USD, version 1', c.price.priceUsdCents === 4900 && c.price.priceUsd === '49.00' && c.price.priceVersion === 1);
+  check('A02 config: price is $39 USD, version 1', c.price.priceUsdCents === 3900 && c.price.priceUsd === '39.00' && c.price.priceVersion === 1);
   check('A03 config: SYNCNET REFERENCE RATE, version + update time, explicitly not an oracle', c.rate.label === 'SYNCNET REFERENCE RATE' && c.rate.rateVersion === 1 && c.rate.updatedAt && /not an on-chain oracle/.test(c.rate.note) && !/oracle price/i.test(JSON.stringify(c)));
-  check('A04 config: indicative quote ≈ 980,000 SYNC, 30-minute lock, 60/40', c.quote.approxSync === '980,000' && c.lockSeconds === 1800 && c.split.burnPercent === 60 && c.split.treasuryPercent === 40);
+  check('A04 config: indicative quote ≈ 780,000 SYNC, 30-minute lock, 60/40', c.quote.approxSync === '780,000' && c.lockSeconds === 1800 && c.split.burnPercent === 60 && c.split.treasuryPercent === 40);
   check('A05 config: never says OFFICIAL WEBSITE', !/official website/i.test(JSON.stringify(c)));
   const closed = await api('POST', { action: 'intent' }, null, { env: {} });
   check('A06 SYNCNET_PROJECT_HOME_ENABLED unset → every write 503 closed', closed.s === 503 && closed.j.code === 'closed');
@@ -137,13 +137,13 @@ let I1;
   const r = await request(T1, W);
   I1 = r.j.intent;
   check('B04 operator creates an intent (201)', r.s === 201 && I1 && I1.status === 'OPEN', r.body);
-  check('B05 intent records price $49 / v1, rate 0.00005 / v1 / effectiveAt', I1.priceUsdCents === 4900 && I1.priceVersion === 1 && I1.syncUsdReferenceRate === '0.00005' && I1.rateVersion === 1 && I1.rateEffectiveAt === '2026-01-01T00:00:00.000Z');
-  check('B06 base amount = exactly 980,000 SYNC (18 decimals)', I1.baseSyncAmount === (980000n * E18).toString());
+  check('B05 intent records price $39 / v1, rate 0.00005 / v1 / effectiveAt', I1.priceUsdCents === 3900 && I1.priceVersion === 1 && I1.syncUsdReferenceRate === '0.00005' && I1.rateVersion === 1 && I1.rateEffectiveAt === '2026-01-01T00:00:00.000Z');
+  check('B06 base amount = exactly 780,000 SYNC (18 decimals)', I1.baseSyncAmount === (780000n * E18).toString());
   const ex = BigInt(I1.exactTaggedSyncAmount), bs = BigInt(I1.baseSyncAmount);
   check('B07 tagged amount > base, difference < 2e-6 SYNC, tag in the low 12 decimals', ex > bs && ex - bs < 2n * 10n ** 12n && ex % 10n ** 12n !== 0n);
   check('B08 intent binds chain 4663, canonical SYNC, configured sink, operatorAtRequest', I1.chainId === 4663 && I1.canonicalSync === SYNC && I1.sink === SINK && I1.operatorAtRequest === W);
   check('B09 rate locked for 30 minutes; createdBlock = chain head', Date.parse(I1.expiresAt) - Date.parse(I1.createdAt) <= 1800 * 1000 && Date.parse(I1.expiresAt) - Date.parse(I1.createdAt) > 1799 * 1000 && I1.createdBlock === head.toString());
-  check('B10 intent is displayable (exact 18-decimal string) and states 60/40 and non-refundable', I1.exactTaggedSyncDisplay.startsWith('980000.000000') && /COMMITTED TO BURN/.test(I1.split.note) && /Non-refundable/.test(I1.refund));
+  check('B10 intent is displayable (exact 18-decimal string) and states 60/40 and non-refundable', I1.exactTaggedSyncDisplay.startsWith('780000.000000') && /COMMITTED TO BURN/.test(I1.split.note) && /Non-refundable/.test(I1.refund));
   const again = await request(T1, W);
   check('B11 a second request while the first is open returns the SAME intent (no second amount)', again.s === 200 && again.j.reused === true && again.j.intent.requestId === I1.requestId && again.j.intent.exactTaggedSyncAmount === I1.exactTaggedSyncAmount);
   for (const [k, v] of [['priceUsdCents', 1], ['priceVersion', 9], ['syncUsdReferenceRate', '1'], ['rate', '1'], ['rateVersion', 2], ['baseSyncAmount', '1'], ['exactTaggedSyncAmount', '1'], ['amount', '1'], ['sink', X], ['chainId', 1], ['tag', '1'], ['canonicalSync', X], ['facts', {}], ['paymentToken', X]]) {
@@ -179,11 +179,11 @@ let I1;
 {
   const oldI = I1;
   const v2 = await request(T5, W, { env: { ...ENV, PROJECT_HOME_RATE_VERSION: '2' } });
-  check('B21 rate version 2 ($0.0005) → 98,000 SYNC base', v2.s === 201 && v2.j.intent.baseSyncAmount === (98000n * E18).toString() && v2.j.intent.rateVersion === 2);
+  check('B21 rate version 2 ($0.0005) → 78,000 SYNC base', v2.s === 201 && v2.j.intent.baseSyncAmount === (78000n * E18).toString() && v2.j.intent.rateVersion === 2);
   const keep = (await api('GET', null, { view: 'intent', id: oldI.requestId })).j.intent;
   check('B22 an existing intent keeps its locked rate after the active rate changes', keep.rateVersion === 1 && keep.syncUsdReferenceRate === '0.00005' && keep.exactTaggedSyncAmount === oldI.exactTaggedSyncAmount);
-  const p2 = await request(T6, W, { env: { ...ENV, PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '5900' } });
-  check('B23 product price version 2 ($59) is recorded on the intent', p2.s === 201 && p2.j.intent.priceUsdCents === 5900 && p2.j.intent.priceVersion === 2 && p2.j.intent.baseSyncAmount === (1180000n * E18).toString());
+  const p2 = await request(T6, W, { env: { ...ENV, PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '4500' } });
+  check('B23 product price version 2 ($45, test fixture) is recorded on the intent', p2.s === 201 && p2.j.intent.priceUsdCents === 4500 && p2.j.intent.priceVersion === 2 && p2.j.intent.baseSyncAmount === (900000n * E18).toString());
   const mutated = { ...PRICING, rates: [{ ...PRICING.rates[0], syncUsd: '0.0001' }, PRICING.rates[1]] };
   const conflict = await request(T7, W, { pricingFile: mutated });
   check('B24 rateVersion 1 reused with a DIFFERENT value → fail closed (503 config_conflict)', conflict.s === 503 && conflict.j.code === 'config_conflict', conflict.body);
@@ -261,7 +261,7 @@ let ACT1;
   ACT1 = ok.j.entitlement;
   check('C16 payment mined inside the lock but verified 2 h later → ACTIVE', ok.s === 200 && ok.j.status === 'ACTIVE', ok.body);
   check('C17 entitlement: kind paid, payer = gifting wallet, operatorAtActivation = history only', ACT1.kind === 'paid' && ACT1.payer === W2 && ACT1.operatorAtActivation === W && ACT1.token === T1);
-  check('C18 entitlement records tx, logIndex, block number/hash, sink, SYNC, amounts, price/rate versions, requestId, safeAt', ACT1.txHash === good.txHash && ACT1.logIndex === 0 && ACT1.blockNumber === good.blockNumber.toString() && /^0x[0-9a-f]{64}$/.test(ACT1.blockHash) && ACT1.sink === SINK && ACT1.canonicalSync === SYNC && ACT1.exactAmount === I1.exactTaggedSyncAmount && ACT1.baseSyncAmount === I1.baseSyncAmount && ACT1.priceUsdCents === 4900 && ACT1.priceVersion === 1 && ACT1.syncUsdReferenceRate === '0.00005' && ACT1.rateVersion === 1 && ACT1.requestId === I1.requestId && ACT1.safeAt && ACT1.finalizedAt === null);
+  check('C18 entitlement records tx, logIndex, block number/hash, sink, SYNC, amounts, price/rate versions, requestId, safeAt', ACT1.txHash === good.txHash && ACT1.logIndex === 0 && ACT1.blockNumber === good.blockNumber.toString() && /^0x[0-9a-f]{64}$/.test(ACT1.blockHash) && ACT1.sink === SINK && ACT1.canonicalSync === SYNC && ACT1.exactAmount === I1.exactTaggedSyncAmount && ACT1.baseSyncAmount === I1.baseSyncAmount && ACT1.priceUsdCents === 3900 && ACT1.priceVersion === 1 && ACT1.syncUsdReferenceRate === '0.00005' && ACT1.rateVersion === 1 && ACT1.requestId === I1.requestId && ACT1.safeAt && ACT1.finalizedAt === null);
   const reg = (await api('GET', null, { view: 'activations' })).j.activations;
   check('C19 activation registry has the record (token, requestId, tx, logIndex, amount, price/rate versions, block)', reg.length === 1 && reg[0].token === T1 && reg[0].requestId === I1.requestId && reg[0].txHash === good.txHash && reg[0].amount === I1.exactTaggedSyncAmount && reg[0].priceVersion === 1 && reg[0].rateVersion === 1 && reg[0].blockHash === ACT1.blockHash);
   check('C20 intent is CONSUMED and the log is claimed by this request', (await api('GET', null, { view: 'intent', id: I1.requestId })).j.intent.status === 'CONSUMED' && MAP.get(`site:paylog:v1:${good.txHash}:0`).value === I1.requestId);
@@ -563,12 +563,19 @@ let ACT1;
   check('F03 complimentary never overwrites an existing entitlement', threw);
   const acts = (await api('GET', null, { view: 'activations' })).j.activations;
   const paid = acts.reduce((s, a) => s + BigInt(a.exactTaggedSyncAmount), 0n);
-  pc.sinkTotals = { settled: paid - 10n ** 18n, burned: (paid - 10n ** 18n) * 60n / 100n, treasury: (paid - 10n ** 18n) - (paid - 10n ** 18n) * 60n / 100n };
+  const settled = paid - 10n ** 18n, burned = (settled * 60n) / 100n, forwarded = settled - burned;
+  pc.sinkTotals = { settled, burned, forwarded };
   pc.sinkBalance = 10n ** 18n + 5n * 10n ** 18n; // 1 SYNC of paid funds not yet settled + 5 SYNC unsolicited
+  const converted = forwarded / 2n; // half of the forwarded treasury share already converted
+  pc.converterBalance = forwarded - converted + 3n * 10n ** 18n; // the rest awaits conversion + 3 SYNC sent straight to the converter
+  pc.converterTotals = { converted, produced: 12_345_678n, delivered: 12_345_678n + 100n }; // real USDG (6 dp) incl. 100 units sent directly
   const mt = (await api('GET', null, { view: 'metrics' })).j;
   check('F04 metrics: activations counted from the registry (complimentary excluded)', mt.projectHomesActivated === acts.length && mt.complimentaryEntitlements === 1);
   check('F05 metrics: SYNC paid for verified activations = registry sum', mt.syncPaidForVerifiedActivations === paid.toString());
-  check('F06 metrics: sink figures come from the contract; unsolicited inflow isolated (5 SYNC)', mt.sink.totalBurnedBySink === pc.sinkTotals.burned.toString() && mt.sink.currentlyCommittedInSink === pc.sinkBalance.toString() && mt.sink.unattributedInflow === (5n * 10n ** 18n).toString());
+  check('F06 metrics: sink stage from the contract — in sink, actually burned, forwarded to converter; unsolicited 5 SYNC isolated', mt.sink.syncActuallyBurned === burned.toString() && mt.sink.syncCurrentlyInSink === pc.sinkBalance.toString() && mt.sink.syncForwardedToTreasuryConverter === forwarded.toString() && mt.sink.unattributedInflow === (5n * 10n ** 18n).toString(), JSON.stringify(mt.sink));
+  check('F06b metrics: converter stage read via the sink\'s immutable TREASURY_CONVERTER — awaiting, converted, real USDG out, delivered', mt.converter.address === CONVERTER && mt.converter.treasury === TREASURY_FIXTURE && mt.converter.syncAwaitingConversion === pc.converterBalance.toString() && mt.converter.syncActuallyConverted === converted.toString() && mt.converter.usdgFromConversions === '12345678' && mt.converter.usdgDeliveredToTreasury === '12345778' && mt.converter.usdgDecimals === 6, JSON.stringify(mt.converter));
+  check('F06c metrics: SYNC sent straight to the converter is isolated as unsolicited (3 SYNC)', mt.converter.unsolicitedSyncInflow === (3n * 10n ** 18n).toString());
+  check('F06d metrics never derive USDG from the reference rate (no $15.60, no usd estimate)', !/15\.6|usdEstimate|expectedUsdg|usdValue/i.test(JSON.stringify(mt)) && mt.notes.some((n) => /ACTUAL DEX EXECUTION RATE/.test(n) && /not the SYNCNET REFERENCE RATE/.test(n)));
   check('F07 metrics wording: committed ≠ burned; unsolicited transfers are not activation payments', mt.notes.some((n) => /COMMITTED TO BURN/.test(n)) && mt.notes.some((n) => /unsolicited/.test(n)));
   check('F08 metrics: rate version used per activation', Object.keys(mt.activationsByRateVersion).length >= 1);
   // reorg invalidation hides a published site and is excluded from metrics
@@ -590,6 +597,25 @@ let ACT1;
   check('F12 store failure at render → 503, nothing rendered', sDown.statusCode === 503 && !sDown.body.includes('Operator Live'));
 }
 
+// ============================================================================================ H. activation is independent of settlement / conversion
+{
+  const TH = lc(A.PONS2_CONTRACT); seedPassport(TH, W);
+  const cfg = (await api('GET', null, { view: 'config' })).j;
+  check('H01 config: 60% burned, 40% converted to USDG for the SyncNet treasury; reference rate ≠ execution rate', cfg.split.treasuryAsset === 'USDG' && /converted to USDG/.test(cfg.split.note) && /actual DEX execution rate \(not the SyncNet reference rate\)/.test(cfg.split.note) && /does not depend/.test(cfg.split.note));
+  // Any read of the sink or the converter now throws: activation and publication must not care.
+  let touched = 0;
+  const strict = async (method, params) => { if (method === 'eth_call' && [SINK, CONVERTER].includes(lc(params[0].to))) { touched++; throw new Error('sink/converter unavailable'); } return rpc(method, params); };
+  const r = await request(TH, W, { rpc: strict });
+  const p = payIntent(r.j.intent);
+  const v = await verify(r.j.intent.requestId, p.txHash, { rpc: strict });
+  check('H02 a SAFE payment activates while the sink is unsettled and the converter unreachable', r.s === 201 && v.s === 200 && v.j.status === 'ACTIVE' && touched === 0, v.body);
+  const pub = await publishCfg(TH, goodConfig(TH), W, { rpc: strict });
+  check('H03 …and the project can publish immediately (no conversion, no settlement required)', pub.s === 200 && touched === 0, pub.body);
+  check('H04 the customer payment is ONE canonical SYNC transfer to the sink (no approval, no burn, no USDG transaction)', pc.receipts.get(p.txHash).logs.length === 1 && pc.receipts.get(p.txHash).logs[0].address === SYNC);
+  const mtDown = (await api('GET', null, { view: 'metrics' }, { rpc: strict })).j;
+  check('H05 metrics with the sink unreachable: registry figures served, sink/converter marked unavailable, never guessed', mtDown.sink.unavailable === true && mtDown.projectHomesActivated >= 1);
+}
+
 // ============================================================================================ G. source-level invariants
 {
   const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');
@@ -599,6 +625,9 @@ let ACT1;
   check('G03 no unbounded log scans (eth_getLogs never used)', !/eth_getLogs|getLogs/.test(src) && !/eth_getLogs/.test(fs.readFileSync(path.join(ROOT, 'netlify/lib/project-home-chain.js'), 'utf8')));
   check('G04 no refund logic exists', !/refund\s*\(|action === 'refund'/.test(src));
   check('G05 operatorAtActivation is never used for authority', !/operatorAtActivation\s*===|===\s*[a-z.]*operatorAtActivation/.test(src));
+  const verifySrc = src.slice(src.indexOf('async function verifyPayment('), src.indexOf('async function recordObserved('));
+  const publishSrc = src.slice(src.indexOf('async function publish('), src.indexOf('async function unpublish('));
+  check('G07 verification and publication never reference USDG, the converter or settlement', !/usdg|converter|settle\(|totalSettled|convert\(/i.test(verifySrc + publishSrc));
   check('G06 no fixed-SYNC product price anywhere', !/1_?000_?000n?\s*\*\s*E18|ACTIVATION_SYNC|priceSync/.test(src));
 }
 

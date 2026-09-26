@@ -6,10 +6,10 @@ import {MockSync, ReentrantSync} from "./utils/MockSync.sol";
 import {SyncNetProjectHomeSink} from "../src/SyncNetProjectHomeSink.sol";
 
 contract SyncNetProjectHomeSinkTest is TestBase {
-    event Settled(address indexed caller, uint256 amount, uint256 burned, uint256 toTreasury);
+    event Settled(address indexed caller, uint256 amount, uint256 burned, uint256 forwardedToConverter);
 
     // Fixture addresses only — never a real treasury.
-    address internal constant TREASURY = address(0x7EA5);
+    address internal constant CONVERTER = address(0xC0417E27); // fixture converter address
     address internal constant PAYER = address(0xB0B);
     address internal constant STRANGER = address(0xBAD);
 
@@ -18,7 +18,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
 
     function setUp() public {
         sync = new MockSync();
-        sink = new SyncNetProjectHomeSink(address(sync), TREASURY);
+        sink = new SyncNetProjectHomeSink(address(sync), CONVERTER);
         sync.mint(PAYER, 1_000_000_000e18);
     }
 
@@ -30,24 +30,24 @@ contract SyncNetProjectHomeSinkTest is TestBase {
     // ------------------------------------------------------------------ constructor
     function test_constructor_rejectsZeroSync() public {
         vm.expectRevert(SyncNetProjectHomeSink.ZeroAddress.selector);
-        new SyncNetProjectHomeSink(address(0), TREASURY);
+        new SyncNetProjectHomeSink(address(0), CONVERTER);
     }
 
-    function test_constructor_rejectsZeroTreasury() public {
+    function test_constructor_rejectsZeroConverter() public {
         vm.expectRevert(SyncNetProjectHomeSink.ZeroAddress.selector);
         new SyncNetProjectHomeSink(address(sync), address(0));
     }
 
-    function test_constructor_rejectsTreasuryEqualToToken() public {
-        vm.expectRevert(SyncNetProjectHomeSink.TreasuryIsToken.selector);
+    function test_constructor_rejectsConverterEqualToToken() public {
+        vm.expectRevert(SyncNetProjectHomeSink.ConverterIsToken.selector);
         new SyncNetProjectHomeSink(address(sync), address(sync));
     }
 
     function test_constructor_setsImmutables() public view {
         assertEq(address(sink.SYNC()), address(sync), "SYNC");
-        assertEq(sink.TREASURY(), TREASURY, "TREASURY");
+        assertEq(sink.TREASURY_CONVERTER(), CONVERTER, "CONVERTER");
         assertEq(sink.BURN_PERCENT(), 60, "BURN_PERCENT");
-        assertEq(sink.totalSettled() + sink.totalBurned() + sink.totalTreasury(), 0, "fresh totals");
+        assertEq(sink.totalSettledSync() + sink.totalBurnedSync() + sink.totalTreasurySyncForwarded(), 0, "fresh totals");
     }
 
     // ------------------------------------------------------------------ split
@@ -58,7 +58,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         assertEq(burned, 600_000e18, "burn 60%");
         assertEq(toTreasury, 400_000e18, "treasury 40%");
         assertEq(sync.totalSupply(), supplyBefore - 600_000e18, "totalSupply decreased by the burn");
-        assertEq(sync.balanceOf(TREASURY), 400_000e18, "treasury received 40%");
+        assertEq(sync.balanceOf(CONVERTER), 400_000e18, "treasury received 40%");
         assertEq(sync.balanceOf(address(sink)), 0, "sink emptied");
     }
 
@@ -87,7 +87,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         uint256 supplyBefore = sync.totalSupply();
         sink.settle();
         assertEq(supplyBefore - sync.totalSupply(), 4, "floor(4.2) burned");
-        assertEq(sync.balanceOf(TREASURY), 3, "remainder 3 to treasury");
+        assertEq(sync.balanceOf(CONVERTER), 3, "remainder 3 to treasury");
         assertEq(sync.balanceOf(address(sink)), 0, "no residue");
     }
 
@@ -112,8 +112,8 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         (uint256 b, uint256 t) = sink.split(amount);
         assertEq(sync.balanceOf(address(sink)), 0, "sink empty after settle");
         assertEq(supplyBefore - sync.totalSupply(), b, "burned == split burn");
-        assertEq(sync.balanceOf(TREASURY), t, "treasury == split remainder");
-        assertEq(sink.totalSettled(), amount, "totalSettled");
+        assertEq(sync.balanceOf(CONVERTER), t, "treasury == split remainder");
+        assertEq(sink.totalSettledSync(), amount, "totalSettled");
     }
 
     // ------------------------------------------------------------------ zero balance / repeats
@@ -123,7 +123,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         assertEq(b + t, 0, "nothing settled");
         assertEq(sync.burnCalls(), 0, "burn not called");
         assertEq(sync.totalSupply(), supplyBefore, "supply unchanged");
-        assertEq(sink.totalSettled(), 0, "totals unchanged");
+        assertEq(sink.totalSettledSync(), 0, "totals unchanged");
     }
 
     function test_settle_repeatedAfterZeroIsSafe() public {
@@ -131,9 +131,9 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         sink.settle();
         sink.settle();
         sink.settle();
-        assertEq(sink.totalSettled(), 1000, "no double count");
-        assertEq(sink.totalBurned(), 600, "burned once");
-        assertEq(sink.totalTreasury(), 400, "treasury once");
+        assertEq(sink.totalSettledSync(), 1000, "no double count");
+        assertEq(sink.totalBurnedSync(), 600, "burned once");
+        assertEq(sink.totalTreasurySyncForwarded(), 400, "treasury once");
     }
 
     function test_settle_cumulativeTotals() public {
@@ -144,11 +144,11 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         pay(1e18 + 3);
         sink.settle();
         uint256 settled = 1000 + 7 + 1e18 + 3;
-        assertEq(sink.totalSettled(), settled, "totalSettled");
-        assertEq(sink.totalBurned() + sink.totalTreasury(), settled, "totals add up");
+        assertEq(sink.totalSettledSync(), settled, "totalSettled");
+        assertEq(sink.totalBurnedSync() + sink.totalTreasurySyncForwarded(), settled, "totals add up");
         uint256 big = 1e18 + 3;
-        assertEq(sink.totalBurned(), 600 + 4 + (big * 60) / 100, "totalBurned");
-        assertEq(sync.balanceOf(TREASURY), sink.totalTreasury(), "treasury balance == totalTreasury");
+        assertEq(sink.totalBurnedSync(), 600 + 4 + (big * 60) / 100, "totalBurned");
+        assertEq(sync.balanceOf(CONVERTER), sink.totalTreasurySyncForwarded(), "converter balance == totalTreasurySyncForwarded");
     }
 
     function test_settle_emitsSettled() public {
@@ -165,7 +165,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         vm.prank(STRANGER);
         sink.settle();
         assertEq(sync.balanceOf(STRANGER), 0, "caller receives nothing");
-        assertEq(sync.balanceOf(TREASURY), 200, "treasury receives");
+        assertEq(sync.balanceOf(CONVERTER), 200, "treasury receives");
     }
 
     function test_settle_callerCannotRedirectFunds() public {
@@ -175,7 +175,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         (bool ok, ) = address(sink).call(abi.encodePacked(SyncNetProjectHomeSink.settle.selector, abi.encode(STRANGER)));
         assertTrue(ok, "settle with junk calldata still settles");
         assertEq(sync.balanceOf(STRANGER), 0, "stranger got nothing");
-        assertEq(sync.balanceOf(TREASURY), 200, "treasury got the 40%");
+        assertEq(sync.balanceOf(CONVERTER), 200, "treasury got the 40%");
     }
 
     function test_unsolicitedTransfersAreSettledToo() public {
@@ -188,7 +188,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         assertEq(toBurn, 630, "committed to burn");
         assertEq(toTreasury, 420, "committed to treasury");
         sink.settle();
-        assertEq(sink.totalSettled(), 1050, "all received SYNC settled 60/40");
+        assertEq(sink.totalSettledSync(), 1050, "all received SYNC settled 60/40");
         assertEq(sync.balanceOf(address(sink)), 0, "no residue");
     }
 
@@ -197,7 +197,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         uint256 supplyBefore = sync.totalSupply();
         sink.pending();
         assertEq(sync.totalSupply(), supplyBefore, "tokens in the sink are committed, not burned");
-        assertEq(sink.totalBurned(), 0, "totalBurned counts only executed burns");
+        assertEq(sink.totalBurnedSync(), 0, "totalBurned counts only executed burns");
     }
 
     // ------------------------------------------------------------------ failures revert atomically
@@ -207,8 +207,8 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         vm.expectRevert(bytes("MockSync: burn reverts"));
         sink.settle();
         assertEq(sync.balanceOf(address(sink)), 1000, "balance untouched");
-        assertEq(sink.totalSettled(), 0, "no accounting on failure");
-        assertEq(sink.totalBurned(), 0, "no burn counted");
+        assertEq(sink.totalSettledSync(), 0, "no accounting on failure");
+        assertEq(sink.totalBurnedSync(), 0, "no burn counted");
     }
 
     function test_settle_revertingTransferRevertsEverything() public {
@@ -218,25 +218,25 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         vm.expectRevert(bytes("MockSync: transfer reverts"));
         sink.settle();
         assertEq(sync.totalSupply(), supplyBefore, "burn rolled back");
-        assertEq(sink.totalSettled(), 0, "no accounting on failure");
+        assertEq(sink.totalSettledSync(), 0, "no accounting on failure");
     }
 
     function test_settle_falseTransferReverts() public {
         pay(1000);
         sync.setTransferReturnsFalse(true);
-        vm.expectRevert(SyncNetProjectHomeSink.TreasuryTransferFailed.selector);
+        vm.expectRevert(SyncNetProjectHomeSink.ConverterTransferFailed.selector);
         sink.settle();
         assertEq(sync.balanceOf(address(sink)), 1000, "balance untouched");
     }
 
     function test_settle_reentryCannotDoubleCount() public {
         ReentrantSync evil = new ReentrantSync();
-        SyncNetProjectHomeSink s = new SyncNetProjectHomeSink(address(evil), TREASURY);
+        SyncNetProjectHomeSink s = new SyncNetProjectHomeSink(address(evil), CONVERTER);
         evil.setSink(address(s));
         evil.mint(address(s), 1000);
         s.settle();
-        assertEq(s.totalSettled(), 1000, "settled once");
-        assertEq(s.totalBurned() + s.totalTreasury(), 1000, "totals consistent");
+        assertEq(s.totalSettledSync(), 1000, "settled once");
+        assertEq(s.totalBurnedSync() + s.totalTreasurySyncForwarded(), 1000, "totals consistent");
         assertEq(evil.balanceOf(address(s)), 0, "empty");
     }
 
@@ -253,7 +253,7 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         calls[1] = abi.encodeWithSignature("admin()");
         calls[2] = abi.encodeWithSignature("transferOwnership(address)", STRANGER);
         calls[3] = abi.encodeWithSignature("renounceOwnership()");
-        calls[4] = abi.encodeWithSignature("setTreasury(address)", STRANGER);
+        calls[4] = abi.encodeWithSignature("setTreasuryConverter(address)", STRANGER);
         calls[5] = abi.encodeWithSignature("setToken(address)", STRANGER);
         calls[6] = abi.encodeWithSignature("setSplit(uint256)", 0);
         calls[7] = abi.encodeWithSignature("rescueToken(address,uint256)", address(sync), 1000);
@@ -274,6 +274,31 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         assertTrue(_callFails(calls[15]), "no parameterised settle");
         assertEq(sync.balanceOf(address(sink)), 1000, "nothing moved");
         assertEq(sync.allowance(address(sink), STRANGER), 0, "no approvals ever granted");
+    }
+
+    function test_noDexOrPriceSurface() public {
+        pay(1000);
+        bytes[] memory calls = new bytes[](8);
+        calls[0] = abi.encodeWithSignature("convert(uint256,uint256,uint256)", 1, 1, type(uint256).max);
+        calls[1] = abi.encodeWithSignature("swap(address,uint256,uint256)", address(sync), 1, 0);
+        calls[2] = abi.encodeWithSignature("USDG()");
+        calls[3] = abi.encodeWithSignature("ROUTER()");
+        calls[4] = abi.encodeWithSignature("setConverter(address)", STRANGER);
+        calls[5] = abi.encodeWithSignature("TREASURY()");
+        calls[6] = abi.encodeWithSignature("price()");
+        calls[7] = abi.encodeWithSignature("settle(uint256)", 1);
+        for (uint256 i = 0; i < calls.length; i++) {
+            vm.prank(STRANGER);
+            assertTrue(_callFails(calls[i]), "the sink has no DEX, price, treasury or setter surface");
+        }
+        assertEq(sync.balanceOf(address(sink)), 1000, "nothing moved");
+    }
+
+    function test_forwardsExactRemainderToConverterAsSync() public {
+        pay(12_345);
+        sink.settle();
+        assertEq(sync.balanceOf(CONVERTER), 12_345 - (12_345 * 60) / 100, "converter holds exactly the remainder, in SYNC");
+        assertEq(sink.totalTreasurySyncForwarded(), sync.balanceOf(CONVERTER), "forwarded total == SYNC at the converter");
     }
 
     function test_noPayableReceiveOrFallback() public {
@@ -299,12 +324,12 @@ contract SyncNetProjectHomeSinkTest is TestBase {
         }
     }
 
-    function test_treasuryAndTokenUnchangedAfterActivity() public {
+    function test_converterAndTokenUnchangedAfterActivity() public {
         pay(12345);
         vm.prank(STRANGER);
         sink.settle();
         assertEq(address(sink.SYNC()), address(sync), "token unchanged");
-        assertEq(sink.TREASURY(), TREASURY, "treasury unchanged");
+        assertEq(sink.TREASURY_CONVERTER(), CONVERTER, "treasury unchanged");
         assertEq(sink.BURN_PERCENT(), 60, "split unchanged");
     }
 }

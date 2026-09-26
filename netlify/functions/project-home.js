@@ -8,13 +8,14 @@
  *   GET  /api/project-home?view=revisions&token=0x…     immutable revision history (audit / recovery)
  *   GET  /api/project-home?view=revision&id=0x…
  *   GET  /api/project-home?view=activations             append-only activation registry export
- *   GET  /api/project-home?view=metrics                 truthful payment metrics (verified vs everything in the sink)
+ *   GET  /api/project-home?view=metrics                 truthful metrics: verified payments, sink, converter, USDG
  *   POST /api/project-home {action:'intent'|'verify'|'reconcile'|'publish'|'unpublish', …}
  *
- * Economic model: PROJECT HOME ACTIVATION is priced at $49 USD (reviewed price version), paid ONLY in $SYNC at the
+ * Economic model: PROJECT HOME ACTIVATION is priced at $39 USD (reviewed price version), paid ONLY in $SYNC at the
  * SYNCNET REFERENCE RATE (reviewed rate version — not an oracle), to the immutable SyncNetProjectHomeSink (60% burned
- * on settle(), 40% to the SyncNet protocol treasury). One-time, per token, non-refundable; bound to the TOKEN, never to
- * the payer. After activation every content operation is free.
+ * on settle(); 40% forwarded as SYNC to the immutable treasury converter, which converts it to USDG for the SyncNet
+ * protocol treasury — downstream accounting that activation NEVER waits for). One-time, per token, non-refundable;
+ * bound to the TOKEN, never to the payer. After activation every content operation is free.
  *
  * Trust model:
  *  - authority comes ONLY from the CURRENT Project Passport operator (mp:passport:v1:<token>, Marketplace-owned, READ
@@ -82,6 +83,7 @@ const isTx = isB32;
 const CLOSED = 'Project Home is not enabled on this deployment.';
 const PAY_CLOSED = 'Project Home activation payments are not open on this deployment.';
 const UNAVAILABLE = 'Project Home is temporarily unavailable.';
+const SPLIT_NOTE = 'Paid SYNC is COMMITTED TO THE PROJECT HOME SINK. 60% is COMMITTED TO BURN and is burned by SYNC.burn() only when the sink is settled; 40% is allocated to the SyncNet protocol treasury and converted to USDG later, at the actual DEX execution rate (not the SyncNet reference rate). Your activation does not depend on either step.';
 const CHAIN_DOWN = 'Robinhood Chain could not be read right now. Nothing was changed. Try again.';
 
 const bad = (message) => publicError(400, 'invalid_request', message || 'Invalid request.');
@@ -126,7 +128,7 @@ function publicIntent(i) {
     baseSyncAmount: i.baseSyncAmount, exactTaggedSyncAmount: i.exactTaggedSyncAmount, exactTaggedSyncDisplay: Pricing.formatUnits(i.exactTaggedSyncAmount),
     createdAt: i.createdAt, createdBlock: i.createdBlock, expiresAt: i.expiresAt, lockedUntil: i.expiresAt, status: i.status,
     observed: i.observed || null, consumedBy: i.consumedBy || null,
-    split: { burnPercent: 60, treasuryPercent: 40, note: 'Paid SYNC is COMMITTED TO THE PROJECT HOME SINK. 60% is COMMITTED TO BURN and is burned only when the sink is settled; 40% goes to the SyncNet protocol treasury.' },
+    split: { burnPercent: 60, treasuryPercent: 40, note: SPLIT_NOTE },
     refund: 'Non-refundable after successful activation. There is no refund mechanism.',
   };
 }
@@ -189,7 +191,7 @@ function configView(cfg) {
   const out = {
     enabled: cfg.siteEnabled, payments: cfg.paymentsEnabled, chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: cfg.sink,
     product: 'PROJECT HOME · ONE-TIME ACTIVATION', lockSeconds: LOCK, domain: Site.DOMAIN,
-    split: { burnPercent: 60, treasuryPercent: 40 }, refund: 'Non-refundable after successful activation.',
+    split: { burnPercent: 60, treasuryPercent: 40, treasuryAsset: 'USDG', note: SPLIT_NOTE }, refund: 'Non-refundable after successful activation.',
     price: cfg.price ? { priceUsdCents: cfg.price.priceUsdCents, priceUsd: displayUsd(cfg.price.priceUsdCents), priceVersion: cfg.price.priceVersion } : null,
     rate: cfg.rate ? { label: 'SYNCNET REFERENCE RATE', syncUsdReferenceRate: cfg.rate.syncUsdReferenceRate, rateVersion: cfg.rate.rateVersion, updatedAt: cfg.rate.rateEffectiveAt, expiresAt: cfg.rate.rateExpiresAt, note: 'A server-controlled reference rate reviewed by SyncNet. It is not an on-chain oracle.' } : null,
     quote: null,
@@ -249,9 +251,14 @@ async function loadActivations(store) {
 }
 
 /**
- * Truthful metrics. VERIFIED activation payments come from the registry (complimentary never counted; activations
- * later invalidated by a reorg excluded). Sink figures come from the sink contract itself; tokens in the sink are
- * COMMITTED, and only totalBurned (executed SYNC.burn) is BURNED. Unattributed inflow is derived only when possible.
+ * Truthful metrics, stage by stage, from real records only:
+ *   VERIFIED activation payments — the registry (complimentary never counted; reorg-invalidated activations excluded);
+ *   SINK — SyncNetProjectHomeSink: SYNC currently committed, SYNC actually burned (executed SYNC.burn), SYNC forwarded
+ *     to the treasury converter;
+ *   CONVERTER — SyncNetProjectHomeTreasuryConverter (address read from the sink's immutable TREASURY_CONVERTER): SYNC
+ *     awaiting conversion, SYNC actually converted, USDG actually produced and actually delivered to the treasury.
+ * USDG is NEVER estimated from the SyncNet reference rate: only on-chain totals are reported. Unsolicited / unattributed
+ * inflows (to the sink or straight to the converter) are derived only when non-negative, never guessed.
  */
 async function metrics(store, rpc, cfg) {
   const acts = await loadActivations(store);
@@ -267,27 +274,53 @@ async function metrics(store, rpc, cfg) {
     activationsByRateVersion: byRate,
     complimentaryEntitlements: (await store.smembers(K.complimentary)).length, // never revenue, never burn
     sink: null,
+    converter: null,
     notes: [
       'SYNC in the sink is COMMITTED TO THE PROJECT HOME SINK; 60% of it is COMMITTED TO BURN until settle() executes.',
-      'BURNED counts only SYNC destroyed by SYNC.burn() inside settle() (the sink contract totalBurned).',
-      'The sink settles ALL SYNC it receives, including unsolicited transfers; those are not Project Home activation payments.',
+      'BURNED counts only SYNC destroyed by SYNC.burn() inside settle() (the sink contract totalBurnedSync).',
+      'The 40% treasury allocation is forwarded AS SYNC to the treasury converter; it becomes USDG only when the SyncNet treasury wallet executes a conversion.',
+      'USDG figures are real conversion output at the ACTUAL DEX EXECUTION RATE (pool fee and price impact included), not the SYNCNET REFERENCE RATE used to price activations. No USD amount is guaranteed.',
+      'The sink and the converter process ALL SYNC they receive, including unsolicited transfers; those are not Project Home activation payments.',
     ],
   };
   if (!cfg.sink) return out;
+  const uint = (hex) => BigInt(hex && hex !== '0x' ? hex : '0x0');
+  const read = async (to, sig, args) => Chain.ethCall(rpc, to, Core.functionSelector(sig) + (args ? Core.abiEncode(args.types, args.values).slice(2) : ''));
+  const syncBalance = async (who) => uint(await read(CANONICAL_SYNC, 'balanceOf(address)', { types: ['address'], values: [who] }));
+  let forwarded = null;
   try {
-    const call = async (sig) => BigInt(await Chain.ethCall(rpc, cfg.sink, Core.functionSelector(sig)));
-    const balance = BigInt(await Chain.ethCall(rpc, CANONICAL_SYNC, Chain.SEL.balanceOf + Core.abiEncode(['address'], [cfg.sink]).slice(2)));
-    const [settled, burned, treasury] = [await call('totalSettled()'), await call('totalBurned()'), await call('totalTreasury()')];
+    const balance = await syncBalance(cfg.sink);
+    const [settled, burned] = [uint(await read(cfg.sink, 'totalSettledSync()')), uint(await read(cfg.sink, 'totalBurnedSync()'))];
+    forwarded = uint(await read(cfg.sink, 'totalTreasurySyncForwarded()'));
     const received = settled + balance;
     out.sink = {
-      address: cfg.sink, currentlyCommittedInSink: balance.toString(), totalSettled: settled.toString(), totalBurnedBySink: burned.toString(),
-      totalSentToTreasury: treasury.toString(), totalReceivedBySink: received.toString(),
+      address: cfg.sink, syncCurrentlyInSink: balance.toString(), totalSettledSync: settled.toString(), syncActuallyBurned: burned.toString(),
+      syncForwardedToTreasuryConverter: forwarded.toString(), totalSyncReceivedBySink: received.toString(),
       unattributedInflow: received >= paidSum ? (received - paidSum).toString() : null,
       unattributedNote: received >= paidSum ? 'SYNC received by the sink that is not a verified Project Home activation payment (unsolicited transfers, late or unverified payments).' : 'Not derivable right now (verified payments exceed the observed sink inflow).',
     };
   } catch (err) {
     logError(FN, 'metrics-chain-unavailable', err, {});
     out.sink = { address: cfg.sink, unavailable: true };
+    return out;
+  }
+  try {
+    const word = await read(cfg.sink, 'TREASURY_CONVERTER()');
+    const converter = '0x' + String(word).slice(-40).toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(converter) || /^0x0{40}$/.test(converter)) throw new Error('sink has no converter');
+    const pendingSync = await syncBalance(converter);
+    const [converted, produced, delivered] = [uint(await read(converter, 'totalSyncConverted()')), uint(await read(converter, 'totalUsdgFromConversions()')), uint(await read(converter, 'totalUsdgDelivered()'))];
+    const treasury = '0x' + String(await read(converter, 'TREASURY()')).slice(-40).toLowerCase();
+    const inflow = converted + pendingSync;
+    out.converter = {
+      address: converter, treasury, syncAwaitingConversion: pendingSync.toString(), syncActuallyConverted: converted.toString(),
+      usdgFromConversions: produced.toString(), usdgDeliveredToTreasury: delivered.toString(), usdgDecimals: 6,
+      unsolicitedSyncInflow: inflow >= forwarded ? (inflow - forwarded).toString() : null,
+      note: 'usdgDeliveredToTreasury also includes any USDG sent to the converter directly (always forwarded to the treasury only); usdgFromConversions is swap output alone.',
+    };
+  } catch (err) {
+    logError(FN, 'metrics-converter-unavailable', err, {});
+    out.converter = { unavailable: true };
   }
   return out;
 }

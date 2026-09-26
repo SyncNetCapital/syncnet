@@ -1,7 +1,7 @@
 # SyncNet Project Home: secure foundation
 
 Status: **foundation only, closed by default**. No UI, no navigation entry, and no deployed contract. No rate has been
-approved and no treasury exists yet. Nothing is live until every step in "Enabling" below has been done deliberately.
+approved and no treasury wallet has been supplied yet. Nothing is live until every step in "Enabling" below has been done deliberately.
 
 A project already on Robinhood Chain (a PAR launch or a Pons V2 launch) has its origin and **Project Passport** resolved
 by SyncNet. The **current Passport operator** can publish a structured, SyncNet-hosted page at `/site/<token>`,
@@ -17,15 +17,25 @@ not prove the identity of the historical or original team.
 | | |
 |---|---|
 | Product | PROJECT HOME · ONE-TIME ACTIVATION, per token/project |
-| Price | **$49 USD** (`priceUsdCents 4900`, `priceVersion 1`) |
+| Price | **$39 USD** (`priceUsdCents 3900`, `priceVersion 1`: the initial launch price) |
 | Paid in | **$SYNC only** (`0x6368e007b9f0b941560ed1f3bceb20247f5eca37`, 18 decimals), chain 4663 |
 | Conversion | SYNCNET REFERENCE RATE: server-controlled and versioned. It is **not an oracle** |
 | Rate lock | 30 minutes, judged by the **block timestamp of the payment** |
-| Split | 60% burned by `SYNC.burn()` on `settle()`, 40% to the SyncNet protocol treasury |
+| Split | 60% burned by `SYNC.burn()` on `settle()`. 40% allocated to the SyncNet protocol treasury, forwarded as SYNC to the treasury converter and **converted to USDG**. The treasury wallet receives **USDG only** |
 | Refunds | none. Non-refundable after successful activation. There is no refund mechanism |
 | Bound to | the **token**, never the payer. It is inherited through Passport transfer |
 | Free after activation | edits, revisions, unpublish, republish, preset changes, adoption after a Passport transfer |
 | Lifetime | active for as long as SyncNet operates the Project Home service |
+
+Customer-facing copy (Phase 2): **"$39 one-time · Pay with $SYNC · ≈ X SYNC · SyncNet reference rate · locked for
+30 minutes · 60% burned · 40% converted to USDG for SyncNet treasury."** Never promise a USDG amount (for example
+"treasury receives $15.60"): the treasury receives whatever the conversion actually produces.
+
+Two different rates are involved and must never be conflated:
+
+- The **SYNCNET REFERENCE RATE** (reviewed, versioned) decides how much SYNC the customer pays for $39.
+- The **ACTUAL DEX EXECUTION RATE** (the live PAR SYNC/USDG pool, after its ~2.1% fee and price impact) decides how much
+  USDG the treasury later receives for its 40% allocation.
 
 SyncNet's own projects (SYNC, SYNCAT, …) are not exempt. A complimentary entitlement exists only as an ops-level function
 with no HTTP route (`grantComplimentary`). It is labelled `COMPLIMENTARY` and never counts as revenue, burn or treasury.
@@ -35,7 +45,7 @@ with no HTTP route (`grantComplimentary`). It is labelled `COMPLIMENTARY` and ne
 All arithmetic is BigInt. No floating point is used anywhere.
 
 ```
-priceUsdCents   integer US cents                           4900   = $49.00
+priceUsdCents   integer US cents                           3900   = $39.00
 rateUsdE18      integer USD per 1 whole SYNC × 10^18         5e13   = $0.00005 / SYNC   (decimal string, <= 18 decimals)
 amounts         integer SYNC wei (18 decimals)
 
@@ -57,7 +67,7 @@ This gives the following properties:
 - The exact amount is always greater than the base, so the tag never lowers the price.
 - The surcharge is below 2 × 10^-6 SYNC.
 - The tag occupies the 12 lowest decimals, and the full amount is shown as an exact 18-decimal string, e.g.
-  `980000.000000482117093551`.
+  `780000.000000482117093551` ($39 at an illustrative $0.00005/SYNC = 780,000 SYNC).
 - The server reserves every exact amount with a set-if-absent key (`site:amt:v1:<wei>`) for longer than any window in
   which a payment could match it. Two live intents therefore never share an amount, and uniqueness does not rely on
   chance.
@@ -89,23 +99,106 @@ parameter.
 Wording is always "SYNCNET REFERENCE RATE · Version X · Updated <effectiveAt> · Locked until <expiresAt of intent>",
 never "oracle price".
 
-## 4. Payment sink (`contracts/project-home-sink/`)
+## 4. Payment sink and treasury converter (`contracts/project-home-sink/`)
 
-`SyncNetProjectHomeSink(address sync, address treasury)` has immutable `SYNC` and `TREASURY` (both non-zero, and the
-treasury must differ from the token) and a constant `BURN_PERCENT = 60`.
+### Lifecycle
 
-`settle()` is permissionless and takes no parameters. It reads its whole balance, then:
+```
+customer pays the exact tagged SYNC amount (ONE transfer to the sink, no approval)
+   │  server verifies the canonical SYNC Transfer at SAFE  ──▶  entitlement ACTIVE  ──▶  the site can publish
+   ▼                                     (nothing below is required for activation or publication)
+SyncNetProjectHomeSink       SYNC committed; 60% COMMITTED TO BURN              (state A)
+   │  settle()  — permissionless, no parameters
+   ├── floor(60%) ──▶ SYNC.burn()                    totalSupply decreases       (state B: BURNED)
+   └── remainder  ──▶ SyncNetProjectHomeTreasuryConverter, as SYNC               (state C: awaiting conversion)
+                           │  convert(amount, minUsdgOut, deadline) — ONLY the treasury wallet
+                           ▼  PAR multi-market router · sellToQuotes · market 1 = PAR SYNC/USDG Uniswap v4 pool
+                        USDG ──▶ SyncNet protocol treasury wallet (immutable)     (state D: USDG delivered)
+```
 
-- burns `floor(balance × 60 / 100)` with `SYNC.burn()`,
-- transfers the remainder (40% plus every rounding residue) to `TREASURY`,
-- updates `totalSettled`, `totalBurned` and `totalTreasury`,
-- emits `Settled`.
+### Sink: `SyncNetProjectHomeSink(address sync, address treasuryConverter)`
 
-A zero balance is a no-op. The contract has no owner, admin, setter, rescue, proxy, arbitrary call, approval,
-payable function, receive or fallback. See `contracts/project-home-sink/README.md` for the ABI.
+- Immutable `SYNC` and `TREASURY_CONVERTER` (both non-zero, and the converter must differ from the token) and a
+  constant `BURN_PERCENT = 60`.
+- `settle()` reads its whole balance and burns `floor(balance × 60 / 100)` with `SYNC.burn()`. It then transfers the
+  remainder (40% plus every rounding residue) **as SYNC** to `TREASURY_CONVERTER`, and updates `totalSettledSync`,
+  `totalBurnedSync` and `totalTreasurySyncForwarded`.
+- It knows no USDG, router, pool, price or slippage. It still has no owner, admin, setter, rescue, proxy, arbitrary
+  call, approval, payable function, receive or fallback.
 
-**Burn language:** before `settle()`, tokens are *COMMITTED TO THE PROJECT HOME SINK* and 60% is *COMMITTED TO BURN*.
-Only `totalBurned` (an executed `SYNC.burn`) is *BURNED*.
+### Converter: `SyncNetProjectHomeTreasuryConverter(sync, usdg, treasury, router, market)`
+
+- Every constructor value is immutable. The constructor re-reads the live PAR factory and reverts unless `market` is
+  the hook-less SYNC/USDG pool. Every conversion re-checks this, so a changed route fails closed.
+- `convert(syncAmount, minUsdgOut, deadline)` is the **only** state-changing function:
+  - it runs only if `msg.sender == TREASURY`;
+  - `minUsdgOut` must be non-zero, and the deadline is enforced;
+  - `syncAmount` can be at most the converter's SYNC balance, which allows partial or batched conversions;
+  - it approves the router for exactly `syncAmount`, calls `sellToQuotes(SYNC, [{market, hops: [], syncAmount}],
+    [minUsdgOut], address(this))` and resets the allowance to 0;
+  - it measures the SYNC actually sold and the USDG actually received from its own balances, and enforces its own floor
+    on that measured output (independently of the router);
+  - it then transfers **all** USDG it holds to `TREASURY`.
+- Anything that fails reverts the whole call and leaves the SYNC where it was. This covers a router revert, too little
+  liquidity, a missed floor, an expired deadline, a changed route and a USDG transfer failure.
+- There is no owner, setter, rescue, sweep, withdrawal, generic swap, recipient parameter, arbitrary call or payable
+  surface. No function takes an address argument.
+- Accounting: `totalSyncConverted` and `totalUsdgFromConversions` record real measured values. `totalUsdgDelivered` also
+  includes any USDG sent to the converter directly, which is always forwarded to the treasury only. `pendingSync()` is
+  the SYNC awaiting conversion.
+
+### Executor and slippage model (why it is safe)
+
+- The **treasury wallet itself is the only executor**: execution authority, not custody authority. It chooses when to
+  convert, how much, the floor and the deadline. It cannot choose the route, pool, tokens or recipient, and it cannot
+  withdraw SYNC.
+- A third party cannot trigger a conversion at all, so nobody can force a dump at `minOut = 1`, and `minOut = 0` is
+  refused outright.
+- If the treasury key is compromised, the attacker can at worst convert at a poor floor into the wallet it already
+  controls. It cannot redirect anything.
+- If the treasury key is lost, the SYNC can no longer be converted, but it could not have been spent either. Rotating
+  the treasury means deploying a new converter and a new sink (both immutable), then pointing
+  `PROJECT_HOME_SINK_ADDRESS` at the new sink. Metrics then span both generations.
+- Robinhood Chain orders transactions by a sequencer, and a fresh quote-based floor plus a short deadline bounds any
+  sandwich.
+
+**Operational procedure for one conversion (no new tooling needed):**
+
+1. Quote by simulation from the treasury address. This is read-only and changes nothing:
+   `cast call <converter> "convert(uint256,uint256,uint256)(uint256,uint256,uint256)" <amount> 1 <now+300> --from <treasury>`.
+2. Send `convert(amount, quote × (1 − tolerance), now + 300)` from the treasury wallet.
+3. If the market moved below the floor, the transaction reverts and nothing is lost.
+
+### Route verification (26 Sep 2026, read-only)
+
+- **USDG** is `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`. It is the `usdg` entry of PAR's SDK address book
+  (pardotfamily/par-sdk `f5a5beb`, "all verified on Blockscout") and of this repo. It is also market 1 of the canonical
+  SYNC launch. On-chain it reads `name()` "Global Dollar", `symbol()` "USDG" and `decimals()` 6; it is a 170-byte proxy
+  (upgradeable by its issuer).
+- **SYNC** is a live PAR multi-market launch in `multiFactory 0x3ea2…29C1` with two markets. `poolKeysFor(SYNC)[1]` is
+  `(USDG, SYNC, fee 20000, tickSpacing 10, hooks 0)` in the Uniswap v4 PoolManager `0x8366…0951`. This is the PAR-created
+  SYNC/USDG pool, and the route is **direct** (one hop).
+- **Router:** `PairPadMultiRouter 0x458D2a59c2F3dd32775a64eE72004561440d64Df`. Its live runtime bytecode equals
+  `pardotfamily/par` commit `ab64911` `src/v3/PairPadMultiRouter.sol` compiled with solc 0.8.26 via-IR (11,316 bytes).
+  The only differences are the metadata hash and the four immutables, which are PoolManager, the multi-factory,
+  SwapRouter02 and WETH. `sellToQuotes` looks the pool up from the factory itself, so a caller cannot name a pool. PAR's
+  own SDK uses the same call for quote-market sells.
+- **Fork rehearsal** (`fork/SinkFork.t.sol`, local, never broadcast) ran on real bytecode and state:
+  - the sink burned exactly floor(60%) and totalSupply fell by that amount;
+  - the converter received the exact remainder;
+  - 800 SYNC converted to 0.038329 USDG, which went to the treasury fixture;
+  - no USDG remained in the converter;
+  - a stranger's conversion, and a floor one unit above the quote, both reverted.
+- **Depth** (`fork/ConversionImpactFork.t.sol`), each size quoted from the same pre-trade state:
+
+  | SYNC sold | USDG received | Price impact vs 1,000 SYNC |
+  |---|---|---|
+  | 1,000 | 0.047912 | (reference) |
+  | 100,000 | 4.787648 | ≈0.1% |
+  | 320,000 (≈ one $39 activation's treasury share) | 15.295168 | ≈0.2% |
+  | 1,000,000 | 47.554593 | ≈0.75% |
+
+  The pool fee is about 2.1%.
 
 ## 5. Payment state machine
 
@@ -295,13 +388,19 @@ Authority never derives from the payer, a holder, the deployer, the fee recipien
 | Project Homes activated | the activation registry. Complimentary grants and reorg-invalidated activations are excluded |
 | SYNC paid for verified activations | the registry sum of exact amounts |
 | Activations by rate version | the registry |
-| SYNC currently committed in the sink | `SYNC.balanceOf(sink)` |
-| Total SYNC burned by the sink | the sink's `totalBurned` (executed `SYNC.burn()`) |
-| Total SYNC sent to the treasury | the sink's `totalTreasury` |
-| Unattributed inflow | `totalSettled + balance − verified payments`. Shown only when this is non-negative. It covers unsolicited transfers and late or unverified payments |
+| SYNC currently in the sink | `SYNC.balanceOf(sink)` (committed, not burned) |
+| SYNC actually burned | the sink's `totalBurnedSync` (executed `SYNC.burn()`) |
+| SYNC forwarded to the treasury converter | the sink's `totalTreasurySyncForwarded` |
+| SYNC awaiting treasury conversion | `SYNC.balanceOf(converter)`. The converter address is read from the sink's immutable `TREASURY_CONVERTER` |
+| SYNC actually converted | the converter's `totalSyncConverted` |
+| USDG actually delivered to the SyncNet treasury | the converter's `totalUsdgDelivered` (6 decimals), with `totalUsdgFromConversions` shown separately as swap output only |
+| Unattributed sink inflow | `totalSettledSync + balance − verified payments`. Shown only when non-negative |
+| Unsolicited converter inflow | `totalSyncConverted + pending − totalTreasurySyncForwarded`. Shown only when non-negative |
 
-The sink contract settles every token it holds. The metrics never claim that all burned SYNC came from Project Home
-customers.
+USDG is **never** computed from the reference rate. There is no "$15.60 per activation" figure anywhere, because only
+real on-chain output is reported. The sink and the converter process every token they receive, so the metrics never
+claim that all burned SYNC or all USDG came from Project Home customers. Conversion output cannot be attributed per
+activation, because allocations are pooled before they are converted.
 
 ## 12. Configuration
 
@@ -309,7 +408,7 @@ customers.
 SYNCNET_PROJECT_HOME_ENABLED=true            # default: closed (site reads/writes, /site, /site-img)
 SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   # default: closed
 PROJECT_HOME_PRICE_VERSION=1
-PROJECT_HOME_PRICE_USD_CENTS=4900            # must equal the reviewed price
+PROJECT_HOME_PRICE_USD_CENTS=3900            # must equal the reviewed price ($39)
 PROJECT_HOME_RATE_VERSION=<n>                # must be reviewed, effective, not expired
 PROJECT_HOME_SINK_ADDRESS=<deployed sink>    # no default
 SYNCNET_RPC_URL=https://…                    # preferred private RPC (public RPC works for development)
@@ -320,11 +419,16 @@ If any of these is missing or inconsistent, payments stay closed. Without the du
 
 ## 13. Enabling (not done in this phase)
 
-1. Approve the SyncNet protocol treasury, for example a Safe multisig.
-2. Deploy the sink with the gated script. It requires `CHAIN_ID=4663`, the canonical `SYNC`, and `TREASURY` plus
-   `TREASURY_CONFIRM`.
-3. Verify the deployment on Blockscout.
-4. Review and commit a rate version, with its `effectiveAt` and `expiresAt`.
-5. Set the environment variables above, first on a preview deploy.
-6. Build and review the Phase 2 UI.
+1. Create a **dedicated** SyncNet protocol treasury wallet. A simple EOA is acceptable for V1; it must never be a
+   founder or deployer wallet. Supply its address.
+2. Deploy with `script/DeployProjectHome.s.sol`, which deploys the **converter first**, then the **sink pointing at
+   it**. It requires `CHAIN_ID=4663`, the canonical `SYNC`, `USDG` and `PAR_MULTI_ROUTER`, `SYNC_USDG_MARKET=1`, and
+   `TREASURY` plus `TREASURY_CONFIRM`. It refuses the deployer and any infrastructure address as treasury. The
+   converter constructor re-verifies the live route, and the script re-reads every immutable after deployment.
+3. Verify both contracts on Blockscout.
+4. Set `PROJECT_HOME_SINK_ADDRESS` to the deployed sink. Metrics find the converter through the sink.
+5. Review and commit the first SYNC/USD reference-rate version, with `effectiveAt` and `expiresAt`.
+6. Canary on a preview deploy with the flags on, then build and review the Phase 2 UI.
 7. Only then enable production.
+
+Conversion is never part of activation. The treasury converts at its own cadence, in batches, with a floor.

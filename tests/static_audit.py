@@ -263,7 +263,7 @@ _price=_je.loads((root/'syncnet-project-home-pricing.json').read_text())
 assert "name: 'SyncNet Website'" in _site_lib and "name: 'SyncNet Marketplace'" not in _site_lib and "name: 'SyncNet Economies'" not in _site_lib
 assert "truthy(env.SYNCNET_PROJECT_HOME_ENABLED)" in _phcfg and "truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED)" in _phcfg  # exact "true" only
 assert 'siteEnabled && paymentsRequested && Boolean(price && rate && sink)' in _phcfg
-assert _price['rates']==[] and [p['priceUsdCents'] for p in _price['prices']]==[4900]  # $49 USD; no rate approved yet
+assert _price['rates']==[] and [p['priceUsdCents'] for p in _price['prices']]==[3900]  # $39 USD; no rate approved yet
 assert '/api/project-home /.netlify/functions/project-home 200' in red and '/site/:token /.netlify/functions/site?token=:token 200!' in red and '/site-img/:cid /.netlify/functions/site-img?cid=:cid 200!' in red
 assert '/contracts/* /404.html 404!' in red and 'from = "/contracts/*"' in toml
 assert 'lib/syncnet-site.js' in toml and 'lib/syncnet-project-home-pricing.js' in toml and 'syncnet-project-home-pricing.json' in toml
@@ -277,6 +277,13 @@ for _pg in _gl.glob(str(root/'*.html')):
 for _f in _gl.glob(str(root/'*.js')):
     assert '/api/project-home' not in open(_f,encoding='utf-8').read(), 'no browser client for Project Home yet: '+_f
 _sink=(root/'contracts/project-home-sink/src/SyncNetProjectHomeSink.sol').read_text()
-assert 'immutable SYNC' in _sink and 'immutable TREASURY' in _sink and 'BURN_PERCENT = 60' in _sink and 'delegatecall' not in _sink
+assert 'immutable SYNC;' in _sink and 'immutable TREASURY_CONVERTER;' in _sink and 'BURN_PERCENT = 60' in _sink and 'delegatecall' not in _sink
+assert not _re3.search(r'usdg|router|slippage|minOut|oracle', _re3.sub(r'//[^\n]*', '', _sink), _re3.I)  # the sink's code stays DEX-free
+_conv=_re3.sub(r'//[^\n]*', '', (root/'contracts/project-home-sink/src/SyncNetProjectHomeTreasuryConverter.sol').read_text())
+for _imm in ['immutable SYNC;','immutable USDG;','immutable TREASURY;','immutable ROUTER;','immutable MARKET;']: assert _imm in _conv, _imm
+assert 'if (msg.sender != TREASURY) revert NotTreasury();' in _conv and 'if (minUsdgOut == 0) revert ZeroMinOut();' in _conv and 'USDG.transfer(TREASURY, delivered)' in _conv
+assert 'delegatecall' not in _conv and '.call(' not in _conv and 'payable' not in _conv and not _re3.search(r'function\s+set[A-Z]|rescue|sweep|withdraw', _conv)
+_dc=(root/'contracts/project-home-sink/script/DeployChecks.sol').read_text()
+assert '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168' in _dc and '0x458D2a59c2F3dd32775a64eE72004561440d64Df' in _dc and 'SYNC_USDG_MARKET = 1' in _dc
 assert not list((root/'contracts/project-home-sink').glob('broadcast/**/*.json')), 'no deployment broadcast may exist'
 print('SyncNet Project Home foundation static audit: PASS')

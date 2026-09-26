@@ -12,67 +12,69 @@ interface ISyncToken {
 /// @title  SyncNetProjectHomeSink
 /// @notice Receives $SYNC paid for SyncNet Project Home activations and settles EVERYTHING it holds, permanently:
 ///           60% burned with SYNC.burn() (totalSupply decreases),
-///           40% (plus every rounding remainder) transferred to the immutable SyncNet protocol treasury.
+///           40% (plus every rounding remainder) forwarded AS SYNC to the immutable treasury converter, which later
+///           converts it to USDG for the SyncNet protocol treasury.
 ///         settle() is permissionless and takes no parameters. There is no owner, no admin, no setter, no rescue,
-///         no proxy, no arbitrary call, no approval, no payable function and no ETH withdrawal path.
+///         no proxy, no arbitrary call, no approval, no payable function, no ETH withdrawal path — and no DEX, price
+///         or slippage logic: the sink knows only SYNC and its converter.
 /// @dev    Tokens held here before settle() are COMMITTED to the sink, not yet burned. Only amounts that went through
-///         SYNC.burn() inside settle() are counted in totalBurned. Anyone can transfer $SYNC here directly; such
+///         SYNC.burn() inside settle() are counted in totalBurnedSync. Anyone can transfer $SYNC here directly; such
 ///         unsolicited deposits are settled 60/40 like everything else — attribution to Project Home activations is
 ///         an off-chain matter (the SyncNet activation registry), never assumed by this contract.
 contract SyncNetProjectHomeSink {
-    /// @notice Share of every settlement that is burned, in percent. The remainder goes to the treasury.
+    /// @notice Share of every settlement that is burned, in percent. The remainder goes to the treasury converter.
     uint256 public constant BURN_PERCENT = 60;
 
     /// @notice The canonical $SYNC token. Immutable.
     ISyncToken public immutable SYNC;
-    /// @notice The SyncNet protocol treasury. Immutable.
-    address public immutable TREASURY;
+    /// @notice The SyncNet Project Home treasury converter (receives the treasury share in SYNC). Immutable.
+    address public immutable TREASURY_CONVERTER;
 
-    /// @notice Cumulative $SYNC settled (burned + sent to the treasury).
-    uint256 public totalSettled;
+    /// @notice Cumulative $SYNC settled (burned + forwarded to the converter).
+    uint256 public totalSettledSync;
     /// @notice Cumulative $SYNC actually burned through SYNC.burn().
-    uint256 public totalBurned;
-    /// @notice Cumulative $SYNC transferred to the treasury.
-    uint256 public totalTreasury;
+    uint256 public totalBurnedSync;
+    /// @notice Cumulative $SYNC forwarded to the treasury converter (NOT yet USDG, NOT yet in the treasury wallet).
+    uint256 public totalTreasurySyncForwarded;
 
-    event Settled(address indexed caller, uint256 amount, uint256 burned, uint256 toTreasury);
+    event Settled(address indexed caller, uint256 amount, uint256 burned, uint256 forwardedToConverter);
 
     error ZeroAddress();
-    error TreasuryIsToken();
-    error TreasuryTransferFailed();
+    error ConverterIsToken();
+    error ConverterTransferFailed();
 
-    constructor(address sync, address treasury) {
-        if (sync == address(0) || treasury == address(0)) revert ZeroAddress();
-        if (treasury == sync) revert TreasuryIsToken();
+    constructor(address sync, address treasuryConverter) {
+        if (sync == address(0) || treasuryConverter == address(0)) revert ZeroAddress();
+        if (treasuryConverter == sync) revert ConverterIsToken();
         SYNC = ISyncToken(sync);
-        TREASURY = treasury;
+        TREASURY_CONVERTER = treasuryConverter;
     }
 
     /// @notice The split settle() would apply to the current balance. View only.
-    function pending() external view returns (uint256 amount, uint256 toBurn, uint256 toTreasury) {
+    function pending() external view returns (uint256 amount, uint256 toBurn, uint256 toConverter) {
         amount = SYNC.balanceOf(address(this));
-        (toBurn, toTreasury) = split(amount);
+        (toBurn, toConverter) = split(amount);
     }
 
-    /// @notice Pure 60/40 split. burn = floor(amount * 60 / 100) computed without overflow; treasury = the rest.
-    function split(uint256 amount) public pure returns (uint256 toBurn, uint256 toTreasury) {
+    /// @notice Pure 60/40 split. burn = floor(amount * 60 / 100) computed without overflow; converter = the rest.
+    function split(uint256 amount) public pure returns (uint256 toBurn, uint256 toConverter) {
         toBurn = (amount / 100) * BURN_PERCENT + ((amount % 100) * BURN_PERCENT) / 100;
-        toTreasury = amount - toBurn;
+        toConverter = amount - toBurn;
     }
 
     /// @notice Settles the sink's entire $SYNC balance. Permissionless, parameterless. A zero balance is a no-op.
-    function settle() external returns (uint256 burned, uint256 toTreasury) {
+    function settle() external returns (uint256 burned, uint256 forwarded) {
         uint256 amount = SYNC.balanceOf(address(this));
         if (amount == 0) return (0, 0);
-        (burned, toTreasury) = split(amount);
+        (burned, forwarded) = split(amount);
 
-        totalSettled += amount;
-        totalBurned += burned;
-        totalTreasury += toTreasury;
+        totalSettledSync += amount;
+        totalBurnedSync += burned;
+        totalTreasurySyncForwarded += forwarded;
 
         if (burned != 0) SYNC.burn(burned);
-        if (toTreasury != 0 && !SYNC.transfer(TREASURY, toTreasury)) revert TreasuryTransferFailed();
+        if (forwarded != 0 && !SYNC.transfer(TREASURY_CONVERTER, forwarded)) revert ConverterTransferFailed();
 
-        emit Settled(msg.sender, amount, burned, toTreasury);
+        emit Settled(msg.sender, amount, burned, forwarded);
     }
 }

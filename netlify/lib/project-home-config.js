@@ -4,7 +4,7 @@
 //   SYNCNET_PROJECT_HOME_ENABLED=true            Project Home reads/site writes/public renderer (needs a durable store)
 //   SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   activation payment intents + verification (needs everything below)
 //   PROJECT_HOME_PRICE_VERSION=1                 active product price version (must exist in the pricing file)
-//   PROJECT_HOME_PRICE_USD_CENTS=4900            must EQUAL that version's reviewed price (a second, explicit key)
+//   PROJECT_HOME_PRICE_USD_CENTS=3900            must EQUAL that version's reviewed price (a second, explicit key)
 //   PROJECT_HOME_RATE_VERSION=<n>                active SYNCNET REFERENCE RATE version (must exist, be effective and
 //                                                not expired in the pricing file)
 //   PROJECT_HOME_SINK_ADDRESS=0x…                the deployed SyncNetProjectHomeSink (no default exists)

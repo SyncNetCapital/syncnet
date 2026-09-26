@@ -1,3 +1,38 @@
+# Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
+
+Unreleased branch: nothing was ever deployed or enabled, so no production price, intent or entitlement changes.
+
+- **Price:** the initial launch price is **$39 USD** (`priceVersion 1` = 3900 cents; previously drafted at $49 and never
+  released). The reference-rate model, 30-minute lock, round-up arithmetic and payment tag are unchanged, and no rate
+  is approved yet.
+- **Sink:** it now forwards the 40% treasury share **as SYNC** to an immutable `TREASURY_CONVERTER`. The fields are
+  renamed so they cannot be misread: `totalSettledSync`, `totalBurnedSync`, `totalTreasurySyncForwarded`. The sink is
+  still DEX-free, ownerless and parameterless.
+- **New `SyncNetProjectHomeTreasuryConverter`:** it converts accumulated SYNC to canonical USDG through one fixed,
+  verified route: PAR multi router `sellToQuotes` on market 1, the PAR SYNC/USDG Uniswap v4 pool. USDG goes only to the
+  immutable treasury wallet, which is also the only executor. `minUsdgOut` must be non-zero and a deadline is enforced.
+  The route is re-verified on every call, and any failure leaves the SYNC in place. There is no owner, setter, rescue,
+  recipient parameter or generic swap.
+- **Route verification:**
+  - USDG is confirmed from the PAR SDK and on-chain;
+  - SYNC's market 1 is confirmed from `poolKeysFor`;
+  - the live router's bytecode was reproduced from PAR's published source.
+- **Fork rehearsal:** burn, forwarding and a real SYNC → USDG conversion to a treasury fixture were run on real
+  bytecode and state, with an informational depth table.
+- **Deployment:** `DeployProjectHome.s.sol` deploys the converter first, then the sink. It pins the canonical USDG,
+  router and market and requires an explicit, confirmed treasury.
+- **Server:** activation still depends only on the verified SYNC payment to the sink, never on settlement or
+  conversion (tested). Metrics now cover every stage: in sink, burned, forwarded, awaiting conversion, converted, and
+  USDG delivered. All of these are real on-chain values and never reference-rate estimates. Wording separates the
+  SYNCNET REFERENCE RATE from the ACTUAL DEX EXECUTION RATE.
+- **Tests:**
+  - Foundry: 70;
+  - contract audit: 113;
+  - server: 180 (adds H01–H05, G07 and F06b–d);
+  - pricing: 81;
+  - the fixture clock now starts at real time, because the real Marketplace code under test checks claim expiry
+    against `Date.now()`.
+
 # SyncNet Project Home: secure foundation (`feature/syncnet-project-home`): 26 Sep 2026
 
 Closed by default. No UI, no navigation entry, and no deployed contract. See `docs/PROJECT_HOME.md`.
@@ -10,7 +45,7 @@ Closed by default. No UI, no navigation entry, and no deployed contract. See `do
   the treasury. There is no admin, setter, rescue, proxy, arbitrary call, approval or payable surface. Includes 34
   Foundry tests and a deploy script gated on chain 4663, the canonical SYNC, and an explicit, confirmed treasury that is
   neither the deployer nor the token. The contract is not deployed.
-- **Pricing:** PROJECT HOME ACTIVATION costs $49 USD (`priceVersion 1`) and is paid only in $SYNC at the versioned,
+- **Pricing:** PROJECT HOME ACTIVATION costs $39 USD (`priceVersion 1`) and is paid only in $SYNC at the versioned,
   git-reviewed SYNCNET REFERENCE RATE, which is not an oracle. Amounts use BigInt fixed point, round up, and add a
   10^12-wei payment tag reserved server-side. `syncnet-project-home-pricing.json` ships no rate, so payments stay
   closed until one is approved.
