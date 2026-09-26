@@ -1,5 +1,6 @@
 /tests/* /404.html 404!
 /docs/* /404.html 404!
+/contracts/* /404.html 404!
 /netlify/* /404.html 404!
 /README.md /404.html 404!
 /README_DUEL.md /404.html 404!

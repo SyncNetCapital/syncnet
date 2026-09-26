@@ -1,0 +1,237 @@
+{
+  "at": "2026-09-26T11:17:02.619Z",
+  "passed": 46,
+  "failed": 0,
+  "results": [
+    {
+      "name": "sink source has no owner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no admin",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no onlyOwner",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no Ownable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no delegatecall",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no upgradeTo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no proxy / implementation slot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no low-level call",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no staticcall",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no assembly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no selfdestruct",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no rescue",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no withdraw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no sweep",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no setTreasury",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no setToken",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no split setter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no any setter",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no approve",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no transferFrom",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no burnFrom",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no payable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no receive()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no fallback()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no sstore/sload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no initializer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no msg.value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no tx.origin",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no dead address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sink source has no arbitrary target",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SYNC is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "TREASURY is immutable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "split is a compile-time constant of 60",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "exactly two assignments to SYNC/TREASURY, both in the constructor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "constructor rejects zero token and zero treasury",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "settle() takes no parameters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "only external calls are SYNC.balanceOf / SYNC.burn / SYNC.transfer(TREASURY, …)",
+      "ok": true,
+      "detail": "SYNC.balanceOf( SYNC.balanceOf( SYNC.burn( SYNC.transfer("
+    },
+    {
+      "name": "burn happens through SYNC.burn (real totalSupply reduction), never a transfer to a dead address",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "treasury remainder = amount - burn (no residue)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "burn share computed without overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "accounting before interactions (CEI)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "treasury transfer result is checked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "committed ABI is exactly the expected public surface",
+      "ok": true,
+      "detail": "constructor (address,address) nonpayable | error TreasuryIsToken() | error TreasuryTransferFailed() | error ZeroAddress() | event Settled(address,uint256,uint256,uint256) | function BURN_PERCENT() view | function SYNC() view | function TREASURY() view | function pending() view | function settle() no"
+    },
+    {
+      "name": "ABI has no payable entry, no receive, no fallback",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the only state-changing function is settle()",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "forge-derived ABI equals the committed ABI",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
