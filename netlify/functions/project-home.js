@@ -45,6 +45,10 @@ const { verifyDigest } = require('../lib/sig-verify');
 const { liveProject, readPassport, passportKey } = require('../lib/live-project');
 const { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC } = require('../lib/project-home-config');
 const { deploymentStatus } = require('../lib/project-home-deployment');
+const PROJECTS = require('../../syncnet-projects.json');
+// Reviewed canonical registry entries by address: display-only logo (same-origin /assets/) and symbol.
+const REGISTRY = new Map((Array.isArray(PROJECTS.projects) ? PROJECTS.projects : []).filter((p) => p && p.registry && p.registry.canonical === true && /^0x[0-9a-fA-F]{40}$/.test(String(p.token || '')))
+  .map((p) => [String(p.token).toLowerCase(), { symbol: String(p.symbol || '').toUpperCase(), logo: /^\/assets\/[a-z0-9][a-z0-9-]{0,63}\.(?:webp|png)$/.test(String((p.profile && p.profile.image) || '')) ? p.profile.image : '' }]));
 
 const FN = 'project-home';
 const K = {
@@ -618,7 +622,8 @@ async function projectFacts(rpc, token) {
   } else if (live.origin && live.origin.pair) {
     markets = [{ pairToken: lc(live.origin.pair.address), symbol: Core.sanitizeForDisplay(String(live.origin.pair.symbol || ''), { maxLength: 16 }) }];
   }
-  for (const m of markets) { // one symbol() read per pair (<= 5), best effort
+  for (const m of markets) { // registry symbol first, else one symbol() read per pair (<= 5), best effort
+    if (!m.symbol && REGISTRY.has(m.pairToken)) m.symbol = REGISTRY.get(m.pairToken).symbol;
     if (!m.symbol && isAddr(m.pairToken) && !/^0x0{40}$/.test(m.pairToken)) {
       let sym = '';
       try { const hex = await Chain.ethCall(rpc, m.pairToken, Chain.SEL.symbol); sym = hex && hex !== '0x' ? String(Core.abiDecode(['string'], hex)[0]) : ''; } catch { sym = ''; }
@@ -630,6 +635,7 @@ async function projectFacts(rpc, token) {
     token, name: live.snapshot.name, symbol: live.snapshot.symbol, decimals: live.meta ? live.meta.decimals : null,
     origin: { launchpad: live.origin.launchpad, label: live.origin.label, factory: lc(live.origin.factory) },
     deployer: lc(live.launch.deployer), markets,
+    logo: REGISTRY.has(lc(token)) ? REGISTRY.get(lc(token)).logo : '', // display-only, reviewed same-origin asset
     // Where creator fees go (display only, from the live classification): a PAR vault mode, 'creator' for a wallet, else ''.
     feeMode: live.feeRight && live.feeRight.kind === 'vault' ? String(live.feeRight.vault || '') : live.feeRight && live.feeRight.kind === 'wallet' ? 'creator' : '',
     feeRecipient: live.feeRight && live.feeRight.kind === 'wallet' ? lc(live.feeRight.recipient) : '',

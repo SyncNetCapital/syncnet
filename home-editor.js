@@ -72,15 +72,20 @@
 
   // ------------------------------------------------------------------ facts for the preview (the server re-reads its own at publish time)
   async function loadFacts() {
+    const registry = new Map();
+    try { const j = await (await fetch('/syncnet-projects.json', { cache: 'no-store' })).json(); for (const p of j.projects || []) if (p && p.registry && p.registry.canonical === true && /^0x[0-9a-fA-F]{40}$/.test(String(p.token || ''))) registry.set(lc(p.token), { symbol: String(p.symbol || '').toUpperCase(), logo: String((p.profile && p.profile.image) || '') }); } catch { /* registry optional */ }
     const [meta, project] = await Promise.all([Chain.readTokenMetadata(rpc, token).catch(() => null), Origins.resolveProject(rpc, token).catch(() => null)]);
     let markets = [];
     if (project && project.origin === 'PAR') {
       try { const launch = await Chain.readLaunch(rpc, token); markets = (await Chain.readMarkets(rpc, token, launch)).slice(0, 5).map((m) => ({ pairToken: lc(m.pairToken), symbol: '' })); } catch { markets = []; }
+      // Human-readable pair symbols (display only; the server re-reads its own at publish): registry, else the pair's symbol().
+      await Promise.all(markets.map(async (m) => { m.symbol = (registry.get(m.pairToken) || {}).symbol || ((await Origins.pairInfo(rpc, m.pairToken).catch(() => null)) || {}).symbol || ''; }));
     } else if (project && project.origin === 'PONS_V2' && project.pair) markets = [{ pairToken: lc(project.pair.address), symbol: project.pair.native ? 'ETH' : '' }];
     let fee = null;
     if (project && project.supported !== false) { try { fee = await Origins.classifyFeeRight(rpc, project); } catch { fee = null; } }
     return {
       feeMode: fee && fee.kind === 'vault' ? String(fee.vault || '') : fee && fee.kind === 'wallet' ? 'creator' : '', feeRecipient: fee && fee.kind === 'wallet' ? lc(fee.recipient) : '',
+      logo: (registry.get(token) || {}).logo || '',
       token, name: (meta && meta.name) || '', symbol: (meta && meta.symbol) || '',
       origin: project && project.supported !== false ? { launchpad: project.origin, label: project.label, factory: project.factory } : null,
       deployer: project ? lc(project.deployer) : '', markets, onchainWebsite: meta && meta.socials ? String(meta.socials.website || '') : '', passport: null,
