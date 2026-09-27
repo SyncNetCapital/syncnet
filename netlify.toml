@@ -12,6 +12,12 @@
   force = true
 
 [[redirects]]
+  from = "/contracts/*"
+  to = "/404.html"
+  status = 404
+  force = true
+
+[[redirects]]
   from = "/netlify/*"
   to = "/404.html"
   status = 404
@@ -137,7 +143,7 @@
 [functions]
   directory = "netlify/functions"
   # Shared browser/server modules and the canonical registry used by the functions.
-  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "syncnet-projects.json", "syncnet-economies.json"]
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "lib/syncnet-site.js", "lib/syncnet-project-home-pricing.js", "syncnet-projects.json", "syncnet-economies.json", "syncnet-project-home-pricing.json", "syncnet-project-home-deployment.json"]
 
 [[redirects]]
   from = "/api/canary-auth"
@@ -200,6 +206,31 @@
   force = true
 
 [[redirects]]
+  from = "/api/project-home"
+  to = "/.netlify/functions/project-home"
+  status = 200
+  force = true
+
+# Project Home public renderer and its image route. Both answer 404 unless SYNCNET_PROJECT_HOME_ENABLED=true.
+[[redirects]]
+  from = "/site/:token"
+  to = "/.netlify/functions/site?token=:token"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/site-img/:cid"
+  to = "/.netlify/functions/site-img?cid=:cid"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/economy"
   to = "/economy.html"
+  status = 200
+
+# Explore with the For sale filter (the Marketplace entry point).
+[[redirects]]
+  from = "/for-sale"
+  to = "/index.html"
   status = 200

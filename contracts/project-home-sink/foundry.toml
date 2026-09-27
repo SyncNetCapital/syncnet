@@ -1,0 +1,22 @@
+# SyncNet Project Home sink — isolated Foundry project. Nothing here is part of the website runtime.
+# No external libraries (no forge-std, no OpenZeppelin): the contract and its tests are self-contained.
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+cache_path = "cache"
+libs = []
+solc_version = "0.8.28"
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 10000
+bytecode_hash = "none"
+cbor_metadata = false
+auto_detect_solc = false
+offline = true
+fs_permissions = []
+
+[fuzz]
+runs = 2048
+seed = "0x5eed"

@@ -11,6 +11,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { deploymentChain } from '../project-home/deployment-fixture.mjs';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const require = createRequire(import.meta.url);
@@ -81,8 +82,13 @@ export const LAUNCHES = [
   { token: A.CREATORLIVE, website: 'https://oplive.example/', name: 'Operator Live', symbol: 'OPLIVE', deployer: A.WALLET, createdAt: iso(3), feeMode: 'creator', creatorFeeRecipient: A.WALLET, markets: [m(A.CASHCAT, 'CASHCAT')] },
   ...Array.from({ length: 6 }, (_, i) => ({ token: '0x8' + String(i).repeat(39), name: 'Cat Friend ' + i, symbol: 'CATF' + i, deployer: A.OTHER_EOA, createdAt: iso(i + 1), feeMode: 'holders', markets: [m(A.CASHCAT, 'CASHCAT'), m(A.SYNC, 'SYNC')] })),
 ];
+// Visual-QA only (never set by the suites): real projects read from Robinhood Chain on 27 Sep 2026, so screenshots use real
+// content. Quantum Ex (PAR multi factory): holder-vault fees, markets USDG + QBTS.
+export const QA = { QEX: '0x8fe7bd7093a2106c1c66f2f23081396c1bda862c', QBTS: '0xc583c60aef9dc401da72cec1b404743a93cea1cc' };
+if (process.env.SYNCNET_QA_FIXTURES === '1') LAUNCHES.push({ token: QA.QEX, website: 'https://quantumex.net/', name: 'Quantum Ex', symbol: 'QEX', description: 'She left you. She didn\'t. Quantum Ex is a relationship in superposition across multiple timelines on Robinhood Chain.', createdAt: iso(5), deployer: '0xbee19e9348824ab03fd7e965f45002176d23320b', feeMode: 'holders', markets: [m(A.USDG, 'USDG'), m(QA.QBTS, 'QBTS')] });
 const byAddr = new Map(LAUNCHES.map((l) => [lc(l.token), l]));
 const ERC = { [lc(A.SYNC)]: ['SyncNet', 'SYNC'], [lc(A.USDG)]: ['Global Dollar', 'USDG'], [lc(A.PONS)]: ['PONS', 'PONS'], [lc(A.CASHCAT)]: ['CASHCAT', 'CASHCAT'], [lc(A.SYNCAT)]: ['SYNCAT', 'SYNCAT'], [lc(A.NET)]: ['NET', 'NET'], [lc(A.FAKESYNC)]: ['SyncNet', 'SYNC'], [lc(A.RANDOM_CONTRACT)]: ['Random', 'RND'] };
+if (process.env.SYNCNET_QA_FIXTURES === '1') Object.assign(ERC, { [QA.QEX]: ['Quantum Ex', 'QEX'], [QA.QBTS]: ['QBTS', 'QBTS'] });
 Object.assign(ERC, { [lc(A.PONS2)]: ['Pons Alpha', 'PALPHA'], [lc(A.PONS2_ETH)]: ['Pons Ether', 'PETH'], [lc(A.PONS2_CONTRACT)]: ['Pons Vaulted', 'PVAULT'], [lc(A.PONS2_PENDING)]: ['Pons Pending', 'PPEND'], [lc(A.PONS1)]: ['Pons Legacy', 'PLEG'], [lc(A.PONS1_LEGACY)]: ['Pons Genesis', 'PGEN'] });
 
 // ---- mutable chain state
@@ -94,7 +100,7 @@ function freshChain() {
     txs: new Map(), // hash -> {tx, receipt}
     pending: new Map(), // hash -> {tx, run}  broadcast but not mined
     nonces: new Map(),
-    block: 0x100,
+    block: 0x100, genesisTs: Math.floor(Date.now() / 1000) - 0x100 - 60,
     fees: { launchFee: 100000000000000n, baseFeeBps: 100n, protocolFeeShareBps: 5000n, maxCreatorTaxBps: 1000n },
     configEnabled: true, canLaunch: true, forwarder: null, factoryPricer: null, spotEpoch: 0, curated: new Set(), noRoute: new Set(),
     routeHooks: new Map(), allowedHooks: new Set(), routeNotQualified: new Set(), routeHops: new Map(), balanceWei: 100n * 10n ** 18n, factoryOverride: null,
@@ -119,7 +125,7 @@ export function resetChain() { Object.assign(chain, freshChain()); }
 
 class Revert extends Error {}
 const PONS_V2_FACTORY = Origins.PONS_V2_FACTORY, PONS_V1_FACTORIES = Origins.PONS_V1_FACTORIES.map((f) => f.address);
-const CONTRACTS = new Set([PONS_V2_FACTORY, ...PONS_V1_FACTORIES, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), lc(A.PONS1_LEGACY), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
+const CONTRACTS = new Set([...(process.env.SYNCNET_QA_FIXTURES === '1' ? [QA.QBTS] : []), PONS_V2_FACTORY, ...PONS_V1_FACTORIES, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), lc(A.PONS1_LEGACY), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
 function hasCode(a) {
   a = lc(a);
   if (chain.tokens.has(a)) return true;
@@ -306,6 +312,7 @@ function mine(hash, tx, run) {
   chain.block += 1;
   let status = '0x1'; const logs = []; let token = null;
   try { token = run(); } catch (e) { if (!(e instanceof Revert)) throw e; status = '0x0'; }
+  if (token && typeof token === 'object' && Array.isArray(token.logs)) { if (status === '0x1') logs.push(...token.logs.map((l, i) => ({ ...l, logIndex: hex(i), transactionHash: hash, blockNumber: hex(chain.block + 0), blockHash: '0x' + chain.block.toString(16).padStart(64, '0'), removed: false }))); token = null; }
   if (status === '0x1' && token) {
     const x = chain.tokens.get(token);
     logs.push({ address: lc(R.multiFactory), topics: [Chain.TOPIC.multiLaunched, '0x' + token.slice(2).padStart(64, '0'), '0x' + lc(tx.from).slice(2).padStart(64, '0')], data: enc(['uint256', 'uint24', 'address[]'], [0n, Number((x.baseFeeBps + BigInt(x.params.creatorTaxBps)) * 100n), x.pairTokens.map(lc)]), blockNumber: hex(chain.block), transactionHash: hash, logIndex: '0x0' });
@@ -320,6 +327,13 @@ function executeLaunch(tx) {
   const from = lc(tx.from);
   const data = String(tx.data || '0x');
   if (data === '0x' || data === '') return () => null; // plain value transfer (Marketplace payments)
+  if (lc(tx.to) === lc(A.SYNC) && data.startsWith('0xa9059cbb')) { // ERC-20 transfer of $SYNC: emits a canonical Transfer log
+    return () => {
+      const [to, amount] = Core.abiDecode(['address', 'uint256'], '0x' + data.slice(10));
+      if (chain.syncTransferReverts) throw new Revert('ERC20InsufficientBalance');
+      return { logs: [{ address: lc(A.SYNC), topics: [Core.keccak256Utf8('Transfer(address,address,uint256)'), '0x' + lc(from).slice(2).padStart(64, '0'), '0x' + lc(to).slice(2).padStart(64, '0')], data: '0x' + BigInt(amount).toString(16).padStart(64, '0') }] };
+    };
+  }
   if (data.startsWith(S.transferCreatorFeeRecipient)) {
     return () => {
       const [token, newRecipient] = Core.abiDecode(['address', 'address'], '0x' + data.slice(10));
@@ -373,6 +387,47 @@ export async function sendTx(tx) {
 export function minePending() { for (const [hash, p] of [...chain.pending]) mine(hash, p.tx, p.run); }
 
 export const rpcStats = { mainnet: 0, fork: 0, server: 0 };
+// ---- canonical PAR SYNC/USDG market (market 1) as read by the automatic SYNCNET REFERENCE RATE: the factory's pool
+// keys / pool id and the Uniswap v4 PoolManager slot0 + liquidity (extsload). Price is set in USD per SYNC; `lagged`
+// (optional) is the price seen at older blocks. Tests mutate ratePool to simulate every failure mode.
+const RP_USDG = '0x5fc5360d0400a0fd4f2af552add042d716f1d168', RP_SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37', RP_NET = '0xca9c78dd337a67f6e0077f65f5e9218719d30edf';
+const RP_POOL_ID = '0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792';
+const isqrt = (n) => { if (n < 2n) return n; let x = 1n << BigInt(Math.ceil(n.toString(2).length / 2)); for (;;) { const y = (x + n / x) >> 1n; if (y >= x) return x; x = y; } }; // Newton from an upper bound: exact floor(sqrt(n))
+/** sqrtPriceX96 for a USD/SYNC price given as a decimal string (floor, so the pool mid is >= that price). */
+export function sqrtForUsd(usd) { const [i, f = ''] = String(usd).split('.'); const e18 = BigInt(i + f.padEnd(18, '0').slice(0, 18)); return isqrt(((10n ** 30n) << 192n) / e18); }
+export const ratePool = { usd: '0.00005', lagged: null, liquidity: 909941346728046186n, badKey: false, badPoolId: false, badTick: false, down: false };
+export function resetRatePool() { Object.assign(ratePool, { usd: '0.00005', lagged: null, liquidity: 909941346728046186n, badKey: false, badPoolId: false, badTick: false, down: false }); }
+const RP_SEL = { keys: Core.functionSelector('poolKeysFor(address)'), id: Core.functionSelector('poolIdFor(address,uint256)'), ext: Core.functionSelector('extsload(bytes32)') };
+const RP_SLOT0 = BigInt(Core.keccak256('0x' + RP_POOL_ID.slice(2) + '6'.padStart(64, '0')));
+/** Answers the canonical-market reads, or undefined for any other call. `head` decides which blocks are "older". */
+export function ratePoolCall(to, data, tag, head) {
+  to = lc(to); data = lc(data);
+  const isFactory = to === lc(R.multiFactory), isPm = to === lc(R.poolManager);
+  if (!isFactory && !isPm) return undefined;
+  const w = (v) => BigInt(v).toString(16).padStart(64, '0');
+  const rateRead = (isFactory && (data === RP_SEL.keys + w(RP_SYNC) || data === RP_SEL.id + w(RP_SYNC) + w(1))) || (isPm && data.startsWith(RP_SEL.ext));
+  if (!rateRead) return undefined;
+  if (ratePool.down) throw new Error('rate pool read failed');
+  if (isFactory && data === RP_SEL.keys + w(RP_SYNC)) {
+    const k1 = ratePool.badKey ? [RP_USDG, RP_SYNC, 20000n, 10n, '0x' + '11'.repeat(20)] : [RP_USDG, RP_SYNC, 20000n, 10n, '0x' + '0'.repeat(40)];
+    return Core.abiEncode(['(address,address,uint24,int24,address)[]'], [[[RP_SYNC, RP_NET, 20000n, 10n, '0x' + '0'.repeat(40)], k1]]);
+  }
+  if (isFactory && data === RP_SEL.id + w(RP_SYNC) + w(1)) return ratePool.badPoolId ? '0x' + 'ab'.repeat(32) : RP_POOL_ID;
+  if (isPm && data.startsWith(RP_SEL.ext)) {
+    const slot = BigInt('0x' + data.slice(10));
+    const older = tag && tag !== 'latest' && BigInt(tag) < BigInt(head);
+    if (slot === RP_SLOT0) {
+      const sqrt = sqrtForUsd(older && ratePool.lagged ? ratePool.lagged : ratePool.usd);
+      const p = Number(sqrt) / 2 ** 96; let tick = Math.floor(Math.log(p * p) / Math.log(1.0001)); if (ratePool.badTick) tick += 500;
+      const t24 = BigInt(tick < 0 ? tick + 0x1000000 : tick);
+      return '0x' + w((20000n << 208n) | (t24 << 160n) | sqrt);
+    }
+    if (slot === RP_SLOT0 + 3n) return '0x' + w(ratePool.liquidity);
+    return '0x' + w(0);
+  }
+  return undefined;
+}
+
 export function rpcHandle(body, chainHex = '0x1237') {
   const one = (q) => {
     const { method, params = [], id } = q; let result;
@@ -381,8 +436,8 @@ export function rpcHandle(body, chainHex = '0x1237') {
       switch (method) {
         case 'eth_chainId': result = chainHex; break;
         case 'eth_blockNumber': result = hex(chain.block); break;
-        case 'eth_getCode': result = hasCode(params[0]) ? '0x6080604052' : '0x'; break;
-        case 'eth_call': result = ethCall(params[0]); break;
+        case 'eth_getCode': { const ph = phDeployChain().code.get(lc(params[0])); result = ph !== undefined ? ph : hasCode(params[0]) ? '0x6080604052' : '0x'; break; }
+        case 'eth_call': { const rp = ratePoolCall(params[0].to, params[0].data, params[1], chain.block); if (rp !== undefined) { result = rp; break; } const g = phDeployChain().getters.get(lc(params[0].to) + ':' + lc(params[0].data)); result = g !== undefined ? '0x' + BigInt(g).toString(16).padStart(64, '0') : ethCall(params[0]); break; }
         case 'eth_getBalance': result = hex(chain.balanceWei); break;
         case 'eth_gasPrice': result = '0x5f5e100'; break;
         case 'eth_maxPriorityFeePerGas': result = '0x0'; break;
@@ -390,7 +445,7 @@ export function rpcHandle(body, chainHex = '0x1237') {
         case 'eth_getTransactionCount': result = hex(nonceOf(params[0]) + (params[1] === 'pending' ? chain.pending.size : 0)); break;
         case 'eth_getTransactionReceipt': result = chain.txs.get(params[0])?.receipt || null; break;
         case 'eth_getTransactionByHash': { const h = params[0]; const t = chain.txs.get(h); if (t) result = t.tx; else if (chain.pending.has(h)) { const p = chain.pending.get(h).tx; result = { hash: h, from: lc(p.from), to: lc(p.to), input: p.data, value: hex(BigInt(p.value || 0)), nonce: hex(p.nonce), blockNumber: null, blockHash: null, transactionIndex: null }; } else result = null; break; }
-        case 'eth_getBlockByNumber': { const n = params[0] === 'latest' ? chain.block : Number(params[0]); result = { number: hex(n), timestamp: hex(1758600000 + n), hash: '0x' + n.toString(16).padStart(64, '0'), baseFeePerGas: '0x5f5e100', transactions: [] }; break; }
+        case 'eth_getBlockByNumber': { const n = params[0] === 'latest' ? chain.block : params[0] === 'safe' ? chain.block - (chain.safeLag || 0) : params[0] === 'finalized' ? chain.block - (chain.finalLag || 0) : Number(params[0]); if (n > chain.block) { result = null; break; } result = { number: hex(n), timestamp: hex((chain.realTime ? chain.genesisTs : 1758600000) + n), hash: '0x' + n.toString(16).padStart(64, '0'), baseFeePerGas: '0x5f5e100', transactions: [] }; break; }
         case 'eth_feeHistory': result = { oldestBlock: hex(chain.block), baseFeePerGas: ['0x5f5e100', '0x5f5e100'], gasUsedRatio: [0.5], reward: [['0x0']] }; break;
         default: result = null;
       }
@@ -452,8 +507,22 @@ const BASE_ENV = {
   UPSTASH_REDIS_REST_URL: 'https://upstash.mock', UPSTASH_REDIS_REST_TOKEN: 'upstash-test-token',
   SYNCNET_PIN_SECONDARY_URL: 'https://psa.mock', SYNCNET_PIN_SECONDARY_TOKEN: 'psa-token',
 };
-const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED'];
-export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true } = {}) {
+const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
+  'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
+/** Project Home test fixture sink (never deployed). The SYNCNET REFERENCE RATE is automatic: it is read from the mocked
+ *  canonical SYNC/USDG market (ratePool, $0.00005 by default), exactly as production reads the real one. */
+export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
+/** The fixture Project Home deployment: a converter + sink built from the AUDITED runtime with correct immutables and
+ *  the approved treasury, so the server's on-chain deployment validation passes exactly as it would in production. It
+ *  is added to the reviewed deployment list in memory only while projectHome is on (the repo file ships empty). */
+export const PH_CONVERTER = '0xc0417e2700000000000000000000000000000c0e';
+const DEPLOYMENT = require(path.join(ROOT, 'syncnet-project-home-deployment.json'));
+let phChain = null;
+function phDeployChain() {
+  if (!phChain) phChain = deploymentChain({ sink: PH_SINK, converter: PH_CONVERTER, treasury: DEPLOYMENT.treasury, sync: A.SYNC, usdg: A.USDG, router: DEPLOYMENT.router }, (x) => Core.functionSelector(x));
+  return phChain;
+}
+export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
   if (publicLaunch) process.env.SYNCNET_PUBLIC_LAUNCH = 'true';
@@ -461,6 +530,15 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   if (registry) process.env.SYNCNET_REGISTRY_SUBMISSIONS = 'true';
   if (uploadsDisabled) process.env.SYNCNET_UPLOADS_DISABLED = 'true';
   if (economyCuration) process.env.SYNCNET_ECONOMY_CURATION = 'true';
+  resetRatePool();
+  chain.realTime = Boolean(projectHome);
+  const d = DEPLOYMENT.deployments.findIndex((x) => lc(x.sink) === PH_SINK);
+  if (d >= 0) DEPLOYMENT.deployments.splice(d, 1);
+  if (projectHome) {
+    DEPLOYMENT.deployments.push({ sink: PH_SINK, converter: PH_CONVERTER });
+    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_SINK_ADDRESS: PH_SINK });
+    if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
+  }
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));
   store.getStore(durable ? { env: process.env } : { env: {} });
 }
@@ -478,6 +556,16 @@ function upstashExec(cmd) {
     case 'DEL': return U.delete(key) ? 1 : 0;
     case 'SADD': { const e = live(key) || { set: new Set(), exp: 0 }; const had = e.set.has(rest[0]); e.set.add(rest[0]); U.set(key, e); return had ? 0 : 1; }
     case 'SMEMBERS': { const e = live(key); return e && e.set ? [...e.set] : []; }
+    case 'EVAL': {
+      // Emulates netlify/lib/store.js CAS_SCRIPT exactly (the only script SyncNet runs): all-or-nothing compare-and-set.
+      // JS is single-threaded here, so the whole block runs without interleaving, like Redis running the Lua script.
+      const n = Number(rest[0]); const keys = rest.slice(1, 1 + n); const argv = rest.slice(1 + n); // key = the script text
+      const [ne, ns, na] = argv.slice(0, 3).map(Number); let a = 3;
+      for (let i = 0; i < ne; i++) { const e = live(keys[i]); const cur = e && !e.set ? e.v : null; const mode = argv[a], want = argv[a + 1]; a += 2; if (mode === 'nil' ? cur !== null : cur !== want) return 0; }
+      for (let i = 0; i < ns; i++) { const ttl = Number(argv[a + 1]); U.set(keys[ne + i], { v: argv[a], exp: ttl > 0 ? t + ttl * 1000 : 0 }); a += 2; }
+      for (let i = 0; i < na; i++) { const k = keys[ne + ns + i]; const e = live(k) || { set: new Set(), exp: 0 }; e.set.add(argv[a]); U.set(k, e); a += 1; }
+      return 1;
+    }
     default: return null;
   }
 }
@@ -500,7 +588,7 @@ async function serverFetch(input, init = {}) {
     const file = init.body.get('file'); const buf = Buffer.from(await file.arrayBuffer());
     const sha = crypto.createHash('sha256').update(buf).digest();
     const cid = cidFor(buf);
-    serverState.pins.push({ type: file.type, size: buf.length, hasExif: buf.includes(Buffer.from('Exif')), hasText: /tEXt|iTXt|zTXt|eXIf/.test(buf.toString('latin1')), cid, auth: (init.headers || {}).Authorization, meta: JSON.parse(init.body.get('pinataMetadata')) });
+    serverState.pins.push({ bytes: buf, type: file.type, size: buf.length, hasExif: buf.includes(Buffer.from('Exif')), hasText: /tEXt|iTXt|zTXt|eXIf/.test(buf.toString('latin1')), cid, auth: (init.headers || {}).Authorization, meta: JSON.parse(init.body.get('pinataMetadata')) });
     return jsonResponse(200, { IpfsHash: cid, PinSize: buf.length });
   }
   if (u.hostname === 'psa.mock') { serverState.secondary.push(JSON.parse(init.body)); return jsonResponse(202, { requestid: 'r1', status: 'queued' }); }
@@ -516,6 +604,7 @@ async function gatewayFetch(u, init = {}) {
   if (mode === 'timeout') return new Promise((_, reject) => { const fail = () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })); if (init.signal?.aborted) fail(); else init.signal?.addEventListener('abort', fail); });
   if (mode === 'down') return new Response('upstream 504: internal gateway trace 0xdeadbeef', { status: 504 });
   if (mode === 'html') return new Response('<!doctype html><html><body>gateway error page</body></html>', { status: 200, headers: { 'content-type': 'text/html' } });
+  { const m = u.pathname.match(/^\/ipfs\/([A-Za-z0-9]+)$/); const pin = m && serverState.pins.find((x) => x.cid === m[1]); if (pin && u.hostname === 'gateway.pinata.cloud') return new Response(pin.bytes, { status: 200, headers: { 'content-type': pin.type, 'content-length': String(pin.bytes.length) } }); }
   if (u.hostname === 'dweb.link') { const m = u.pathname.match(/^\/ipfs\/([A-Za-z0-9]+)(\/.*)?$/); return new Response('', { status: 301, headers: { location: `https://${m[1].toLowerCase()}.ipfs.dweb.link${m[2] || '/'}` } }); }
   return new Response(PNG, { status: 200, headers: { 'content-type': 'image/png', 'content-length': String(PNG.length) } });
 }
@@ -526,7 +615,7 @@ export { realFetch };
 const origLog = console.log;
 console.log = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) { try { serverState.logs.push(JSON.parse(a[0])); } catch { serverState.logs.push(a[0]); } return; } origLog(...a); };
 
-const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies'];
+const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies', 'project-home', 'site', 'site-img'];
 const fnModules = Object.fromEntries(FUNCTIONS.map((n) => [n, require(path.join(ROOT, 'netlify/functions', n + '.js'))]));
 function ipfsCheckFn() { return fnModules['ipfs-check']; }
 let ipCounter = 0;
@@ -534,7 +623,7 @@ async function runFunction(name, req, u, body, res) {
   const ip = serverState.fixedIp || `10.${(ipCounter >> 16) & 255}.${(ipCounter >> 8) & 255}.${ipCounter++ & 255}`;
   const event = { httpMethod: req.method, path: u.pathname, rawUrl: 'http://localhost' + req.url, headers: { ...req.headers, 'x-nf-client-connection-ip': ip }, queryStringParameters: Object.fromEntries(u.searchParams), body: body || null, isBase64Encoded: false };
   const out = await fnModules[name].handler(event);
-  res.writeHead(out.statusCode, out.headers || {}); res.end(out.body || '');
+  res.writeHead(out.statusCode, out.headers || {}); res.end(out.isBase64Encoded ? Buffer.from(out.body || '', 'base64') : out.body || '');
 }
 
 export function startServer(port = 8931) {
@@ -557,6 +646,8 @@ export function startServer(port = 8931) {
       if (/declarer\.example/.test(url)) return json(200, { found: true, origin: 'https://declarer.example', declaration: { schema: 'syncnet.site.v1', token: lc(A.CREATORLIVE) } });
       return json(200, { found: false, origin: url, reason: 'http-404' });
     }
+    if (/^\/site\/[^/]+$/.test(p) || /^\/site-img\/[^/]+$/.test(p)) { const fn = p.startsWith('/site-img/') ? 'site-img' : 'site'; return runFunction(fn, req, u, '', res).catch((e) => { origLog('FUNCTION CRASH', fn, e); json(500, { error: 'crash' }); }); }
+    if (p === '/for-sale') p = '/index.html';
     if (p.startsWith('/project/') || p.startsWith('/token/')) p = '/token.html';
     if (p === '/') p = '/index.html';
     const f = path.join(ROOT, path.normalize(p));

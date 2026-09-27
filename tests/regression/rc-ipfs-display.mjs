@@ -49,7 +49,7 @@ const HOSTOF = (src) => { try { return new URL(src).hostname; } catch { return s
 async function projectLogo(modes) {
   Object.assign(browserGateways, modes);
   const { c, page } = await newPage();
-  await page.goto(BASE + '/project/' + TOKEN);
+  await page.goto(BASE + '/project/' + TOKEN + '#details');
   await page.waitForFunction(() => document.querySelector('#tokenCard img[data-ipfs]'), null, { timeout: 20000 });
   await page.waitForFunction(() => { const i = document.querySelector('#tokenCard img[data-ipfs]'); return (i.complete && i.naturalWidth > 0) || i.dataset.ipfsFailed; }, null, { timeout: 20000 });
   const state = await page.$eval('#tokenCard img[data-ipfs]', (i) => ({ src: i.currentSrc || i.src, failed: i.dataset.ipfsFailed || '', ipfs: i.dataset.ipfs, w: i.naturalWidth }));

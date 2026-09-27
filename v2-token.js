@@ -100,8 +100,8 @@ function evidenceTable(prov,sym){
 
 async function run(){
  const m=location.pathname.match(/\/(?:token|project)\/(0x[a-fA-F0-9]{40})/),a=m?.[1]?.toLowerCase();
- if(!a){$('tokenTitle').textContent='INVALID TOKEN';$('tokenDescription').textContent='The URL does not contain a valid token contract.';return}
- $('tokenTitle').textContent='CHECKING…';$('tokenDescription').textContent='Reading the PAR factory record on Robinhood Chain.';
+ if(!a){$('tokenTitle').textContent='Invalid contract';$('tokenDescription').textContent='The URL does not contain a valid token contract.';announce({invalid:true});return}
+ $('tokenTitle').textContent='CHECKING…';$('tokenDescription').textContent='Reading the launch record on Robinhood Chain.';
  let launch;try{launch=await Chain.readLaunch(rpc,a)}catch{launch='unavailable'}
  const isPar=Boolean(launch&&launch!=='unavailable');
  // Other supported origins (Pons V2) — read live from their canonical factory only when the token is not a PAR launch.
@@ -122,7 +122,7 @@ async function run(){
  const sym=chainSym||safeSymbol(profile?.symbol||profile?.profile?.name||'TOKEN');
  const name=(isPar||isPons||canonical?(chainName||disp(profile?.profile?.name,64)):chainName)||'Unnamed contract';
  const impostor=!canonical?canonicalList.find(c=>c.token!==a&&Core.confusableSkeleton(c.symbol)===Core.confusableSkeleton(sym)&&sym!=='TOKEN'):null;
- document.title=`${name} — SyncNet`;$('tokenTitle').textContent=name;$('tokenDescription').textContent=`$${sym} · ${a}`;
+ document.title=`${name} — SyncNet`;$('tokenTitle').textContent=name;$('tokenDescription').textContent=`$${sym}`;
  const logoUri=isPar||isPons?(meta&&meta.logo||profile?.profile?.image||''):canonical?(profile?.profile?.image||''):'';
  const logoHtml=Ipfs.imgHtml(logoUri,{letter:(sym||'S').charAt(0)});
  const badges=[];
@@ -139,10 +139,11 @@ async function run(){
  const impostorNote=impostor?`<div class="registry-inline unverified-record"><span>NOT THE CANONICAL $${esc(impostor.symbol)}</span><strong>Same ticker, different contract</strong><small>The canonical $${esc(impostor.symbol)} is ${esc(impostor.token)}. SyncNet identifies canonical assets by contract address only.</small><a href="/project/${esc(impostor.token)}">OPEN CANONICAL →</a></div>`:'';
  const provBox=prov.status?`<div class="registry-inline"><span>SYNCNET PROVENANCE</span><strong>${esc(prov.status.label)}</strong><small>${esc(prov.detail)} This is not a quality, safety or affiliation signal.</small><a href="/registry.html">VIEW REGISTRY →</a></div>${prov.status===Prov.STATUS.BUILT?evidenceTable(prov,sym):''}`:'';
  const localBox=local.length?`<div class="registry-inline local-record"><span>THIS BROWSER ONLY · NOT PUBLIC</span><strong>${esc(local.map(r=>String(r.state).replace(/_/g,' ')).join(' · '))}</strong><small>Your browser holds ${local.length===1?'a launch record':local.length+' launch records'} for this address. Browser records are private evidence, not public Registry provenance.${local.map(r=>r.expected&&r.expected.openingBuy?` Opening buy in the launch transaction: ${esc(fmtEth(r.expected.openingBuy.ethWei))} ETH (from this browser’s launch record).`:'').join('')}</small><a href="/launches.html">MY LAUNCHES →</a></div>`:'';
- let ownMarkets='',marketContracts='';
+ let ownMarkets='',marketContracts='',marketList=[]; // marketList: the project's DIRECT markets, read from its factory record
  if(isPar){
   let mk=[];try{mk=await Chain.readMarkets(rpc,a,launch)}catch{mk=[]}
   const syms=await Promise.all(mk.map(x=>{const row=markets(idxRes).find(r=>same(pairAddr(r),x.pairToken));return row&&row.quoteSymbol?Promise.resolve(safeSymbol(row.quoteSymbol)):ercSymbol(x.pairToken)}));
+  marketList=mk.map((x,i)=>({address:String(x.pairToken).toLowerCase(),symbol:syms[i]}));
   ownMarkets=`<div class="eyebrow" style="margin-top:28px">Direct markets · read from the PAR factory</div><div class="chip-row">${mk.map((x,i)=>`<span class="chip">${esc(sym)} / ${esc(syms[i])}</span>`).join('')||'<span class="chip">markets not readable right now</span>'}</div>`;
   marketContracts=mk.length?`<div class="economic-card"><strong>Market contracts</strong><p>${mk.map((x,i)=>`${esc(syms[i])}: <span class="mono">${esc(x.pairToken)}</span>`).join('<br>')}</p></div>`:'';
  }else if(isPons){
@@ -152,6 +153,7 @@ async function run(){
   const pass=mkt&&mkt.passport,lst=mkt&&mkt.listing||null;
   const row=(l,v)=>`<div class="passport-row"><span>${esc(l)}</span><div><strong>${v}</strong></div></div>`;
   const pairText=pair?(pair.native?'ETH':pair.symbol||short(pair.address)):short(pons.pair.address);
+  marketList=[{address:String(pons.pair.address).toLowerCase(),symbol:safeSymbol(pair?(pair.native?'ETH':pair.symbol||''):'')||short(pons.pair.address)}];
   const frText=fr?(fr.kind==='wallet'?' · wallet':fr.kind==='encumbered'?' · wallet · Pons protocol override pending':' · contract'):'';
   ownMarkets=`<div class="eyebrow" style="margin-top:28px">Origin · read from the Pons V2 factory</div><div class="passport-rows">${row('Origin','PONS V2 · ON-CHAIN VERIFIED')}${row('Token contract',`<span class="mono">${esc(a)}</span>`)}${row('Pair asset',esc(pairText))}${row('Status',esc(pons.state.label))}${row('Creator tax',esc((pons.creatorTaxBps/100)+'%'))}${row('Deployer',`<span class="mono">${esc(pons.deployer)}</span>`)}${row('Creator-fee recipient',`<span class="mono">${esc(pons.creatorFeeRecipient)}</span>${esc(frText)}`)}${row('Project Passport',pass?`SYNCNET OPERATOR <span class="mono">${esc(pass.operator)}</span>`:'Not claimed yet')}${row('Marketplace',lst?`<a href="/marketplace.html#listing=${esc(lst.id)}">${lst.status==='ACTIVE'?'FOR SALE · '+esc(lst.price)+' '+esc(lst.currency):'LISTING · '+esc(String(lst.status||'').replace(/_/g,' '))} →</a>`:'Not listed')}</div><p class="coverage-note">A Project Passport is SyncNet-recognised operational control, not ownership of the token contract. No partnership with or endorsement by Pons is implied.</p>`;
  }else if(isPonsV1){
@@ -163,8 +165,16 @@ async function run(){
  const facts=isPar?`<div class="registry-facts">${fact('Deployer',short(launch.deployer))}${fact('Fee mode',VAULTS[String(launch.creatorFeeRecipient).toLowerCase()]||'creator wallet')}${fact('Launched (indexer)',idxRes?.createdAt?String(idxRes.createdAt).replace('T',' ').slice(0,16)+(/^\d{4}-/.test(String(idxRes.createdAt))?' UTC':''):'')}${fact('Projects using this token as a market',String(usedBy.length))}</div>`:(isPons||isPonsV1)?'':`<div class="registry-facts">${fact('Projects using this contract as a market (indexer)',String(usedBy.length))}</div>`; // Pons pages show no PAR-indexer-derived counts
  let desc='';
  if(isPar&&meta&&meta.description){const full=Core.sanitizeForDisplay(meta.description,{maxLength:2048,multiline:true});const head=Array.from(full).slice(0,420).join('');desc=full.length>head.length?`<div class="example-copy token-description"><strong>Description:</strong> <span>${esc(head)}…</span><details><summary>Show the full description</summary><p>${esc(full)}</p></details></div>`:`<p class="example-copy token-description"><strong>Description:</strong> ${esc(full)}</p>`}
- $('tokenCard').innerHTML=`<div class="example-top"><div class="example-project">${logoHtml}<div><h3>${esc(name)}</h3><p class="mono">${esc(a)}</p></div></div><div class="badge-stack">${badges.join('')}</div></div>${impostorNote}${provBox}${localBox}${facts}${desc}${ownMarkets}${usedBy.length&&!isPons&&!isPonsV1?`<div class="eyebrow" style="margin-top:28px">${isPar?'Projects using this token as a market':'PAR launches using this contract as a market (indexer)'}</div><div class="chip-row">${children}</div>${usedBy.length>12?`<p class="coverage-note">Showing 12 of ${usedBy.length}. Open Map for the network view.</p>`:''}`:''}<div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(a)}">MAP CONNECTIONS</a><a class="btn" href="/economy.html?root=${esc(a.toLowerCase())}">ECONOMY VIEW</a>${isPar?`<a class="btn" href="/build.html?with=${esc(a)}">SYNC WITH $${esc(sym)}</a><a class="btn" href="https://par.family/token/${esc(a)}" target="_blank" rel="noreferrer">PAR ↗</a>`:''}<a class="btn" href="https://robinhoodchain.blockscout.com/address/${esc(a)}" target="_blank" rel="noreferrer">EXPLORER ↗</a></div>${isPar?'<div class="passport-panel" id="passportPanel" aria-live="polite"><div class="network-empty">Reading Passport data from PAR…</div></div>':''}${marketContracts}`;
+ $('tokenCard').innerHTML=`<div class="example-top"><div class="example-project">${logoHtml}<div><h3>${esc(name)}</h3><p class="mono">${esc(a)}</p></div></div><div class="badge-stack">${badges.join('')}</div></div>${impostorNote}${provBox}${localBox}${facts}${desc}${ownMarkets}${usedBy.length&&!isPons&&!isPonsV1?`<div class="eyebrow" style="margin-top:28px">${isPar?'Projects using this token as a market':'PAR launches using this contract as a market (indexer)'}</div><div class="chip-row">${children}</div>${usedBy.length>12?`<p class="coverage-note">Showing 12 of ${usedBy.length}. Open Map for the network view.</p>`:''}`:''}${isPar?'<div class="passport-panel" id="passportPanel" aria-live="polite"><div class="network-empty">Reading Passport data from PAR…</div></div>':''}${marketContracts}`;
  if(isPar)renderPassport(a,launch,meta,prov,profile,mkt).catch(()=>{const h=$('passportPanel');if(h)h.innerHTML='<div class="network-empty">Passport data is temporarily unavailable.</div>'});
+ // The Project Page rows (project-page.js) are built from the SAME facts this page just verified — never re-derived.
+ const origin=isPar?'PAR':isPons?'PONS_V2':isPonsV1?'PONS_V1':(launch==='unavailable'||pons==='unavailable')?'UNAVAILABLE':'UNVERIFIED';
+ const src=isPar?launch:isPons?pons:null;
+ announce({token:a,name,symbol:sym,logoUri,origin,originLabel:{PAR:'PAR launch',PONS_V2:'Pons V2 launch',PONS_V1:'Pons V1 launch',UNAVAILABLE:'Origin unavailable',UNVERIFIED:'Not a verified launch'}[origin],
+  claimable:Boolean(src),deployer:src?String(src.deployer||'').toLowerCase():'',feeRecipient:src?String(src.creatorFeeRecipient||'').toLowerCase():'',
+  passport:marketPassport,listing:mkt&&mkt.listing||null,registryOperator:prov&&prov.status===Prov.STATUS.OPERATOR&&prov.operator?String(prov.operator.operator||'').toLowerCase():'',
+  markets:marketList.map(m=>{const c=canonicalList.find(k=>k.token!==m.address&&Core.confusableSkeleton(k.symbol)===Core.confusableSkeleton(m.symbol));return{address:m.address,symbol:m.symbol,notCanonical:Boolean(c)}}),feeMode:isPar?(VAULTS[String(launch.creatorFeeRecipient).toLowerCase()]||'creator'):'',canonical:Boolean(canonical),impostorOf:impostor?{token:impostor.token,symbol:impostor.symbol}:null,usedBy:usedBy.length,directMarkets:isPar?Number(launch.marketCount||0):isPons?1:0,tradeUrl:isPar?'https://par.family/token/'+a:'',description:isPar&&meta&&meta.description?Core.sanitizeForDisplay(String(meta.description),{maxLength:320}):''});
 }
-run().catch(()=>{$('tokenTitle').textContent='TOKEN DATA UNAVAILABLE';$('tokenDescription').textContent='The chain or the indexer did not answer.';$('tokenCard').innerHTML='<div class="network-empty">The chain/indexer did not return enough data for this contract right now. No provenance or relationship has been inferred.</div>'});
+function announce(detail){window.__snProject=detail;window.dispatchEvent(new CustomEvent('syncnet:project',{detail}))}
+run().catch(()=>{announce({unavailable:true});$('tokenTitle').textContent='Project data unavailable';$('tokenDescription').textContent='The chain or the indexer did not answer.';$('tokenCard').innerHTML='<div class="network-empty">The chain/indexer did not return enough data for this contract right now. No provenance or relationship has been inferred.</div>'});
 })();

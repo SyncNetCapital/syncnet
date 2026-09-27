@@ -1,3 +1,115 @@
+# Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
+
+## Project Home: automatic SYNCNET REFERENCE RATE for production quotes: 27 Sep 2026
+
+- Each NEW payment intent derives the rate server-side from the canonical PAR SYNC/USDG market. It reads the factory
+  pool key and id (pinned) and the PoolManager slot0 at the latest block and ≈2 minutes earlier, uses the lower mid,
+  and rounds down to 3 significant figures. Guards: canonical route, tick consistency, liquidity floor, ≤10% two-point
+  divergence, hard bounds, and ≤ +25% vs the last accepted reference younger than 1 hour. Any failure means no quote
+  (fail closed, no fallback).
+- The rate and its source (block, time, pool, route) are snapshotted into the intent, entitlement and activation. The
+  30-minute lock and exact tagged amounts are unchanged. Verification never uses the current market.
+- `PROJECT_HOME_RATE_VERSION` is obsolete; manual rates v1–v4 are historical canary records. The $12 price, contracts,
+  60/40 split and verification semantics are unchanged.
+
+## Project Home V3 product refinement: $12 price, website renderer, builder, one-accent identity: 27 Sep 2026
+
+- **Price:** reviewed `priceVersion 2` = 1200 cents ($12 one-time) is the active public price; v1 is kept as history.
+  No new reference rate (rate v2 has expired, so payments stay closed). Architecture, split and contracts are unchanged.
+- **Public Project Home:** redesigned as a project website (hero, About, Markets & economy, Verified facts, collapsed
+  Verified details). CLEAN, DARK and TERMINAL differ in type and structure. Still zero JavaScript and the same CSP.
+  `projectFacts` adds display-only `feeMode` / `feeRecipient`.
+- **Editor:** site-builder layout with a real-width scaled preview (desktop/mobile), preset cards, image thumbnails and a
+  $12 offer card.
+- **Shell:** a larger header with an inline SVG convergence mark; a search-led Explore with a factual network panel;
+  a Project Page identity head (large logo, on-chain description for PAR tokens except impostors, action buttons).
+- **Identity:** black / bone / cyan only. Copper and warm state colours removed; states use marks and borders.
+
+## Project Home V3 canary: SYNCNET REFERENCE RATE v2: 27 Sep 2026
+
+- Rate v1 expired at 02:15Z and is unchanged. Added **v2 = 0.0000409 USD/SYNC**, effective 2026-09-27T05:05Z, expiring
+  11:05Z (6 h), derived read-only at block 73672789 (mid 0.000040985, rounded down). $39 = 953,545.232273838630806846 SYNC
+  base. The price, the 30-minute lock, the contracts and the economics are unchanged. The preview-only config now selects
+  `PROJECT_HOME_RATE_VERSION=2`.
+
+## Project Home V3 canary: first SYNCNET REFERENCE RATE (v1): 26 Sep 2026
+
+- `syncnet-project-home-pricing.json`: rate **v1 = 0.0000457 USD/SYNC**, effective 2026-09-26T20:15Z, expires
+  2026-09-27T02:15Z (6 h), derived read-only from the canonical PAR SYNC/USDG market 1 at block 73363740. This is not
+  an oracle. $39 = 853,391.684901531728665208 SYNC base. The price, the 30-minute lock and the contracts are unchanged.
+- Payments remain closed everywhere unless the preview-only environment (docs/PROJECT_HOME.md §16) is set. Production
+  is untouched.
+
+Unreleased branch: nothing was ever deployed or enabled, so no production price, intent or entitlement changes.
+
+- **Price:** the initial launch price is **$39 USD** (`priceVersion 1` = 3900 cents; previously drafted at $49 and never
+  released). The reference-rate model, 30-minute lock, round-up arithmetic and payment tag are unchanged, and no rate
+  is approved yet.
+- **Sink:** it now forwards the 40% treasury share **as SYNC** to an immutable `TREASURY_CONVERTER`. The fields are
+  renamed so they cannot be misread: `totalSettledSync`, `totalBurnedSync`, `totalTreasurySyncForwarded`. The sink is
+  still DEX-free, ownerless and parameterless.
+- **New `SyncNetProjectHomeTreasuryConverter`:** it converts accumulated SYNC to canonical USDG through one fixed,
+  verified route: PAR multi router `sellToQuotes` on market 1, the PAR SYNC/USDG Uniswap v4 pool. USDG goes only to the
+  immutable treasury wallet, which is also the only executor. `minUsdgOut` must be non-zero and a deadline is enforced.
+  The route is re-verified on every call, and any failure leaves the SYNC in place. There is no owner, setter, rescue,
+  recipient parameter or generic swap.
+- **Route verification:**
+  - USDG is confirmed from the PAR SDK and on-chain;
+  - SYNC's market 1 is confirmed from `poolKeysFor`;
+  - the live router's bytecode was reproduced from PAR's published source.
+- **Fork rehearsal:** burn, forwarding and a real SYNC → USDG conversion to a treasury fixture were run on real
+  bytecode and state, with an informational depth table.
+- **Deployment:** `DeployProjectHome.s.sol` deploys the converter first, then the sink. It pins the canonical USDG,
+  router and market and requires an explicit, confirmed treasury.
+- **Server:** activation still depends only on the verified SYNC payment to the sink, never on settlement or
+  conversion (tested). Metrics now cover every stage: in sink, burned, forwarded, awaiting conversion, converted, and
+  USDG delivered. All of these are real on-chain values and never reference-rate estimates. Wording separates the
+  SYNCNET REFERENCE RATE from the ACTUAL DEX EXECUTION RATE.
+- **Tests:**
+  - Foundry: 70;
+  - contract audit: 113;
+  - server: 180 (adds H01–H05, G07 and F06b–d);
+  - pricing: 81;
+  - the fixture clock now starts at real time, because the real Marketplace code under test checks claim expiry
+    against `Date.now()`.
+
+# SyncNet Project Home: secure foundation (`feature/syncnet-project-home`): 26 Sep 2026
+
+Closed by default. No UI, no navigation entry, and no deployed contract. See `docs/PROJECT_HOME.md`.
+
+- **M0 refactor (behaviour-preserving):** added `netlify/lib/sig-verify.js`, which verifies ECDSA and then EIP-1271 for
+  Marketplace, Economies and Project Home. Added `netlify/lib/live-project.js` (moved `liveProject`/`feeRightOf` from
+  the Marketplace, plus a read-only `readPassport`).
+- **Sink:** added `contracts/project-home-sink` with `SyncNetProjectHomeSink`. It has an immutable token and treasury,
+  and a permissionless, parameterless `settle()` that burns floor(60%) with `SYNC.burn()` and sends the remainder to
+  the treasury. There is no admin, setter, rescue, proxy, arbitrary call, approval or payable surface. Includes 34
+  Foundry tests and a deploy script gated on chain 4663, the canonical SYNC, and an explicit, confirmed treasury that is
+  neither the deployer nor the token. The contract is not deployed.
+- **Pricing:** PROJECT HOME ACTIVATION costs $39 USD (`priceVersion 1`) and is paid only in $SYNC at the versioned,
+  git-reviewed SYNCNET REFERENCE RATE, which is not an oracle. Amounts use BigInt fixed point, round up, and add a
+  10^12-wei payment tag reserved server-side. `syncnet-project-home-pricing.json` ships no rate, so payments stay
+  closed until one is approved.
+- **Payments:** `/api/project-home`:
+  - intents can be created only by the current Passport operator (EIP-712 `SyncNet Website`), and clients cannot
+    override any economic field;
+  - verification uses targeted, bounded chain reads. The rate lock is judged by block time, and activation happens at
+    SAFE;
+  - activation is ONE atomic compare-and-set: a fixed Lua script via `store.cas()` claims the log, creates the
+    entitlement, consumes the intent and writes the registry record together;
+  - `reconcile` moves an entitlement to FINALIZED or INVALIDATED_BY_REORG and keeps the history.
+  There are no refunds. Metrics separate verified activation payments from everything else the sink received.
+- **Sites:**
+  - `lib/syncnet-site.js` holds the V1 schema, canonical `configHash`, the EIP-712 types
+    (`SitePublish`/`SiteUnpublish`/`ActivationRequest`) and the pure zero-JS renderer.
+  - Publish, edit, unpublish, restore and adopt require the current operator. The Passport is checked atomically at
+    commit and again at render time. After a Passport transfer, every operator-authored link loses its `href` until
+    the new operator adopts the site.
+  - `/site/<token>` uses CSP `default-src 'none'` with a hashed stylesheet. `/site-img/<cid>` serves only sanitised,
+    hash-verified images. `ipfs-upload` now records sanitised CIDs.
+- **Tests:** added 6 suites to `tests/run-all.mjs`: Foundry (34), sink static/ABI audit (46), pricing (80), site and
+  renderer audit (149), server (169) and real-Redis atomicity (17). Static-audit additions cover Project Home.
+  `/contracts/*` is not served, and `tests/fingerprint.mjs` excludes `contracts/`.
+
 # Pons V1 strict detection + live Step 3 verification (`feature/syncnet-economies-v0`): 26 Sep 2026
 
 - Pons V1 detection now knows both canonical factory generations from the official Pons docs: ACTIVE

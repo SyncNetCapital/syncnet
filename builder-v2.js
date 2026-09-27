@@ -89,7 +89,7 @@ function validateStep(n){
   if(wc==='kit'&&$('website').value.trim()&&!safeUrl($('website').value)){toast('That website URL is not valid — it must start with https://');$('website').focus();return false}
   if($('x').value.trim()&&!safeUrl($('x').value)){toast('X must be @handle or an https:// link');$('x').focus();return false}
   return true}
- if(n===2){if(!quotes.length){toast('Choose at least one token to sync with');return false}if(quotes.some(q=>q.eligible!==true)){toast('Every selected token must be eligible');return false}return true}
+ if(n===2){if(!quotes.length){toast('Choose at least one token to connect to');return false}if(quotes.some(q=>q.eligible!==true)){toast('Every selected token must be eligible');return false}return true}
  if(n===3){if(!feeMode){toast('Choose where the creator share goes');document.querySelector('input[name="feeMode"]')?.focus();return false}
   if(feeMode==='creator'){const r=creatorRecipientInput();if(r){const chk=Chain.recipientStaticCheck(r,{quotes:quotes.map(q=>q.address),extraBlocked:blockedRecipients()});if(!chk.ok){toast(chk.error);$('creatorRecipient')?.focus();return false}}if(contractRecipient&&contractRecipient.kind==='contract'&&same(contractRecipient.address,resolvedRecipient())&&!$('contractRecipientAck')?.checked){toast('The fee recipient is a contract — confirm it in step 03');$('contractRecipientAck')?.focus();return false}}
   if(openingBuyWei<0n||openingBuyError()){toast(openingBuyError()||'Check the opening buy amount');$('openingBuy')?.focus();return false}return true}

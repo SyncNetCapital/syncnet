@@ -2,7 +2,7 @@
 /*
  * SyncNet Marketplace V1 — the persistent, signature-authenticated backend.
  *
- *   GET  /api/marketplace?view=config|listings|listing|passport|deal|wallet
+ *   GET  /api/marketplace?view=config|listings|listing|passport|passports|deal|wallet
  *   POST /api/marketplace {action, ...fields, signature}
  *
  * Trust model (see MARKETPLACE_SECURITY.md):
@@ -32,6 +32,8 @@ const { getStore } = require('../lib/store');
 const { clientIp, limit, limitAll } = require('../lib/ratelimit');
 const { serverRpc } = require('../lib/chain-rpc');
 const { readJsonBody, query, method: methodOf } = require('../lib/body');
+const { verifyDigest } = require('../lib/sig-verify');
+const { liveProject, feeRightOf } = require('../lib/live-project');
 
 const FN = 'marketplace';
 const K = {
@@ -76,43 +78,16 @@ async function consumeNonce(store, wallet, nonce) {
 async function indexWallet(store, wallet, ref) { await store.sadd(K.wallet(lc(wallet)), ref); }
 
 // ---------------------------------------------------------------- signature verification (server-side, always)
+// ECDSA recovery, then EIP-1271 for contract wallets via a live chain read (netlify/lib/sig-verify.js, shared).
 async function verifySig(rpc, wallet, kind, message, signature) {
   if (typeof signature !== 'string' || !/^0x[0-9a-fA-F]{130,}$/.test(signature) || signature.length > 8200) return false;
   let digest;
   try { digest = Market.digest(kind, message); } catch { return false; }
-  try { if (lc(Core.recoverAddress(digest, signature)) === lc(wallet)) return true; } catch { /* not ECDSA by this wallet */ }
-  try {
-    const code = await Chain.getCode(rpc, wallet);
-    if (!code || code === '0x') return false;
-    const data = Chain.SEL.isValidSignature + Core.abiEncode(['bytes32', 'bytes'], [digest, signature]).slice(2);
-    const out = await rpc('eth_call', [{ to: wallet, data }, 'latest']);
-    return String(out || '').toLowerCase().startsWith('0x1626ba7e');
-  } catch { return false; }
+  return verifyDigest(rpc, wallet, digest, signature);
 }
 
 // ---------------------------------------------------------------- live origin reads: PAR, Pons V2 (never client-supplied)
-// Fee-right classification is shared with the browser (lib/syncnet-origins.js); PAR results are unchanged.
-const feeRightOf = (rpc, launch) => Origins.classifyFeeRight(rpc, launch.origin ? launch : { ...launch, origin: 'PAR' });
-/**
- * Launchpad-agnostic live project: {launch} is the normalized project (origin, factory, deployer,
- * creatorFeeRecipient, …) of a SUPPORTED origin, or null. {unsupported} carries a positively identified but not yet
- * supported origin (Pons V1). Throws when any canonical factory cannot be read (callers answer 503).
- */
-async function liveProject(rpc, token) {
-  const project = await Origins.resolveProject(rpc, token); // PAR factories, then Pons V2, then Pons V1 — live
-  if (!project) return { launch: null };
-  if (!project.supported) return { launch: null, unsupported: project };
-  const [feeRight, meta, pair] = await Promise.all([
-    feeRightOf(rpc, project), Chain.readTokenMetadata(rpc, token).catch(() => null),
-    project.origin === 'PONS_V2' ? Origins.pairInfo(rpc, project.pair.address).catch(() => null) : null,
-  ]);
-  const launch = project;
-  const snapshot = meta ? {
-    name: Market.clean(meta.name, 64), symbol: Market.clean(meta.symbol, 16).toUpperCase(),
-    logo: /^ipfs:\/\/[A-Za-z0-9]+(?:\/[A-Za-z0-9._~/-]+)?$/.test(String(meta.logo || '')) ? String(meta.logo) : '', // stays ipfs://; display-only gateways live in the browser
-  } : { name: '', symbol: '', logo: '' };
-  return { launch, feeRight, snapshot, origin: Origins.publicOrigin(project, pair) };
-}
+// liveProject / feeRightOf live in netlify/lib/live-project.js (shared with Project Home); behaviour is unchanged.
 const NOT_SUPPORTED = 'This address is not a PAR launch or a Pons V2 launch, so it cannot be claimed or listed.';
 function unsupportedAnswer(live) {
   if (live.unsupported && live.unsupported.origin === 'PONS_V1') return publicError(422, 'unsupported_origin', 'PONS V1 DETECTED · This earlier Pons launch generation is not supported by the Marketplace.');
@@ -209,6 +184,14 @@ async function handler(event = {}, deps = {}) {
         const listing = p && p.listing ? publicListing(await getJson(store, K.listing(p.listing))) : null;
         return json(200, { enabled: on, passport: publicPassport(p), listing: listing && listing.status === 'ACTIVE' ? listing : listing });
       }
+      if (view === 'passports') {
+        // Batch, read-only: the Passport (sync / control state) of up to 100 projects, for Explore and My Projects.
+        const tokens = [...new Set(String(query(event, 'tokens') || '').toLowerCase().split(',').filter(isAddr))].slice(0, 100);
+        const rows = await Promise.all(tokens.map((t) => getJson(store, K.passport(t))));
+        const passports = {};
+        tokens.forEach((t, i) => { const p = rows[i]; if (p && isAddr(p.operator)) passports[t] = { operator: lc(p.operator), operatorSince: p.operatorSince || null, launchpad: p.launchpad || Origins.recordOrigin(p), listing: p.listing || null }; });
+        return json(200, { enabled: on, passports });
+      }
       if (view === 'deal') {
         const d = await getJson(store, K.deal(lc(query(event, 'id'))));
         if (!d) return publicError(404, 'not_found', 'Deal not found.');
@@ -219,14 +202,15 @@ async function handler(event = {}, deps = {}) {
         const w = lc(query(event, 'address'));
         if (!isAddr(w)) return bad('Invalid wallet address.');
         const refs = (await store.smembers(K.wallet(w))).slice(0, 300);
-        const listings = [], offers = [], deals = [];
+        const listings = [], offers = [], deals = [], passports = [];
         for (const ref of refs) {
           const [t, id] = ref.split(':');
+          if (t === 'P') { const p = await getJson(store, K.passport(lc(id))); if (p && lc(p.operator) === w) passports.push({ token: lc(p.token || id), operator: lc(p.operator), operatorSince: p.operatorSince || null, launchpad: p.launchpad || Origins.recordOrigin(p), listing: p.listing || null }); }
           if (t === 'L') { const l = await getJson(store, K.listing(id)); if (l) listings.push(publicListing(l)); }
           if (t === 'O') { const o = await getJson(store, K.offer(id)); if (o) { const l = await getJson(store, K.listing(o.listingId)); offers.push(publicOffer(o, l)); } }
           if (t === 'D') { const d = await getJson(store, K.deal(id)); if (d) deals.push(publicDeal(d)); }
         }
-        return json(200, { enabled: on, listings, offers, deals });
+        return json(200, { enabled: on, listings, offers, deals, passports }); // passports: only those this wallet CURRENTLY operates
       }
       return bad('Unknown view.');
     } catch (err) {

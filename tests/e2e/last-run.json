@@ -1,14 +1,9 @@
 {
-  "at": "2026-09-26T09:24:09.778Z",
+  "at": "2026-09-27T06:48:53.165Z",
   "failures": 0,
   "results": [
     {
-      "name": "home: mapper hidden before first map",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "home: mapper section revealed",
+      "name": "network: mapper result visible",
       "ok": true,
       "detail": ""
     },
@@ -95,7 +90,7 @@
     {
       "name": "reduced-motion: jump is immediate (no smooth scroll)",
       "ok": true,
-      "detail": "y=817"
+      "detail": "y=355"
     },
     {
       "name": "race: last MAP request wins",
@@ -365,7 +360,7 @@
     {
       "name": "simulation passed",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xc7152a23F30E0E3de04CF53c27C2e520e2947c8E\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 2.5%\nPAR base fee: 1% · protocol "
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x83Ce37411914a0790DC3b10be278F46C024b792C\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 2.5%\nPAR base fee: 1% · protocol "
     },
     {
       "name": "sim: creator recipient = connected wallet in calldata",
@@ -460,7 +455,7 @@
     {
       "name": "founder: sim + metadata preflight pass",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x7De27D4912BA9246079bA2f98d5fd10ca12B21c6\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → Creator / operator wallet: 0x2c753"
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x624e8f451d705d87bfF0fEa23D63C706bFE77883\nMarkets: PONSYNC / SYNC · PONSYNC / PONS\nPAR launch fee: 0.0001 ETH\nSent from wallet: 0.0001 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → Creator / operator wallet: 0x2c753"
     },
     {
       "name": "founder: launch locked before signature",
@@ -500,7 +495,7 @@
     {
       "name": "founder: live launch confirmed + verified",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xad62df3231b3e76a5ff51f12836954a6a14f9b14\nTransaction: 0x1690fbebd0ca2d9e3c2fdf85ed7892dbd7c2787ae91161023bd5a4d1cda9d99e\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0xb27c7bc90dca2c12dd5e1bb97485d36601d3e82b291e58730baa177beab38700 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — exp"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xb2d4c09a12656fc98bf6c8ba576814e7855cf5c0\nTransaction: 0x10840af25769eb1039a3dffd7d8bf606ed38f44746bacb59e1c4de0368e73ce6\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: found\nIntent: recordHash 0x413e14832264a83833e587f384246fc45418dc329eb1e88a1ad73b6ec6e0306a committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — exp"
     },
     {
       "name": "founder: tx carries explicit chainId",
@@ -540,7 +535,7 @@
     {
       "name": "mismatch: factory record failure surfaced, tx hash kept",
       "ok": true,
-      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0xd2ecfcb6b01014ba701f6cfaf17a9a57bc127c22\nTransaction: 0x39f2faf68a30408564599ef9901ada78e68c798817f66c3898304c1ed9ae6102\nState: MINED\nOn-chain factory record + markets + metadata: MISMATCH in Creator-fee recipient — do not launch again; inspec"
+      "detail": "LAUNCH EXECUTED — VERIFICATION NEEDS ATTENTION\n\nToken: 0x244774067ed7f9320ac8b024ff2b96c76822e4ee\nTransaction: 0xd6251c3332393c1413048deef2513eb9df98d6d0959879c62f6bc6c8d2049ba4\nState: MINED\nOn-chain factory record + markets + metadata: MISMATCH in Creator-fee recipient — do not launch again; inspec"
     },
     {
       "name": "mismatch: further launches locked",
@@ -560,7 +555,7 @@
     {
       "name": "mp: production surface — no lab/local-test/simulated wording",
       "ok": true,
-      "detail": "LABS"
+      "detail": "and everything SyncNet cannot verify is labelled exactly that."
     },
     {
       "name": "mp: non-custodial model stated on the page (hero + settlement card)",
@@ -780,7 +775,7 @@
     {
       "name": "buy: simulation passes through PAR router",
       "ok": true,
-      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0x075Cc49b02cb5b584fe3c844055a7C0d7e5a4721\nMarkets: BUYT / SYNC · BUYT / PONS\nPAR launch fee: 0.0001 ETH\nOpening buy: 0.05 ETH → ≈20,000,000 BUYT (2.0% of supply) · minimum 19,800,000 · via PAR router 0x458D2a59c2F3dd32775a64eE72004561440d64Df\nSent from wallet: 0.0501 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → C"
+      "detail": "SIMULATION PASSED ✓\n\nNetwork: Robinhood Chain MAINNET (4663)\nPredicted token: 0xF21a672AE8941cc15CD8cbA41C994Cf9d4639CAf\nMarkets: BUYT / SYNC · BUYT / PONS\nPAR launch fee: 0.0001 ETH\nOpening buy: 0.05 ETH → ≈20,000,000 BUYT (2.0% of supply) · minimum 19,800,000 · via PAR router 0x458D2a59c2F3dd32775a64eE72004561440d64Df\nSent from wallet: 0.0501 ETH + gas\nEstimated gas ceiling: 750000\nCreator tax: 1%\nPAR base fee: 1% · protocol share 50% of base (read live)\nTotal trading fee: 2%\nCreator share → C"
     },
     {
       "name": "buy: two legs, equal split, sum = buy",
@@ -860,7 +855,7 @@
     {
       "name": "buy: launch confirmed + verified through router path",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xfde17471d460d6c6ab36cda15ec9ab1cd9f63714\nTransaction: 0x9796ef73731cf013b5095d7a0ed777cc6d5e59a38389d5a50557092713297659\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xcb8348fff6ac00b134f3303549d82fd1b34029ef"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xbfb1e2e34988479e06bfd06a87c389b5e28e9be5\nTransaction: 0x9297b1e097b4160a0c52cd367837b8f1fa8f5b0c1e4e6383097d17aa35d13406\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xb2c7faed7a5b053cdfa5ec056184fde946aae37b"
     },
     {
       "name": "buy: tx sent to router with fee + buy",
@@ -870,7 +865,7 @@
     {
       "name": "buy: post-launch balance meets minimum",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xfde17471d460d6c6ab36cda15ec9ab1cd9f63714\nTransaction: 0x9796ef73731cf013b5095d7a0ed777cc6d5e59a38389d5a50557092713297659\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xcb8348fff6ac00b134f3303549d82fd1b34029ef3b6bb1b8034efc07f00d848c committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — export the proof and add it to syncnet-projects.json to publish.\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0xbfb1e2e34988479e06bfd06a87c389b5e28e9be5\nTransaction: 0x9297b1e097b4160a0c52cd367837b8f1fa8f5b0c1e4e6383097d17aa35d13406\nState: FULLY_VERIFIED\nOn-chain factory record + markets + metadata: VERIFIED ✓\nOpening buy: wallet holds 20,000,000 tokens (2.0% of supply) ✓ (≥ minimum 19,800,000)\nPAR indexer: found\nIntent: recordHash 0xb2c7faed7a5b053cdfa5ec056184fde946aae37bfcdc24a740e39889c25fe898 committed in the PAR salt; EIP-712 signature by 0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\n\nRegistry: public submissions are not enabled on this deployment — export the proof and add it to syncnet-projects.json to publish.\n\nVIEW TRANSACTION ↗ · VIEW ON PAR ↗ · PROJECT PAGE → · MY LAUNCHES →"
     },
     {
       "name": "buy: record holds the opening buy, the exact value and the met minimum",
@@ -940,7 +935,7 @@
     {
       "name": "rehearsal: full launch confirmed on fork",
       "ok": true,
-      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x49a060373394787adb2dfddd7cde41a122de59d8\nTransaction: 0x36a73118f90bed97874cc4eeb0399a4f052a5b3c877e1654ed6abdc180c9dbb6\nState: INDEXER_PENDING\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: pending (on-chain is authoritative; RE-VERIFY later "
+      "detail": "LIVE LAUNCH CONFIRMED ✓\n\nToken: 0x6f2b8ae6d278816eca76bacde398b44ac0e5b83a\nTransaction: 0x4fad603462307eb5643e31ed202a0c6305b8ffa2faa24602a40dce1d4bd73a18\nState: INDEXER_PENDING\nOn-chain factory record + markets + metadata: VERIFIED ✓\nPAR indexer: pending (on-chain is authoritative; RE-VERIFY later "
     },
     {
       "name": "rehearsal: tx chainId is the fork",
@@ -1073,12 +1068,42 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /for-sale: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/for-sale: primary nav is Explore · Create, wallet says Connect",
+      "ok": true,
+      "detail": "Explore Create"
+    },
+    {
+      "name": "desktop /for-sale: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "desktop /you.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "/you.html: primary nav is Explore · Create, wallet says Connect",
+      "ok": true,
+      "detail": "Explore Create"
+    },
+    {
+      "name": "desktop /you.html: no visible text under 10.5px",
       "ok": true,
       "detail": ""
     },
@@ -1088,9 +1113,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/network.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/network.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /network.html: no visible text under 10.5px",
@@ -1103,9 +1128,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/build.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/build.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /build.html: no visible text under 10.5px",
@@ -1118,9 +1143,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/marketplace.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/marketplace.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /marketplace.html: no visible text under 10.5px",
@@ -1133,9 +1158,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/sync.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/sync.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /sync.html: no visible text under 10.5px",
@@ -1148,9 +1173,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/registry.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/registry.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /registry.html: no visible text under 10.5px",
@@ -1163,9 +1188,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/labs.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/labs.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /labs.html: no visible text under 10.5px",
@@ -1178,9 +1203,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no visible text under 10.5px",
@@ -1193,9 +1218,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/kit.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/kit.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /kit.html: no visible text under 10.5px",
@@ -1208,9 +1233,9 @@
       "detail": "overflow=0"
     },
     {
-      "name": "/launches.html: nav vocabulary Map/Registry/Marketplace/$SYNC token/Labs + SYNC A PROJECT",
+      "name": "/launches.html: primary nav is Explore · Create, wallet says Connect",
       "ok": true,
-      "detail": "MapRegistryMarketplace$SYNC tokenLabsSYNC A PROJECT"
+      "detail": "Explore Create"
     },
     {
       "name": "desktop /launches.html: no visible text under 10.5px",
@@ -1268,6 +1293,11 @@
       "detail": "overflow=0"
     },
     {
+      "name": "mobile /: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /: tap targets ≥40px",
       "ok": true,
       "detail": ""
@@ -1278,9 +1308,54 @@
       "detail": ""
     },
     {
+      "name": "mobile /for-sale: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /for-sale: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /for-sale: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /for-sale: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /you.html: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /you.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /you.html: tap targets ≥40px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile /you.html: no visible text under 10.5px",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /network.html: no horizontal overflow",
       "ok": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /network.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "mobile /network.html: tap targets ≥40px",
@@ -1298,6 +1373,11 @@
       "detail": "overflow=0"
     },
     {
+      "name": "mobile /build.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /build.html: tap targets ≥40px",
       "ok": true,
       "detail": ""
@@ -1311,6 +1391,11 @@
       "name": "mobile /marketplace.html: no horizontal overflow",
       "ok": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /marketplace.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "mobile /marketplace.html: tap targets ≥40px",
@@ -1328,6 +1413,11 @@
       "detail": "overflow=0"
     },
     {
+      "name": "mobile /sync.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /sync.html: tap targets ≥40px",
       "ok": true,
       "detail": ""
@@ -1341,6 +1431,11 @@
       "name": "mobile /registry.html: no horizontal overflow",
       "ok": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /registry.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "mobile /registry.html: tap targets ≥40px",
@@ -1358,6 +1453,11 @@
       "detail": "overflow=0"
     },
     {
+      "name": "mobile /labs.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /labs.html: tap targets ≥40px",
       "ok": true,
       "detail": ""
@@ -1371,6 +1471,11 @@
       "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: no horizontal overflow",
       "ok": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "mobile /project/0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967: tap targets ≥40px",
@@ -1388,6 +1493,11 @@
       "detail": "overflow=0"
     },
     {
+      "name": "mobile /kit.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "mobile /kit.html: tap targets ≥40px",
       "ok": true,
       "detail": ""
@@ -1401,6 +1511,11 @@
       "name": "mobile /launches.html: no horizontal overflow",
       "ok": true,
       "detail": "overflow=0"
+    },
+    {
+      "name": "mobile /launches.html: bottom nav has exactly Explore · Create · You",
+      "ok": true,
+      "detail": ""
     },
     {
       "name": "mobile /launches.html: tap targets ≥40px",

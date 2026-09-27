@@ -7,7 +7,17 @@
 // StoreUnavailable. Callers decide how to fail; ratelimit.limit() fails closed.
 //
 // Adapter: { durable, kind, incrWindow(key, ttlSeconds) -> number, get(key) -> string|null,
-//            set(key, value, {ttlSeconds}?), del(key), sadd(key, member), smembers(key) -> string[] }
+//            set(key, value, {ttlSeconds}?), del(key), sadd(key, member), smembers(key) -> string[],
+//            cas({expect, set, sadd}) -> boolean }
+//
+// cas() is the ONE multi-key atomic primitive (Project Home payment activation and site writes). It is a single
+// fixed Lua script (EVAL) on Upstash — Redis runs a script atomically, with no other command interleaved — and a
+// synchronous, await-free block in the in-memory adapter. Semantics, identical in both:
+//   expect: [[key, value|null], ...]   every key must currently hold exactly `value` (null = must not exist);
+//   set:    [[key, value, ttlSeconds?], ...]  written only if EVERY expectation holds;
+//   sadd:   [[key, member], ...]              likewise.
+// Returns true when the writes happened, false when an expectation failed (nothing written). Any store problem
+// throws StoreUnavailable (callers fail closed). Keys and values are data (KEYS/ARGV), never script text.
 
 class StoreUnavailable extends Error {
   constructor(message, options) {
@@ -19,6 +29,44 @@ class StoreUnavailable extends Error {
 }
 
 const DEFAULT_TIMEOUT_MS = 2000;
+const CAS_MAX_OPS = 16;
+const CAS_SCRIPT = [
+  "local ne, ns, na = tonumber(ARGV[1]), tonumber(ARGV[2]), tonumber(ARGV[3])",
+  "local a = 4",
+  "for i = 1, ne do",
+  "  local cur = redis.call('GET', KEYS[i])",
+  "  local mode, want = ARGV[a], ARGV[a + 1]",
+  "  a = a + 2",
+  "  if mode == 'nil' then",
+  "    if cur then return 0 end",
+  "  elseif cur ~= want then return 0 end",
+  "end",
+  "for i = 1, ns do",
+  "  local ttl = tonumber(ARGV[a + 1])",
+  "  if ttl > 0 then redis.call('SET', KEYS[ne + i], ARGV[a], 'EX', ttl) else redis.call('SET', KEYS[ne + i], ARGV[a]) end",
+  "  a = a + 2",
+  "end",
+  "for i = 1, na do",
+  "  redis.call('SADD', KEYS[ne + ns + i], ARGV[a])",
+  "  a = a + 1",
+  "end",
+  "return 1",
+].join('\n');
+
+// Validates a cas() spec; returns normalized arrays or throws TypeError (programming error, not an outage).
+function casSpec(spec) {
+  const s = spec && typeof spec === 'object' ? spec : {};
+  const expect = Array.isArray(s.expect) ? s.expect : [];
+  const set = Array.isArray(s.set) ? s.set : [];
+  const sadd = Array.isArray(s.sadd) ? s.sadd : [];
+  if (expect.length + set.length + sadd.length > CAS_MAX_OPS || set.length + sadd.length === 0) throw new TypeError('cas: invalid operation count');
+  const key = (k) => { if (typeof k !== 'string' || !k || k.length > 512) throw new TypeError('cas: invalid key'); return k; };
+  return {
+    expect: expect.map(([k, v]) => [key(k), v === null ? null : String(v)]),
+    set: set.map(([k, v, ttl]) => [key(k), String(v), ttlSecondsOf(ttl)]),
+    sadd: sadd.map(([k, m]) => [key(k), String(m)]),
+  };
+}
 const MEMORY_MAX_ENTRIES = 50000;
 const MEMORY = new Map(); // module-level: shared by the singleton for the lifetime of the instance
 let singleton = null;
@@ -125,6 +173,18 @@ function upstashAdapter({ url, token, fetchImpl, timeoutMs }) {
       if (!Array.isArray(members)) throw new StoreUnavailable('Upstash SMEMBERS reply malformed');
       return members.map(String);
     },
+    async cas(spec) {
+      const c = casSpec(spec);
+      const keys = [...c.expect.map((e) => e[0]), ...c.set.map((e) => e[0]), ...c.sadd.map((e) => e[0])];
+      const args = [String(c.expect.length), String(c.set.length), String(c.sadd.length)];
+      for (const [, v] of c.expect) args.push(v === null ? 'nil' : 'eq', v === null ? '' : v);
+      for (const [, v, ttl] of c.set) args.push(v, String(ttl));
+      for (const [, m] of c.sadd) args.push(m);
+      const result = await command('EVAL', CAS_SCRIPT, String(keys.length), ...keys, ...args);
+      const n = Number(result);
+      if (n !== 0 && n !== 1) throw new StoreUnavailable('Upstash EVAL reply malformed');
+      return n === 1;
+    },
   };
 }
 
@@ -201,6 +261,25 @@ function memoryAdapter({ map, now }) {
       if (entry.type !== 'set') throw wrongType(key);
       return [...entry.value];
     },
+    // Synchronous from the first check to the last write (no await): atomic within this process, like the script.
+    async cas(spec) {
+      const c = casSpec(spec);
+      for (const [k, want] of c.expect) {
+        const entry = live(k);
+        if (entry && entry.type !== 'string') throw wrongType(k);
+        const cur = entry ? entry.value : null;
+        if (want === null ? cur !== null : cur !== want) return false;
+      }
+      for (const [k] of c.sadd) { const e = live(k); if (e && e.type !== 'set') throw wrongType(k); }
+      for (const [k] of c.set) { const e = live(k); if (e && e.type !== 'string') throw wrongType(k); }
+      for (const [k, v, ttl] of c.set) put(k, { type: 'string', value: v, expiresAt: ttl ? clock() + ttl * 1000 : null });
+      for (const [k, m] of c.sadd) {
+        let entry = live(k);
+        if (!entry) { entry = { type: 'set', value: new Set(), expiresAt: null }; put(k, entry); }
+        entry.value.add(m);
+      }
+      return true;
+    },
   };
 }
 
@@ -228,4 +307,4 @@ function _resetForTests() {
   MEMORY.clear();
 }
 
-module.exports = { getStore, createStore, StoreUnavailable, _resetForTests };
+module.exports = { getStore, createStore, StoreUnavailable, _resetForTests, CAS_SCRIPT };
