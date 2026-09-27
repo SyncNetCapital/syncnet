@@ -279,7 +279,7 @@ _price=_je.loads((root/'syncnet-project-home-pricing.json').read_text())
 assert "name: 'SyncNet Website'" in _site_lib and "name: 'SyncNet Marketplace'" not in _site_lib and "name: 'SyncNet Economies'" not in _site_lib
 assert "truthy(env.SYNCNET_PROJECT_HOME_ENABLED)" in _phcfg and "truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED)" in _phcfg  # exact "true" only
 assert 'siteEnabled && paymentsRequested && Boolean(price && rate && sink)' in _phcfg
-assert [p['priceUsdCents'] for p in _price['prices']]==[3900]  # $39 USD
+assert [(p['priceVersion'],p['priceUsdCents']) for p in _price['prices']]==[(1,3900),(2,1200)]  # v1 kept as history; v2 = $12 USD is the ACTIVE public price
 # Reference rates: short-lived reviewed versions only. The first (V3 canary) is pinned exactly; every version must be a
 # plain decimal, carry a source, and be valid for at most 6 hours (a stale rate can never be left open).
 import datetime as _dt
@@ -304,6 +304,9 @@ assert "'/api/project-home'" not in (root/'project-page.js').read_text()  # the 
 for _pg in _gl.glob(str(root/'*.html')):
     _t=open(_pg,encoding='utf-8').read()
     assert 'Websites' not in _t and 'oracle' not in _t.lower() and '15.60' not in _t, _pg
+    assert '$39' not in _t and '$49' not in _t and '4.80' not in _t, _pg  # public UI shows only the ACTIVE $12 price, never a revenue figure
+for _f in _gl.glob(str(root/'*.js')):
+    assert '$39' not in open(_f,encoding='utf-8').read(), _f  # no superseded price in any public script
 _heh=(root/'home-editor.html').read_text(); _hej=(root/'home-editor.js').read_text()
 # preview: the shared pure renderer in preview mode, inside a sandbox that can never run script
 assert _re3.findall(r'<iframe[^>]*>', _heh)==['<iframe id="hePreview" sandbox="allow-same-origin" title="Preview of this Project Home. Not published." referrerpolicy="no-referrer">']
@@ -311,10 +314,10 @@ assert "Site.render({ config, facts, authority: { signer: S.account }, mode: 'pr
 assert '.srcdoc = ' in _hej and 'allow-scripts' not in _heh + _hej and 'innerHTML = Site.render' not in _hej
 assert 'Site.CID.test(j.cid)' in _hej and "'x-syncnet-upload-session': session" in _hej  # only sanitised CIDs, existing upload path
 # payment copy (exact wording; never "oracle", never a per-activation revenue figure)
-assert '$39' in _heh and 'Pay with $SYNC · 60% burned · 40% converted to USDG for SyncNet treasury' in _heh
+assert '$12' in _heh and 'Pay with $SYNC · 60% burned · 40% converted to USDG for SyncNet treasury' in _heh
 assert 'SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes' in _hej
 assert 'Send only the exact quoted amount before the quote expires. Late or duplicate payments cannot be automatically refunded.' in _hej
-assert 'oracle' not in (_heh+_hej).lower() and '15.60' not in _heh+_hej
+assert 'oracle' not in (_heh+_hej).lower() and '15.60' not in _heh+_hej and '4.80' not in _heh+_hej
 for _step in ['Quote ready','Payment seen','Activated','Finalized']: assert _step in _heh, _step
 assert "action: 'reconcile'" in _hej and 'syncnet_home_pay_' in _hej and "view: 'status'" in _hej  # UI-triggered finality + recovery
 _sink=(root/'contracts/project-home-sink/src/SyncNetProjectHomeSink.sol').read_text()

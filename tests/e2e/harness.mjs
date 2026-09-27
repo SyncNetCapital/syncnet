@@ -82,8 +82,13 @@ export const LAUNCHES = [
   { token: A.CREATORLIVE, website: 'https://oplive.example/', name: 'Operator Live', symbol: 'OPLIVE', deployer: A.WALLET, createdAt: iso(3), feeMode: 'creator', creatorFeeRecipient: A.WALLET, markets: [m(A.CASHCAT, 'CASHCAT')] },
   ...Array.from({ length: 6 }, (_, i) => ({ token: '0x8' + String(i).repeat(39), name: 'Cat Friend ' + i, symbol: 'CATF' + i, deployer: A.OTHER_EOA, createdAt: iso(i + 1), feeMode: 'holders', markets: [m(A.CASHCAT, 'CASHCAT'), m(A.SYNC, 'SYNC')] })),
 ];
+// Visual-QA only (never set by the suites): real projects read from Robinhood Chain on 27 Sep 2026, so screenshots use real
+// content. Quantum Ex (PAR multi factory): holder-vault fees, markets USDG + QBTS.
+export const QA = { QEX: '0x8fe7bd7093a2106c1c66f2f23081396c1bda862c', QBTS: '0xc583c60aef9dc401da72cec1b404743a93cea1cc' };
+if (process.env.SYNCNET_QA_FIXTURES === '1') LAUNCHES.push({ token: QA.QEX, website: 'https://quantumex.net/', name: 'Quantum Ex', symbol: 'QEX', description: 'She left you. She didn\'t. Quantum Ex is a relationship in superposition across multiple timelines on Robinhood Chain.', createdAt: iso(5), deployer: '0xbee19e9348824ab03fd7e965f45002176d23320b', feeMode: 'holders', markets: [m(A.USDG, 'USDG'), m(QA.QBTS, 'QBTS')] });
 const byAddr = new Map(LAUNCHES.map((l) => [lc(l.token), l]));
 const ERC = { [lc(A.SYNC)]: ['SyncNet', 'SYNC'], [lc(A.USDG)]: ['Global Dollar', 'USDG'], [lc(A.PONS)]: ['PONS', 'PONS'], [lc(A.CASHCAT)]: ['CASHCAT', 'CASHCAT'], [lc(A.SYNCAT)]: ['SYNCAT', 'SYNCAT'], [lc(A.NET)]: ['NET', 'NET'], [lc(A.FAKESYNC)]: ['SyncNet', 'SYNC'], [lc(A.RANDOM_CONTRACT)]: ['Random', 'RND'] };
+if (process.env.SYNCNET_QA_FIXTURES === '1') Object.assign(ERC, { [QA.QEX]: ['Quantum Ex', 'QEX'], [QA.QBTS]: ['QBTS', 'QBTS'] });
 Object.assign(ERC, { [lc(A.PONS2)]: ['Pons Alpha', 'PALPHA'], [lc(A.PONS2_ETH)]: ['Pons Ether', 'PETH'], [lc(A.PONS2_CONTRACT)]: ['Pons Vaulted', 'PVAULT'], [lc(A.PONS2_PENDING)]: ['Pons Pending', 'PPEND'], [lc(A.PONS1)]: ['Pons Legacy', 'PLEG'], [lc(A.PONS1_LEGACY)]: ['Pons Genesis', 'PGEN'] });
 
 // ---- mutable chain state
@@ -120,7 +125,7 @@ export function resetChain() { Object.assign(chain, freshChain()); }
 
 class Revert extends Error {}
 const PONS_V2_FACTORY = Origins.PONS_V2_FACTORY, PONS_V1_FACTORIES = Origins.PONS_V1_FACTORIES.map((f) => f.address);
-const CONTRACTS = new Set([PONS_V2_FACTORY, ...PONS_V1_FACTORIES, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), lc(A.PONS1_LEGACY), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
+const CONTRACTS = new Set([...(process.env.SYNCNET_QA_FIXTURES === '1' ? [QA.QBTS] : []), PONS_V2_FACTORY, ...PONS_V1_FACTORIES, lc(A.PONS2), lc(A.PONS2_ETH), lc(A.PONS2_CONTRACT), lc(A.PONS2_PENDING), lc(A.PONS1), lc(A.PONS1_LEGACY), A.SYNC, A.SYNCAT, A.CASHCAT, A.NET, A.USDG, A.PONS, A.PONS_FAKE, A.EVIL, A.CREATORLIVE, A.FAKESYNC, A.RANDOM_CONTRACT, A.SAFE, R.multiFactory, R.multiRouter, R.quotePricer, R.holderVault, R.burnVault, R.floorVault, R.factory, R.weth, R.poolManager, R.swapRouter02, R.feeEscrow, ...LAUNCHES.map((l) => l.token)].map(lc));
 function hasCode(a) {
   a = lc(a);
   if (chain.tokens.has(a)) return true;
@@ -494,7 +499,7 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   if (projectHome) {
     PRICING.rates.push({ ...PH_TEST_RATE });
     DEPLOYMENT.deployments.push({ sink: PH_SINK, converter: PH_CONVERTER });
-    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: String(PH_TEST_RATE.rateVersion), PROJECT_HOME_SINK_ADDRESS: PH_SINK });
+    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_RATE_VERSION: String(PH_TEST_RATE.rateVersion), PROJECT_HOME_SINK_ADDRESS: PH_SINK });
     if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
   }
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));

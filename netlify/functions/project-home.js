@@ -12,7 +12,7 @@
  *   GET  /api/project-home?view=metrics                 truthful metrics: verified payments, sink, converter, USDG
  *   POST /api/project-home {action:'intent'|'verify'|'reconcile'|'publish'|'unpublish', …}
  *
- * Economic model: PROJECT HOME ACTIVATION is priced at $39 USD (reviewed price version), paid ONLY in $SYNC at the
+ * Economic model: PROJECT HOME ACTIVATION is priced at $12 USD (reviewed price version 2), paid ONLY in $SYNC at the
  * SYNCNET REFERENCE RATE (reviewed rate version — not an oracle), to the immutable SyncNetProjectHomeSink (60% burned
  * on settle(); 40% forwarded as SYNC to the immutable treasury converter, which converts it to USDG for the SyncNet
  * protocol treasury — downstream accounting that activation NEVER waits for). One-time, per token, non-refundable;
@@ -630,6 +630,9 @@ async function projectFacts(rpc, token) {
     token, name: live.snapshot.name, symbol: live.snapshot.symbol, decimals: live.meta ? live.meta.decimals : null,
     origin: { launchpad: live.origin.launchpad, label: live.origin.label, factory: lc(live.origin.factory) },
     deployer: lc(live.launch.deployer), markets,
+    // Where creator fees go (display only, from the live classification): a PAR vault mode, 'creator' for a wallet, else ''.
+    feeMode: live.feeRight && live.feeRight.kind === 'vault' ? String(live.feeRight.vault || '') : live.feeRight && live.feeRight.kind === 'wallet' ? 'creator' : '',
+    feeRecipient: live.feeRight && live.feeRight.kind === 'wallet' ? lc(live.feeRight.recipient) : '',
     onchainWebsite: Core.sanitizeForDisplay(website, { maxLength: 200 }),
     readAt: new Date().toISOString(),
   };

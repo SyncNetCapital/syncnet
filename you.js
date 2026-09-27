@@ -43,7 +43,7 @@
     const t = esc(it.token), h = it.home, editor = `/home-editor.html?token=${t}`;
     if (!it.passport) return { state: 'unclaimed', text: 'Unclaimed · you can sync it', action: `<a href="/project/${t}">Sync project →</a>` };
     if (h && h.state === 'awaiting') return { state: 'synced', text: 'Home needs your review', action: `<a class="sn-btn primary" href="${editor}&review=1">REVIEW &amp; ADOPT</a>` };
-    if (it.listing) return { state: 'synced', text: `<span class="sn-copper">For sale</span> · <span class="sn-num">${esc(it.listing.price)} ${esc(it.listing.currency)}</span>`, action: `<a href="/marketplace.html#listing=${esc(it.listing.id)}">View listing →</a>` };
+    if (it.listing) return { state: 'synced', text: `<span class="sn-sale">For sale</span> · <span class="sn-num">${esc(it.listing.price)} ${esc(it.listing.currency)}</span>`, action: `<a href="/marketplace.html#listing=${esc(it.listing.id)}">View listing →</a>` };
     if (h && h.state === 'paused') return { state: 'synced', text: 'Home suspended', action: `<a href="${editor}">Check status →</a>` };
     if (h && h.state === 'live') return { state: 'synced', text: 'Synced · Home live', action: `<a href="${editor}">Edit home →</a>` };
     if (h && h.state === 'unpublished') return { state: 'synced', text: 'Synced · Home unpublished', action: `<a href="${editor}">Edit home →</a>` };

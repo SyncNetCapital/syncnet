@@ -1,5 +1,18 @@
 # Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
 
+## Project Home V3 product refinement: $12 price, website renderer, builder, one-accent identity: 27 Sep 2026
+
+- **Price:** reviewed `priceVersion 2` = 1200 cents ($12 one-time) is the active public price; v1 is kept as history.
+  No new reference rate (rate v2 has expired, so payments stay closed). Architecture, split and contracts are unchanged.
+- **Public Project Home:** redesigned as a project website (hero, About, Markets & economy, Verified facts, collapsed
+  Verified details). CLEAN, DARK and TERMINAL differ in type and structure. Still zero JavaScript and the same CSP.
+  `projectFacts` adds display-only `feeMode` / `feeRecipient`.
+- **Editor:** site-builder layout with a real-width scaled preview (desktop/mobile), preset cards, image thumbnails and a
+  $12 offer card.
+- **Shell:** a larger header with an inline SVG convergence mark; a search-led Explore with a factual network panel;
+  a Project Page identity head (large logo, on-chain description for PAR tokens except impostors, action buttons).
+- **Identity:** black / bone / cyan only. Copper and warm state colours removed; states use marks and borders.
+
 ## Project Home V3 canary: SYNCNET REFERENCE RATE v2: 27 Sep 2026
 
 - Rate v1 expired at 02:15Z and is unchanged. Added **v2 = 0.0000409 USD/SYNC**, effective 2026-09-27T05:05Z, expiring

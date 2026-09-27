@@ -3,7 +3,7 @@
  *
  * Rows keep independent dimensions apart:
  *   SYNC STATE   Unclaimed / Synced (a Project Passport exists)            — shape glyph + label
- *   MARKET       For sale (an ACTIVE operator-signed listing), Home live  — copper only for "For sale"
+ *   MARKET       For sale (an ACTIVE operator-signed listing), Home live  — "For sale" is a bordered mark, no colour
  *   CONNECTIONS  direct markets + projects using it as a market; "Network hub" when widely used
  * Data: PAR launch history (/api/par-launches-all), the reviewed Registry (/syncnet-projects.json), live Marketplace
  * listings, and batch Passport / Home state. Search never implies an on-chain action: it opens a Project Page.
@@ -65,7 +65,21 @@
     for (const [t, n] of usedBy) { const r = state.rows.get(t); if (r) r.usedBy = n; }
     state.loaded = true;
     state.degraded = !launches.length;
+    stats(listings);
     await enrich(pool());
+  }
+
+  /** Network panel: counts that are COMPLETE for what Explore reads (indexed projects, active listings, launches paired
+   *  with $SYNC in the PAR history). Nothing partial (e.g. synced counts) is shown as a total. */
+  function stats(listings) {
+    const box = $('exploreStats');
+    if (!box || state.degraded) return;
+    const sync = state.rows.get('0x6368e007b9f0b941560ed1f3bceb20247f5eca37');
+    const fmt = (n) => Number(n || 0).toLocaleString('en-US');
+    $('exProjects').textContent = fmt([...state.rows.values()].filter((r) => r.name || r.symbol).length);
+    $('exSale').textContent = fmt(listings.filter((l) => l.status === 'ACTIVE').length);
+    $('exSyncUsers').textContent = fmt(sync ? sync.usedBy : 0);
+    box.hidden = false;
   }
 
   /** Candidate rows for the current filter/search (before sync-state enrichment). */
@@ -116,9 +130,9 @@
     // Same ticker as a canonical SyncNet asset but a different contract (confusable-aware): say so on the row.
     const canon = Core && r.symbol ? state.canonical.get(Core.confusableSkeleton(r.symbol)) : null;
     const impostor = canon && canon.token !== r.token ? `<span class="sn-flag">Not the canonical $${esc(canon.symbol)}</span>` : '';
-    const market = [impostor, r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : ''].filter(Boolean).join(' · ');
+    const market = [impostor, r.listing ? '<span class="sn-sale">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : ''].filter(Boolean).join(' · ');
     const connText = hub ? `Network hub · <span class="sn-num">${conn}</span>` : conn ? `<span class="sn-num">${conn}</span>` : '—';
-    const mobileFacts = [impostor, r.listing ? '<span class="sn-copper">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : '', hub ? 'Network hub' : conn ? `${conn} connection${conn === 1 ? '' : 's'}` : ''].filter(Boolean).slice(0, 2).join(' · ');
+    const mobileFacts = [impostor, r.listing ? '<span class="sn-sale">For sale</span>' : '', home && home.state === 'live' ? 'Home live' : '', hub ? 'Network hub' : conn ? `${conn} connection${conn === 1 ? '' : 's'}` : ''].filter(Boolean).slice(0, 2).join(' · ');
     const name = r.name || r.symbol || UI.short(r.token);
     const letter = (r.symbol || r.name || '·').charAt(0);
     const label = `${name}${r.symbol ? ' ($' + r.symbol + ')' : ''}, ${UI.LABEL[syncState]}${impostor ? ', not the canonical $' + canon.symbol : ''}${r.listing ? ', for sale' : ''}`;

@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-27T05:01:26.945Z",
-  "passed": 97,
+  "at": "2026-09-27T06:32:06.648Z",
+  "passed": 101,
   "failed": 0,
   "results": [
     {
@@ -289,7 +289,7 @@
       "detail": ""
     },
     {
-      "name": "repo pricing file: price v1 = 3900 cents ($39 USD) — the initial launch price",
+      "name": "repo pricing file: price v2 = 1200 cents ($12 USD) — the ACTIVE public price; v1 (3900) kept unchanged as reviewed history",
       "ok": true,
       "detail": ""
     },
@@ -315,6 +315,11 @@
     },
     {
       "name": "repo rate v2 window: 2026-09-27T05:05Z → 11:05Z (6 h), starts after v1 expired",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "$12 at rate v2 = 293,398.533007334963325184 SYNC (rounded UP)",
       "ok": true,
       "detail": ""
     },
@@ -370,6 +375,21 @@
     },
     {
       "name": "canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ACTIVE config (price v2 = $12, rate v2) inside the rate window → payments open at 1200 cents",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "price v2 selected with the OLD cents (3900) → payments closed (env can never re-introduce $39)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ACTIVE config after rate v2 expired → payments closed naturally (no new rate in this pass)",
       "ok": true,
       "detail": ""
     },

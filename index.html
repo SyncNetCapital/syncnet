@@ -5,19 +5,27 @@
 <meta property="og:title" content="SyncNet — Sync your project"><meta property="og:description" content="Find a project. Verify control. Give it a home."><meta property="og:url" content="https://syncnet.capital"><meta property="og:image" content="https://syncnet.capital/assets/syncnet-logo.png">
 <link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png">
 </head><body class="sn-explore">
-<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><img src="/assets/syncnet-logo-thumb.webp" width="28" height="28" alt=""><span>SyncNet</span></a><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><svg class="sn-mark" viewBox="0 0 40 24" aria-hidden="true" focusable="false"><path class="sn-mark-a" d="M2 5.5h13c8.5 0 10 6.5 17 6.5"/><path d="M2 18.5h13c8.5 0 10-6.5 17-6.5"/><path d="M32 12h6"/></svg><span>SyncNet</span></a><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
 <main class="sn-main" id="main">
 <section class="sn-wrap sn-intro" aria-labelledby="exploreTitle">
+<div class="ex-hero">
+<div class="ex-main">
 <h1 class="sn-h1" id="exploreTitle">Sync your project.</h1>
 <p class="sn-lede">Find a project. Verify control. Give it a home.</p>
-<p class="sn-context" id="exploreContext"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a>, the network asset, has direct markets with NET and USDG.</p>
 <form class="sn-search" id="exploreSearch" role="search" action="/" method="get">
-<svg class="sn-motif" viewBox="0 0 72 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1.5H22C42 1.5 50 15 72 15" stroke="#6fd3df" stroke-opacity=".7"/><path d="M0 28.5H22C42 28.5 50 15 72 15" stroke="#cf9165" stroke-opacity=".7"/></svg>
+<svg class="sn-motif" viewBox="0 0 72 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1.5H22C42 1.5 50 15 72 15" stroke="#6fd3df" stroke-opacity=".7"/><path d="M0 28.5H22C42 28.5 50 15 72 15" stroke="#ece6d8" stroke-opacity=".55"/></svg>
 <label class="sr-only" for="exploreQ">Search projects by name, ticker or contract</label>
-<input id="exploreQ" name="q" type="search" placeholder="Name, ticker or contract" autocomplete="off" spellcheck="false" enterkeyhint="go">
+<input id="exploreQ" name="q" type="search" placeholder="Search a project by name, ticker or contract" autocomplete="off" spellcheck="false" enterkeyhint="go">
 <button type="submit" aria-label="Open project">→</button>
 </form>
-<p class="sn-small" style="margin:14px 0 0"><a class="sn-textbtn" href="/build.html">+ Create a new project</a></p>
+<p class="ex-under"><a class="sn-textbtn" href="/build.html">+ Create a new project</a><span class="sn-muted">Searching opens a Project Page. Nothing is signed.</span></p>
+</div>
+<aside class="ex-net" aria-label="Network">
+<p class="sn-label">Robinhood Chain · the network</p>
+<p class="sn-context" id="exploreContext"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a>, the network asset, has direct markets with NET and USDG.</p>
+<dl class="ex-stats" id="exploreStats" hidden><div><dt>Projects</dt><dd class="sn-num" id="exProjects"></dd></div><div><dt>For sale</dt><dd class="sn-num" id="exSale"></dd></div><div><dt>$SYNC pairs</dt><dd class="sn-num" id="exSyncUsers"></dd></div></dl>
+</aside>
+</div>
 <div class="sn-filters" role="toolbar" aria-label="Show projects">
 <button type="button" data-filter="all" aria-pressed="true">All</button>
 <button type="button" data-filter="synced" aria-pressed="false">Synced</button>

@@ -105,7 +105,7 @@ await suite('Explore · Synced AND For sale are independent dimensions', async (
   const row = page.locator(`#exploreList a[href="/project/${T}"]`);
   const rowText = (await row.innerText()).replace(/\s+/g, ' ');
   check('row shows Synced (sync state) and For sale (market) together', /Synced/.test(rowText) && /For sale/.test(rowText), rowText);
-  check('synced glyph is one line; for-sale is copper text, not a state', (await row.locator('.sn-d-col svg[data-glyph]').getAttribute('data-glyph')) === 'synced' && (await row.locator('.sn-copper').count()) >= 1);
+  check('synced glyph is one line; for-sale is a bordered neutral mark (no second colour), not a state', (await row.locator('.sn-d-col svg[data-glyph]').getAttribute('data-glyph')) === 'synced' && (await row.locator('.sn-sale').count()) >= 1);
   await page.click('[data-filter="synced"]'); await page.waitForTimeout(200);
   check('Synced filter keeps it', (await page.locator(`#exploreList a[href="/project/${T}"]`).count()) === 1);
   await page.click('[data-filter="sale"]'); await page.waitForTimeout(200);
@@ -229,17 +229,19 @@ await suite('Project Home editor · V1 schema, validation, preview under the pro
   await p.goto(BASE + '/home-editor.html?token=' + T); await p.waitForSelector('#heGrid:not([hidden])', { timeout: 20000 });
   check('control groups: STYLE / CONTENT / LINKS / SECTIONS', (await p.$$eval('#heForm legend', (l) => l.map((x) => x.textContent).join('|'))) === 'Style|Content|Links|Sections');
   check('no HTML / CSS / Markdown / embed / AI inputs', (await p.$$eval('#heForm textarea', (t) => t.length)) === 1 && !/html|css|markdown|embed|\bAI\b/i.test(await text(p, '#heForm')));
-  await p.check('input[name="preset"][value="TERMINAL"]'); await p.selectOption('#heAccent', 'GREEN');
+  await p.check('input[name="preset"][value="TERMINAL"]'); await p.selectOption('#heAccent', 'SLATE');
   await p.fill('#heHeadline', 'Hello from the operator'); await p.fill('#heAbout', 'Line one.\n\nLine two.');
   await p.selectOption('#heCtaLabel', 'TRADE'); await p.fill('#heCtaUrl', 'https://par.family/token/' + T); await p.fill('#heX', '@oplive');
   await p.uncheck('[data-section="socials"]'); await p.waitForTimeout(300);
   const doc = await p.$eval('#hePreview', (f) => f.srcdoc);
   check('preview: the pure renderer in preview mode (watermark, noindex)', doc.includes('<div class="watermark">PREVIEW · NOT PUBLISHED</div>') && doc.includes('noindex'));
-  check('preview: operator text, preset and accent applied', doc.includes('Hello from the operator') && doc.includes('preset-terminal accent-green'));
+  check('preview: operator text, preset and accent applied', doc.includes('Hello from the operator') && doc.includes('preset-terminal accent-slate'));
   check('preview: no clickable link, no script, socials hidden by the Sections switch', !/<a /.test(doc) && !/<script/i.test(doc) && !/@?oplive/.test(doc.split('Socials')[1] || ''));
   check('preview iframe: sandbox without script permission', (await p.getAttribute('#hePreview', 'sandbox')) === 'allow-same-origin');
   check('preview: no public URL (srcdoc, about:srcdoc)', (await p.getAttribute('#hePreview', 'src')) === null && p.frames().some((f) => f.url() === 'about:srcdoc'));
   check('draft saved in this browser only', /Hello from the operator/.test(await p.evaluate((t) => localStorage.getItem('syncnet_home_draft_' + t), T)));
+  await p.reload(); await p.waitForSelector('#heGrid:not([hidden])', { timeout: 20000 }); await p.waitForTimeout(300);
+  check('reopening the editor restores every field of the saved draft (headline, about, preset, accent)', (await p.inputValue('#heHeadline')) === 'Hello from the operator' && (await p.inputValue('#heAbout')) === 'Line one.\n\nLine two.' && (await p.isChecked('input[name="preset"][value="TERMINAL"]')) && (await p.inputValue('#heAccent')) === 'SLATE');
   // validation
   await p.fill('#heCtaUrl', 'http://insecure.example'); await p.waitForTimeout(200);
   check('validation: http:// link refused inline', /Button link must start with https:\/\//.test(await text(p, '#heErrors')));
@@ -283,7 +285,7 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   await p.goto(BASE + '/home-editor.html?token=' + T); await p.waitForSelector('#heBar:not([hidden])', { timeout: 20000 });
   check('progressive: payment details stay hidden until Continue', await p.locator('#hePay').isHidden() && (await text(p, '#hePrimary')) === 'Continue to activation');
   await p.click('#hePrimary');
-  check('activation copy: $39 ONE-TIME · Pay with $SYNC · 60% burned · 40% converted to USDG', /\$39/.test(await text(p, '.he-price')) && /Pay with \$SYNC · 60% burned · 40% converted to USDG for SyncNet treasury/.test(await text(p, '#hePay')));
+  check('activation copy: $12 ONE-TIME · Pay with $SYNC · 60% burned · 40% converted to USDG', /\$12/.test(await text(p, '.he-price')) && !/\$39/.test(await text(p, 'body')) && /Pay with \$SYNC · 60% burned · 40% converted to USDG for SyncNet treasury/.test(await text(p, '#hePay')));
   await p.click('#heQuoteBtn'); await p.waitForSelector('#hePayBtn', { timeout: 15000 });
   const q = await text(p, '#heQuote');
   check('QUOTE READY: exact amount, sink, SYNCNET REFERENCE RATE locked 30 minutes, countdown', /\$SYNC/.test(q) && /SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes/.test(q) && /2\d:\d\d|30:00/.test(await text(p, '#heLeft')));

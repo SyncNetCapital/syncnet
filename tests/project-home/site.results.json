@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-27T05:01:46.937Z",
-  "passed": 149,
+  "at": "2026-09-27T06:32:08.882Z",
+  "passed": 163,
   "failed": 0,
   "results": [
     {
@@ -745,6 +745,76 @@
     },
     {
       "name": "renderer source never emits a style= attribute or <script",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V3 hierarchy: authority → identity → headline → About → Markets → Verified facts → Verified details → footer",
+      "ok": true,
+      "detail": "14554,14672,14982,15934,16206,16815,17456,18715"
+    },
+    {
+      "name": "raw full addresses appear ONLY inside the collapsed Verified details",
+      "ok": true,
+      "detail": "17621,18273,17944,17849,18169"
+    },
+    {
+      "name": "Verified details collapsed by default and every full address select-to-copy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "quote asset recognised BY ADDRESS: USDG address shows $USDG even when its contract claims another symbol",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "economy: holder-vault fee flow shown in human terms, never an amount",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown fee mode renders nothing (no free text from facts)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "after transfer: SYNCED WEBSITE · PUBLISHED BY PREVIOUS OPERATOR · AWAITING CONFIRMATION, links disabled",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "hero image renders as a figure; without one the hero is still complete (identity tile)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "presets render distinct body classes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "presets differ in type and structure, not only colour (serif CLEAN, heavy DARK band, mono TERMINAL prompts)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "design standard: no gradient, shadow, glow, blur or glass in the site stylesheet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "one brand accent: every accent resolves to cyan (deeper cyan on bone) or monochrome; no warm or violet colour anywhere",
+      "ok": true,
+      "detail": "#6fd3df,#ece6d8,#17707c,#141312"
+    },
+    {
+      "name": "tap targets: CTA ≥ 48px, social links ≥ 44px, details summary ≥ 44px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no internal navigation links: the only hrefs are the operator CTA and socials",
       "ok": true,
       "detail": ""
     }

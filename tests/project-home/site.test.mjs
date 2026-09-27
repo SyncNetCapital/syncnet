@@ -165,6 +165,36 @@ check(`static render audit: ${audited} hostile renders, no script/iframe/object/
 check('the static stylesheet contains no url(), @import or expression()', !/url\(|@import|expression\(|javascript:/i.test(Site.STYLESHEET));
 check('renderer source never emits a style= attribute or <script', !/style=|<script/i.test(fs.readFileSync(path.join(ROOT, 'lib/syncnet-site.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')));
 
+
+// ---------------------------------------------------------------- V3 website hierarchy: identity → story → markets → facts → details
+{
+  const F = { ...facts, feeMode: 'holders', markets: [{ pairToken: '0x5fc5360d0400a0fd4f2af552add042d716f1d168', symbol: 'FAKE' }, { pairToken: '0x' + '33'.repeat(20), symbol: 'CASHCAT' }] };
+  const h = Site.render({ config: full, facts: F, authority: { signer: OP }, mode: 'published', revision: { configHash: '0x' + 'ab'.repeat(32), issuedAt: 1790000000 } });
+  const at = (x) => h.indexOf(x);
+  const order = ['class="authority"', '<header class="identity">', 'class="headline"', '<h2>About</h2>', '<h2>Markets</h2>', '<h2>Verified facts</h2>', '<details>', '<footer>'];
+  check('V3 hierarchy: authority → identity → headline → About → Markets → Verified facts → Verified details → footer', order.every((x, i) => at(x) >= 0 && (i === 0 || at(order[i - 1]) < at(x))), order.map(at).join(','));
+  const raw = [TOKEN, OP, facts.deployer, facts.origin.factory, '0x' + '33'.repeat(20)];
+  check('raw full addresses appear ONLY inside the collapsed Verified details', raw.every((a) => at(a) > at('<details>')), raw.map(at).join(','));
+  check('Verified details collapsed by default and every full address select-to-copy', !/<details open/.test(h) && (h.match(/<code class="addr">0x[0-9a-f]{40}<\/code>/g) || []).length >= 5 && /user-select:all/.test(Site.STYLESHEET));
+  check('quote asset recognised BY ADDRESS: USDG address shows $USDG even when its contract claims another symbol', h.includes('$USDG') && !h.includes('$FAKE'));
+  check('economy: holder-vault fee flow shown in human terms, never an amount', h.includes('Creator fees fund holder rewards') && h.includes('Not guaranteed'));
+  const odd = Site.render({ config: full, facts: { ...F, feeMode: '<img src=x>' }, authority: { signer: OP } });
+  check('unknown fee mode renders nothing (no free text from facts)', !odd.includes('Creator fees') && !odd.includes('<img src=x'));
+  const staleH = Site.render({ config: full, facts: F, authority: { signer: '0x' + 'ee'.repeat(20) }, mode: 'published' });
+  check('after transfer: SYNCED WEBSITE · PUBLISHED BY PREVIOUS OPERATOR · AWAITING CONFIRMATION, links disabled', staleH.includes('SYNCED WEBSITE · ' + Site.PREVIOUS_LABEL) && staleH.includes('Awaiting confirmation') && !/href=/.test(staleH) && staleH.includes('aria-disabled="true"'));
+  const withHero = Site.render({ config: norm({ heroCid: cidOk }).config, facts: F, authority: { signer: OP } });
+  const noHero = Site.render({ config: norm({}).config, facts: F, authority: { signer: OP } });
+  check('hero image renders as a figure; without one the hero is still complete (identity tile)', withHero.includes('<figure class="media">') && !noHero.includes('<figure') && noHero.includes('class="tile"'));
+  const presets = Site.PRESETS.map((p) => Site.render({ config: norm({ preset: p }).config, facts: F, authority: { signer: OP } }));
+  check('presets render distinct body classes', presets.every((x, i) => x.includes('class="preset-' + Site.PRESETS[i].toLowerCase() + ' ')));
+  check('presets differ in type and structure, not only colour (serif CLEAN, heavy DARK band, mono TERMINAL prompts)', /\.preset-clean\{[^}]*--disp:var\(--serif\)/.test(Site.STYLESHEET) && Site.STYLESHEET.includes('.preset-dark .hero.has-img .media img{aspect-ratio:16/9') && /\.preset-terminal\{[^}]*--sans:var\(--mono\)/.test(Site.STYLESHEET) && Site.STYLESHEET.includes('.preset-terminal .headline::before{content:"> "'));
+  check('design standard: no gradient, shadow, glow, blur or glass in the site stylesheet', !/gradient|box-shadow|text-shadow|blur\(|backdrop|filter:drop/i.test(Site.STYLESHEET));
+  const accs = [...Site.STYLESHEET.matchAll(/--acc:(#[0-9a-f]{6})/gi)].map((m) => m[1].toLowerCase());
+  check('one brand accent: every accent resolves to cyan (deeper cyan on bone) or monochrome; no warm or violet colour anywhere', accs.length >= 4 && accs.every((c) => ['#6fd3df', '#17707c', '#ece6d8', '#141312'].includes(c)) && !/#cf9165|#e0b36d|#e59a8f|#9a5328|#8a5212|#b45309|#bca3b9|#7c3aed|#6366f1|#4f46e5|#8b5cf6|orange|amber|copper/i.test(Site.STYLESHEET.replace(/\.accent-[a-z]+/g, '')), accs.join(','));
+  check('tap targets: CTA ≥ 48px, social links ≥ 44px, details summary ≥ 44px', /\.ext\{[^}]*min-height:48px/.test(Site.STYLESHEET) && /\.ext\.social\{[^}]*min-height:44px/.test(Site.STYLESHEET) && /summary\{[^}]*min-height:64px/.test(Site.STYLESHEET));
+  check('no internal navigation links: the only hrefs are the operator CTA and socials', (h.match(/href=/g) || []).length === 2);
+}
+
 const passed = results.filter((r) => r.ok).length;
 fs.writeFileSync(path.join(ROOT, 'tests/project-home/site.results.json'), JSON.stringify({ at: new Date().toISOString(), passed, failed: failures, results }, null, 2));
 console.log(`${passed}/${results.length} project-home site checks passed`);

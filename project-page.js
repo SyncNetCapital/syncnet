@@ -61,9 +61,16 @@
     } else { warn.hidden = true; warn.textContent = ''; }
     const acts = [];
     // On an impostor, trading is still possible but is labelled by contract, never by the protected ticker alone.
-    if (P.tradeUrl) acts.push(`<a href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">${imp ? `Trade contract ${esc(short(P.token))} on PAR ↗` : 'Trade on PAR ↗'}</a>`);
+    if (P.tradeUrl) acts.push(`<a class="sn-btn" href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">${imp ? `Trade contract ${esc(short(P.token))} on PAR ↗` : 'Trade on PAR ↗'}</a>`);
     acts.push(`<a href="https://robinhoodchain.blockscout.com/address/${esc(P.token)}" target="_blank" rel="noreferrer">View on explorer ↗</a>`);
     $('pjActions').innerHTML = acts.join('');
+    // The token's own on-chain description (PAR metadata), clearly attributed. Never shown for a ticker impostor, whose
+    // self-description could impersonate the canonical project.
+    const desc = $('pjDesc');
+    if (desc) {
+      if (P.description && !imp) { desc.innerHTML = `${esc(P.description)}<span class="pj-desc-src">From the token’s on-chain metadata</span>`; desc.hidden = false; }
+      else { desc.hidden = true; desc.textContent = ''; }
+    }
   }
 
   // ------------------------------------------------------------------ rows

@@ -17,7 +17,7 @@ not prove the identity of the historical or original team.
 | | |
 |---|---|
 | Product | PROJECT HOME · ONE-TIME ACTIVATION, per token/project |
-| Price | **$39 USD** (`priceUsdCents 3900`, `priceVersion 1`: the initial launch price) |
+| Price | **$12 USD** (`priceUsdCents 1200`, `priceVersion 2`: the ACTIVE public price; `priceVersion 1` = 3900 is kept as reviewed history and never selected) |
 | Paid in | **$SYNC only** (`0x6368e007b9f0b941560ed1f3bceb20247f5eca37`, 18 decimals), chain 4663 |
 | Conversion | SYNCNET REFERENCE RATE: server-controlled and versioned. It is **not an oracle** |
 | Rate lock | 30 minutes, judged by the **block timestamp of the payment** |
@@ -27,13 +27,13 @@ not prove the identity of the historical or original team.
 | Free after activation | edits, revisions, unpublish, republish, preset changes, adoption after a Passport transfer |
 | Lifetime | active for as long as SyncNet operates the Project Home service |
 
-Customer-facing copy (Phase 2): **"$39 one-time · Pay with $SYNC · ≈ X SYNC · SyncNet reference rate · locked for
+Customer-facing copy (Phase 2): **"$12 one-time · Pay with $SYNC · ≈ X SYNC · SyncNet reference rate · locked for
 30 minutes · 60% burned · 40% converted to USDG for SyncNet treasury."** Never promise a USDG amount (for example
 "treasury receives $15.60"): the treasury receives whatever the conversion actually produces.
 
 Two different rates are involved and must never be conflated:
 
-- The **SYNCNET REFERENCE RATE** (reviewed, versioned) decides how much SYNC the customer pays for $39.
+- The **SYNCNET REFERENCE RATE** (reviewed, versioned) decides how much SYNC the customer pays for $12.
 - The **ACTUAL DEX EXECUTION RATE** (the live PAR SYNC/USDG pool, after its ~2.1% fee and price impact) decides how much
   USDG the treasury later receives for its 40% allocation.
 
@@ -45,7 +45,7 @@ with no HTTP route (`grantComplimentary`). It is labelled `COMPLIMENTARY` and ne
 All arithmetic is BigInt. No floating point is used anywhere.
 
 ```
-priceUsdCents   integer US cents                           3900   = $39.00
+priceUsdCents   integer US cents                           1200   = $12.00
 rateUsdE18      integer USD per 1 whole SYNC × 10^18         5e13   = $0.00005 / SYNC   (decimal string, <= 18 decimals)
 amounts         integer SYNC wei (18 decimals)
 
@@ -407,8 +407,8 @@ activation, because allocations are pooled before they are converted.
 ```
 SYNCNET_PROJECT_HOME_ENABLED=true            # default: closed (site reads/writes, /site, /site-img)
 SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   # default: closed
-PROJECT_HOME_PRICE_VERSION=1
-PROJECT_HOME_PRICE_USD_CENTS=3900            # must equal the reviewed price ($39)
+PROJECT_HOME_PRICE_VERSION=2
+PROJECT_HOME_PRICE_USD_CENTS=1200            # must equal the reviewed price ($12, price version 2)
 PROJECT_HOME_RATE_VERSION=<n>                # must be reviewed, effective, not expired
 PROJECT_HOME_SINK_ADDRESS=<deployed sink>    # no default
 SYNCNET_RPC_URL=https://…                    # preferred private RPC (public RPC works for development)
@@ -558,8 +558,8 @@ Preview-only configuration (Netlify UI → Environment variables → scope to **
 |---|---|
 | `SYNCNET_PROJECT_HOME_ENABLED` | `true` |
 | `SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED` | `true` |
-| `PROJECT_HOME_PRICE_VERSION` | `1` |
-| `PROJECT_HOME_PRICE_USD_CENTS` | `3900` |
+| `PROJECT_HOME_PRICE_VERSION` | `2` |
+| `PROJECT_HOME_PRICE_USD_CENTS` | `1200` (price version 2, $12) |
 | `PROJECT_HOME_RATE_VERSION` | `2` (v1 expired; see below) |
 | `PROJECT_HOME_SINK_ADDRESS` | `0xc32fb194a0a2bc5fa313febd2de5096ca467213d` |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | a durable store (preferably a preview-only database) |
@@ -577,4 +577,55 @@ since. Depth: a 950k-SYNC sale (≈ $39) adds 0.65% price impact, 5M adds 3.3%. 
 
 $39 at v2 = base **953,545.232273838630806846 SYNC** (rounded up). Each quote adds its random tag of less than 2×10⁻⁶ SYNC.
 Before paying, re-check the mid. If it moved more than 3% from 0.000040985, add v3 and leave v2 unchanged.
+
+## 17. V3 product refinement (27 Sep 2026): $12 price, website renderer, builder, identity
+
+**Price.** The active public price is **$12 one-time** (`priceVersion 2` = 1200 cents), paid in $SYNC: 60% burned, 40%
+converted to USDG for the SyncNet treasury. `priceVersion 1` (3900) stays in the reviewed file as history and is never
+selected. Deployments select it with `PROJECT_HOME_PRICE_VERSION=2` and `PROJECT_HOME_PRICE_USD_CENTS=1200`. No new
+reference rate was added: rate v2 has expired, so payments stay closed until a fresh rate is reviewed in before the next
+canary. The payment, quote, rate, split, entitlement and contract architecture is unchanged.
+
+**Public renderer** (`lib/syncnet-site.js`, still zero JavaScript, one hashed stylesheet, same CSP). The page is now a
+project website, and verification supports it rather than leading it:
+1. authority bar (`SYNCED WEBSITE · PASSPORT OPERATOR VERIFIED`, or `SYNCED WEBSITE · PUBLISHED BY PREVIOUS OPERATOR ·
+   AWAITING CONFIRMATION` with every operator link disabled) and a site header (logo or monogram, name, ticker, origin);
+2. hero: the operator headline set large, the CTA with its destination host, social links, and the hero image. Without
+   an image, an identity tile keeps the hero complete;
+3. About, set editorially (the first paragraph as a lead);
+4. Markets & economy: pairs shown as `$TOKEN / $QUOTE` (quote assets recognised BY ADDRESS: USDG, NET, SYNC, ETH) and
+   the fee flow in human terms (e.g. "Creator fees fund holder rewards", no amounts);
+5. Verified facts: a compact strip (chain, token, origin, markets, Passport state) and the Passport disclaimer;
+6. Verified details, collapsed: every raw address in full (contract, factory, deployer, pairs, Passport operator, site
+   signer, signed configuration), select-to-copy (the page has no JavaScript, so there is no copy button).
+
+Presets differ structurally: **CLEAN** (bone, serif display, generous editorial space, side image), **DARK** (near-black,
+heavy sans display, full-width cinematic image band) and **TERMINAL** (mono, compact, framed `hero.png` / `token.json`
+windows, `>` prompt, `##` section rules).
+
+**Identity.** Black field, white/bone type, CYAN as the only accent. The operator accent is limited to Cyan or Mono;
+stored legacy accent values render cyan. For-sale, warning, error and impostor states use marks, borders and weight,
+never a second colour (legacy `v2.css` warm states are neutralised in `ui.css`).
+
+**Editor.** A site builder: grouped controls on the left (Style with preset cards and accent, Content with image
+thumbnails, Links, Sections) and the live website on a canvas at its REAL width (1280px desktop or 390px phone, scaled
+to fit) in the same sandboxed `srcdoc` iframe. The action bar stays in view. The activation panel shows what $12
+includes.
+
+**Images in a Deploy Preview.** The upload path is unchanged (wallet-signed upload session → server sanitiser → pin →
+`site:img:v1:<cid>` → same-origin `/site-img/<cid>` with SHA-256 verification). It is closed unless ALL of these are set
+for the preview context only:
+
+| Variable | Value |
+|---|---|
+| `SYNCNET_PUBLIC_UPLOADS` | `true` (wallet-signed uploads; per-wallet, per-IP and global quotas apply) |
+| `PINATA_JWT` | a Pinata JWT scoped to `pinFileToIPFS` only |
+| `SYNCNET_UPLOAD_KEY` | a random secret of at least 32 characters (signs upload sessions) |
+| `UPSTASH_REDIS_REST_URL` / `_TOKEN` | the preview durable store (also required for quotas and `site:img` records) |
+| `SYNCNET_PROJECT_HOME_ENABLED` | `true` (`/site-img` serves only while Project Home is enabled) |
+
+Optional: `SYNCNET_PIN_SECONDARY_URL` / `_TOKEN` (redundant pin). Without `SYNCNET_PUBLIC_UPLOADS`, only a founder upload
+session (`/api/canary-auth`, `SYNCNET_CANARY_KEY`) can upload. The editor then says "Image uploads are not open on this
+deployment", and a home works without images. Note: a Deploy Preview URL is reachable by anyone who has it, so
+`SYNCNET_PUBLIC_UPLOADS=true` there lets any wallet upload within the quotas.
 

@@ -41,7 +41,7 @@ const PAID = new Set(['ACTIVE', 'FINALIZED']);
 function page(statusCode, title, message) {
   const body = ['<!doctype html>', '<html lang="en">', '<head>', '<meta charset="utf-8">', '<meta name="viewport" content="width=device-width, initial-scale=1">',
     '<meta name="robots" content="noindex, nofollow">', `<title>${Site.escapeHtml(title)} · SyncNet</title>`, `<style>${Site.STYLESHEET}</style>`, '</head>',
-    '<body class="preset-clean accent-slate">', '<div class="wrap">', '<header class="identity">', `<h1>${Site.escapeHtml(title)}</h1>`, `<p>${Site.escapeHtml(message)}</p>`, '</header>', '</div>', '</body>', '</html>'].join('\n');
+    '<body class="preset-clean accent-slate">', '<div class="bar"><div class="wrap"><span>Project Home on SyncNet</span></div></div>', '<section class="hero solo"><div class="wrap"><div>', `<h1 class="headline name">${Site.escapeHtml(title)}</h1>`, `<p class="note">${Site.escapeHtml(message)}</p>`, '</div></div></section>', '</body>', '</html>'].join('\n');
   return { statusCode, headers: { ...HEADERS }, body };
 }
 const notFound = () => page(404, 'Not found', 'No SyncNet Project Home is published at this address.');

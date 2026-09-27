@@ -8,7 +8,7 @@
  *          sandbox grants no script permission); same-origin only so /site-img's Cross-Origin-Resource-Policy lets sanitised images load.
  *          Watermark "PREVIEW · NOT PUBLISHED", no clickable links, nothing stored or served by SyncNet, no public URL.
  *          The page CSP is unchanged and applies to the srcdoc document too (see docs/PROJECT_HOME.md).
- * ACTIVATE one-time $39 activation paid in $SYNC at the SYNCNET REFERENCE RATE: a signed ActivationRequest returns a
+ * ACTIVATE one-time $12 activation paid in $SYNC at the SYNCNET REFERENCE RATE: a signed ActivationRequest returns a
  *          locked exact amount (30 minutes); ONE ERC-20 transfer to the sink; the server verifies it from the chain.
  *          QUOTE READY → PAYMENT SEEN (confirming) → ACTIVATED → FINALIZED (later). The user may leave and return:
  *          recovery uses the server's own request state (status view) plus the tx hash remembered in this browser.
@@ -77,7 +77,10 @@
     if (project && project.origin === 'PAR') {
       try { const launch = await Chain.readLaunch(rpc, token); markets = (await Chain.readMarkets(rpc, token, launch)).slice(0, 5).map((m) => ({ pairToken: lc(m.pairToken), symbol: '' })); } catch { markets = []; }
     } else if (project && project.origin === 'PONS_V2' && project.pair) markets = [{ pairToken: lc(project.pair.address), symbol: project.pair.native ? 'ETH' : '' }];
+    let fee = null;
+    if (project && project.supported !== false) { try { fee = await Origins.classifyFeeRight(rpc, project); } catch { fee = null; } }
     return {
+      feeMode: fee && fee.kind === 'vault' ? String(fee.vault || '') : fee && fee.kind === 'wallet' ? 'creator' : '', feeRecipient: fee && fee.kind === 'wallet' ? lc(fee.recipient) : '',
       token, name: (meta && meta.name) || '', symbol: (meta && meta.symbol) || '',
       origin: project && project.supported !== false ? { launchpad: project.origin, label: project.label, factory: project.factory } : null,
       deployer: project ? lc(project.deployer) : '', markets, onchainWebsite: meta && meta.socials ? String(meta.socials.website || '') : '', passport: null,
@@ -89,7 +92,7 @@
   function fill(c) {
     const f = $('heForm');
     f.querySelectorAll('input[name="preset"]').forEach((r) => { r.checked = r.value === c.preset; });
-    $('heAccent').value = c.accent; $('heHeadline').value = c.headline; $('heAbout').value = c.about;
+    $('heAccent').value = c.accent === 'SLATE' ? 'SLATE' : 'BLUE' /* SyncNet offers cyan or monochrome only */; $('heHeadline').value = c.headline; $('heAbout').value = c.about;
     $('heCtaLabel').value = c.cta ? c.cta.label : ''; $('heCtaUrl').value = c.cta ? c.cta.url : '';
     f.querySelectorAll('[data-social]').forEach((i) => { i.value = (c.socials && c.socials[i.dataset.social]) || ''; });
     f.querySelectorAll('[data-section]').forEach((i) => { i.checked = !c.sections || c.sections[i.dataset.section] !== false; });
@@ -122,12 +125,40 @@
   function preview(config) {
     const facts = { ...S.facts, passport: S.passport ? { operator: S.passport.operator, operatorSince: S.passport.operatorSince } : null };
     $('hePreview').srcdoc = Site.render({ config, facts, authority: { signer: S.account }, mode: 'preview' });
+    const dot = $('heAccentDot'); if (dot) dot.dataset.accent = $('heAccent').value;
+  }
+  /** The preview canvas shows the site at its REAL width (1280px desktop, 390px phone), scaled to fit. Only the frame's
+   *  box is transformed; the sandboxed document is untouched. */
+  const DEVICE_W = { desktop: 1280, mobile: 390 };
+  function fitPreview() {
+    const box = $('heCanvas'), f = $('hePreview');
+    if (!box || !f || !box.clientWidth) return;
+    const w = DEVICE_W[S.device] || 1280;
+    const avail = box.clientWidth - (S.device === 'mobile' ? 32 : 0);
+    const k = Math.min(1, avail / w);
+    box.dataset.device = S.device;
+    f.style.width = w + 'px';
+    f.style.height = Math.ceil(box.clientHeight / k) + 'px';
+    f.style.transform = `scale(${k})`;
+    f.style.left = S.device === 'mobile' ? Math.max(0, Math.round((box.clientWidth - w * k) / 2)) + 'px' : '0px';
+  }
+  function setDevice(d) {
+    S.device = d;
+    document.querySelectorAll('[data-device]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.device === d)));
+    fitPreview();
   }
 
   // ------------------------------------------------------------------ images: the existing sanitizer/upload path only
   function imageNames() {
     $('heLogoName').textContent = S.images.logoCid ? 'Sanitised · ' + S.images.logoCid.slice(0, 10) + '…' : 'None';
     $('heHeroName').textContent = S.images.heroCid ? 'Sanitised · ' + S.images.heroCid.slice(0, 10) + '…' : 'None';
+    // Thumbnails of the SANITISED image only (same-origin /site-img/<cid>, the path the published home uses).
+    for (const [field, id] of [['logoCid', 'heLogoThumb'], ['heroCid', 'heHeroThumb']]) {
+      const t = $(id), cid = S.images[field];
+      if (!t) continue;
+      t.innerHTML = cid && Site.CID.test(cid) ? `<img src="/site-img/${esc(cid)}" alt="">` : '';
+      t.dataset.empty = String(!cid);
+    }
     document.querySelectorAll('[data-clear]').forEach((b) => { b.hidden = !S.images[b.dataset.clear]; });
   }
   function uploadSession() { try { const t = sessionStorage.getItem(UPLOAD_SESSION_KEY) || ''; const p = t.split('.'); const exp = Number(p[0] === 'v2' ? p[3] : p[1] || 0); if (t && exp * 1000 > Date.now() + 60000) return t; sessionStorage.removeItem(UPLOAD_SESSION_KEY); } catch { /* ignore */ } return ''; }
@@ -399,7 +430,7 @@
   // ------------------------------------------------------------------ boot
   async function refreshStatus() { S.st = await api({ view: 'status', token }); S.passport = S.st.passport; return S.st; }
   function gate(html) { const g = $('heGate'); g.innerHTML = html; g.hidden = false; $('heGrid').hidden = true; $('heBar').hidden = true; $('hePay').hidden = true; $('heReview').hidden = true; }
-  function showEditor() { $('heGate').hidden = true; $('heGrid').hidden = false; onChange(); }
+  function showEditor() { $('heGate').hidden = true; $('heGrid').hidden = false; onChange(); requestAnimationFrame(fitPreview); }
   async function startingConfig() {
     const saved = store.get(DRAFT);
     if (saved) { const n = Site.normalize(saved); if (n.ok && n.config.token === token) return n.config; }
@@ -418,7 +449,7 @@
     document.querySelector('.he-controls').hidden = true;
     $('heGrid').classList.add('is-review'); steps('publish');
     S.lastValid = rev.config; S.reviewConfig = rev.config;
-    preview(rev.config);
+    preview(rev.config); requestAnimationFrame(fitPreview);
     $('heAdopt').onclick = () => publish(site.configHash);
     $('heEditInstead').onclick = () => { $('heReview').hidden = true; $('heGrid').classList.remove('is-review'); document.querySelector('.he-controls').hidden = false; fill(rev.config); showEditor(); };
   }
@@ -430,6 +461,7 @@
     status('Loading…');
     try {
       S.cfg = await api({ view: 'config' });
+      if (S.cfg.price && Number.isInteger(S.cfg.price.priceUsdCents)) { const c = S.cfg.price.priceUsdCents; $('hePrice').textContent = '$' + (c % 100 ? (c / 100).toFixed(2) : String(c / 100)); }
       if (!S.cfg.enabled) { status(''); gate('<p>Project Home is not open yet.</p><p class="sn-small sn-muted">Nothing can be activated or published on this deployment right now.</p>'); return; }
       if (!account) { status(''); gate('<p>Connect the Passport operator wallet to edit this Project Home.</p><p style="margin:14px 0 0"><button class="sn-btn primary" type="button" id="heConnect">Connect</button></p>'); $('heConnect').addEventListener('click', () => W.connect().catch((e) => status(e.message, 'bad'))); return; }
       const [facts] = await Promise.all([S.facts ? Promise.resolve(S.facts) : loadFacts(), refreshStatus()]);
@@ -464,6 +496,10 @@
     $('heUnpublish').addEventListener('click', unpublish);
     $('heRecover').addEventListener('click', recover);
     S.images = { logoCid: '', heroCid: '' };
+    S.device = matchMedia('(max-width: 959px)').matches ? 'mobile' : 'desktop';
+    document.querySelectorAll('[data-device]').forEach((b) => b.addEventListener('click', () => setDevice(b.dataset.device)));
+    setDevice(S.device);
+    if (window.ResizeObserver) new ResizeObserver(() => fitPreview()).observe($('heCanvas')); else addEventListener('resize', fitPreview);
     let first = true;
     W.onChange((s) => {
       const a = s.connected ? lc(s.account) : '';
