@@ -13,7 +13,8 @@
  *   POST /api/project-home {action:'intent'|'verify'|'reconcile'|'publish'|'unpublish', …}
  *
  * Economic model: PROJECT HOME ACTIVATION is priced at $12 USD (reviewed price version 2), paid ONLY in $SYNC at the
- * SYNCNET REFERENCE RATE (reviewed rate version — not an oracle), to the immutable SyncNetProjectHomeSink (60% burned
+ * SYNCNET REFERENCE RATE (derived automatically per new intent from the canonical PAR SYNC/USDG market and locked
+ * into that intent — not an oracle; netlify/lib/project-home-rate.js), to the immutable SyncNetProjectHomeSink (60% burned
  * on settle(); 40% forwarded as SYNC to the immutable treasury converter, which converts it to USDG for the SyncNet
  * protocol treasury — downstream accounting that activation NEVER waits for). One-time, per token, non-refundable;
  * bound to the TOKEN, never to the payer. After activation every content operation is free.
@@ -45,6 +46,7 @@ const { verifyDigest } = require('../lib/sig-verify');
 const { liveProject, readPassport, passportKey } = require('../lib/live-project');
 const { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC } = require('../lib/project-home-config');
 const { deploymentStatus } = require('../lib/project-home-deployment');
+const { deriveReferenceRate, RateUnavailable } = require('../lib/project-home-rate');
 const PROJECTS = require('../../syncnet-projects.json');
 // Reviewed canonical registry entries by address: display-only logo (same-origin /assets/) and symbol.
 const REGISTRY = new Map((Array.isArray(PROJECTS.projects) ? PROJECTS.projects : []).filter((p) => p && p.registry && p.registry.canonical === true && /^0x[0-9a-fA-F]{40}$/.test(String(p.token || '')))
@@ -56,7 +58,6 @@ const K = {
   intentsOf: (t) => `site:intents:v1:${t}`,
   open: (t) => `site:open:v1:${t}`,
   amount: (wei) => `site:amt:v1:${wei}`,
-  rate: (v) => `site:rate:v1:${v}`,
   price: (v) => `site:price:v1:${v}`,
   paylog: (h, i) => `site:paylog:v1:${h}:${i}`,
   entitlement: (t) => `site:entitlement:v1:${t}`,
@@ -92,6 +93,7 @@ const UNAVAILABLE = 'Project Home is temporarily unavailable.';
 const UNVERIFIED = 'Project Home activation payments are paused: the payment contracts could not be verified on Robinhood Chain. No payment was requested.';
 const SPLIT_NOTE = 'Paid SYNC is COMMITTED TO THE PROJECT HOME SINK. 60% is COMMITTED TO BURN and is burned by SYNC.burn() only when the sink is settled; 40% is allocated to the SyncNet protocol treasury and converted to USDG later, at the actual DEX execution rate (not the SyncNet reference rate). Your activation does not depend on either step.';
 const CHAIN_DOWN = 'Robinhood Chain could not be read right now. Nothing was changed. Try again.';
+const RATE_DOWN = 'SyncNet cannot derive a trustworthy SYNCNET REFERENCE RATE from the canonical SYNC/USDG market right now, so no quote was issued and nothing was requested. Try again in a few minutes.';
 
 const bad = (message) => publicError(400, 'invalid_request', message || 'Invalid request.');
 async function getJson(store, key) {
@@ -132,6 +134,7 @@ function publicIntent(i) {
     requestId: i.requestId, token: i.token, operatorAtRequest: i.operatorAtRequest, chainId: i.chainId, canonicalSync: i.canonicalSync, sink: i.sink,
     priceUsdCents: i.priceUsdCents, priceUsd: displayUsd(i.priceUsdCents), priceVersion: i.priceVersion,
     rateLabel: 'SYNCNET REFERENCE RATE', syncUsdReferenceRate: i.syncUsdReferenceRate, rateVersion: i.rateVersion, rateEffectiveAt: i.rateEffectiveAt,
+    rateSource: i.rateSource ? { chainId: i.rateSource.chainId, market: i.rateSource.market, route: i.rateSource.route, poolId: i.rateSource.poolId, block: i.rateSource.block, blockTimestamp: i.rateSource.blockTimestamp, derivedAt: i.rateSource.derivedAt } : null,
     baseSyncAmount: i.baseSyncAmount, exactTaggedSyncAmount: i.exactTaggedSyncAmount, exactTaggedSyncDisplay: Pricing.formatUnits(i.exactTaggedSyncAmount),
     createdAt: i.createdAt, createdBlock: i.createdBlock, expiresAt: i.expiresAt, lockedUntil: i.expiresAt, status: i.status,
     observed: i.observed || null, consumedBy: i.consumedBy || null,
@@ -156,7 +159,9 @@ async function handler(event = {}, deps = {}) {
   const cfg = projectHomeConfig({ env, store, now, file: deps.pricingFile, deploymentFile: deps.deploymentFile });
   const casOk = typeof store.cas === 'function';
   const denied = (rl) => (rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter));
-  const ctx = { store, rpc, env, now, cfg, ip, random: deps.random || ((n) => crypto.randomBytes(n)) };
+  // The SYNCNET REFERENCE RATE source (tests inject a fixed one; production reads the canonical PAR market).
+  const rateSource = typeof deps.rateSource === 'function' ? deps.rateSource : () => deriveReferenceRate({ rpc, store, now });
+  const ctx = { store, rpc, env, now, cfg, ip, rateSource, random: deps.random || ((n) => crypto.randomBytes(n)) };
 
   if (method === 'GET') {
     const rl = await limit(store, { bucket: 'ph-read', id: ip, limit: 120, windowSeconds: 60 });
@@ -205,15 +210,9 @@ function configView(cfg, verified) {
     product: 'PROJECT HOME · ONE-TIME ACTIVATION', lockSeconds: LOCK, domain: Site.DOMAIN,
     split: { burnPercent: 60, treasuryPercent: 40, treasuryAsset: 'USDG', note: SPLIT_NOTE }, refund: 'Non-refundable after successful activation.',
     price: cfg.price ? { priceUsdCents: cfg.price.priceUsdCents, priceUsd: displayUsd(cfg.price.priceUsdCents), priceVersion: cfg.price.priceVersion } : null,
-    rate: cfg.rate ? { label: 'SYNCNET REFERENCE RATE', syncUsdReferenceRate: cfg.rate.syncUsdReferenceRate, rateVersion: cfg.rate.rateVersion, updatedAt: cfg.rate.rateEffectiveAt, expiresAt: cfg.rate.rateExpiresAt, note: 'A server-controlled reference rate reviewed by SyncNet. It is not an on-chain oracle.' } : null,
-    quote: null,
+    rate: { label: 'SYNCNET REFERENCE RATE', mode: 'automatic', source: 'Canonical PAR SYNC/USDG market (market 1) on Robinhood Chain', note: 'Derived by SyncNet from the canonical SYNC/USDG market when a quote is requested, then locked into that quote for 30 minutes. It is not an on-chain oracle.' },
+    quote: null, // no indicative amount: the exact amount exists only inside a quote (the rate is read at quote time)
   };
-  if (payable && cfg.price && cfg.rate) {
-    try {
-      const base = Pricing.baseSyncWei(cfg.price.priceUsdCents, BigInt(cfg.rate.rateUsdE18));
-      out.quote = { baseSyncAmount: base.toString(), approxSync: Pricing.displaySync(base), note: 'Indicative. The exact amount is locked in a payment intent for 30 minutes.' };
-    } catch { out.quote = null; }
-  }
   return out;
 }
 
@@ -365,7 +364,7 @@ async function snapshot(store, key, identity) {
 }
 
 // ---------------------------------------------------------------- 1. payment intent (current Passport operator only)
-async function createIntent(b, { store, rpc, cfg, now, random }) {
+async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
   const extra = onlyFields(b, ['action', 'token', 'operator', 'issuedAt', 'nonce', 'signature']);
   if (extra) return extra;
   if (!cfg.paymentsEnabled) return publicError(503, 'payments_closed', PAY_CLOSED);
@@ -400,9 +399,13 @@ async function createIntent(b, { store, rpc, cfg, now, random }) {
     const existing = (await getJson(store, K.intent(openRaw))).value;
     if (existing && existing.status === 'OPEN' && now() < Date.parse(existing.expiresAt)) return json(200, { ok: true, reused: true, intent: publicIntent(existing) });
   }
-  const price = cfg.price, rate = cfg.rate;
-  if (!(await snapshot(store, K.price(price.priceVersion), Pricing.priceIdentity(price))) || !(await snapshot(store, K.rate(rate.rateVersion), Pricing.rateIdentity(rate)))) {
-    return publicError(503, 'config_conflict', PAY_CLOSED);
+  const price = cfg.price;
+  if (!(await snapshot(store, K.price(price.priceVersion), Pricing.priceIdentity(price)))) return publicError(503, 'config_conflict', PAY_CLOSED);
+  // SYNCNET REFERENCE RATE for THIS new intent, from the canonical PAR SYNC/USDG market (fail closed, no fallback).
+  let rate;
+  try { rate = await rateSource(); } catch (err) {
+    log(FN, 'rate-unavailable', { code: err instanceof RateUnavailable ? err.code : 'error', detail: String((err && (err.detail || err.message)) || '').slice(0, 160), token });
+    return publicError(503, 'rate_unavailable', RATE_DOWN);
   }
   let createdBlock;
   try {
@@ -423,6 +426,7 @@ async function createIntent(b, { store, rpc, cfg, now, random }) {
       schema: 'syncnet.project-home.intent.v1', requestId, token, operatorAtRequest: operator, chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: cfg.sink,
       priceUsdCents: price.priceUsdCents, priceVersion: price.priceVersion,
       syncUsdReferenceRate: rate.syncUsdReferenceRate, rateUsdE18: rate.rateUsdE18, rateVersion: rate.rateVersion, rateEffectiveAt: rate.rateEffectiveAt,
+      rateSource: rate.source || null,
       baseSyncAmount: base.toString(), exactTaggedSyncAmount: exact.toString(), tag: tag.toString(),
       createdAt: new Date(createdAtMs).toISOString(), createdAtSec, createdBlock: createdBlock.toString(),
       expiresAt: new Date((createdAtSec + LOCK) * 1000).toISOString(), expiresAtSec: createdAtSec + LOCK,
@@ -434,7 +438,7 @@ async function createIntent(b, { store, rpc, cfg, now, random }) {
       sadd: [[K.intentsOf(token), requestId]],
     });
     if (ok) {
-      log(FN, 'intent-created', { token, operator: hashId(operator), rateVersion: rate.rateVersion, priceVersion: price.priceVersion });
+      log(FN, 'intent-created', { token, operator: hashId(operator), rate: rate.syncUsdReferenceRate, rateBlock: rate.source ? rate.source.block : null, priceVersion: price.priceVersion });
       return json(201, { ok: true, reused: false, intent: publicIntent(intent) });
     }
     if (await store.get(K.nonce(operator, nonce))) return publicError(409, 'replay', 'This nonce was already used.');
@@ -516,7 +520,7 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
     payer: pick.from, sink: intent.sink, canonicalSync: CANONICAL_SYNC,
     exactAmount: intent.exactTaggedSyncAmount, baseSyncAmount: intent.baseSyncAmount,
     priceUsdCents: intent.priceUsdCents, priceVersion: intent.priceVersion,
-    syncUsdReferenceRate: intent.syncUsdReferenceRate, rateUsdE18: intent.rateUsdE18, rateVersion: intent.rateVersion, rateEffectiveAt: intent.rateEffectiveAt,
+    syncUsdReferenceRate: intent.syncUsdReferenceRate, rateUsdE18: intent.rateUsdE18, rateVersion: intent.rateVersion, rateEffectiveAt: intent.rateEffectiveAt, rateSource: intent.rateSource || null,
     requestId, activatedAt: at, safeAt: at, finalizedAt: finalized ? at : null,
     operatorAtActivation: intent.operatorAtRequest, // HISTORY ONLY — never authority
     previous: entNow.value && entNow.value.status === 'INVALIDATED_BY_REORG' ? { txHash: entNow.value.txHash, logIndex: entNow.value.logIndex, invalidatedAt: entNow.value.invalidatedAt } : null,
@@ -525,7 +529,7 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
     schema: 'syncnet.project-home.activation.v1', token, requestId, txHash, logIndex: pick.logIndex, payer: pick.from,
     amount: intent.exactTaggedSyncAmount, exactTaggedSyncAmount: intent.exactTaggedSyncAmount, baseSyncAmount: intent.baseSyncAmount,
     priceUsdCents: intent.priceUsdCents, priceVersion: intent.priceVersion, syncUsdReferenceRate: intent.syncUsdReferenceRate, rateVersion: intent.rateVersion,
-    rateEffectiveAt: intent.rateEffectiveAt, blockNumber: receiptHeight.toString(), blockHash: blk.hash, blockTimestamp: Number(blk.timestamp),
+    rateEffectiveAt: intent.rateEffectiveAt, rateSource: intent.rateSource || null, blockNumber: receiptHeight.toString(), blockHash: blk.hash, blockTimestamp: Number(blk.timestamp),
     sink: intent.sink, activatedAt: at, operatorAtActivation: intent.operatorAtRequest, kind: 'paid',
   };
   const consumed = { ...intent, status: 'CONSUMED', consumedBy: { txHash, logIndex: pick.logIndex, at } };

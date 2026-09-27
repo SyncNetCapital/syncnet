@@ -310,7 +310,7 @@
     }
     box.innerHTML = `<p class="sn-small sn-dim">Get a quote to lock the exact $SYNC amount for 30 minutes. Asking for a quote is a free signature.</p>
 <p style="margin:14px 0 0"><button class="sn-btn primary" type="button" id="heQuoteBtn">Get quote</button></p>
-<p class="sn-small sn-muted">SYNCNET REFERENCE RATE${S.cfg.rate ? ` · 1 $SYNC ≈ $${esc(S.cfg.rate.syncUsdReferenceRate)} (version ${esc(S.cfg.rate.rateVersion)})` : ''}. A SyncNet-reviewed rate, not an on-chain price.</p>`;
+<p class="sn-small sn-muted">SYNCNET REFERENCE RATE · read from the canonical SYNC/USDG market on Robinhood Chain when you request a quote, then locked for 30 minutes. A SyncNet reference rate, not a price feed.</p>`;
     $('heQuoteBtn').addEventListener('click', getQuote);
   }
   async function getQuote() {
@@ -339,7 +339,7 @@
 <dt>Amount</dt><dd><span class="sn-amount" id="heAmount">${esc(i.exactTaggedSyncDisplay)} $SYNC</span> <button class="sn-textbtn sn-small" type="button" data-copy-text="${esc(i.exactTaggedSyncDisplay)}">Copy</button></dd>
 <dt>To</dt><dd><span class="sn-mono">${esc(i.sink)}</span> <span class="sn-small sn-muted">Project Home sink</span></dd>
 <dt>Price</dt><dd>$${esc(i.priceUsd)} · one-time</dd>
-<dt>Rate</dt><dd>SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes<br><span class="sn-small sn-muted">1 $SYNC = $${esc(i.syncUsdReferenceRate)} · version ${esc(i.rateVersion)}</span></dd>
+<dt>Rate</dt><dd>SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes<br><span class="sn-small sn-muted">1 $SYNC = $${esc(i.syncUsdReferenceRate)} · ${i.rateSource && i.rateSource.block ? `canonical SYNC/USDG market · block ${esc(i.rateSource.block)}` : `version ${esc(i.rateVersion)}`}</span></dd>
 <dt>Locked for</dt><dd><span class="sn-mono" id="heLeft">—</span></dd></dl>
 <p class="sn-warn-line">Send only the exact quoted amount before the quote expires. Late or duplicate payments cannot be automatically refunded.</p>
 <p style="margin:16px 0 0"><button class="sn-btn primary" type="button" id="hePayBtn">PAY WITH $SYNC</button></p>

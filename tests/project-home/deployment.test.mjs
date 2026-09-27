@@ -64,7 +64,7 @@ async function mustRefuse(label, arrange, over = {}) {
   check('correct audited sink + converter + treasury → PASS: quote issued', r.s === 201 && r.j.intent && r.j.intent.sink === SINK, r.body);
   check('PASS used both code reads (sink + converter) within the bounded budget', rpcCalls.getCode === 2);
   const cfg = await api('GET', null, { view: 'config' });
-  check('PASS: config view exposes the verified sink and an indicative quote', cfg.j.payments === true && cfg.j.deploymentVerified === true && cfg.j.sink === SINK && cfg.j.quote && cfg.j.quote.baseSyncAmount);
+  check('PASS: config view exposes the verified sink and the automatic SYNCNET REFERENCE RATE mode (amounts exist only in quotes)', cfg.j.payments === true && cfg.j.deploymentVerified === true && cfg.j.sink === SINK && cfg.j.rate.mode === 'automatic' && cfg.j.quote === null);
   const direct = await Dep._internals.validateOnChain(rpc, Dep.loadDeployment(DEPLOYMENT), SINK);
   check('PASS: the validator reads at most 12 RPC calls', direct.ok && direct.rpcCalls <= Dep._internals.RPC_BUDGET, JSON.stringify(direct));
 }

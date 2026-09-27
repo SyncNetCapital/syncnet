@@ -387,6 +387,47 @@ export async function sendTx(tx) {
 export function minePending() { for (const [hash, p] of [...chain.pending]) mine(hash, p.tx, p.run); }
 
 export const rpcStats = { mainnet: 0, fork: 0, server: 0 };
+// ---- canonical PAR SYNC/USDG market (market 1) as read by the automatic SYNCNET REFERENCE RATE: the factory's pool
+// keys / pool id and the Uniswap v4 PoolManager slot0 + liquidity (extsload). Price is set in USD per SYNC; `lagged`
+// (optional) is the price seen at older blocks. Tests mutate ratePool to simulate every failure mode.
+const RP_USDG = '0x5fc5360d0400a0fd4f2af552add042d716f1d168', RP_SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37', RP_NET = '0xca9c78dd337a67f6e0077f65f5e9218719d30edf';
+const RP_POOL_ID = '0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792';
+const isqrt = (n) => { if (n < 2n) return n; let x = 1n << BigInt(Math.ceil(n.toString(2).length / 2)); for (;;) { const y = (x + n / x) >> 1n; if (y >= x) return x; x = y; } }; // Newton from an upper bound: exact floor(sqrt(n))
+/** sqrtPriceX96 for a USD/SYNC price given as a decimal string (floor, so the pool mid is >= that price). */
+export function sqrtForUsd(usd) { const [i, f = ''] = String(usd).split('.'); const e18 = BigInt(i + f.padEnd(18, '0').slice(0, 18)); return isqrt(((10n ** 30n) << 192n) / e18); }
+export const ratePool = { usd: '0.00005', lagged: null, liquidity: 909941346728046186n, badKey: false, badPoolId: false, badTick: false, down: false };
+export function resetRatePool() { Object.assign(ratePool, { usd: '0.00005', lagged: null, liquidity: 909941346728046186n, badKey: false, badPoolId: false, badTick: false, down: false }); }
+const RP_SEL = { keys: Core.functionSelector('poolKeysFor(address)'), id: Core.functionSelector('poolIdFor(address,uint256)'), ext: Core.functionSelector('extsload(bytes32)') };
+const RP_SLOT0 = BigInt(Core.keccak256('0x' + RP_POOL_ID.slice(2) + '6'.padStart(64, '0')));
+/** Answers the canonical-market reads, or undefined for any other call. `head` decides which blocks are "older". */
+export function ratePoolCall(to, data, tag, head) {
+  to = lc(to); data = lc(data);
+  const isFactory = to === lc(R.multiFactory), isPm = to === lc(R.poolManager);
+  if (!isFactory && !isPm) return undefined;
+  const w = (v) => BigInt(v).toString(16).padStart(64, '0');
+  const rateRead = (isFactory && (data === RP_SEL.keys + w(RP_SYNC) || data === RP_SEL.id + w(RP_SYNC) + w(1))) || (isPm && data.startsWith(RP_SEL.ext));
+  if (!rateRead) return undefined;
+  if (ratePool.down) throw new Error('rate pool read failed');
+  if (isFactory && data === RP_SEL.keys + w(RP_SYNC)) {
+    const k1 = ratePool.badKey ? [RP_USDG, RP_SYNC, 20000n, 10n, '0x' + '11'.repeat(20)] : [RP_USDG, RP_SYNC, 20000n, 10n, '0x' + '0'.repeat(40)];
+    return Core.abiEncode(['(address,address,uint24,int24,address)[]'], [[[RP_SYNC, RP_NET, 20000n, 10n, '0x' + '0'.repeat(40)], k1]]);
+  }
+  if (isFactory && data === RP_SEL.id + w(RP_SYNC) + w(1)) return ratePool.badPoolId ? '0x' + 'ab'.repeat(32) : RP_POOL_ID;
+  if (isPm && data.startsWith(RP_SEL.ext)) {
+    const slot = BigInt('0x' + data.slice(10));
+    const older = tag && tag !== 'latest' && BigInt(tag) < BigInt(head);
+    if (slot === RP_SLOT0) {
+      const sqrt = sqrtForUsd(older && ratePool.lagged ? ratePool.lagged : ratePool.usd);
+      const p = Number(sqrt) / 2 ** 96; let tick = Math.floor(Math.log(p * p) / Math.log(1.0001)); if (ratePool.badTick) tick += 500;
+      const t24 = BigInt(tick < 0 ? tick + 0x1000000 : tick);
+      return '0x' + w((20000n << 208n) | (t24 << 160n) | sqrt);
+    }
+    if (slot === RP_SLOT0 + 3n) return '0x' + w(ratePool.liquidity);
+    return '0x' + w(0);
+  }
+  return undefined;
+}
+
 export function rpcHandle(body, chainHex = '0x1237') {
   const one = (q) => {
     const { method, params = [], id } = q; let result;
@@ -396,7 +437,7 @@ export function rpcHandle(body, chainHex = '0x1237') {
         case 'eth_chainId': result = chainHex; break;
         case 'eth_blockNumber': result = hex(chain.block); break;
         case 'eth_getCode': { const ph = phDeployChain().code.get(lc(params[0])); result = ph !== undefined ? ph : hasCode(params[0]) ? '0x6080604052' : '0x'; break; }
-        case 'eth_call': { const g = phDeployChain().getters.get(lc(params[0].to) + ':' + lc(params[0].data)); result = g !== undefined ? '0x' + BigInt(g).toString(16).padStart(64, '0') : ethCall(params[0]); break; }
+        case 'eth_call': { const rp = ratePoolCall(params[0].to, params[0].data, params[1], chain.block); if (rp !== undefined) { result = rp; break; } const g = phDeployChain().getters.get(lc(params[0].to) + ':' + lc(params[0].data)); result = g !== undefined ? '0x' + BigInt(g).toString(16).padStart(64, '0') : ethCall(params[0]); break; }
         case 'eth_getBalance': result = hex(chain.balanceWei); break;
         case 'eth_gasPrice': result = '0x5f5e100'; break;
         case 'eth_maxPriorityFeePerGas': result = '0x0'; break;
@@ -468,11 +509,9 @@ const BASE_ENV = {
 };
 const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
   'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
-/** Project Home test fixtures: a sink that is never deployed and a TEST reference rate added in memory only (the
- *  reviewed repo file's own short-lived canary rate would expire during long-lived test runs). */
+/** Project Home test fixture sink (never deployed). The SYNCNET REFERENCE RATE is automatic: it is read from the mocked
+ *  canonical SYNC/USDG market (ratePool, $0.00005 by default), exactly as production reads the real one. */
 export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
-export const PH_TEST_RATE = Object.freeze({ rateVersion: 900, syncUsd: '0.00005', effectiveAt: '2026-01-01T00:00:00Z', expiresAt: '2027-06-01T00:00:00Z', source: 'E2E TEST FIXTURE — never deployed' });
-const PRICING = require(path.join(ROOT, 'syncnet-project-home-pricing.json'));
 /** The fixture Project Home deployment: a converter + sink built from the AUDITED runtime with correct immutables and
  *  the approved treasury, so the server's on-chain deployment validation passes exactly as it would in production. It
  *  is added to the reviewed deployment list in memory only while projectHome is on (the repo file ships empty). */
@@ -491,15 +530,13 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   if (registry) process.env.SYNCNET_REGISTRY_SUBMISSIONS = 'true';
   if (uploadsDisabled) process.env.SYNCNET_UPLOADS_DISABLED = 'true';
   if (economyCuration) process.env.SYNCNET_ECONOMY_CURATION = 'true';
-  const i = PRICING.rates.findIndex((r) => r.rateVersion === PH_TEST_RATE.rateVersion);
-  if (i >= 0) PRICING.rates.splice(i, 1);
+  resetRatePool();
   chain.realTime = Boolean(projectHome);
   const d = DEPLOYMENT.deployments.findIndex((x) => lc(x.sink) === PH_SINK);
   if (d >= 0) DEPLOYMENT.deployments.splice(d, 1);
   if (projectHome) {
-    PRICING.rates.push({ ...PH_TEST_RATE });
     DEPLOYMENT.deployments.push({ sink: PH_SINK, converter: PH_CONVERTER });
-    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_RATE_VERSION: String(PH_TEST_RATE.rateVersion), PROJECT_HOME_SINK_ADDRESS: PH_SINK });
+    Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_SINK_ADDRESS: PH_SINK });
     if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
   }
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));

@@ -7,7 +7,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {
-  A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex,
+  A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex, ratePool, resetRatePool,
 } from './fixtures.mjs';
 
 const require = createRequire(import.meta.url);
@@ -103,8 +103,8 @@ async function unpublishSite(token, who = W, over = {}) {
   const c = (await api('GET', null, { view: 'config' })).j;
   check('A01 config: payments open with full configuration', c.enabled === true && c.payments === true);
   check('A02 config: price is $39 USD, version 1', c.price.priceUsdCents === 3900 && c.price.priceUsd === '39.00' && c.price.priceVersion === 1);
-  check('A03 config: SYNCNET REFERENCE RATE, version + update time, explicitly not an oracle', c.rate.label === 'SYNCNET REFERENCE RATE' && c.rate.rateVersion === 1 && c.rate.updatedAt && /not an on-chain oracle/.test(c.rate.note) && !/oracle price/i.test(JSON.stringify(c)));
-  check('A04 config: indicative quote ≈ 780,000 SYNC, 30-minute lock, 60/40', c.quote.approxSync === '780,000' && c.lockSeconds === 1800 && c.split.burnPercent === 60 && c.split.treasuryPercent === 40);
+  check('A03 config: SYNCNET REFERENCE RATE is automatic (canonical SYNC/USDG market), explicitly not an oracle', c.rate.label === 'SYNCNET REFERENCE RATE' && c.rate.mode === 'automatic' && /PAR SYNC\/USDG market/i.test(c.rate.source) && /not an on-chain oracle/.test(c.rate.note) && !/oracle price/i.test(JSON.stringify(c)) && !('rateVersion' in c.rate));
+  check('A04 config: no indicative amount outside a quote, 30-minute lock, 60/40', c.quote === null && c.lockSeconds === 1800 && c.split.burnPercent === 60 && c.split.treasuryPercent === 40);
   check('A05 config: never says OFFICIAL WEBSITE', !/official website/i.test(JSON.stringify(c)));
   const closed = await api('POST', { action: 'intent' }, null, { env: {} });
   check('A06 SYNCNET_PROJECT_HOME_ENABLED unset → every write 503 closed', closed.s === 503 && closed.j.code === 'closed');
@@ -114,8 +114,15 @@ async function unpublishSite(token, who = W, over = {}) {
   check('A08 missing sink address → intent 503 payments_closed', noSink.s === 503 && noSink.j.code === 'payments_closed');
   const payOff = await request(T2, W, { env: { ...ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'false' } });
   check('A09 payments flag off → intent 503', payOff.s === 503 && payOff.j.code === 'payments_closed');
-  const noRate = await request(T2, W, { pricingFile: { ...PRICING, rates: [] } });
-  check('A10 no approved rate → intent 503 (fail closed)', noRate.s === 503);
+  const noManualRate = (await api('GET', null, { view: 'config' }, { pricingFile: { ...PRICING, rates: [] }, env: (({ PROJECT_HOME_RATE_VERSION, ...e }) => e)(ENV) })).j;
+  check('A10 no manual rate file entry and no PROJECT_HOME_RATE_VERSION → payments still open (automatic rate)', noManualRate.payments === true);
+  // A13 the automatic rate FAILS CLOSED: no quote, no intent stored, no amount reserved
+  for (const [label, mut] of [['RPC read fails', { down: true }], ['pool id ≠ canonical', { badPoolId: true }], ['pool key has hooks (not the reviewed route)', { badKey: true }], ['slot0 tick inconsistent with price', { badTick: true }], ['liquidity below floor', { liquidity: 10n ** 16n }], ['price moved >10 % within ≈2 minutes (volatile)', { lagged: '0.00006' }], ['price outside hard bounds', { usd: '5000000' }]]) {
+    Object.assign(ratePool, mut);
+    const f = await request(T2, W);
+    check('A13 rate source: ' + label + ' → 503 rate_unavailable, no intent', f.s === 503 && f.j.code === 'rate_unavailable' && !MAP.has('site:open:v1:' + T2), f.body);
+    resetRatePool();
+  }
   const zeroRate = await request(T2, W, { pricingFile: { ...PRICING, rates: [{ ...PRICING.rates[0], syncUsd: '0' }] } });
   check('A11 zero rate in the pricing file → whole table invalid → 503', zeroRate.s === 503);
   const nonDurable = parse(await ph._handler({ httpMethod: 'POST', headers: {}, body: '{"action":"intent"}' }, { store: { ...createStore({ map: new Map() }) }, env: ENV, rpc, pricingFile: PRICING }));
@@ -137,7 +144,7 @@ let I1;
   const r = await request(T1, W);
   I1 = r.j.intent;
   check('B04 operator creates an intent (201)', r.s === 201 && I1 && I1.status === 'OPEN', r.body);
-  check('B05 intent records price $39 / v1, rate 0.00005 / v1 / effectiveAt', I1.priceUsdCents === 3900 && I1.priceVersion === 1 && I1.syncUsdReferenceRate === '0.00005' && I1.rateVersion === 1 && I1.rateEffectiveAt === '2026-01-01T00:00:00.000Z');
+  check('B05 intent records price $39 / v1 and the AUTOMATIC rate 0.00005 with its source (chain, market 1, pool id, block, time)', I1.priceUsdCents === 3900 && I1.priceVersion === 1 && I1.syncUsdReferenceRate === '0.00005' && I1.rateVersion === 'AUTO' && I1.rateEffectiveAt === I1.rateSource.derivedAt && I1.rateSource.chainId === 4663 && I1.rateSource.market === 1 && I1.rateSource.route === 'SYNC/USDG direct' && I1.rateSource.poolId === '0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792' && I1.rateSource.block === head.toString() && Boolean(I1.rateSource.blockTimestamp));
   check('B06 base amount = exactly 780,000 SYNC (18 decimals)', I1.baseSyncAmount === (780000n * E18).toString());
   const ex = BigInt(I1.exactTaggedSyncAmount), bs = BigInt(I1.baseSyncAmount);
   check('B07 tagged amount > base, difference < 2e-6 SYNC, tag in the low 12 decimals', ex > bs && ex - bs < 2n * 10n ** 12n && ex % 10n ** 12n !== 0n);
@@ -178,17 +185,25 @@ let I1;
 // ---- rate / price versions
 {
   const oldI = I1;
-  const v2 = await request(T5, W, { env: { ...ENV, PROJECT_HOME_RATE_VERSION: '2' } });
-  check('B21 rate version 2 ($0.0005) → 78,000 SYNC base', v2.s === 201 && v2.j.intent.baseSyncAmount === (78000n * E18).toString() && v2.j.intent.rateVersion === 2);
+  ratePool.usd = '0.0005'; // SYNC ×10 on the canonical market
+  const jumped = await request(T5, W);
+  check('B20 a >25 % one-step rise vs the accepted reference (<1 h old) → 503 rate_unavailable (manipulation guard)', jumped.s === 503 && jumped.j.code === 'rate_unavailable');
+  const refRow = JSON.parse(MAP.get('site:rateref:v1').value);
+  check('B20b the accepted reference is the last accepted rate (0.00005), not the rejected one', refRow.rateUsdE18 === (5n * 10n ** 13n).toString());
+  MAP.delete('site:rateref:v1'); // the reference ages out (1 h) — a real repricing is then accepted
+  const v2 = await request(T5, W);
+  check('B21 new intent after a real market move: automatic rate 0.0005 → 78,000 SYNC base', v2.s === 201 && v2.j.intent.baseSyncAmount === (78000n * E18).toString() && v2.j.intent.rateVersion === 'AUTO' && v2.j.intent.syncUsdReferenceRate === '0.0005');
   const keep = (await api('GET', null, { view: 'intent', id: oldI.requestId })).j.intent;
-  check('B22 an existing intent keeps its locked rate after the active rate changes', keep.rateVersion === 1 && keep.syncUsdReferenceRate === '0.00005' && keep.exactTaggedSyncAmount === oldI.exactTaggedSyncAmount);
+  check('B22 an existing intent keeps its locked rate and exact amount after the market moves', keep.syncUsdReferenceRate === '0.00005' && keep.exactTaggedSyncAmount === oldI.exactTaggedSyncAmount);
+  ratePool.down = true;
+  const reuse = await request(T5, W);
+  check('B22b rate source down: an existing OPEN intent is still served unchanged (no new rate read needed)', reuse.s === 200 && reuse.j.reused === true && reuse.j.intent.requestId === v2.j.intent.requestId);
+  resetRatePool(); // back to 0.00005 (a fall is always accepted: more SYNC is charged, never less)
   const p2 = await request(T6, W, { env: { ...ENV, PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '4500' } });
   check('B23 product price version 2 ($45, test fixture) is recorded on the intent', p2.s === 201 && p2.j.intent.priceUsdCents === 4500 && p2.j.intent.priceVersion === 2 && p2.j.intent.baseSyncAmount === (900000n * E18).toString());
-  const mutated = { ...PRICING, rates: [{ ...PRICING.rates[0], syncUsd: '0.0001' }, PRICING.rates[1]] };
-  const conflict = await request(T7, W, { pricingFile: mutated });
-  check('B24 rateVersion 1 reused with a DIFFERENT value → fail closed (503 config_conflict)', conflict.s === 503 && conflict.j.code === 'config_conflict', conflict.body);
-  const snap = JSON.parse(MAP.get('site:rate:v1:1').value);
-  check('B25 immutable rate snapshot keeps the first-seen value', snap.syncUsdReferenceRate === '0.00005' && snap.rateUsdE18 === (5n * 10n ** 13n).toString());
+  const envNoRate = (await api('GET', null, { view: 'config' }, { env: { ...ENV, PROJECT_HOME_RATE_VERSION: '99' } })).j;
+  check('B24 PROJECT_HOME_RATE_VERSION is obsolete: an unknown value no longer closes payments', envNoRate.payments === true);
+  check('B25 no manual rate snapshot keys are written any more', ![...MAP.keys()].some((k) => k.startsWith('site:rate:v1:')));
   const priceConflict = await request(T7, W, { pricingFile: { ...PRICING, prices: [{ priceVersion: 1, priceUsdCents: 100 }] }, env: { ...ENV, PROJECT_HOME_PRICE_USD_CENTS: '100' } });
   check('B26 priceVersion 1 reused with a different price → fail closed', priceConflict.s === 503);
   // tag collision: force the same tag twice for two intents with the same base
@@ -261,9 +276,9 @@ let ACT1;
   ACT1 = ok.j.entitlement;
   check('C16 payment mined inside the lock but verified 2 h later → ACTIVE', ok.s === 200 && ok.j.status === 'ACTIVE', ok.body);
   check('C17 entitlement: kind paid, payer = gifting wallet, operatorAtActivation = history only', ACT1.kind === 'paid' && ACT1.payer === W2 && ACT1.operatorAtActivation === W && ACT1.token === T1);
-  check('C18 entitlement records tx, logIndex, block number/hash, sink, SYNC, amounts, price/rate versions, requestId, safeAt', ACT1.txHash === good.txHash && ACT1.logIndex === 0 && ACT1.blockNumber === good.blockNumber.toString() && /^0x[0-9a-f]{64}$/.test(ACT1.blockHash) && ACT1.sink === SINK && ACT1.canonicalSync === SYNC && ACT1.exactAmount === I1.exactTaggedSyncAmount && ACT1.baseSyncAmount === I1.baseSyncAmount && ACT1.priceUsdCents === 3900 && ACT1.priceVersion === 1 && ACT1.syncUsdReferenceRate === '0.00005' && ACT1.rateVersion === 1 && ACT1.requestId === I1.requestId && ACT1.safeAt && ACT1.finalizedAt === null);
+  check('C18 entitlement records tx, logIndex, block number/hash, sink, SYNC, amounts, price/rate versions, requestId, safeAt', ACT1.txHash === good.txHash && ACT1.logIndex === 0 && ACT1.blockNumber === good.blockNumber.toString() && /^0x[0-9a-f]{64}$/.test(ACT1.blockHash) && ACT1.sink === SINK && ACT1.canonicalSync === SYNC && ACT1.exactAmount === I1.exactTaggedSyncAmount && ACT1.baseSyncAmount === I1.baseSyncAmount && ACT1.priceUsdCents === 3900 && ACT1.priceVersion === 1 && ACT1.syncUsdReferenceRate === '0.00005' && ACT1.rateVersion === 'AUTO' && ACT1.rateSource && ACT1.rateSource.poolId === '0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792' && ACT1.requestId === I1.requestId && ACT1.safeAt && ACT1.finalizedAt === null);
   const reg = (await api('GET', null, { view: 'activations' })).j.activations;
-  check('C19 activation registry has the record (token, requestId, tx, logIndex, amount, price/rate versions, block)', reg.length === 1 && reg[0].token === T1 && reg[0].requestId === I1.requestId && reg[0].txHash === good.txHash && reg[0].amount === I1.exactTaggedSyncAmount && reg[0].priceVersion === 1 && reg[0].rateVersion === 1 && reg[0].blockHash === ACT1.blockHash);
+  check('C19 activation registry has the record (token, requestId, tx, logIndex, amount, price/rate versions, block)', reg.length === 1 && reg[0].token === T1 && reg[0].requestId === I1.requestId && reg[0].txHash === good.txHash && reg[0].amount === I1.exactTaggedSyncAmount && reg[0].priceVersion === 1 && reg[0].rateVersion === 'AUTO' && Boolean(reg[0].rateSource && reg[0].rateSource.block) && reg[0].blockHash === ACT1.blockHash);
   check('C20 intent is CONSUMED and the log is claimed by this request', (await api('GET', null, { view: 'intent', id: I1.requestId })).j.intent.status === 'CONSUMED' && MAP.get(`site:paylog:v1:${good.txHash}:0`).value === I1.requestId);
   const idem = await verify(I1.requestId, good.txHash);
   check('C21 re-verifying the same payment is idempotent', idem.s === 200 && idem.j.idempotent === true);

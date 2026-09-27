@@ -1,5 +1,17 @@
 # Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
 
+## Project Home: automatic SYNCNET REFERENCE RATE for production quotes: 27 Sep 2026
+
+- Each NEW payment intent derives the rate server-side from the canonical PAR SYNC/USDG market. It reads the factory
+  pool key and id (pinned) and the PoolManager slot0 at the latest block and ≈2 minutes earlier, uses the lower mid,
+  and rounds down to 3 significant figures. Guards: canonical route, tick consistency, liquidity floor, ≤10% two-point
+  divergence, hard bounds, and ≤ +25% vs the last accepted reference younger than 1 hour. Any failure means no quote
+  (fail closed, no fallback).
+- The rate and its source (block, time, pool, route) are snapshotted into the intent, entitlement and activation. The
+  30-minute lock and exact tagged amounts are unchanged. Verification never uses the current market.
+- `PROJECT_HOME_RATE_VERSION` is obsolete; manual rates v1–v4 are historical canary records. The $12 price, contracts,
+  60/40 split and verification semantics are unchanged.
+
 ## Project Home V3 product refinement: $12 price, website renderer, builder, one-accent identity: 27 Sep 2026
 
 - **Price:** reviewed `priceVersion 2` = 1200 cents ($12 one-time) is the active public price; v1 is kept as history.

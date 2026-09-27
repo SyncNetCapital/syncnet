@@ -5,15 +5,16 @@
 //   SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   activation payment intents + verification (needs everything below)
 //   PROJECT_HOME_PRICE_VERSION=2                 active product price version (must exist in the pricing file)
 //   PROJECT_HOME_PRICE_USD_CENTS=1200            must EQUAL that version's reviewed price (a second, explicit key)
-//   PROJECT_HOME_RATE_VERSION=<n>                active SYNCNET REFERENCE RATE version (must exist, be effective and
-//                                                not expired in the pricing file)
 //   PROJECT_HOME_SINK_ADDRESS=0x…                the deployed SyncNetProjectHomeSink (no default exists); it must ALSO be a
 //                                                reviewed deployment in syncnet-project-home-deployment.json, and it is
 //                                                verified ON-CHAIN before any quote (netlify/lib/project-home-deployment.js)
 //
-// Prices and rates themselves live ONLY in the git-reviewed syncnet-project-home-pricing.json: a deployment can select
-// a reviewed version, never type a new value into an environment variable. Any missing, malformed or inconsistent
-// value closes payments (and the reason is logged once), whatever the browser says.
+// Prices live ONLY in the git-reviewed syncnet-project-home-pricing.json: a deployment can select a reviewed version,
+// never type a new value into an environment variable. The SYNCNET REFERENCE RATE is NOT configured here: it is derived
+// automatically from the canonical PAR SYNC/USDG market for each new payment intent (netlify/lib/project-home-rate.js)
+// and snapshotted into that intent. PROJECT_HOME_RATE_VERSION is obsolete and ignored (the manual rates v1–v4 in the
+// pricing file are historical canary records). Any missing, malformed or inconsistent value closes payments (and the
+// reason is logged once), whatever the browser says.
 const Pricing = require('../../lib/syncnet-project-home-pricing.js');
 const PRICING_FILE = require('../../syncnet-project-home-pricing.json');
 const { log } = require('./log');
@@ -31,11 +32,10 @@ let warned = '';
 /**
  * projectHomeConfig({env, store, file, now}) -> {
  *   durable, siteEnabled, paymentsEnabled, closedReasons: string[],
- *   chainId, sync, sink, deployment, price: {priceVersion, priceUsdCents} | null, rate: {rateVersion, …} | null }
+ *   chainId, sync, sink, deployment, price: {priceVersion, priceUsdCents} | null, rateMode: 'automatic' }
  */
 function projectHomeConfig(options = {}) {
   const env = options.env || process.env;
-  const nowMs = typeof options.now === 'function' ? options.now() : Date.now();
   const durable = Boolean(options.store && options.store.durable);
   const reasons = [];
   const siteRequested = truthy(env.SYNCNET_PROJECT_HOME_ENABLED);
@@ -57,17 +57,6 @@ function projectHomeConfig(options = {}) {
     else price = p;
   }
 
-  let rate = null;
-  const rv = posInt(env.PROJECT_HOME_RATE_VERSION);
-  if (!rv) reasons.push('PROJECT_HOME_RATE_VERSION missing');
-  else if (table) {
-    const r = table.rates.get(rv);
-    if (!r) reasons.push('rate version not in the pricing file');
-    else if (nowMs < Date.parse(r.rateEffectiveAt)) reasons.push('rate version not yet effective');
-    else if (nowMs >= Date.parse(r.rateExpiresAt)) reasons.push('rate version expired');
-    else rate = r;
-  }
-
   let deployment = null;
   try { deployment = loadDeployment(options.deploymentFile); } catch (err) { reasons.push('deployment file invalid: ' + err.message); }
   const sinkRaw = lc(env.PROJECT_HOME_SINK_ADDRESS);
@@ -77,14 +66,14 @@ function projectHomeConfig(options = {}) {
 
   const paymentsRequested = truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED);
   if (!paymentsRequested) reasons.push('SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED is not true');
-  const paymentsEnabled = siteEnabled && paymentsRequested && Boolean(price && rate && sink);
+  const paymentsEnabled = siteEnabled && paymentsRequested && Boolean(price && sink);
 
   if (paymentsRequested && !paymentsEnabled) {
     const key = reasons.join('|');
     if (key !== warned) { warned = key; log('project-home', 'payments-closed', { problems: reasons }); }
   }
   // paymentsEnabled is the STATIC gate. Quotes additionally require an on-chain deployment PASS (project-home.js).
-  return { durable, siteEnabled, paymentsEnabled, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, deployment, price, rate };
+  return { durable, siteEnabled, paymentsEnabled, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, deployment, price, rateMode: 'automatic' };
 }
 
 module.exports = { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC };

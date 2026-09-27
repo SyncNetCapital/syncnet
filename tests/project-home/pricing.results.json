@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-27T06:32:06.648Z",
-  "passed": 101,
+  "at": "2026-09-27T16:10:05.707Z",
+  "passed": 111,
   "failed": 0,
   "results": [
     {
@@ -354,32 +354,22 @@
       "detail": ""
     },
     {
-      "name": "repo defaults (real pricing file, env set) before rate v1 is effective → payments closed",
+      "name": "ACTIVE config ($12 = price v2, reviewed sink, NO rate version) → payments open, rate mode automatic",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "canary config inside the rate v1 window → payments open, sink = reviewed canary sink, rate v1",
+      "name": "no time window: payments stay open at any date (the rate is read per quote, not configured)",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "canary config 1 s before rate v1 effectiveAt → payments closed",
+      "name": "PROJECT_HOME_RATE_VERSION is obsolete: unknown, expired or junk values change nothing",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "canary config at rate v1 expiresAt → payments closed (expired rate never charges)",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "ACTIVE config (price v2 = $12, rate v2) inside the rate window → payments open at 1200 cents",
+      "name": "the historical manual rates (v1–v4) may be removed without closing payments",
       "ok": true,
       "detail": ""
     },
@@ -389,32 +379,7 @@
       "detail": ""
     },
     {
-      "name": "ACTIVE config after rate v2 expired → payments closed naturally (no new rate in this pass)",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "canary config with rate v2 inside its window → payments open, sink = reviewed canary sink, rate v2 = 0.0000409",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "rate v2 1 s before effectiveAt → payments closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "rate v2 at expiresAt → payments closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "rate v2 selected during the old v1 window → payments closed (not yet effective)",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "expired rate v1 still selected after v2 exists → payments closed (never falls back or forward silently)",
+      "name": "ACTIVE config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed",
       "ok": true,
       "detail": ""
     },
@@ -444,11 +409,6 @@
       "detail": ""
     },
     {
-      "name": "missing PROJECT_HOME_RATE_VERSION → payments closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
       "name": "missing PROJECT_HOME_SINK_ADDRESS → payments closed",
       "ok": true,
       "detail": ""
@@ -465,21 +425,6 @@
     },
     {
       "name": "unknown price version → closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "unknown rate version → closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "rate not yet effective → closed",
-      "ok": true,
-      "detail": ""
-    },
-    {
-      "name": "rate expired → closed",
       "ok": true,
       "detail": ""
     },
@@ -504,7 +449,112 @@
       "detail": ""
     },
     {
-      "name": "rate env with junk → closed",
+      "name": "auto rate: canonical market at $0.00005 → SYNCNET REFERENCE RATE 0.00005, rateVersion AUTO",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate: audit source = chain 4663, market 1, SYNC/USDG direct, pinned pool id, block + time, lagged block, both mids",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate: bounded — at most 9 RPC reads (7 used)",
+      "ok": true,
+      "detail": "7"
+    },
+    {
+      "name": "auto rate: $12 at 0.00005 = 240,000 SYNC base",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate: rounded DOWN to 3 significant figures (0.0000366948 → 0.0000366, never above the mid)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate: two reads ≈2 minutes apart → the LOWER mid is used (more SYNC charged, never less)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: lagged mid differs by >10 % → volatile",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: wrong chain id → wrong_chain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: factory pool id is not the canonical pool → not_canonical_market",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: market 1 pool key is not the reviewed route (hooks) → not_canonical_market",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: slot0 tick inconsistent with its price → inconsistent_slot0",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: in-range liquidity below the floor → thin_liquidity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: rate outside the hard pricing bounds → out_of_bounds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: malformed read (short result) → malformed_read",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "auto rate fails closed: RPC failure → rpc_failed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jump guard: >+25 % above an accepted reference younger than 1 h → refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jump guard: the refused rate is NOT recorded as the reference",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jump guard: the same rise is accepted once the reference is older than 1 h (real repricing)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jump guard: a FALL is always accepted (more SYNC is charged, never less)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "jump guard: normal movement within +25 % is accepted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no fallback: the automatic rate never reads the manual rate table, an env rate or a third-party API",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "never labelled an oracle price",
       "ok": true,
       "detail": ""
     }

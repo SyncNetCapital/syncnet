@@ -5,11 +5,11 @@ import { deploymentFile, deploymentChain } from './deployment-fixture.mjs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { A, chain, resetChain, rpcHandle, signDigest, ROOT } from '../e2e/harness.mjs';
+import { A, chain, resetChain, rpcHandle, signDigest, ROOT, ratePool, resetRatePool, ratePoolCall } from '../e2e/harness.mjs';
 
 const require = createRequire(import.meta.url);
 export const Core = require(path.join(ROOT, 'lib/syncnet-core.js'));
-export { A, chain, resetChain, signDigest, ROOT };
+export { A, chain, resetChain, signDigest, ROOT, ratePool, resetRatePool };
 
 export const SYNC = '0x6368e007b9f0b941560ed1f3bceb20247f5eca37';
 export const SINK = '0x5111c0000000000000000000000000000000beef'; // fixture sink (never deployed)
@@ -36,7 +36,7 @@ export const PRICING = {
 };
 export const ENV = {
   SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1',
-  PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK,
+  PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_SINK_ADDRESS: SINK,
 };
 
 /** Controllable clock shared by the functions under test (ms). */
@@ -120,6 +120,8 @@ export async function rpc(method, params = []) {
     case 'eth_getCode': if (pc.dep && pc.dep.code.has(lc(params[0]))) return pc.dep.code.get(lc(params[0])); break;
     case 'eth_call': {
       const to = lc(params[0].to), data = lc(params[0].data);
+      const rp = ratePoolCall(to, data, params[1], pc.head); // canonical SYNC/USDG market (automatic reference rate)
+      if (rp !== undefined) return rp;
       const dg = pc.dep && pc.dep.getters.get(to + ':' + data);
       if (dg === 'revert') throw Object.assign(new Error('execution reverted'), { name: 'RpcError', code: 3, revert: true });
       if (dg !== undefined) return '0x' + BigInt(dg).toString(16).padStart(64, '0');

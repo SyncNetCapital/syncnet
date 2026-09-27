@@ -278,7 +278,10 @@ _site_lib=(root/'lib/syncnet-site.js').read_text(); _phcfg=(root/'netlify/lib/pr
 _price=_je.loads((root/'syncnet-project-home-pricing.json').read_text())
 assert "name: 'SyncNet Website'" in _site_lib and "name: 'SyncNet Marketplace'" not in _site_lib and "name: 'SyncNet Economies'" not in _site_lib
 assert "truthy(env.SYNCNET_PROJECT_HOME_ENABLED)" in _phcfg and "truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED)" in _phcfg  # exact "true" only
-assert 'siteEnabled && paymentsRequested && Boolean(price && rate && sink)' in _phcfg
+assert 'siteEnabled && paymentsRequested && Boolean(price && sink)' in _phcfg and 'PROJECT_HOME_RATE_VERSION' not in _phcfg.split('*/')[-1].replace('PROJECT_HOME_RATE_VERSION is obsolete','')  # rate is automatic, not an env gate
+_rate=(root/'netlify/lib/project-home-rate.js').read_text()
+assert "const POOL_ID = '0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792'" in _rate and 'oracle price' not in _rate.lower()
+assert "deriveReferenceRate({ rpc, store, now })" in _ph and "publicError(503, 'rate_unavailable', RATE_DOWN)" in _ph  # automatic rate per new intent, fail closed
 assert [(p['priceVersion'],p['priceUsdCents']) for p in _price['prices']]==[(1,3900),(2,1200)]  # v1 kept as history; v2 = $12 USD is the ACTIVE public price
 # Reference rates: short-lived reviewed versions only. The first (V3 canary) is pinned exactly; every version must be a
 # plain decimal, carry a source, and be valid for at most 6 hours (a stale rate can never be left open).

@@ -5,7 +5,8 @@
     "The reference rate is server-controlled and reviewed in git. It is not an oracle.",
     "Versions are immutable: never edit a published price or rate entry. Add a new version and point the deployment at it.",
     "Rates are short-lived and reviewed: a new version is added (never edited) whenever the SYNCNET REFERENCE RATE must change or the previous version expires. An expired or missing version keeps payments CLOSED.",
-    "priceVersion 2 ($12 USD, 1200 cents) is the ACTIVE public launch price. priceVersion 1 is kept as reviewed history only and is never selected."
+    "priceVersion 2 ($12 USD, 1200 cents) is the ACTIVE public launch price. priceVersion 1 is kept as reviewed history only and is never selected.",
+    "Rates v1-v4 are HISTORICAL canary records only. Production quotes use the automatic SYNCNET REFERENCE RATE derived per new payment intent from the canonical PAR SYNC/USDG market (netlify/lib/project-home-rate.js); PROJECT_HOME_RATE_VERSION is obsolete."
   ],
   "prices": [
     {

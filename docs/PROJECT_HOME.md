@@ -79,7 +79,7 @@ This gives the following properties:
 
 - Prices and rates exist **only** in `syncnet-project-home-pricing.json`, so every value change is a reviewed commit.
   Versions are immutable: to change a rate, add a new version and never edit an old one.
-- The deployment selects `PROJECT_HOME_PRICE_VERSION` and `PROJECT_HOME_RATE_VERSION`. It must also repeat
+- (Superseded for rates by §18: the rate is now automatic.) The deployment selects `PROJECT_HOME_PRICE_VERSION`. It must also repeat
   `PROJECT_HOME_PRICE_USD_CENTS`, which has to equal the reviewed value. No environment variable can introduce a new
   number.
 - Every rate has `effectiveAt` and `expiresAt`. An expired rate closes payments, which forces a periodic, explicit
@@ -409,7 +409,6 @@ SYNCNET_PROJECT_HOME_ENABLED=true            # default: closed (site reads/write
 SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   # default: closed
 PROJECT_HOME_PRICE_VERSION=2
 PROJECT_HOME_PRICE_USD_CENTS=1200            # must equal the reviewed price ($12, price version 2)
-PROJECT_HOME_RATE_VERSION=<n>                # must be reviewed, effective, not expired
 PROJECT_HOME_SINK_ADDRESS=<deployed sink>    # no default
 SYNCNET_RPC_URL=https://…                    # preferred private RPC (public RPC works for development)
 UPSTASH_REDIS_REST_URL / _TOKEN              # durable store (required)
@@ -560,7 +559,7 @@ Preview-only configuration (Netlify UI → Environment variables → scope to **
 | `SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED` | `true` |
 | `PROJECT_HOME_PRICE_VERSION` | `2` |
 | `PROJECT_HOME_PRICE_USD_CENTS` | `1200` (price version 2, $12) |
-| `PROJECT_HOME_RATE_VERSION` | `2` (v1 expired; see below) |
+| `PROJECT_HOME_RATE_VERSION` | obsolete since §18 (automatic rate); leave unset |
 | `PROJECT_HOME_SINK_ADDRESS` | `0xc32fb194a0a2bc5fa313febd2de5096ca467213d` |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | a durable store (preferably a preview-only database) |
 
@@ -628,4 +627,46 @@ Optional: `SYNCNET_PIN_SECONDARY_URL` / `_TOKEN` (redundant pin). Without `SYNCN
 session (`/api/canary-auth`, `SYNCNET_CANARY_KEY`) can upload. The editor then says "Image uploads are not open on this
 deployment", and a home works without images. Note: a Deploy Preview URL is reachable by anyone who has it, so
 `SYNCNET_PUBLIC_UPLOADS=true` there lets any wallet upload within the quotas.
+
+## 18. Automatic SYNCNET REFERENCE RATE (production)
+
+The manual, git-reviewed rate versions (v1–v4) were canary tooling: payments stopped whenever a reviewed rate expired.
+Production now derives the rate automatically, server-side, for each NEW payment intent
+(`netlify/lib/project-home-rate.js`). Rates v1–v4 stay in `syncnet-project-home-pricing.json` as historical records
+only. `PROJECT_HOME_RATE_VERSION` is obsolete and ignored.
+
+**Source.** Only the canonical PAR SYNC/USDG market: the PAR multi-market factory's SYNC market 1, which is Uniswap v4
+pool `0xeaff358aa176be51e27a562f77ba12265490af09813ff1f71a3f8d796cb13792` on the PoolManager, read directly from
+Robinhood Chain (4663). No third-party price API.
+
+**Algorithm** (at most 9 read-only RPC calls; 7 in practice):
+1. The chain id must be 4663. Read the latest block `L`.
+2. At `L`, `factory.poolKeysFor(SYNC)[1]` must be the reviewed key (currency0 USDG, currency1 SYNC, no hooks).
+   `keccak256(abi.encode(key))` must equal `factory.poolIdFor(SYNC, 1)` AND the pinned pool id.
+3. Read `PoolManager.extsload(slot0)` and `extsload(liquidity)` at `L`. `sqrtPriceX96` must be > 0, the slot0 tick
+   must agree with the price (±1), and in-range liquidity must be ≥ 1e17.
+4. Read slot0 again at `L − 1200` blocks (≈2 minutes earlier).
+5. Compute the mid (USD per SYNC, ×1e18) = 10^30 · 2^192 / sqrtPriceX96² (USDG has 6 decimals, SYNC 18).
+6. The two mids may differ by at most 10%. The LOWER one is used, so more SYNC is charged, never less.
+7. Round DOWN to 3 significant figures, the same method as the canary rates.
+8. The rate must lie within the pricing library's hard bounds. It must also not be more than +25% above the last
+   ACCEPTED reference when that reference is younger than 1 hour (Upstash key `site:rateref:v1`, written only by
+   accepted derivations, TTL 2 hours). Falls are always accepted.
+
+**Locking and audit.** The rate is snapshotted into the intent: `syncUsdReferenceRate`, `rateUsdE18`,
+`rateVersion: "AUTO"`, `rateEffectiveAt`, and `rateSource` (chain, factory, PoolManager, market, route, pool id, block,
+block time, lagged block, both mids, liquidity, LP fee, method, derivedAt). It is copied into the entitlement and the
+activation record. The exact tagged amount stays locked for the 30-minute quote window. A reused open intent never
+re-reads the market. Verification uses only the intent's own exact amount, never the current market.
+
+**Fail closed.** If the chain id is wrong, the RPC fails, a read is malformed, the market or route is not canonical,
+slot0 is inconsistent, liquidity is too thin, the price is too volatile, it jumps, or it is out of bounds, then NO quote
+is issued (`503 rate_unavailable`, reason logged). There is never a fallback to a manual or stale rate. Existing
+intents stay verifiable.
+
+**Production environment for payments:** `SYNCNET_PROJECT_HOME_ENABLED=true`,
+`SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true`, `PROJECT_HOME_PRICE_VERSION=2`, `PROJECT_HOME_PRICE_USD_CENTS=1200`,
+`PROJECT_HOME_SINK_ADDRESS=0xc32fb194a0a2bc5fa313febd2de5096ca467213d`, and `UPSTASH_REDIS_REST_URL` /
+`UPSTASH_REDIS_REST_TOKEN`. `SYNCNET_RPC_URL` is recommended: a private RPC for the reads, which also needs ≈2 minutes
+of recent state, as the public RPC provides.
 

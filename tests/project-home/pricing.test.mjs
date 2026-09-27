@@ -93,7 +93,7 @@ check('repo pricing file has no fixed-SYNC price anywhere', !/1,?000,?000|syncAm
 // ---------------------------------------------------------------- rollout gate (fail closed)
 const SINK = '0x' + '5e'.repeat(20);
 const durable = { durable: true };
-const ENV = { SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_RATE_VERSION: '1', PROJECT_HOME_SINK_ADDRESS: SINK };
+const ENV = { SYNCNET_PROJECT_HOME_ENABLED: 'true', SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '1', PROJECT_HOME_PRICE_USD_CENTS: '3900', PROJECT_HOME_SINK_ADDRESS: SINK };
 const T = Date.parse('2026-06-01T00:00:00Z');
 // P1-2: a fully configured gate also needs the sink to be a REVIEWED deployment (on-chain validation happens per quote).
 const REVIEWED_DEPLOYMENT = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-deployment.json'), 'utf8'));
@@ -102,37 +102,81 @@ const gate = (env, extra = {}) => projectHomeConfig({ env, store: durable, file:
 check('fully configured → site and payments open', gate(ENV).siteEnabled && gate(ENV).paymentsEnabled);
 check('sink not in the reviewed deployments → payments closed (site unaffected)', gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).siteEnabled && !gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).paymentsEnabled && gate(ENV, { deploymentFile: REVIEWED_DEPLOYMENT }).sink === null);
 check('empty environment → everything closed', !projectHomeConfig({ env: {}, store: durable }).siteEnabled && !projectHomeConfig({ env: {}, store: durable }).paymentsEnabled);
-check('repo defaults (real pricing file, env set) before rate v1 is effective → payments closed', !projectHomeConfig({ env: ENV, store: durable, now: () => T }).paymentsEnabled);
-// The real canary configuration: repo pricing file + repo reviewed deployment + the canary sink.
+// AUTOMATIC SYNCNET REFERENCE RATE: the gate no longer depends on a manual rate version or its time window.
 const CANARY_ENV = { ...ENV, PROJECT_HOME_SINK_ADDRESS: '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' };
-const ACTIVE_ENV = { ...CANARY_ENV, PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_RATE_VERSION: '2' };
-const canary = (iso, env = CANARY_ENV) => projectHomeConfig({ env, store: durable, now: () => Date.parse(iso) });
-check('canary config inside the rate v1 window → payments open, sink = reviewed canary sink, rate v1', canary('2026-09-26T21:00:00Z').paymentsEnabled && canary('2026-09-26T21:00:00Z').sink === '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' && String(canary('2026-09-26T21:00:00Z').rate.rateVersion) === '1');
-check('canary config 1 s before rate v1 effectiveAt → payments closed', !canary('2026-09-26T20:14:59Z').paymentsEnabled);
-check('canary config at rate v1 expiresAt → payments closed (expired rate never charges)', !canary('2026-09-27T02:15:00Z').paymentsEnabled);
-check('canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed', !canary('2026-09-26T21:00:00Z', { ...CANARY_ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: undefined }).paymentsEnabled);
-const CANARY_ENV_V2 = { ...CANARY_ENV, PROJECT_HOME_RATE_VERSION: '2' };
-check('ACTIVE config (price v2 = $12, rate v2) inside the rate window → payments open at 1200 cents', canary('2026-09-27T06:00:00Z', ACTIVE_ENV).paymentsEnabled && canary('2026-09-27T06:00:00Z', ACTIVE_ENV).price.priceUsdCents === 1200 && canary('2026-09-27T06:00:00Z', ACTIVE_ENV).price.priceVersion === 2);
-check('price v2 selected with the OLD cents (3900) → payments closed (env can never re-introduce $39)', !canary('2026-09-27T06:00:00Z', { ...ACTIVE_ENV, PROJECT_HOME_PRICE_USD_CENTS: '3900' }).paymentsEnabled);
-check('ACTIVE config after rate v2 expired → payments closed naturally (no new rate in this pass)', !canary('2026-09-27T11:05:00Z', ACTIVE_ENV).paymentsEnabled && !canary('2026-10-01T00:00:00Z', ACTIVE_ENV).paymentsEnabled);
-check('canary config with rate v2 inside its window → payments open, sink = reviewed canary sink, rate v2 = 0.0000409', canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).paymentsEnabled && canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).sink === '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' && String(canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).rate.rateVersion) === '2' && canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).rate.syncUsdReferenceRate === '0.0000409');
-check('rate v2 1 s before effectiveAt → payments closed', !canary('2026-09-27T05:04:59Z', CANARY_ENV_V2).paymentsEnabled);
-check('rate v2 at expiresAt → payments closed', !canary('2026-09-27T11:05:00Z', CANARY_ENV_V2).paymentsEnabled);
-check('rate v2 selected during the old v1 window → payments closed (not yet effective)', !canary('2026-09-26T21:00:00Z', CANARY_ENV_V2).paymentsEnabled);
-check('expired rate v1 still selected after v2 exists → payments closed (never falls back or forward silently)', !canary('2026-09-27T06:00:00Z').paymentsEnabled);
+const ACTIVE_ENV = { ...CANARY_ENV, PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200' };
+const live = (iso, env = ACTIVE_ENV) => projectHomeConfig({ env, store: durable, now: () => Date.parse(iso) });
+check('ACTIVE config ($12 = price v2, reviewed sink, NO rate version) → payments open, rate mode automatic', live('2026-10-01T00:00:00Z').paymentsEnabled && live('2026-10-01T00:00:00Z').price.priceUsdCents === 1200 && live('2026-10-01T00:00:00Z').rateMode === 'automatic' && !('rate' in live('2026-10-01T00:00:00Z')));
+check('no time window: payments stay open at any date (the rate is read per quote, not configured)', ['2026-09-27T20:51:00Z', '2027-06-01T00:00:00Z', '2030-01-01T00:00:00Z'].every((t) => live(t).paymentsEnabled));
+check('PROJECT_HOME_RATE_VERSION is obsolete: unknown, expired or junk values change nothing', ['99', '1', '1; DROP'].every((v) => live('2026-10-01T00:00:00Z', { ...ACTIVE_ENV, PROJECT_HOME_RATE_VERSION: v }).paymentsEnabled));
+check('the historical manual rates (v1–v4) may be removed without closing payments', projectHomeConfig({ env: ACTIVE_ENV, store: durable, file: { ...repo, rates: [] }, now: () => T }).paymentsEnabled);
+check('price v2 selected with the OLD cents (3900) → payments closed (env can never re-introduce $39)', !live('2026-10-01T00:00:00Z', { ...ACTIVE_ENV, PROJECT_HOME_PRICE_USD_CENTS: '3900' }).paymentsEnabled);
+check('ACTIVE config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed', !live('2026-10-01T00:00:00Z', { ...ACTIVE_ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: undefined }).paymentsEnabled);
 check('no durable store → closed', !projectHomeConfig({ env: ENV, store: { durable: false }, file: good, now: () => T }).siteEnabled);
 for (const k of Object.keys(ENV)) { const e = { ...ENV }; delete e[k]; check('missing ' + k + ' → payments closed', !gate(e).paymentsEnabled); }
 check('SYNCNET_PROJECT_HOME_ENABLED=TRUE-ish values other than "true" stay closed', !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: '1' }).siteEnabled && !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: 'yes' }).siteEnabled);
 check('price cents env must equal the reviewed price', !gate({ ...ENV, PROJECT_HOME_PRICE_USD_CENTS: '100' }).paymentsEnabled);
 check('unknown price version → closed', !gate({ ...ENV, PROJECT_HOME_PRICE_VERSION: '2' }).paymentsEnabled);
-check('unknown rate version → closed', !gate({ ...ENV, PROJECT_HOME_RATE_VERSION: '9' }).paymentsEnabled);
-check('rate not yet effective → closed', !gate(ENV, { now: () => Date.parse('2025-12-31T23:59:59Z') }).paymentsEnabled);
-check('rate expired → closed', !gate(ENV, { now: () => Date.parse('2027-01-01T00:00:00Z') }).paymentsEnabled);
 check('sink = zero address → closed', !gate({ ...ENV, PROJECT_HOME_SINK_ADDRESS: '0x' + '0'.repeat(40) }).paymentsEnabled);
 check('sink = the SYNC token → closed', !gate({ ...ENV, PROJECT_HOME_SINK_ADDRESS: '0x6368e007b9f0b941560ed1f3bceb20247f5eca37' }).paymentsEnabled);
 check('malformed sink → closed', !gate({ ...ENV, PROJECT_HOME_SINK_ADDRESS: 'sink' }).paymentsEnabled);
 check('invalid pricing file → closed', !projectHomeConfig({ env: ENV, store: durable, file: { schema: 'nope' }, now: () => T }).paymentsEnabled);
-check('rate env with junk → closed', !gate({ ...ENV, PROJECT_HOME_RATE_VERSION: '1; DROP' }).paymentsEnabled);
+
+// ---------------------------------------------------------------- automatic SYNCNET REFERENCE RATE (canonical PAR market)
+{
+  const Rate = require(path.join(ROOT, 'netlify/lib/project-home-rate.js'));
+  const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
+  const H = await import('../e2e/harness.mjs');
+  const HEAD = 74000000n;
+  let calls = 0, chainHex = '0x1237', mangle = null;
+  const rpc = async (method, params = []) => {
+    calls++;
+    if (method === 'eth_chainId') return chainHex;
+    if (method === 'eth_getBlockByNumber') return { number: '0x' + HEAD.toString(16), hash: '0x' + '1'.repeat(64), timestamp: '0x' + (1790500000).toString(16) };
+    if (method === 'eth_call') { if (mangle) return mangle; const r = H.ratePoolCall(params[0].to, params[0].data, params[1], HEAD); if (r === undefined) throw new Error('unexpected call'); return r; }
+    throw new Error('unexpected ' + method);
+  };
+  const store = createStore({ env: {} });
+  const T0 = Date.parse('2026-10-01T12:00:00Z');
+  const derive = (at = T0) => { calls = 0; return Rate.deriveReferenceRate({ rpc, store, now: () => at }); };
+  const code = async (p) => { try { await p; return 'ok'; } catch (e) { return e.code || e.message; } };
+  const reset = () => { H.resetRatePool(); chainHex = '0x1237'; mangle = null; };
+  reset();
+  const r = await derive();
+  check('auto rate: canonical market at $0.00005 → SYNCNET REFERENCE RATE 0.00005, rateVersion AUTO', r.syncUsdReferenceRate === '0.00005' && r.rateUsdE18 === (5n * 10n ** 13n).toString() && r.rateVersion === 'AUTO' && r.source.label === 'SYNCNET REFERENCE RATE');
+  check('auto rate: audit source = chain 4663, market 1, SYNC/USDG direct, pinned pool id, block + time, lagged block, both mids', r.source.chainId === 4663 && r.source.market === 1 && r.source.route === 'SYNC/USDG direct' && r.source.poolId === Rate.CONSTANTS.POOL_ID && r.source.block === HEAD.toString() && r.source.blockTimestamp === new Date(1790500000 * 1000).toISOString() && r.source.laggedBlock === (HEAD - 1200n).toString() && Boolean(r.source.midUsdE18Latest && r.source.midUsdE18Lagged));
+  check('auto rate: bounded — at most 9 RPC reads (7 used)', calls <= 9, calls);
+  check('auto rate: $12 at 0.00005 = 240,000 SYNC base', P.baseSyncWei(1200, r.rateUsdE18) === 240000n * E18);
+  reset(); H.ratePool.usd = '0.0000366948'; MAPDEL();
+  check('auto rate: rounded DOWN to 3 significant figures (0.0000366948 → 0.0000366, never above the mid)', (await derive()).syncUsdReferenceRate === '0.0000366');
+  reset(); H.ratePool.usd = '0.00005'; H.ratePool.lagged = '0.000048'; MAPDEL();
+  check('auto rate: two reads ≈2 minutes apart → the LOWER mid is used (more SYNC charged, never less)', (await derive()).syncUsdReferenceRate === '0.000048');
+  const bad = async (label, setup, want) => { reset(); MAPDEL(); setup(); check('auto rate fails closed: ' + label + ' → ' + want, (await code(derive())) === want); reset(); };
+  await bad('lagged mid differs by >10 %', () => { H.ratePool.lagged = '0.000044'; }, 'volatile');
+  await bad('wrong chain id', () => { chainHex = '0x1'; }, 'wrong_chain');
+  await bad('factory pool id is not the canonical pool', () => { H.ratePool.badPoolId = true; }, 'not_canonical_market');
+  await bad('market 1 pool key is not the reviewed route (hooks)', () => { H.ratePool.badKey = true; }, 'not_canonical_market');
+  await bad('slot0 tick inconsistent with its price', () => { H.ratePool.badTick = true; }, 'inconsistent_slot0');
+  await bad('in-range liquidity below the floor', () => { H.ratePool.liquidity = 10n ** 16n; }, 'thin_liquidity');
+  await bad('rate outside the hard pricing bounds', () => { H.ratePool.usd = '5000000'; }, 'out_of_bounds');
+  await bad('malformed read (short result)', () => { mangle = '0x1234'; }, 'malformed_read');
+  await bad('RPC failure', () => { H.ratePool.down = true; }, 'rpc_failed');
+  // one-step jump guard vs the last ACCEPTED reference
+  reset(); MAPDEL(); await derive(T0); // accepted reference 0.00005 at T0
+  H.ratePool.usd = '0.00007'; // +40 %
+  check('jump guard: >+25 % above an accepted reference younger than 1 h → refused', (await code(derive(T0 + 10 * 60e3))) === 'jump');
+  check('jump guard: the refused rate is NOT recorded as the reference', JSON.parse(await store.get(Rate.CONSTANTS.REF_KEY)).rateUsdE18 === (5n * 10n ** 13n).toString());
+  check('jump guard: the same rise is accepted once the reference is older than 1 h (real repricing)', (await derive(T0 + 61 * 60e3)).syncUsdReferenceRate === '0.00007');
+  H.ratePool.usd = '0.00004'; // −43 % vs the new reference
+  check('jump guard: a FALL is always accepted (more SYNC is charged, never less)', (await derive(T0 + 62 * 60e3)).syncUsdReferenceRate === '0.00004');
+  H.ratePool.usd = '0.000048'; // +20 %
+  check('jump guard: normal movement within +25 % is accepted', (await derive(T0 + 63 * 60e3)).syncUsdReferenceRate === '0.000048');
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/lib/project-home-rate.js'), 'utf8');
+  check('no fallback: the automatic rate never reads the manual rate table, an env rate or a third-party API', !/pricing\.json|\.rates\b|PROJECT_HOME_RATE_VERSION|coingecko|dexscreener|https?:\/\//i.test(src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '')));
+  check('never labelled an oracle price', !/oracle price/i.test(src) && /SYNCNET REFERENCE RATE/.test(src));
+  reset();
+  function MAPDEL() { store.del(Rate.CONSTANTS.REF_KEY); }
+}
 
 const passed = results.filter((r) => r.ok).length;
 fs.writeFileSync(path.join(ROOT, 'tests/project-home/pricing.results.json'), JSON.stringify({ at: new Date().toISOString(), passed, failed: failures, results }, null, 2));
