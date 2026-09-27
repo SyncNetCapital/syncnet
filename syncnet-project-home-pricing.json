@@ -40,6 +40,13 @@
       "effectiveAt": "2026-09-27T08:00:00Z",
       "expiresAt": "2026-09-27T14:00:00Z",
       "source": "V3 CANARY \u00b7 SYNCNET REFERENCE RATE (not an oracle). Mid of the canonical PAR SYNC/USDG market 1 (pool 0xeaff358a\u202613792, fee 2.098%, liquidity unchanged) at Robinhood Chain block 73776421 (2026-09-27T07:55:41Z): 0.000040818 USD/SYNC from a 1,000-SYNC simulated sale (0.000039962 after fee), equal to the last swap (07:04Z, 4.0819e-5). Last 6 swaps 4.062e-5\u20134.099e-5 over ~7 h (01:21\u201307:04Z): stable. A 950k-SYNC sale adds 0.65% impact. Rounded DOWN to 0.0000408 (0.05% below mid). Valid 6 h; re-check before use and add a new version if SYNC moves >3%."
+    },
+    {
+      "rateVersion": 4,
+      "syncUsd": "0.0000367",
+      "effectiveAt": "2026-09-27T14:50:00Z",
+      "expiresAt": "2026-09-27T20:50:00Z",
+      "source": "V3 CANARY \u00b7 SYNCNET REFERENCE RATE (not an oracle). Mid of the canonical PAR SYNC/USDG market 1 (pool 0xeaff358a\u202613792, fee 2.098%, liquidity unchanged) at Robinhood Chain block 74019948 (2026-09-27T14:45:05Z): 0.000036775 USD/SYNC from a 1,000-SYNC simulated sale (0.000036003 after fee), equal to the last swap (14:19Z, 3.6775e-5). A sell-off 11:00\u201311:25Z took SYNC from 4.07e-5 to 3.55e-5 (-13%); swaps since 11:46Z 3.65e-5\u20133.70e-5 (within ~1.5%). A 950k-SYNC sale adds 0.62% impact. Rounded DOWN to 0.0000367 (0.2% below mid). Valid 6 h; re-check before use and add a new version if SYNC moves >3%."
     }
   ]
 }
