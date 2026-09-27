@@ -287,6 +287,13 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   check('progressive: payment details stay hidden until Continue', await p.locator('#hePay').isHidden() && (await text(p, '#hePrimary')) === 'Continue to activation');
   await p.click('#hePrimary');
   check('activation copy: $12 ONE-TIME · Pay with $SYNC · 60% burned · 40% converted to USDG', /\$12/.test(await text(p, '.he-price')) && !/\$39/.test(await text(p, 'body')) && /Pay with \$SYNC · 60% burned · 40% converted to USDG for SyncNet treasury/.test(await text(p, '#hePay')));
+  // Incident 27 Sep 2026: a wallet transfer request left open by an earlier page load was approved next to a fresh quote.
+  // While such a request may be open, no quote and no Pay action are offered; the user must reject it first.
+  await p.evaluate((t) => localStorage.setItem('syncnet_home_pay_' + t, JSON.stringify({ requestId: '0x' + '9'.repeat(64), sending: true, amount: '293398.533008033454581141', at: Date.now() })), T);
+  await p.reload(); await p.waitForSelector('#heBar:not([hidden])', { timeout: 20000 }); await p.click('#hePrimary'); await p.waitForTimeout(300);
+  check('open wallet request from an earlier load: no Get quote, no Pay, explicit reject-in-wallet warning', (await p.locator('#heQuoteBtn').count()) === 0 && (await p.locator('#hePayBtn').count()) === 0 && /REJECT any pending Project Home transfer/.test(await text(p, '#heQuote')) && /293398\.533/.test(await text(p, '#heQuote')));
+  p.once('dialog', (d) => d.accept()); await p.click('#heClearPending'); await p.waitForSelector('#heQuoteBtn', { timeout: 5000 });
+  check('after the user confirms the wallet request was rejected, a quote can be requested again', (await p.evaluate((t) => localStorage.getItem('syncnet_home_pay_' + t), T)) === null);
   await p.click('#heQuoteBtn'); await p.waitForSelector('#hePayBtn', { timeout: 15000 });
   const q = await text(p, '#heQuote');
   check('QUOTE READY: exact amount, sink, SYNCNET REFERENCE RATE locked 30 minutes, countdown', /\$SYNC/.test(q) && /SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes/.test(q) && /2\d:\d\d|30:00/.test(await text(p, '#heLeft')));

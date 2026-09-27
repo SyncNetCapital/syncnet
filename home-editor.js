@@ -69,6 +69,11 @@
     });
   }
   const entOk = () => Boolean(S.st && S.st.entitlement && (S.st.entitlement.status === 'ACTIVE' || S.st.entitlement.status === 'FINALIZED'));
+  // A $SYNC transfer request handed to the wallet whose outcome this browser never learned (page reloaded or closed
+  // while the wallet prompt was open). Wallets keep such requests and can still send them later, so while one may be
+  // open NO new quote or payment is offered: that is how a stale quote got paid next to a fresh one.
+  const walletRequestOpen = () => { const p = store.get(PAY); return Boolean(p && p.sending && !p.txHash); };
+  const OPEN_REQUEST_MSG = 'A $SYNC transfer request from this browser may still be open in your wallet (for a quote of {amt} $SYNC). Open your wallet and REJECT any pending Project Home transfer before paying again. Approving it would send a second, non-activating payment.';
 
   // ------------------------------------------------------------------ facts for the preview (the server re-reads its own at publish time)
   async function loadFacts() {
@@ -296,6 +301,13 @@
     if (intent && intent.status === 'OPEN' && Date.parse(intent.expiresAt) > Date.now() && !(pend && pend.requestId === intent.requestId && pend.txHash)) { renderQuote(intent); return; }
     if (S.polling) return;
     paySteps('');
+    if (walletRequestOpen()) {
+      const p = store.get(PAY);
+      box.innerHTML = `<p class="sn-warn-line">${esc(OPEN_REQUEST_MSG.replace('{amt}', p.amount || 'an earlier'))}</p>
+<p style="margin:14px 0 0"><button class="sn-btn" type="button" id="heClearPending">I rejected it in my wallet</button></p>`;
+      $('heClearPending').addEventListener('click', () => { if (confirm('Only continue if your wallet shows NO pending Project Home transfer. Continue?')) { store.set(PAY, null); renderQuoteArea(); } });
+      return;
+    }
     box.innerHTML = `<p class="sn-small sn-dim">Get a quote to lock the exact $SYNC amount for 30 minutes. Asking for a quote is a free signature.</p>
 <p style="margin:14px 0 0"><button class="sn-btn primary" type="button" id="heQuoteBtn">Get quote</button></p>
 <p class="sn-small sn-muted">SYNCNET REFERENCE RATE${S.cfg.rate ? ` · 1 $SYNC ≈ $${esc(S.cfg.rate.syncUsdReferenceRate)} (version ${esc(S.cfg.rate.rateVersion)})` : ''}. A SyncNet-reviewed rate, not an on-chain price.</p>`;
@@ -303,6 +315,7 @@
   }
   async function getQuote() {
     if (S.busy) return;
+    if (walletRequestOpen()) { renderQuoteArea(); return; }
     S.busy = true;
     try {
       const message = { token, operator: S.account, issuedAt: nowSec(), nonce: nonce() };
@@ -347,7 +360,8 @@
   async function pay(i) {
     if (S.busy) return;
     const pend = store.get(PAY);
-    if (pend && pend.requestId === i.requestId && pend.txHash) { resume(); return; } // never a second transfer for one quote
+    if (pend && pend.txHash) { resume(); return; } // a transfer is already on its way (ANY quote): verify it, never send another
+    if (walletRequestOpen()) { renderQuoteArea(); return; } // an earlier wallet request may still be open
     const left = Math.floor((Date.parse(i.expiresAt) - Date.now()) / 1000);
     if (left < MIN_PAY_SECONDS) { payStatus('This quote is too close to expiry. Get a new quote.', 'warn'); return; }
     if (lc(i.canonicalSync) !== SYNC || Number(i.chainId) !== CHAIN_ID || !S.cfg.sink || lc(i.sink) !== lc(S.cfg.sink) || lc(i.token) !== token) { payStatus('This quote does not match the payment configuration. Nothing was sent.', 'bad'); return; }
@@ -355,8 +369,9 @@
     try {
       payStatus('Review the $SYNC transfer in your wallet…');
       let txHash;
+      store.set(PAY, { requestId: i.requestId, sending: true, amount: i.exactTaggedSyncDisplay, expiresAt: i.expiresAt, at: Date.now() });
       try { txHash = await W.sendTransaction({ to: SYNC, data: transferData(i.sink, i.exactTaggedSyncAmount), value: '0x0' }); }
-      catch (e) { throw new Error(e && (e.code === 4001 || /reject|denied/i.test(String(e.message))) ? 'You rejected the transaction. Nothing was sent.' : 'The wallet could not send the transaction: ' + String((e && e.message) || e).slice(0, 140)); }
+      catch (e) { store.set(PAY, null); throw new Error(e && (e.code === 4001 || /reject|denied/i.test(String(e.message))) ? 'You rejected the transaction. Nothing was sent.' : 'The wallet could not send the transaction: ' + String((e && e.message) || e).slice(0, 140)); }
       store.set(PAY, { requestId: i.requestId, txHash: lc(txHash), at: Date.now() });
       clearInterval(S.countdown);
       await verifyLoop(i.requestId, lc(txHash));
