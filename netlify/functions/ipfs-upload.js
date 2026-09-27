@@ -27,7 +27,7 @@ const { log, logError, hashId } = require('../lib/log');
 const { getStore } = require('../lib/store');
 const { clientIp, limitAll } = require('../lib/ratelimit');
 const { flags } = require('../lib/flags');
-const { readJsonBody, header, query, method: methodOf } = require('../lib/body');
+const { readJsonBody, header, method: methodOf } = require('../lib/body');
 
 const FN = 'ipfs-upload';
 const MAX_INPUT_BYTES = 3 * 1024 * 1024;
@@ -90,29 +90,7 @@ async function handler(event = {}, deps = {}) {
   const method = methodOf(event);
   const store = deps.store || getStore();
   const gate = flags({ env, store });
-  if (method === 'GET' || method === 'HEAD') {
-    // TEMPORARY (Deploy Preview diagnosis): ?diag=1 adds one BOOLEAN per publicUploads requirement. Never a value,
-    // length, prefix or hash of any secret. Remove once uploads are confirmed open on the preview.
-    if (String(query(event, 'diag') || '') === '1') {
-      const has = (k) => Boolean(String(env[k] == null ? '' : env[k]).trim());
-      return json(200, {
-        public: gate.publicUploads,
-        diag: {
-          publicUploadsFlag: gate.requested.publicUploads, // SYNCNET_PUBLIC_UPLOADS is exactly "true"
-          publicUploadsFlagSet: has('SYNCNET_PUBLIC_UPLOADS'), // the variable is visible to this function at all
-          uploadsDisabled: gate.uploadsKilled, // SYNCNET_UPLOADS_DISABLED is "true" (must be false)
-          pinataJwtPresent: has('PINATA_JWT'),
-          uploadKeyPresent: has('SYNCNET_UPLOAD_KEY'),
-          uploadKeyLengthValid: String(env.SYNCNET_UPLOAD_KEY == null ? '' : env.SYNCNET_UPLOAD_KEY).length >= 32,
-          upstashUrlPresent: has('UPSTASH_REDIS_REST_URL') || has('SYNCNET_UPSTASH_URL'),
-          upstashTokenPresent: has('UPSTASH_REDIS_REST_TOKEN') || has('SYNCNET_UPSTASH_TOKEN'),
-          durableStorePresent: gate.durable,
-          projectHomeEnabledFlag: String(env.SYNCNET_PROJECT_HOME_ENABLED || '').trim().toLowerCase() === 'true', // needed by /site-img, not by this gate
-        },
-      });
-    }
-    return json(200, { public: gate.publicUploads });
-  }
+  if (method === 'GET' || method === 'HEAD') return json(200, { public: gate.publicUploads });
   if (method !== 'POST') return publicError(405, 'method_not_allowed', 'POST only.', { allow: 'GET, POST' });
   if (gate.uploadsKilled) return publicError(503, 'paused', PAUSED);
   if (!String(env.PINATA_JWT || '').trim()) {
