@@ -79,9 +79,13 @@ const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-pr
 check('repo pricing file: price v1 = 3900 cents ($39 USD) — the initial launch price', P.loadTable(repo).prices.get(1).priceUsdCents === 3900 && P.loadTable(repo).prices.size === 1);
 // V3 canary: exactly ONE reviewed SYNCNET REFERENCE RATE (v1), short-lived (≤ 6 h), never an oracle claim.
 const repoRate = P.loadTable(repo).rates.get(1);
-check('repo pricing file: exactly one reviewed rate — v1 = 0.0000457 USD/SYNC (canary SYNCNET REFERENCE RATE)', P.loadTable(repo).rates.size === 1 && repo.rates[0].syncUsd === '0.0000457' && repoRate.rateUsdE18 === (457n * 10n ** 11n).toString());
+check('repo pricing file: v1 = 0.0000457 USD/SYNC kept unchanged (versions are immutable)', P.loadTable(repo).rates.size === 2 && repo.rates[0].syncUsd === '0.0000457' && repoRate.rateUsdE18 === (457n * 10n ** 11n).toString());
 check('repo rate v1 window: 2026-09-26T20:15Z → 2026-09-27T02:15Z (6 h, the 30-min quote lock is separate)', repoRate.rateEffectiveAt === '2026-09-26T20:15:00.000Z' && repoRate.rateExpiresAt === '2026-09-27T02:15:00.000Z' && Date.parse(repoRate.rateExpiresAt) - Date.parse(repoRate.rateEffectiveAt) === 6 * 3600e3);
-check('repo rate source is labelled SYNCNET REFERENCE RATE and never claims to be an oracle', /SYNCNET REFERENCE RATE/.test(repo.rates[0].source) && !/oracle/i.test(repo.rates[0].source.replace(/not an oracle/gi, '')));
+check('every repo rate source is labelled SYNCNET REFERENCE RATE and never claims to be an oracle', repo.rates.every((r) => /SYNCNET REFERENCE RATE/.test(r.source) && !/oracle/i.test(r.source.replace(/not an oracle/gi, ''))));
+const repoRate2 = P.loadTable(repo).rates.get(2);
+check('repo rate v2 = 0.0000409 USD/SYNC (fresh canary SYNCNET REFERENCE RATE)', repo.rates[1].rateVersion === 2 && repo.rates[1].syncUsd === '0.0000409' && repoRate2.rateUsdE18 === (409n * 10n ** 11n).toString());
+check('repo rate v2 window: 2026-09-27T05:05Z → 11:05Z (6 h), starts after v1 expired', repoRate2.rateEffectiveAt === '2026-09-27T05:05:00.000Z' && repoRate2.rateExpiresAt === '2026-09-27T11:05:00.000Z' && Date.parse(repoRate2.rateExpiresAt) - Date.parse(repoRate2.rateEffectiveAt) === 6 * 3600e3 && Date.parse(repoRate2.rateEffectiveAt) >= Date.parse(repoRate.rateExpiresAt));
+check('$39 at rate v2 = 953,545.232273838630806846 SYNC (rounded UP)', BigInt(P.baseSyncWei(3900, repoRate2.rateUsdE18)) === 953545232273838630806846n);
 check('$39 at rate v1 = 853,391.684901531728665208 SYNC (rounded UP, never undercharges)', BigInt(P.baseSyncWei(3900, repoRate.rateUsdE18)) === 853391684901531728665208n);
 check('repo pricing file has no fixed-SYNC price anywhere', !/1,?000,?000|syncAmount|priceSync/i.test(JSON.stringify(repo.prices)));
 
@@ -105,6 +109,12 @@ check('canary config inside the rate v1 window → payments open, sink = reviewe
 check('canary config 1 s before rate v1 effectiveAt → payments closed', !canary('2026-09-26T20:14:59Z').paymentsEnabled);
 check('canary config at rate v1 expiresAt → payments closed (expired rate never charges)', !canary('2026-09-27T02:15:00Z').paymentsEnabled);
 check('canary config without SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED → payments closed', !canary('2026-09-26T21:00:00Z', { ...CANARY_ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: undefined }).paymentsEnabled);
+const CANARY_ENV_V2 = { ...CANARY_ENV, PROJECT_HOME_RATE_VERSION: '2' };
+check('canary config with rate v2 inside its window → payments open, sink = reviewed canary sink, rate v2 = 0.0000409', canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).paymentsEnabled && canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).sink === '0xc32fb194a0a2bc5fa313febd2de5096ca467213d' && String(canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).rate.rateVersion) === '2' && canary('2026-09-27T06:00:00Z', CANARY_ENV_V2).rate.syncUsdReferenceRate === '0.0000409');
+check('rate v2 1 s before effectiveAt → payments closed', !canary('2026-09-27T05:04:59Z', CANARY_ENV_V2).paymentsEnabled);
+check('rate v2 at expiresAt → payments closed', !canary('2026-09-27T11:05:00Z', CANARY_ENV_V2).paymentsEnabled);
+check('rate v2 selected during the old v1 window → payments closed (not yet effective)', !canary('2026-09-26T21:00:00Z', CANARY_ENV_V2).paymentsEnabled);
+check('expired rate v1 still selected after v2 exists → payments closed (never falls back or forward silently)', !canary('2026-09-27T06:00:00Z').paymentsEnabled);
 check('no durable store → closed', !projectHomeConfig({ env: ENV, store: { durable: false }, file: good, now: () => T }).siteEnabled);
 for (const k of Object.keys(ENV)) { const e = { ...ENV }; delete e[k]; check('missing ' + k + ' → payments closed', !gate(e).paymentsEnabled); }
 check('SYNCNET_PROJECT_HOME_ENABLED=TRUE-ish values other than "true" stay closed', !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: '1' }).siteEnabled && !gate({ ...ENV, SYNCNET_PROJECT_HOME_ENABLED: 'yes' }).siteEnabled);

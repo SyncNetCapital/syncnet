@@ -1,5 +1,12 @@
 # Project Home economics revision: $39, treasury receives USDG (`feature/syncnet-project-home`): 26 Sep 2026
 
+## Project Home V3 canary: SYNCNET REFERENCE RATE v2: 27 Sep 2026
+
+- Rate v1 expired at 02:15Z and is unchanged. Added **v2 = 0.0000409 USD/SYNC**, effective 2026-09-27T05:05Z, expiring
+  11:05Z (6 h), derived read-only at block 73672789 (mid 0.000040985, rounded down). $39 = 953,545.232273838630806846 SYNC
+  base. The price, the 30-minute lock, the contracts and the economics are unchanged. The preview-only config now selects
+  `PROJECT_HOME_RATE_VERSION=2`.
+
 ## Project Home V3 canary: first SYNCNET REFERENCE RATE (v1): 26 Sep 2026
 
 - `syncnet-project-home-pricing.json`: rate **v1 = 0.0000457 USD/SYNC**, effective 2026-09-26T20:15Z, expires

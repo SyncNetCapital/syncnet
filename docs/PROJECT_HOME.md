@@ -560,7 +560,21 @@ Preview-only configuration (Netlify UI → Environment variables → scope to **
 | `SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED` | `true` |
 | `PROJECT_HOME_PRICE_VERSION` | `1` |
 | `PROJECT_HOME_PRICE_USD_CENTS` | `3900` |
-| `PROJECT_HOME_RATE_VERSION` | `1` |
+| `PROJECT_HOME_RATE_VERSION` | `2` (v1 expired; see below) |
 | `PROJECT_HOME_SINK_ADDRESS` | `0xc32fb194a0a2bc5fa313febd2de5096ca467213d` |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | a durable store (preferably a preview-only database) |
+
+### Rate v2 (2026-09-27), replaces the expired v1 for the canary
+
+v1 expired at 02:15Z and is kept unchanged. **Rate v2 = 0.0000409 USD per SYNC** (≈ 24,449.88 SYNC per USD). Valid
+2026-09-27T05:05:00Z → 11:05:00Z (6 h). The 30-minute quote lock is unchanged.
+
+Derivation (read-only, bounded) at block 73672789 (2026-09-27T05:00:06Z): a simulated 1,000-SYNC sale on market 1 executes
+at 0.000040125 USDG/SYNC. Grossed up for the 2.098% fee, that is a mid of 0.000040985, equal to the last swap. Pool
+liquidity is unchanged since yesterday. Price history: 4.94e-5 at 15:07Z, 4.57e-5 when v1 was set, then steady selling to 4.08e-5
+by 00:38Z (−10.3% since v1, −17% over 14 h). The last 3 swaps (00:38–02:54Z) were within 4.083–4.099e-5, with none
+since. Depth: a 950k-SYNC sale (≈ $39) adds 0.65% price impact, 5M adds 3.3%. The mid is rounded **down** to 0.0000409 (0.2% below).
+
+$39 at v2 = base **953,545.232273838630806846 SYNC** (rounded up). Each quote adds its random tag of less than 2×10⁻⁶ SYNC.
+Before paying, re-check the mid. If it moved more than 3% from 0.000040985, add v3 and leave v2 unchanged.
 
