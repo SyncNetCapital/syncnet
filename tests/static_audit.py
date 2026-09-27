@@ -284,7 +284,7 @@ assert [(p['priceVersion'],p['priceUsdCents']) for p in _price['prices']]==[(1,3
 # plain decimal, carry a source, and be valid for at most 6 hours (a stale rate can never be left open).
 import datetime as _dt
 _iso=lambda v:_dt.datetime.strptime(v,'%Y-%m-%dT%H:%M:%SZ')
-assert [r['rateVersion'] for r in _price['rates']]==[1,2] and _price['rates'][0]['syncUsd']=='0.0000457' and _price['rates'][1]['syncUsd']=='0.0000409'  # v1 immutable, v2 appended
+assert [r['rateVersion'] for r in _price['rates']]==[1,2,3] and _price['rates'][2]['syncUsd']=='0.0000408' and _price['rates'][0]['syncUsd']=='0.0000457' and _price['rates'][1]['syncUsd']=='0.0000409'  # v1 immutable, v2 appended
 for _r in _price['rates']:
     assert _r['source'] and 'oracle' not in _r['source'].lower().replace('not an oracle','')
     assert 0 < (_iso(_r['expiresAt'])-_iso(_r['effectiveAt'])).total_seconds() <= 6*3600

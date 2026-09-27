@@ -79,7 +79,7 @@ const repo = JSON.parse(fs.readFileSync(path.join(ROOT, 'syncnet-project-home-pr
 check('repo pricing file: price v2 = 1200 cents ($12 USD) — the ACTIVE public price; v1 (3900) kept unchanged as reviewed history', P.loadTable(repo).prices.get(2).priceUsdCents === 1200 && P.loadTable(repo).prices.get(1).priceUsdCents === 3900 && P.loadTable(repo).prices.size === 2);
 // V3 canary: exactly ONE reviewed SYNCNET REFERENCE RATE (v1), short-lived (≤ 6 h), never an oracle claim.
 const repoRate = P.loadTable(repo).rates.get(1);
-check('repo pricing file: v1 = 0.0000457 USD/SYNC kept unchanged (versions are immutable)', P.loadTable(repo).rates.size === 2 && repo.rates[0].syncUsd === '0.0000457' && repoRate.rateUsdE18 === (457n * 10n ** 11n).toString());
+check('repo pricing file: v1 = 0.0000457 USD/SYNC kept unchanged (versions are immutable)', P.loadTable(repo).rates.size === 3 && repo.rates[0].syncUsd === '0.0000457' && repoRate.rateUsdE18 === (457n * 10n ** 11n).toString());
 check('repo rate v1 window: 2026-09-26T20:15Z → 2026-09-27T02:15Z (6 h, the 30-min quote lock is separate)', repoRate.rateEffectiveAt === '2026-09-26T20:15:00.000Z' && repoRate.rateExpiresAt === '2026-09-27T02:15:00.000Z' && Date.parse(repoRate.rateExpiresAt) - Date.parse(repoRate.rateEffectiveAt) === 6 * 3600e3);
 check('every repo rate source is labelled SYNCNET REFERENCE RATE and never claims to be an oracle', repo.rates.every((r) => /SYNCNET REFERENCE RATE/.test(r.source) && !/oracle/i.test(r.source.replace(/not an oracle/gi, ''))));
 const repoRate2 = P.loadTable(repo).rates.get(2);
