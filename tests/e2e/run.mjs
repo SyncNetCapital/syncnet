@@ -610,8 +610,8 @@ await suite('all pages · desktop + mobile + nav vocabulary', async () => {
       check(`${vp.name} ${p}: no horizontal overflow`, ov <= 1, 'overflow=' + ov);
       if (await page.locator('.sn-nav').count()) {
         // Phase 2 IA: Explore / Create (+ My Projects once connected) and Connect — nothing else is primary navigation
-        const nav = vp.name === 'desktop' ? (await page.innerText('.sn-nav')).replace(/\s+/g, ' ').trim() : '';
-        if (vp.name === 'desktop') check(`${p}: primary nav is Explore · Create, wallet says Connect`, nav === 'Explore Create' && (await page.innerText('[data-wallet]')).trim() === 'Connect' && !/sign in/i.test(await page.innerText('.sn-top')), nav);
+        const nav = vp.name === 'desktop' ? (await page.$eval('.sn-nav', (e) => [...e.querySelectorAll('a')].filter((x) => !x.hidden).map((x) => x.textContent.trim()).join(' '))) : ''; // labels as written; the original nav uppercases them with CSS
+        if (vp.name === 'desktop') check(`${p}: primary nav is Explore · Create, wallet says Connect`, nav === 'Explore Create' && (await page.$eval('[data-wallet]', (e) => e.textContent.trim())) === 'Connect' && !/sign in/i.test(await page.innerText('.sn-top')), nav);
         else check(`mobile ${p}: bottom nav has exactly Explore · Create · You`, (await page.locator('.sn-tabbar a:visible').allInnerTexts()).map((t) => t.trim()).join('|') === 'Explore|Create|You' && (await page.locator('.nav-toggle').count()) === 0);
       }
       if (vp.name === 'mobile') {

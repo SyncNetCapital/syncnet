@@ -8,9 +8,9 @@ home=(root/'index.html').read_text(encoding='utf-8')
 build=(root/'build.html').read_text(encoding='utf-8')
 network=(root/'network.html').read_text(encoding='utf-8')
 # Phase 2 IA: Explore IS the home page (headline, one search, Create link, text filters, project rows).
-assert 'Sync your project.' in home and 'id="exploreSearch"' in home and 'id="exploreQ"' in home and 'id="exploreList"' in home
+assert 'MAKE <span class="cyan">SYNC</span><br>A VERB.' in home and 'id="exploreSearch"' in home and 'id="exploreQ"' in home and 'id="exploreList"' in home
 assert all(f'data-filter="{f}"' in home for f in ['all', 'synced', 'sale', 'new']) and 'href="/build.html">+ Create a new project' in home
-assert 'aria-label="Open project"' in home and '>SYNC<' not in home  # the search button opens; it never says SYNC
+assert 'aria-label="Open project"' in home and 'SYNC' not in __import__('re').search(r'<button type="submit" aria-label="Open project">([^<]*)</button>', home).group(1)  # the search button opens; it never says SYNC
 # the network map moved (unchanged) to /network.html
 assert 'id="tokenSearch"' in network and 'id="mapToken"' in network and 'id="topologyGraph"' in network
 assert build.count('data-preset=') >= 2

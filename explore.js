@@ -65,21 +65,7 @@
     for (const [t, n] of usedBy) { const r = state.rows.get(t); if (r) r.usedBy = n; }
     state.loaded = true;
     state.degraded = !launches.length;
-    stats(listings);
     await enrich(pool());
-  }
-
-  /** Network panel: counts that are COMPLETE for what Explore reads (indexed projects, active listings, launches paired
-   *  with $SYNC in the PAR history). Nothing partial (e.g. synced counts) is shown as a total. */
-  function stats(listings) {
-    const box = $('exploreStats');
-    if (!box || state.degraded) return;
-    const sync = state.rows.get('0x6368e007b9f0b941560ed1f3bceb20247f5eca37');
-    const fmt = (n) => Number(n || 0).toLocaleString('en-US');
-    $('exProjects').textContent = fmt([...state.rows.values()].filter((r) => r.name || r.symbol).length);
-    $('exSale').textContent = fmt(listings.filter((l) => l.status === 'ACTIVE').length);
-    $('exSyncUsers').textContent = fmt(sync ? sync.usedBy : 0);
-    box.hidden = false;
   }
 
   /** Candidate rows for the current filter/search (before sync-state enrichment). */

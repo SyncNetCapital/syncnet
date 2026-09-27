@@ -58,7 +58,7 @@ await suite('Explore · first viewport, search, filters, For sale', async () => 
   const c = await ctx(); const page = await c.newPage(); const errs = errorsOf(page);
   await page.goto(BASE + '/'); await page.waitForSelector('#exploreList .sn-row', { timeout: 20000 });
   const fold = await page.evaluate(() => ({ h1: document.getElementById('exploreTitle').getBoundingClientRect().bottom, search: document.getElementById('exploreSearch').getBoundingClientRect(), filters: document.querySelector('.sn-filters').getBoundingClientRect().bottom, row: document.querySelector('#exploreList .sn-row').getBoundingClientRect().bottom, vh: innerHeight }));
-  check('Explore: headline, search, filters and the first row fit the first desktop viewport', fold.row < fold.vh && fold.filters < fold.vh, JSON.stringify(fold));
+  check('Explore: the original hero (mark, headline, search) fits the first desktop viewport; discovery follows directly below it', fold.h1 < fold.vh && fold.search.bottom < fold.vh && fold.filters < fold.vh * 1.35, JSON.stringify(fold));
   check('Explore: search control is 48–54px tall', fold.search.height >= 48 && fold.search.height <= 54, String(fold.search.height));
   check('Explore: search button opens (arrow), never says SYNC', (await page.getAttribute('#exploreSearch button', 'aria-label')) === 'Open project' && !/SYNC/.test(await text(page, '#exploreSearch')));
   check('Explore: "+ Create a new project" links to Create', (await page.getAttribute('a[href="/build.html"].sn-textbtn', 'href')) === '/build.html');
@@ -118,11 +118,12 @@ await suite('Global navigation · desktop + mobile 3-item bar', async () => {
   fresh();
   const d = await ctx(); const p = await d.newPage();
   await p.goto(BASE + '/network.html'); await p.waitForTimeout(600);
-  check('desktop: Explore · Create, wallet Connect; My Projects hidden until connected', (await text(p, '.sn-nav')).replace(/\s+/g, ' ').trim() === 'Explore Create' && (await text(p, '[data-wallet]')) === 'Connect');
+  const dom = (sel) => p.$eval(sel, (e) => e.textContent).catch(() => ''); // labels as written (the original nav sets them in uppercase with CSS)
+  check('desktop: Explore · Create, wallet Connect; My Projects hidden until connected', (await text(p, '.sn-nav')).replace(/\s+/g, ' ').trim().toUpperCase() === 'EXPLORE CREATE' && (await dom('[data-wallet]')) === 'Connect');
   check('desktop: persistent search in the top bar', await p.locator('.sn-top-search input').isVisible());
   check('desktop: Network counts as Explore (current page marker)', (await p.getAttribute('.sn-nav [data-nav="explore"]', 'aria-current')) === 'page');
   await connect(p);
-  check('desktop: connected → My Projects appears and wallet shows a short address', /My Projects/.test(await text(p, '.sn-nav')) && /^0x[0-9a-f]{4}…[0-9a-f]{4}$/.test((await text(p, '[data-wallet]')).trim()));
+  check('desktop: connected → My Projects appears and wallet shows a short address', /My Projects/i.test(await text(p, '.sn-nav')) && /^0x[0-9a-f]{4}…[0-9a-f]{4}$/.test((await text(p, '[data-wallet]')).trim()));
   await d.close();
   const m = await ctx({ width: 375, height: 760 }); const q = await m.newPage();
   for (const pth of ['/', '/project/' + T, '/you.html', '/build.html', '/marketplace.html']) {
@@ -459,7 +460,7 @@ await suite('NET visibility · derived from real markets / fee flows, never inve
   check('homepage: exactly one factual NET/USDG line, about $SYNC only', line === '$SYNC, the network asset, has direct markets with NET and USDG.' && (await hp.$$eval('.sn-intro p', (ps) => ps.filter((x) => /\bNET\b/.test(x.innerText)).length)) === 1, line);
   check('homepage: no promotional / universal NET claim', !/powered by|built for|every project|all projects|NET ecosystem/i.test(await hp.innerText('main')));
   check('Explore rows: no NET column or reward claim added', !/NET|Earns/i.test(await hp.innerText('.sn-list-head')) && !/earns? NET/i.test(await hp.innerText('#exploreList')));
-  check('homepage: first viewport still holds headline, search, filters and the first row', await hp.evaluate(() => document.querySelector('#exploreList .sn-row').getBoundingClientRect().bottom < innerHeight));
+  check('homepage: first viewport holds the headline and the search; the project list follows directly below', await hp.evaluate(() => document.getElementById('exploreSearch').getBoundingClientRect().bottom < innerHeight && document.querySelector('#exploreList .sn-row').getBoundingClientRect().top < innerHeight * 1.5));
   await h.close();
   // Mobile 375: $SYNC page stays clean; Explore rows keep identity + sync state primary (no extra line per row)
   const m = await ctx({ width: 375, height: 740 }); const mp = await m.newPage();

@@ -1,31 +1,26 @@
 <!doctype html><html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d0c0b">
-<title>SyncNet — Sync your project</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000000">
+<title>SyncNet — Make SYNC a verb.</title>
 <meta name="description" content="Find a project on Robinhood Chain. Verify control. Give it a home.">
-<meta property="og:title" content="SyncNet — Sync your project"><meta property="og:description" content="Find a project. Verify control. Give it a home."><meta property="og:url" content="https://syncnet.capital"><meta property="og:image" content="https://syncnet.capital/assets/syncnet-logo.png">
+<meta property="og:title" content="SyncNet — Make SYNC a verb."><meta property="og:description" content="Find a project. Verify control. Give it a home."><meta property="og:url" content="https://syncnet.capital"><meta property="og:image" content="https://syncnet.capital/assets/syncnet-logo.png">
 <link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png">
 </head><body class="sn-explore">
-<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><svg class="sn-mark" viewBox="0 0 40 24" aria-hidden="true" focusable="false"><path class="sn-mark-a" d="M2 5.5h13c8.5 0 10 6.5 17 6.5"/><path d="M2 18.5h13c8.5 0 10-6.5 17-6.5"/><path d="M32 12h6"/></svg><span>SyncNet</span></a><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><span class="nav-mark" aria-hidden="true">S</span><span>SyncNet</span></a><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
 <main class="sn-main" id="main">
-<section class="sn-wrap sn-intro" aria-labelledby="exploreTitle">
-<div class="ex-hero">
-<div class="ex-main">
-<h1 class="sn-h1" id="exploreTitle">Sync your project.</h1>
-<p class="sn-lede">Find a project. Verify control. Give it a home.</p>
-<form class="sn-search" id="exploreSearch" role="search" action="/" method="get">
-<svg class="sn-motif" viewBox="0 0 72 30" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M0 1.5H22C42 1.5 50 15 72 15" stroke="#6fd3df" stroke-opacity=".7"/><path d="M0 28.5H22C42 28.5 50 15 72 15" stroke="#ece6d8" stroke-opacity=".55"/></svg>
+<section class="sn-intro ex-hero" aria-labelledby="exploreTitle"><div class="sn-wrap ex-hero-in">
+<div class="ex-mark" role="img" aria-label="SyncNet: two paths converging into sync"><svg viewBox="60 170 1080 180" aria-hidden="true" focusable="false"><path class="ex-mark-c" d="M78 188 H430 C555 188 585 260 720 260"/><path class="ex-mark-i" d="M78 332 H430 C555 332 585 260 720 260"/><path class="ex-mark-i" d="M720 260 H1122"/></svg></div>
+<p class="ex-eyebrow">Project network · Robinhood Chain</p>
+<h1 class="ex-title" id="exploreTitle">MAKE <span class="cyan">SYNC</span><br>A VERB.</h1>
+<p class="ex-copy"><strong>Find a project. Verify control. Give it a home.</strong></p>
+<form class="sn-search ex-search" id="exploreSearch" role="search" action="/" method="get">
 <label class="sr-only" for="exploreQ">Search projects by name, ticker or contract</label>
-<input id="exploreQ" name="q" type="search" placeholder="Search a project by name, ticker or contract" autocomplete="off" spellcheck="false" enterkeyhint="go">
-<button type="submit" aria-label="Open project">→</button>
+<input id="exploreQ" name="q" type="search" placeholder="Name, ticker or 0x…" autocomplete="off" spellcheck="false" enterkeyhint="go">
+<button type="submit" aria-label="Open project">Search</button>
 </form>
-<p class="ex-under"><a class="sn-textbtn" href="/build.html">+ Create a new project</a><span class="sn-muted">Searching opens a Project Page. Nothing is signed.</span></p>
-</div>
-<aside class="ex-net" aria-label="Network">
-<p class="sn-label">Robinhood Chain · the network</p>
-<p class="sn-context" id="exploreContext"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a>, the network asset, has direct markets with NET and USDG.</p>
-<dl class="ex-stats" id="exploreStats" hidden><div><dt>Projects</dt><dd class="sn-num" id="exProjects"></dd></div><div><dt>For sale</dt><dd class="sn-num" id="exSale"></dd></div><div><dt>$SYNC pairs</dt><dd class="sn-num" id="exSyncUsers"></dd></div></dl>
-</aside>
-</div>
+<p class="sn-context ex-context" id="exploreContext"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a>, the network asset, has direct markets with NET and USDG.</p>
+<p class="ex-create"><a class="sn-textbtn" href="/build.html">+ Create a new project</a></p>
+</div></section>
+<section class="sn-wrap ex-list" aria-label="Projects">
 <div class="sn-filters" role="toolbar" aria-label="Show projects">
 <button type="button" data-filter="all" aria-pressed="true">All</button>
 <button type="button" data-filter="synced" aria-pressed="false">Synced</button>
