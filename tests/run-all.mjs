@@ -20,6 +20,7 @@ const SUITES = [
   ['PONS V2 discovery unit (decode, adaptive scan, reorg, sorted sets)', 'node', ['tests/unit/pons-discovery.test.mjs'], /(\d+)\/(\d+) pons discovery checks passed/],
   ['PONS V2 index sorted sets on real Redis (Upstash adapter == memory)', 'node', ['tests/unit/pons-redis-zset.test.mjs'], /(\d+)\/(\d+) pons real-Redis sorted-set checks passed/],
   ['server PONS V2 discovery /api/pons-economy + curation', 'node', ['tests/server/pons-economy.test.mjs'], /(\d+)\/(\d+) pons economy server checks passed/],
+  ['Solana discovery V0 (identity, Pump truth model, launch index, indexer, /api/pump-economy, backfill)', 'node', ['tests/unit/solana-discovery.test.mjs'], /(\d+)\/(\d+) solana discovery checks passed/],
   ['audit PoCs · engine (AFTER)', 'node', ['tests/audit/poc-engine.mjs'], /(\d+)\/(\d+) reproduced/],
   ['audit PoCs · server (AFTER)', 'node', ['tests/audit/poc-server.mjs'], /(\d+)\/(\d+) reproduced/],
   ['audit PoCs · pages (AFTER)', 'node', ['tests/audit/poc-e2e.mjs'], /(\d+)\/(\d+) vulnerability checks reproduced/],
