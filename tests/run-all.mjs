@@ -21,6 +21,7 @@ const SUITES = [
   ['audit PoCs · server (AFTER)', 'node', ['tests/audit/poc-server.mjs'], /(\d+)\/(\d+) reproduced/],
   ['audit PoCs · pages (AFTER)', 'node', ['tests/audit/poc-e2e.mjs'], /(\d+)\/(\d+) vulnerability checks reproduced/],
   ['E2E (existing product suites, updated)', 'node', ['tests/e2e/run.mjs'], /(\d+)\/(\d+) checks passed/],
+  ['Network Map child connections (show all / collapse, batches)', 'node', ['tests/e2e/network-children.mjs'], /(\d+)\/(\d+) network children checks passed/],
   ['required regressions R01–R28', 'node', ['tests/regression/rc-regressions.mjs'], /(\d+)\/(\d+) regression checks passed/],
   ['IPFS display (canonical utility, PONSYNC CID)', 'node', ['tests/regression/rc-ipfs-display.mjs'], /(\d+)\/(\d+) ipfs-display checks passed/],
   ['Marketplace walkthrough (two browsers, full deal)', 'node', ['tests/regression/rc-marketplace.mjs'], /(\d+)\/(\d+) marketplace walkthrough checks passed/],
