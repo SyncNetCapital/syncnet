@@ -670,3 +670,28 @@ intents stay verifiable.
 `UPSTASH_REDIS_REST_TOKEN`. `SYNCNET_RPC_URL` is recommended: a private RPC for the reads, which also needs ≈2 minutes
 of recent state, as the public RPC provides.
 
+
+## 19. Ops suspension (SyncNet moderation)
+
+`netlify/lib/project-home-suspension.js` is SyncNet's own "stop serving" switch, separate from the operator's unpublish.
+There is **no HTTP route**: it runs only from `netlify/ops/project-home-suspension.mjs` (never deployed as a function,
+`/netlify/*` is 404) with the production Upstash credentials in the shell, like `grantComplimentary`. No wallet —
+including the Passport operator's — can suspend, reinstate or override it. The CLI refuses to run without a durable store.
+
+```
+node netlify/ops/project-home-suspension.mjs status    <token>
+node netlify/ops/project-home-suspension.mjs suspend   <token> --category security|abuse|legal|third-party-rights|terms --actor <ops-id> [--note "internal"]
+node netlify/ops/project-home-suspension.mjs reinstate <token> --actor <ops-id> [--note "internal"]
+```
+
+- State: `site:suspension:v1:<token>` (status, category, internal note, actor, time, sequence). Every change is one
+  `cas` that also appends `ops-suspend` / `ops-reinstate` to the project's append-only `site:audit:v1:<token>` and adds
+  the token to `site:suspended:v1`. A record that cannot be parsed counts as suspended (fail closed).
+- While suspended: `/site/<token>` answers a neutral 503 "This Project Home is currently unavailable."; the `revision`
+  content view answers 403; `publish` (new, restore, adopt) and new activation quotes answer 403 `suspended`, and
+  publish carries the suspension key as a `cas` expectation so a suspension landing mid-publish aborts it. `status`
+  exposes only `{status, category, since}`; `homes` reports `suspended`. The operator can still unpublish.
+- Never touched: entitlement, intents, activation registry, revisions, configs, Passport. Reinstatement needs no new
+  activation fee.
+- Not covered: `/site-img/<cid>` serves any sanitised CID, not per project. To stop serving one image, remove its
+  `site:img:v1:<cid>` record (that also blocks publishing it again); unpinning at Pinata is separate.

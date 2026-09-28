@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-27T16:10:10.742Z",
-  "passed": 163,
+  "at": "2026-09-28T10:57:55.054Z",
+  "passed": 164,
   "failed": 0,
   "results": [
     {
@@ -705,6 +705,11 @@
     },
     {
       "name": "Passport disclaimer: authority, not original-team identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "operator-content disclaimer: SyncNet does not verify or endorse the operator's claims; report path named without a link",
       "ok": true,
       "detail": ""
     },

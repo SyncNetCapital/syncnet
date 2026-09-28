@@ -12,6 +12,10 @@
  *   GET  /api/project-home?view=metrics                 truthful metrics: verified payments, sink, converter, USDG
  *   POST /api/project-home {action:'intent'|'verify'|'reconcile'|'publish'|'unpublish', …}
  *
+ * OPS SUSPENSION (netlify/lib/project-home-suspension.js, no HTTP route): while SyncNet has suspended a Project Home,
+ * publish / restore / adopt are refused and the revision content view is not served. Only the public category is
+ * exposed (status view); entitlement, payments, activations, revisions and the Passport are untouched.
+ *
  * Economic model: PROJECT HOME ACTIVATION is priced at $12 USD (reviewed price version 2), paid ONLY in $SYNC at the
  * SYNCNET REFERENCE RATE (derived automatically per new intent from the canonical PAR SYNC/USDG market and locked
  * into that intent — not an oracle; netlify/lib/project-home-rate.js), to the immutable SyncNetProjectHomeSink (60% burned
@@ -47,6 +51,7 @@ const { liveProject, readPassport, passportKey } = require('../lib/live-project'
 const { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC } = require('../lib/project-home-config');
 const { deploymentStatus } = require('../lib/project-home-deployment');
 const { deriveReferenceRate, RateUnavailable } = require('../lib/project-home-rate');
+const Suspension = require('../lib/project-home-suspension');
 const PROJECTS = require('../../syncnet-projects.json');
 // Reviewed canonical registry entries by address: display-only logo (same-origin /assets/) and symbol.
 const REGISTRY = new Map((Array.isArray(PROJECTS.projects) ? PROJECTS.projects : []).filter((p) => p && p.registry && p.registry.canonical === true && /^0x[0-9a-fA-F]{40}$/.test(String(p.token || '')))
@@ -93,6 +98,7 @@ const UNAVAILABLE = 'Project Home is temporarily unavailable.';
 const UNVERIFIED = 'Project Home activation payments are paused: the payment contracts could not be verified on Robinhood Chain. No payment was requested.';
 const SPLIT_NOTE = 'Paid SYNC is COMMITTED TO THE PROJECT HOME SINK. 60% is COMMITTED TO BURN and is burned by SYNC.burn() only when the sink is settled; 40% is allocated to the SyncNet protocol treasury and converted to USDG later, at the actual DEX execution rate (not the SyncNet reference rate). Your activation does not depend on either step.';
 const CHAIN_DOWN = 'Robinhood Chain could not be read right now. Nothing was changed. Try again.';
+const SUSPENDED = 'SyncNet has suspended this Project Home, so it cannot be published, restored or adopted right now. Its activation, revision history and Project Passport are unchanged. See /contact.html#report to ask about it.';
 const RATE_DOWN = 'SyncNet cannot derive a trustworthy SYNCNET REFERENCE RATE from the canonical SYNC/USDG market right now, so no quote was issued and nothing was requested. Try again in a few minutes.';
 
 const bad = (message) => publicError(400, 'invalid_request', message || 'Invalid request.');
@@ -221,27 +227,29 @@ async function readView(view, event, { store, rpc, cfg }) {
   if (view === 'status') {
     const token = lc(query(event, 'token'));
     if (!isAddr(token)) return bad('Invalid token address.');
-    const [ent, cur, open, passport] = await Promise.all([getJson(store, K.entitlement(token)), getJson(store, K.cur(token)), store.get(K.open(token)), readPassport(store, token)]);
+    const [ent, cur, open, passport, susp] = await Promise.all([getJson(store, K.entitlement(token)), getJson(store, K.cur(token)), store.get(K.open(token)), readPassport(store, token), Suspension.readSuspension(store, token)]);
     const intent = open ? (await getJson(store, K.intent(open))).value : null;
     const recent = (await store.smembers(K.intentsOf(token))).slice(0, 20);
     return json(200, {
       enabled: true, token, entitlement: publicEntitlement(ent.value), site: publicCur(cur.value), openIntent: publicIntent(intent),
       intents: recent, passport: passport ? { operator: lc(passport.operator), operatorSince: passport.operatorSince || null } : null,
+      suspension: Suspension.publicSuspension(susp),
     });
   }
   if (view === 'homes') {
     // Batch, read-only: the public HOME state of up to 100 projects (Explore / My Projects rows).
     //   live      published, entitlement ACTIVE/FINALIZED, signed by the CURRENT Passport operator
     //   awaiting  published by a previous operator (links disabled until the current operator adopts it)
-    //   unpublished / paused (entitlement invalidated by a reorg) / none
+    //   unpublished / paused (entitlement invalidated by a reorg) / suspended (SyncNet ops suspension) / none
     const tokens = [...new Set(String(query(event, 'tokens') || '').toLowerCase().split(',').filter(isAddr))].slice(0, 100);
     const homes = {};
     await Promise.all(tokens.map(async (t) => {
-      const [cur, ent, passport] = await Promise.all([getJson(store, K.cur(t)), getJson(store, K.entitlement(t)), readPassport(store, t)]);
+      const [cur, ent, passport, susp] = await Promise.all([getJson(store, K.cur(t)), getJson(store, K.entitlement(t)), readPassport(store, t), Suspension.readSuspension(store, t)]);
       const c = cur.value, e = ent.value;
       let state = 'none';
       if (c && c.state === 'PUBLISHED') state = !e || !PAID_STATES.has(e.status) ? 'paused' : passport && lc(passport.operator) === c.signer ? 'live' : 'awaiting';
       else if (c && c.state === 'UNPUBLISHED') state = 'unpublished';
+      if (susp.suspended) state = 'suspended';
       if (state !== 'none' || e) homes[t] = { state, activated: Boolean(e && PAID_STATES.has(e.status)) };
     }));
     return json(200, { enabled: true, homes });
@@ -265,7 +273,9 @@ async function readView(view, event, { store, rpc, cfg }) {
     const id = lc(query(event, 'id'));
     if (!isB32(id)) return bad('Invalid revision id.');
     const r = (await getJson(store, K.rev(id))).value;
-    return r ? json(200, { enabled: true, revision: r }) : publicError(404, 'not_found', 'Revision not found.');
+    if (!r) return publicError(404, 'not_found', 'Revision not found.');
+    if ((await Suspension.readSuspension(store, lc(r.token))).suspended) return publicError(403, 'unavailable', Suspension.PUBLIC_MESSAGE);
+    return json(200, { enabled: true, revision: r });
   }
   if (view === 'activations') return json(200, { enabled: true, activations: await loadActivations(store) });
   if (view === 'metrics') return json(200, { enabled: true, ...(await metrics(store, rpc, cfg)) });
@@ -385,6 +395,7 @@ async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
   const pRaw = await store.get(K.passport(token));
   let passport = null; try { passport = pRaw ? JSON.parse(pRaw) : null; } catch { passport = null; }
   if (!passport || lc(passport.operator) !== operator) return publicError(403, 'not_operator', 'Only the current Project Passport operator can request a Project Home activation.');
+  if ((await Suspension.readSuspension(store, token)).suspended) return publicError(403, 'suspended', SUSPENDED); // never quote a home SyncNet will not serve
   const ent = await getJson(store, K.entitlement(token));
   if (ent.value && (PAID_STATES.has(ent.value.status) || ent.value.status === 'PENDING_CONFIRMATION')) return publicError(409, 'already_active', 'This project already has a Project Home activation. It never has to be paid again.');
   // One open intent per token: an unexpired one is returned as is (same amount, same lock) — never a second amount.
@@ -674,6 +685,9 @@ async function publish(b, { store, rpc, now }) {
   const pRaw = await store.get(K.passport(token));
   let passport = null; try { passport = pRaw ? JSON.parse(pRaw) : null; } catch { passport = null; }
   if (!passport || lc(passport.operator) !== operator) return publicError(403, 'not_operator', 'Only the current Project Passport operator can publish this Project Home.');
+  // OPS SUSPENSION outranks the operator: no publish, restore or adopt while it holds (re-checked atomically at commit).
+  const susp = await Suspension.readSuspension(store, token);
+  if (susp.suspended) return publicError(403, 'suspended', SUSPENDED);
   // ENTITLEMENT (payment) is separate from the SIGNATURE (content): both are required.
   const ent = await getJson(store, K.entitlement(token));
   if (!ent.value) return publicError(402, 'activation_required', 'This project has no Project Home activation yet. Preview and editing are free; publishing needs the one-time activation.');
@@ -697,7 +711,7 @@ async function publish(b, { store, rpc, now }) {
   };
   const pointer = { schema: 'syncnet.site.current.v1', token, state: 'PUBLISHED', revisionId: id, configHash, signer: operator, issuedAt, at };
   const ok = await store.cas({
-    expect: [[K.passport(token), pRaw], [K.entitlement(token), ent.raw], [K.cur(token), cur.raw], [K.nonce(operator, nonce), null], [K.rev(id), null], ...(cfgRaw ? [[K.cfg(configHash), cfgRaw]] : [])],
+    expect: [[K.passport(token), pRaw], [K.entitlement(token), ent.raw], [K.cur(token), cur.raw], [K.nonce(operator, nonce), null], [K.rev(id), null], [Suspension.K.suspension(token), susp.raw], ...(cfgRaw ? [[K.cfg(configHash), cfgRaw]] : [])],
     set: [[K.cfg(configHash), Site.canonicalJson(config)], [K.rev(id), JSON.stringify(revision)], [K.cur(token), JSON.stringify(pointer)], [K.nonce(operator, nonce), '1', NONCE_TTL]],
     sadd: [[K.revs(token), id], [K.audit(token), JSON.stringify({ type: revision.kind, token, revisionId: id, signer: operator, at })]],
   });

@@ -231,6 +231,7 @@
     un.hidden = !(site && site.state === 'PUBLISHED');
     btn.disabled = false; btn.hidden = false; note.textContent = '';
     const ent = S.st && S.st.entitlement;
+    if (S.st && S.st.suspension) { steps(entOk() ? 'publish' : 'edit'); btn.dataset.act = ''; btn.textContent = 'PUBLISH'; btn.disabled = true; note.textContent = 'SyncNet has suspended this Project Home, so publishing and activation are paused. Your activation, revision history and Project Passport are unchanged. To ask about it, use Contact → Report.'; return; }
     if (ent && ent.status === 'INVALIDATED_BY_REORG') { btn.textContent = 'Check payment again'; btn.dataset.act = 'reverify'; note.textContent = 'The activation payment left the canonical chain. Publishing is paused until it is confirmed again.'; steps('activate'); return; }
     if (entOk()) {
       steps('publish');

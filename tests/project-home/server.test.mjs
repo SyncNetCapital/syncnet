@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import {
   A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex, ratePool, resetRatePool,
 } from './fixtures.mjs';
@@ -629,6 +630,85 @@ let ACT1;
   check('H04 the customer payment is ONE canonical SYNC transfer to the sink (no approval, no burn, no USDG transaction)', pc.receipts.get(p.txHash).logs.length === 1 && pc.receipts.get(p.txHash).logs[0].address === SYNC);
   const mtDown = (await api('GET', null, { view: 'metrics' }, { rpc: strict })).j;
   check('H05 metrics with the sink unreachable: registry figures served, sink/converter marked unavailable, never guessed', mtDown.sink.unavailable === true && mtDown.projectHomesActivated >= 1);
+}
+
+// ============================================================================================ S. SyncNet ops suspension
+{
+  const Susp = require(path.join(ROOT, 'netlify/lib/project-home-suspension.js'));
+  const T = T8; // complimentary entitlement, published by the current operator W (F01/F02)
+  const live0 = await site('/site/' + T);
+  check('S00 fixture: the Project Home is live before suspension', live0.statusCode === 200 && live0.body.includes(Site.AUTHORITY_LABEL));
+  // nothing over HTTP can suspend or reinstate — not an unauthenticated caller, not the Passport operator
+  const m = { token: T, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const viaHttp = [
+    await api('POST', { action: 'suspend', token: T, category: 'abuse', actor: 'x' }),
+    await api('POST', { action: 'reinstate', token: T, actor: 'x' }),
+    await api('POST', { action: 'suspend', ...m, signature: signDigest(W, Site.digest('SiteUnpublish', m)) }),
+    await api('GET', null, { view: 'suspend', token: T }),
+  ];
+  check('S01 no HTTP action or view can suspend/reinstate (unauthenticated or operator-signed → 400, nothing written)', viaHttp.every((r) => r.s === 400) && !MAP.has(Susp.K.suspension(T)), viaHttp.map((r) => r.s).join());
+  const fnSrc = fs.readdirSync(path.join(ROOT, 'netlify/functions')).map((f) => fs.readFileSync(path.join(ROOT, 'netlify/functions', f), 'utf8')).join('\n');
+  check('S02 no Netlify function calls suspend()/reinstate() (ops CLI only; no route exists)', !/\.(suspend|reinstate)\(/.test(fnSrc) && !/\bsuspend\(|reinstate\(/.test(fnSrc));
+  let bad = [];
+  for (const [label, f] of [['no actor', () => Susp.suspend(store, T, { category: 'abuse' })], ['unknown category', () => Susp.suspend(store, T, { category: 'spam!', actor: 'ops:a' })], ['bad token', () => Susp.suspend(store, '0x12', { category: 'abuse', actor: 'ops:a' })], ['reinstate while not suspended', () => Susp.reinstate(store, T, { actor: 'ops:a' })]]) {
+    try { await f(); bad.push(label); } catch { /* refused */ }
+  }
+  check('S03 invalid ops calls are refused (actor required, fixed categories, reinstate needs a suspension)', bad.length === 0 && !MAP.has(Susp.K.suspension(T)), bad.join());
+  const cli = spawnSync(process.execPath, [path.join(ROOT, 'netlify/ops/project-home-suspension.mjs'), 'suspend', T, '--category', 'abuse', '--actor', 'ops:x'], { env: { PATH: process.env.PATH }, encoding: 'utf8' });
+  check('S04 ops CLI refuses to run without the durable production store (fail closed)', cli.status === 2 && /no durable store/.test(cli.stderr), cli.stderr);
+
+  // suspend: snapshot everything that is NOT suspension state, suspend, compare
+  const skip = (k) => k === Susp.K.index || k.startsWith('site:suspension:') || k.startsWith('site:audit:') || k.startsWith('rl:') || /^ph-|ratelimit|:rl:/.test(k);
+  // durable records only: TTL-bound locks/counters (e.g. an expiring open-quote lock of another project) may lapse meanwhile
+  const snap = () => JSON.stringify([...MAP.entries()].filter(([k, v]) => !skip(k) && !v.expiresAt).map(([k, v]) => [k, v.value instanceof Set ? [...v.value].sort() : v.value]).sort());
+  const auditBefore = (await store.smembers('site:audit:v1:' + T)).length;
+  const before = snap();
+  await Susp.suspend(store, T, { category: 'abuse', note: 'PRIVATE-NOTE phishing report #12', actor: 'ops:alice', now: () => clock.now() });
+  const pg = await site('/site/' + T);
+  check('S05 suspended Project Home is not publicly served (neutral 503 page)', pg.statusCode === 503 && pg.body.includes('This Project Home is currently unavailable.') && !pg.body.includes('The synced home of this project'));
+  check('S06 the public page exposes no note, actor or category', !/PRIVATE-NOTE|ops:alice|abuse/i.test(pg.body));
+  const st = await status(T);
+  check('S07 status view: SUSPENDED + public category only (no note, no actor)', st.suspension && st.suspension.status === 'SUSPENDED' && st.suspension.category === 'abuse' && !/PRIVATE-NOTE|ops:alice/.test(JSON.stringify(st)), JSON.stringify(st.suspension));
+  check('S08 homes view reports "suspended" (never "live")', (await api('GET', null, { view: 'homes', tokens: T })).j.homes[T].state === 'suspended');
+  const revId = st.site.revisionId;
+  const rv = await api('GET', null, { view: 'revision', id: revId });
+  check('S09 revision content is not served while suspended; the revision list (history) still is', rv.s === 403 && !rv.body.includes('synced home') && (await api('GET', null, { view: 'revisions', token: T })).j.revisions.length >= 1);
+  const pub = await publishCfg(T, goodConfig(T, { headline: 'Trying to publish around the suspension' }));
+  const readopt = await publishCfg(T, null, W, { byHash: true, configHash: st.site.configHash });
+  check('S10 operator publish / restore cannot bypass the suspension (403 suspended, pointer unchanged)', pub.s === 403 && pub.j.code === 'suspended' && readopt.s === 403 && JSON.parse(MAP.get('site:cur:v1:' + T).value).revisionId === revId, pub.body);
+  const q = await request(T, W);
+  check('S11 no activation quote is issued for a suspended Project Home', q.s === 403 && q.j.code === 'suspended', q.body);
+  // a suspension landing between publish's reads and its commit is caught atomically
+  await Susp.reinstate(store, T, { actor: 'ops:alice', now: () => clock.now() });
+  storeMode.beforeCas = async () => { await Susp.suspend(store, T, { category: 'security', actor: 'ops:bob', now: () => clock.now() }); };
+  clock.advance(2);
+  const race = await publishCfg(T, goodConfig(T, { headline: 'Racing the suspension' }));
+  check('S12 a suspension committed during publish aborts the publish (atomic expectation)', race.s === 409 && JSON.parse(MAP.get('site:cur:v1:' + T).value).revisionId === revId && (await site('/site/' + T)).statusCode === 503, race.body);
+  const after = snap();
+  check('S13 entitlement, payments, activations, revisions and Passport are untouched by suspension', after === before, JSON.parse(after).filter((e) => !before.includes(JSON.stringify(e))).map((e) => e[0]).join(' ') + ' | removed: ' + JSON.parse(before).filter((e) => !after.includes(JSON.stringify(e))).map((e) => e[0]).join(' '));
+  // fail closed: a record that cannot be parsed counts as suspended
+  const good = MAP.get(Susp.K.suspension(T));
+  MAP.set(Susp.K.suspension(T), { type: 'string', value: '{not json', expiresAt: null });
+  const corrupt = await site('/site/' + T);
+  check('S14 unreadable suspension record → treated as suspended (fail closed)', corrupt.statusCode === 503 && (await publishCfg(T, goodConfig(T, { headline: 'Corrupt record attempt' }))).j.code === 'suspended');
+  MAP.set(Susp.K.suspension(T), good);
+  // the operator's own unpublish still works while suspended and is a separate state
+  clock.advance(2);
+  const un = await unpublishSite(T);
+  check('S15 operator unpublish is separate and still allowed while suspended', un.s === 200 && JSON.parse(MAP.get('site:cur:v1:' + T).value).state === 'UNPUBLISHED');
+  // reinstatement
+  await Susp.reinstate(store, T, { actor: 'ops:carol', note: 'reviewed, content removed by operator', now: () => clock.now() });
+  const st2 = await status(T);
+  check('S16 reinstated: no suspension in the status view; the entitlement is still valid', st2.suspension === null && st2.entitlement && st2.entitlement.status === 'ACTIVE');
+  clock.advance(2);
+  const again = await publishCfg(T, goodConfig(T, { headline: 'Back after review' }));
+  const pg2 = await site('/site/' + T);
+  check('S17 after reinstatement the operator can publish again without a new activation fee, and it is served', again.s === 200 && pg2.statusCode === 200 && pg2.body.includes('Back after review'), again.body);
+  // audit trail
+  const h = await Susp.history(store, T);
+  check('S18 append-only ops audit: every suspend/reinstate kept, in order, with actor, category, note and time', h.map((e) => e.type).join() === 'ops-suspend,ops-reinstate,ops-suspend,ops-reinstate' && h[0].actor === 'ops:alice' && h[0].note.startsWith('PRIVATE-NOTE') && h[0].category === 'abuse' && h[2].actor === 'ops:bob' && h[3].actor === 'ops:carol' && h.every((e) => e.at && e.token === T), JSON.stringify(h.map((e) => [e.type, e.actor, e.seq])));
+  check('S19 pre-existing audit events (complimentary, publish) are retained', (await store.smembers('site:audit:v1:' + T)).length >= auditBefore + 4 && (await store.smembers(Susp.K.index)).includes(T));
+  check('S20 the Passport operator is still W and unchanged by moderation', JSON.parse(MAP.get('mp:passport:v1:' + T).value).operator === W);
 }
 
 // ============================================================================================ G. source-level invariants

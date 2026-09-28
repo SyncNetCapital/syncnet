@@ -122,6 +122,7 @@ check('HTML in about is escaped', cur.includes('&lt;b&gt;bold&lt;/b&gt;') && !cu
 check('verified identity comes before any operator content', cur.indexOf('<header class="identity">') < cur.indexOf('Written by the Passport operator'));
 check('operator content is labelled as such', (cur.match(/Written by the Passport operator/g) || []).length === 2);
 check('Passport disclaimer: authority, not original-team identity', cur.includes('does not prove the identity of the historical or original team'));
+check('operator-content disclaimer: SyncNet does not verify or endorse the operator\'s claims; report path named without a link', cur.includes('Project Home content is provided by the Project Passport operator who signed it. SyncNet does not verify or endorse its claims.') && cur.includes('syncnet.capital/contact.html#report') && !/href="[^"]*contact/.test(cur));
 check('product wording: active for as long as SyncNet operates the service (no perpetual promise)', cur.includes('for as long as SyncNet operates the Project Home service') && !/forever|perpetual/i.test(cur));
 check('never OFFICIAL WEBSITE', !/official website/i.test(cur + stale + prev));
 check('invalid config → no operator content at all', (() => { const h = Site.render({ config: { ...full, html: '<script>x</script>' }, facts, authority: { signer: OP } }); return !h.includes('Written by the Passport operator') && !h.includes('<script'); })());

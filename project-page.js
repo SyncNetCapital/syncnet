@@ -86,6 +86,7 @@
     const byCurrent = published && operator() && lc(site.signer) === operator();
     const edit = `/home-editor.html?token=${esc(t)}`;
     const open = `<a href="/site/${esc(t)}" target="_blank" rel="noopener">Open home ↗</a>`;
+    if (st.suspension) return rowHtml('home', 'Home', 'Unavailable<small>SyncNet is not serving this Project Home right now.' + (r === 'operator' ? ' Its activation, history and Project Passport are unchanged.' : '') + '</small>', r === 'operator' ? '<a href="/contact.html#report">Contact →</a>' : '');
     if (ent && ent.status === 'INVALIDATED_BY_REORG') {
       return rowHtml('home', 'Home', 'Suspended<small>The activation payment left the canonical chain. The home is paused until the same payment is confirmed again.</small>', r === 'operator' ? `<a href="${edit}">Check status →</a>` : '');
     }

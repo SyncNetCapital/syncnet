@@ -13,7 +13,9 @@
  *    operator-authored external link is rendered NON-CLICKABLE until the new operator adopts the site (a new
  *    signature, no payment). Responses are never cached, so a transfer takes effect on the next request;
  *  - shown only while the project's entitlement is ACTIVE/FINALIZED and the site is PUBLISHED; closed unless
- *    SYNCNET_PROJECT_HOME_ENABLED=true with a durable store. Store failure fails closed (503, nothing rendered).
+ *    SYNCNET_PROJECT_HOME_ENABLED=true with a durable store. Store failure fails closed (503, nothing rendered);
+ *  - an OPS SUSPENSION (netlify/lib/project-home-suspension.js) is checked first: a neutral "currently unavailable"
+ *    page, with no reason, note or content.
  */
 const crypto = require('crypto');
 const Site = require('../../lib/syncnet-site.js');
@@ -22,6 +24,7 @@ const { clientIp, limit } = require('../lib/ratelimit');
 const { logError } = require('../lib/log');
 const { readPassport } = require('../lib/live-project');
 const { projectHomeConfig } = require('../lib/project-home-config');
+const { readSuspension, PUBLIC_MESSAGE: SUSPENDED_MESSAGE } = require('../lib/project-home-suspension');
 
 const STYLE_HASH = "'sha256-" + crypto.createHash('sha256').update(Site.STYLESHEET, 'utf8').digest('base64') + "'";
 const CSP = `default-src 'none'; style-src ${STYLE_HASH}; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`;
@@ -76,6 +79,7 @@ async function handler(event = {}, deps = {}) {
   try {
     const rl = await limit(store, { bucket: 'ph-site', id: clientIp(event), limit: 240, windowSeconds: 60 });
     if (!rl.allowed) return rl.reason === 'store-unavailable' ? page(503, 'Temporarily unavailable', 'This Project Home cannot be shown right now.') : { ...page(429, 'Too many requests', 'Please wait and try again.'), headers: { ...HEADERS, 'retry-after': String(rl.retryAfter || 60) } };
+    if ((await readSuspension(store, token)).suspended) return page(503, 'Project Home unavailable', SUSPENDED_MESSAGE);
     const cur = await getJson(store, `site:cur:v1:${token}`);
     if (!cur || cur.state !== 'PUBLISHED' || !/^0x[0-9a-f]{64}$/.test(String(cur.revisionId || ''))) return notFound();
     const [ent, rev, passport] = await Promise.all([getJson(store, `site:entitlement:v1:${token}`), getJson(store, `site:rev:v1:${cur.revisionId}`), readPassport(store, token)]);
