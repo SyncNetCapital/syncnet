@@ -508,7 +508,7 @@ const BASE_ENV = {
   SYNCNET_PIN_SECONDARY_URL: 'https://psa.mock', SYNCNET_PIN_SECONDARY_TOKEN: 'psa-token',
 };
 const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
-  'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
+  'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'SYNCNET_PROJECT_HOME_FREE_BETA', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
 /** Project Home test fixture sink (never deployed). The SYNCNET REFERENCE RATE is automatic: it is read from the mocked
  *  canonical SYNC/USDG market (ratePool, $0.00005 by default), exactly as production reads the real one. */
 export const PH_SINK = '0x5111c0000000000000000000000000000000beef';
@@ -522,7 +522,7 @@ function phDeployChain() {
   if (!phChain) phChain = deploymentChain({ sink: PH_SINK, converter: PH_CONVERTER, treasury: DEPLOYMENT.treasury, sync: A.SYNC, usdg: A.USDG, router: DEPLOYMENT.router }, (x) => Core.functionSelector(x));
   return phChain;
 }
-export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome } = {}) {
+export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome, projectHomeFreeBeta = false } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
   if (publicLaunch) process.env.SYNCNET_PUBLIC_LAUNCH = 'true';
@@ -538,6 +538,7 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
     DEPLOYMENT.deployments.push({ sink: PH_SINK, converter: PH_CONVERTER });
     Object.assign(process.env, { SYNCNET_PROJECT_HOME_ENABLED: 'true', PROJECT_HOME_PRICE_VERSION: '2', PROJECT_HOME_PRICE_USD_CENTS: '1200', PROJECT_HOME_SINK_ADDRESS: PH_SINK });
     if (projectHomePayments) process.env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED = 'true';
+    if (projectHomeFreeBeta) process.env.SYNCNET_PROJECT_HOME_FREE_BETA = 'true';
   }
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));
   store.getStore(durable ? { env: process.env } : { env: {} });

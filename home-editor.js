@@ -72,6 +72,8 @@
     });
   }
   const entOk = () => Boolean(S.st && S.st.entitlement && (S.st.entitlement.status === 'ACTIVE' || S.st.entitlement.status === 'FINALIZED'));
+  // FREE BETA (server config): no payment UI at all; the first publish creates the project's free-beta activation.
+  const beta = () => Boolean(S.cfg && S.cfg.freeBeta);
   // A $SYNC transfer request handed to the wallet whose outcome this browser never learned (page reloaded or closed
   // while the wallet prompt was open). Wallets keep such requests and can still send them later, so while one may be
   // open NO new quote or payment is offered: that is how a stale quote got paid next to a fresh one.
@@ -245,6 +247,14 @@
       else note.textContent = 'Publishing is a free signature. The home is signed by your wallet.';
       return;
     }
+    if (beta()) {
+      steps('publish');
+      btn.dataset.act = 'publish';
+      btn.textContent = 'PUBLISH FREE BETA';
+      note.textContent = 'Project Home is currently free during beta. Publish your Project Home at no activation cost. Free-beta activations stay with the project.';
+      if (!S.config) { btn.disabled = true; note.textContent = 'Project Home is currently free during beta. Fix the highlighted fields to publish.'; }
+      return;
+    }
     steps(($('hePay').hidden) ? 'edit' : 'activate');
     btn.dataset.act = 'activate';
     btn.textContent = 'Continue to activation';
@@ -273,7 +283,7 @@
       if (adopting) body.configHash = hash; else body.config = S.config;
       const r = await post(body);
       if (!r.ok) throw new Error(errText(r, 'Publishing failed.'));
-      await refreshStatus();
+      await refreshStatus(); renderReceipt();
       status(adopting ? 'Adopted. Your home is live and its links work again.' : 'Published. Your home is live.', 'ok');
       $('heStatus').insertAdjacentHTML('beforeend', ` <a href="/site/${esc(token)}" target="_blank" rel="noopener">Open home ↗</a>`);
       if (adopting) { $('heReview').hidden = true; $('heGrid').classList.remove('is-review'); document.querySelector('.he-controls').hidden = false; fill(S.reviewConfig); showEditor(); }
@@ -450,6 +460,7 @@
     const pend = store.get(PAY);
     const intent = S.st && S.st.openIntent;
     if (entOk()) { store.set(PAY, null); return false; }
+    if (beta()) return false; // no payment UI during the free beta (a payment sent earlier stays recorded server-side)
     if (pend && pend.txHash) { $('hePay').hidden = false; refreshBar(); verifyLoop(pend.requestId, pend.txHash); return true; }
     if (intent && intent.observed && intent.observed.txHash) { $('hePay').hidden = false; refreshBar(); verifyLoop(intent.requestId, intent.observed.txHash); return true; }
     return false;
@@ -492,6 +503,22 @@
   }
   function renderReceipt() {
     const r = receiptData(), sec = $('heReceipt');
+    const e = S.st && S.st.entitlement;
+    $('heReceiptTitle').textContent = 'Receipt · SyncNet Project Home activation';
+    document.querySelector('.he-receipt-actions').hidden = false;
+    if (!r && e && e.kind === 'beta') { // not a payment receipt: no amount, no payer, no transaction exists
+      $('heReceiptTitle').textContent = 'FREE BETA ACTIVATION';
+      document.querySelector('.he-receipt-actions').hidden = true;
+      $('heReceiptBody').innerHTML = `<dl class="sn-kv">
+<dt>Project</dt><dd>${esc((S.facts && S.facts.name) || '—')}</dd>
+<dt>Token contract</dt><dd><span class="sn-mono">${esc(e.token)}</span></dd>
+<dt>Entitlement</dt><dd>FREE BETA · belongs to the project (token), not to a wallet</dd>
+<dt>Activated</dt><dd>${esc(String(e.activatedAt || '').replace('T', ' ').slice(0, 19))} UTC</dd>
+<dt>Status</dt><dd>${esc(e.status)}</dd>
+<dt>Payment</dt><dd>None. Free-beta activations stay with the project after the beta ends.</dd></dl>`;
+      sec.hidden = false;
+      return;
+    }
     if (!r) { sec.hidden = true; return; }
     const row = (k, v) => `<dt>${esc(k)}</dt><dd>${v}</dd>`;
     const mono = (v) => `<span class="sn-mono">${esc(v == null ? '—' : v)}</span>`;
@@ -579,7 +606,7 @@ ${row('Refunds', esc(r.refund))}
       }
       fill(await startingConfig());
       showEditor();
-      if (params.get('step') === 'pay' && !entOk()) { $('hePay').hidden = false; refreshBar(); }
+      if (params.get('step') === 'pay' && !entOk() && !beta()) { $('hePay').hidden = false; refreshBar(); }
       if (!resume() && !$('hePay').hidden) renderQuoteArea();
       watchFinality();
       if (!(await uploadsOpen())) { document.querySelectorAll('.he-file input').forEach((i) => { i.disabled = true; }); document.querySelectorAll('.he-file').forEach((l) => l.setAttribute('aria-disabled', 'true')); $('heImgNote').textContent = 'Image uploads are not open on this deployment. Your home works without images.'; }

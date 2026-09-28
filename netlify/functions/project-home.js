@@ -23,6 +23,12 @@
  * protocol treasury — downstream accounting that activation NEVER waits for). One-time, per token, non-refundable;
  * bound to the TOKEN, never to the payer. After activation every content operation is free.
  *
+ * FREE BETA (SYNCNET_PROJECT_HOME_FREE_BETA=true, payments off): the CURRENT Passport operator's first successful
+ * publish creates, in the SAME atomic commit, a durable entitlement {kind:'beta', label:'FREE BETA'} bound to the token.
+ * It records no payment, payer, amount or transaction and never counts as revenue. It is never created by reads,
+ * previews or quotes, never replaces an existing (paid / complimentary / beta) entitlement, and stays valid after the
+ * beta ends (grandfathered): turning the beta off and payments on needs no migration.
+ *
  * Trust model:
  *  - authority comes ONLY from the CURRENT Project Passport operator (mp:passport:v1:<token>, Marketplace-owned, READ
  *    ONLY here). Never from the payer, a holder, the deployer, the fee recipient, operatorAtActivation or socials;
@@ -71,6 +77,7 @@ const K = {
   activationsOf: (t) => `site:acts:v1:${t}`,
   audit: (t) => `site:audit:v1:${t}`,
   complimentary: 'site:comp:v1',
+  beta: 'site:beta:v1', // index of tokens holding a FREE BETA entitlement
   cfg: (h) => `site:cfg:v1:${h}`,
   rev: (id) => `site:rev:v1:${id}`,
   cur: (t) => `site:cur:v1:${t}`,
@@ -150,7 +157,7 @@ function publicIntent(i) {
 }
 function publicEntitlement(e) {
   if (!e) return null;
-  return { ...e, termsVersion: e.termsVersion || null, exactSyncDisplay: e.exactAmount ? Pricing.formatUnits(e.exactAmount) : null, label: e.kind === 'complimentary' ? 'COMPLIMENTARY' : 'PAID', countsAsRevenue: e.kind === 'paid', lifetime: 'ONE-TIME PROJECT HOME ACTIVATION · active for as long as SyncNet operates the Project Home service' };
+  return { ...e, termsVersion: e.termsVersion || null, exactSyncDisplay: e.exactAmount ? Pricing.formatUnits(e.exactAmount) : null, label: e.kind === 'complimentary' ? 'COMPLIMENTARY' : e.kind === 'beta' ? 'FREE BETA' : 'PAID', countsAsRevenue: e.kind === 'paid', lifetime: 'ONE-TIME PROJECT HOME ACTIVATION · active for as long as SyncNet operates the Project Home service' };
 }
 const publicCur = (c) => c && { token: c.token, state: c.state, revisionId: c.revisionId || null, configHash: c.configHash || null, signer: c.signer, issuedAt: c.issuedAt, at: c.at };
 
@@ -212,7 +219,7 @@ async function handler(event = {}, deps = {}) {
 function configView(cfg, verified) {
   const payable = Boolean(cfg.paymentsEnabled && verified);
   const out = {
-    enabled: cfg.siteEnabled, payments: payable, deploymentVerified: Boolean(verified), chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: payable ? cfg.sink : null,
+    enabled: cfg.siteEnabled, payments: payable, freeBeta: Boolean(cfg.freeBetaEnabled), mode: cfg.freeBetaEnabled ? 'free-beta' : payable ? 'paid' : 'closed', deploymentVerified: Boolean(verified), chainId: CHAIN_ID, canonicalSync: CANONICAL_SYNC, sink: payable ? cfg.sink : null,
     product: 'PROJECT HOME · ONE-TIME ACTIVATION', lockSeconds: LOCK, domain: Site.DOMAIN,
     split: { burnPercent: 60, treasuryPercent: 40, treasuryAsset: 'USDG', note: SPLIT_NOTE }, refund: 'Non-refundable after successful activation.',
     price: cfg.price ? { priceUsdCents: cfg.price.priceUsdCents, priceUsd: displayUsd(cfg.price.priceUsdCents), priceVersion: cfg.price.priceVersion } : null,
@@ -250,7 +257,7 @@ async function readView(view, event, { store, rpc, cfg }) {
       if (c && c.state === 'PUBLISHED') state = !e || !PAID_STATES.has(e.status) ? 'paused' : passport && lc(passport.operator) === c.signer ? 'live' : 'awaiting';
       else if (c && c.state === 'UNPUBLISHED') state = 'unpublished';
       if (susp.suspended) state = 'suspended';
-      if (state !== 'none' || e) homes[t] = { state, activated: Boolean(e && PAID_STATES.has(e.status)) };
+      if (state !== 'none' || e) homes[t] = { state, activated: Boolean(e && PAID_STATES.has(e.status)), kind: e ? e.kind : null };
     }));
     return json(200, { enabled: true, homes });
   }
@@ -311,6 +318,7 @@ async function metrics(store, rpc, cfg) {
     syncPaidForVerifiedActivations: paidSum.toString(),
     activationsByRateVersion: byRate,
     complimentaryEntitlements: (await store.smembers(K.complimentary)).length, // never revenue, never burn
+    freeBetaEntitlements: (await store.smembers(K.beta)).length, // never revenue, never burn
     sink: null,
     converter: null,
     notes: [
@@ -676,7 +684,7 @@ async function projectFacts(rpc, token) {
   };
 }
 
-async function publish(b, { store, rpc, now }) {
+async function publish(b, { store, rpc, now, cfg }) {
   const extra = onlyFields(b, ['action', 'token', 'operator', 'issuedAt', 'nonce', 'signature', 'config', 'configHash']);
   if (extra) return extra;
   const env = signedEnvelope(b, now());
@@ -705,11 +713,13 @@ async function publish(b, { store, rpc, now }) {
   // OPS SUSPENSION outranks the operator: no publish, restore or adopt while it holds (re-checked atomically at commit).
   const susp = await Suspension.readSuspension(store, token);
   if (susp.suspended) return publicError(403, 'suspended', SUSPENDED);
-  // ENTITLEMENT (payment) is separate from the SIGNATURE (content): both are required.
+  // ENTITLEMENT (activation) is separate from the SIGNATURE (content): both are required. An existing entitlement is
+  // always reused as is; only a project with NO entitlement can receive a FREE BETA one (created atomically below).
   const ent = await getJson(store, K.entitlement(token));
-  if (!ent.value) return publicError(402, 'activation_required', 'This project has no Project Home activation yet. Preview and editing are free; publishing needs the one-time activation.');
-  if (ent.value.status === 'INVALIDATED_BY_REORG') return publicError(409, 'entitlement_invalidated', 'The activation payment was removed by a chain reorganisation. Publication is disabled until it is reconciled.');
-  if (!PAID_STATES.has(ent.value.status)) return publicError(402, 'activation_pending', 'The activation payment is not confirmed yet.');
+  const beta = !ent.value && Boolean(cfg && cfg.freeBetaEnabled);
+  if (!ent.value && !beta) return publicError(402, 'activation_required', 'This project has no Project Home activation yet. Preview and editing are free; publishing needs the one-time activation.');
+  if (ent.value && ent.value.status === 'INVALIDATED_BY_REORG') return publicError(409, 'entitlement_invalidated', 'The activation payment was removed by a chain reorganisation. Publication is disabled until it is reconciled.');
+  if (ent.value && !PAID_STATES.has(ent.value.status)) return publicError(402, 'activation_pending', 'The activation payment is not confirmed yet.');
   for (const cid of [config.logoCid, config.heroCid].filter(Boolean)) {
     if (!(await store.get(K.img(cid)))) return publicError(422, 'image_not_sanitised', 'Images must be uploaded through the SyncNet image sanitizer first.');
   }
@@ -721,22 +731,27 @@ async function publish(b, { store, rpc, now }) {
   const id = Site.digest('SitePublish', message);
   const at = new Date(now()).toISOString();
   const adopting = Boolean(cur.value && cur.value.configHash === configHash && cur.value.signer !== operator);
+  // FREE BETA entitlement: no payment, payer, amount or transaction exists, so none is recorded. operatorAtActivation is
+  // history only (never authority); the entitlement belongs to the token.
+  const betaEnt = beta ? { schema: 'syncnet.project-home.entitlement.v1', token, status: 'ACTIVE', kind: 'beta', label: 'FREE BETA', program: 'free-beta', chainId: CHAIN_ID, activatedAt: at, firstRevisionId: id, operatorAtActivation: operator } : null;
+  const e = ent.value || betaEnt;
   const revision = {
     schema: 'syncnet.site.revision.v1', id, kind: b.config !== undefined ? 'publish' : adopting ? 'adopt' : 'restore',
     token, configHash, config, facts, signer: operator, signature: b.signature, issuedAt, nonce, publishedAt: at,
-    entitlement: { kind: ent.value.kind, status: ent.value.status, txHash: ent.value.txHash || null },
+    entitlement: { kind: e.kind, status: e.status, txHash: e.txHash || null },
   };
   const pointer = { schema: 'syncnet.site.current.v1', token, state: 'PUBLISHED', revisionId: id, configHash, signer: operator, issuedAt, at };
   const ok = await store.cas({
     expect: [[K.passport(token), pRaw], [K.entitlement(token), ent.raw], [K.cur(token), cur.raw], [K.nonce(operator, nonce), null], [K.rev(id), null], [Suspension.K.suspension(token), susp.raw], ...(cfgRaw ? [[K.cfg(configHash), cfgRaw]] : [])],
-    set: [[K.cfg(configHash), Site.canonicalJson(config)], [K.rev(id), JSON.stringify(revision)], [K.cur(token), JSON.stringify(pointer)], [K.nonce(operator, nonce), '1', NONCE_TTL]],
-    sadd: [[K.revs(token), id], [K.audit(token), JSON.stringify({ type: revision.kind, token, revisionId: id, signer: operator, at })]],
+    set: [[K.cfg(configHash), Site.canonicalJson(config)], [K.rev(id), JSON.stringify(revision)], [K.cur(token), JSON.stringify(pointer)], [K.nonce(operator, nonce), '1', NONCE_TTL], ...(betaEnt ? [[K.entitlement(token), JSON.stringify(betaEnt)]] : [])],
+    sadd: [[K.revs(token), id], [K.audit(token), JSON.stringify({ type: revision.kind, token, revisionId: id, signer: operator, at })],
+      ...(betaEnt ? [[K.beta, token], [K.audit(token), JSON.stringify({ type: 'beta-activated', token, revisionId: id, operator, at })]] : [])],
   });
   if (!ok) {
     if (await store.get(K.nonce(operator, nonce))) return publicError(409, 'replay', 'This nonce was already used.');
     return publicError(409, 'conflict', 'The project changed while publishing (for example, a Passport transfer). Reload and sign again.');
   }
-  log(FN, 'published', { token, kind: revision.kind, signer: hashId(operator) });
+  log(FN, 'published', { token, kind: revision.kind, signer: hashId(operator), betaActivated: Boolean(betaEnt) });
   return json(200, { ok: true, kind: revision.kind, site: publicCur(pointer), url: '/site/' + token });
 }
 

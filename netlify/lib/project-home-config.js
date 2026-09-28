@@ -3,6 +3,11 @@
 //
 //   SYNCNET_PROJECT_HOME_ENABLED=true            Project Home reads/site writes/public renderer (needs a durable store)
 //   SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   activation payment intents + verification (needs everything below)
+//   SYNCNET_PROJECT_HOME_FREE_BETA=true          FREE BETA: the current Passport operator's first publish creates a durable
+//                                                kind:'beta' entitlement (no payment). Mutually exclusive with payments:
+//                                                both "true", or a value other than true/false, closes BOTH new-activation
+//                                                paths (existing entitlements keep working). Beta entitlements stay valid
+//                                                after the beta ends (grandfathered).
 //   PROJECT_HOME_PRICE_VERSION=2                 active product price version (must exist in the pricing file)
 //   PROJECT_HOME_PRICE_USD_CENTS=1200            must EQUAL that version's reviewed price (a second, explicit key)
 //   PROJECT_HOME_SINK_ADDRESS=0x…                the deployed SyncNetProjectHomeSink (no default exists); it must ALSO be a
@@ -31,7 +36,7 @@ let warned = '';
 
 /**
  * projectHomeConfig({env, store, file, now}) -> {
- *   durable, siteEnabled, paymentsEnabled, closedReasons: string[],
+ *   durable, siteEnabled, paymentsEnabled, freeBetaEnabled, mode: 'free-beta'|'paid'|'closed', closedReasons: string[],
  *   chainId, sync, sink, deployment, price: {priceVersion, priceUsdCents} | null, rateMode: 'automatic' }
  */
 function projectHomeConfig(options = {}) {
@@ -66,14 +71,29 @@ function projectHomeConfig(options = {}) {
 
   const paymentsRequested = truthy(env.SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED);
   if (!paymentsRequested) reasons.push('SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED is not true');
-  const paymentsEnabled = siteEnabled && paymentsRequested && Boolean(price && sink);
+  // FREE BETA: its own flag, never inferred from the payment flag. Invalid or conflicting values fail closed for BOTH
+  // new-activation paths, so a typo can never silently open paid activation (or free activation).
+  const betaRaw = lc(env.SYNCNET_PROJECT_HOME_FREE_BETA);
+  const betaInvalid = betaRaw !== '' && betaRaw !== 'true' && betaRaw !== 'false';
+  const betaRequested = betaRaw === 'true';
+  const conflict = betaRequested && paymentsRequested;
+  if (betaInvalid) reasons.push('SYNCNET_PROJECT_HOME_FREE_BETA must be true or false');
+  if (conflict) reasons.push('SYNCNET_PROJECT_HOME_FREE_BETA and SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED are both true');
+  const blocked = betaInvalid || conflict;
+  const paymentsEnabled = !blocked && siteEnabled && paymentsRequested && Boolean(price && sink);
+  const freeBetaEnabled = siteEnabled && betaRequested && !blocked;
+  if (blocked) {
+    const key = 'beta|' + reasons.join('|');
+    if (key !== warned) { warned = key; log('project-home', 'activation-config-conflict', { problems: reasons }); }
+  }
 
-  if (paymentsRequested && !paymentsEnabled) {
+  if (paymentsRequested && !paymentsEnabled && !blocked) {
     const key = reasons.join('|');
     if (key !== warned) { warned = key; log('project-home', 'payments-closed', { problems: reasons }); }
   }
   // paymentsEnabled is the STATIC gate. Quotes additionally require an on-chain deployment PASS (project-home.js).
-  return { durable, siteEnabled, paymentsEnabled, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, deployment, price, rateMode: 'automatic' };
+  const mode = freeBetaEnabled ? 'free-beta' : paymentsEnabled ? 'paid' : 'closed';
+  return { durable, siteEnabled, paymentsEnabled, freeBetaEnabled, mode, closedReasons: reasons, chainId: CHAIN_ID, sync: CANONICAL_SYNC, sink, deployment, price, rateMode: 'automatic' };
 }
 
 module.exports = { projectHomeConfig, CHAIN_ID, CANONICAL_SYNC };

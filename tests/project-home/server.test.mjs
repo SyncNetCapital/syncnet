@@ -754,6 +754,116 @@ let ACT1;
   check('S20 the Passport operator is still W and unchanged by moderation', JSON.parse(MAP.get('mp:passport:v1:' + T).value).operator === W);
 }
 
+// ============================================================================================ B. FREE BETA (dormant paid system untouched)
+{
+  const Susp = require(path.join(ROOT, 'netlify/lib/project-home-suspension.js'));
+  const BETA = { ...ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'false', SYNCNET_PROJECT_HOME_FREE_BETA: 'true' };
+  const PAID = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'false' };
+  const reset = (t) => { for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(t)) MAP.delete(k); };
+  const entOf = (t) => (MAP.get('site:entitlement:v1:' + t) || {}).value || null;
+  const tick = () => clock.advance(2);
+  const cfgV = async (env) => (await api('GET', null, { view: 'config' }, { env })).j;
+  const TB = T4, TN = T5;
+  reset(TB); reset(TN);
+
+  // --- configuration
+  const cb = await cfgV(BETA);
+  check('BETA01 beta config: enabled, freeBeta, payments OFF, mode free-beta, no sink, no quote', cb.enabled === true && cb.freeBeta === true && cb.payments === false && cb.mode === 'free-beta' && cb.sink === null && cb.quote === null, JSON.stringify(cb).slice(0, 200));
+  const both = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'true' };
+  const cc = await cfgV(both);
+  const cPub = await publishCfg(TN, goodConfig(TN), W, { env: both });
+  const cQ = await request(TN, W, { env: both });
+  check('BETA02 conflicting config (beta AND payments true) fails closed: no free publish, no paid quote', cc.freeBeta === false && cc.payments === false && cc.mode === 'closed' && cPub.s === 402 && cQ.s === 503 && cQ.j.code === 'payments_closed' && !entOf(TN), cPub.body + cQ.body);
+  const bad = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'yes' };
+  const bc = await cfgV(bad);
+  const bQ = await request(TN, W, { env: bad });
+  tick();
+  const bPub = await publishCfg(TN, goodConfig(TN), W, { env: bad });
+  check('BETA03 invalid FREE_BETA value fails closed for BOTH paths (payments not silently opened)', bc.freeBeta === false && bc.payments === false && bQ.s === 503 && bPub.s === 402 && !entOf(TN));
+  const off = { ...BETA, SYNCNET_PROJECT_HOME_ENABLED: 'false' };
+  const oc = await cfgV(off);
+  tick();
+  const oPub = await publishCfg(TN, goodConfig(TN), W, { env: off });
+  check('BETA04 beta flag without SYNCNET_PROJECT_HOME_ENABLED → Project Home stays closed', oc.enabled === false && oc.freeBeta === false && oPub.s === 503 && !entOf(TN));
+
+  // --- no entitlement from reads, quotes, or unauthorised publishes
+  await api('GET', null, { view: 'status', token: TB }, { env: BETA });
+  await api('GET', null, { view: 'homes', tokens: TB }, { env: BETA });
+  await api('GET', null, { view: 'revisions', token: TB }, { env: BETA });
+  const bq = await request(TB, W, { env: BETA });
+  check('BETA05 viewing status/homes/revisions and asking for a quote create NO entitlement; no quote exists in beta', !entOf(TB) && bq.s === 503 && bq.j.code === 'payments_closed' && !MAP.has('site:open:v1:' + TB));
+  tick();
+  const np = await publishCfg(TB, goodConfig(TB), X, { env: BETA });
+  const bs = await publishCfg(TB, goodConfig(TB), W, { env: BETA, signer: X, signature: signDigest(X, Site.digest('SitePublish', { token: TB, operator: W, configHash: Site.configHash(goodConfig(TB)), issuedAt: nowSec(), nonce: rnd32() })) });
+  check('BETA06 a non-operator (or a bad signature) cannot create a beta entitlement', np.s === 403 && np.j.code === 'not_operator' && bs.s === 401 && !entOf(TB), np.body + bs.body);
+  // atomicity: a failed commit leaves no entitlement
+  storeMode.failCas = true; tick();
+  const failed = await publishCfg(TB, goodConfig(TB), W, { env: BETA });
+  storeMode.failCas = false;
+  check('BETA07 store fails at the commit → 503, no entitlement, no revision (atomic with the publish)', failed.s === 503 && !entOf(TB) && !MAP.has('site:cur:v1:' + TB));
+
+  // --- first beta publish
+  tick();
+  const actsBefore = (await store.smembers('site:acts:v1')).length;
+  const first = await publishCfg(TB, goodConfig(TB, { headline: 'Free beta home' }), W, { env: BETA });
+  const be = JSON.parse(entOf(TB));
+  check('BETA08 current operator publishes for free during beta', first.s === 200 && first.j.kind === 'publish', first.body);
+  check('BETA09 the first publish atomically created a durable FREE BETA entitlement bound to the token', be.kind === 'beta' && be.label === 'FREE BETA' && be.status === 'ACTIVE' && be.token === TB && be.firstRevisionId === first.j.site.revisionId && (await store.smembers('site:beta:v1')).includes(TB) && (await store.smembers('site:audit:v1:' + TB)).some((m) => JSON.parse(m).type === 'beta-activated'));
+  check('BETA10 no fake payment: no payer, tx, amount, price, rate, quote or block; not in the paid activation registry', ['payer', 'txHash', 'logIndex', 'exactAmount', 'baseSyncAmount', 'priceUsdCents', 'syncUsdReferenceRate', 'requestId', 'blockNumber', 'sink', 'termsVersion'].every((k) => !(k in be)) && (await store.smembers('site:acts:v1')).length === actsBefore);
+  const stB = (await api('GET', null, { view: 'status', token: TB }, { env: BETA })).j;
+  const mt = (await api('GET', null, { view: 'metrics' }, { env: BETA })).j;
+  check('BETA11 public status: FREE BETA, zero revenue; metrics count it separately, never as paid activation', stB.entitlement.label === 'FREE BETA' && stB.entitlement.countsAsRevenue === false && stB.entitlement.exactSyncDisplay === null && mt.freeBetaEntitlements >= 1, JSON.stringify({ label: stB.entitlement && stB.entitlement.label, rev: stB.entitlement && stB.entitlement.countsAsRevenue, disp: stB.entitlement && stB.entitlement.exactSyncDisplay, fb: mt.freeBetaEntitlements, acts: mt.projectHomesActivated }));
+  const pg = await site('/site/' + TB, { env: BETA });
+  check('BETA12 the free-beta home is served publicly, operator-verified', pg.statusCode === 200 && pg.body.includes('Free beta home') && pg.body.includes(Site.AUTHORITY_LABEL));
+  check('BETA13 homes view distinguishes the kind (beta) and shows it live', (await api('GET', null, { view: 'homes', tokens: TB }, { env: BETA })).j.homes[TB].kind === 'beta');
+  // edit, unpublish, republish/restore: the same entitlement is reused
+  tick(); const ed = await publishCfg(TB, goodConfig(TB, { headline: 'Edited in beta' }), W, { env: BETA });
+  tick(); const un = await unpublishSite(TB, W, { env: BETA });
+  tick(); const rs = await publishCfg(TB, null, W, { env: BETA, byHash: true, configHash: Site.configHash(goodConfig(TB, { headline: 'Edited in beta' })) });
+  check('BETA14 edit, unpublish and restore work for free and reuse the SAME entitlement (no second grant)', ed.s === 200 && un.s === 200 && rs.s === 200 && rs.j.kind === 'restore' && entOf(TB) === JSON.stringify(be), [ed.s, un.s, rs.s].join());
+  // Passport transfer → the new operator controls / adopts
+  const pk = 'mp:passport:v1:' + TB; const pass = JSON.parse(MAP.get(pk).value);
+  MAP.set(pk, { type: 'string', value: JSON.stringify({ ...pass, operator: W2 }), expiresAt: null });
+  const staleOld = await publishCfg(TB, goodConfig(TB, { headline: 'Old operator' }), W, { env: BETA });
+  tick(); const adopt = await publishCfg(TB, null, W2, { env: BETA, byHash: true, configHash: Site.configHash(goodConfig(TB, { headline: 'Edited in beta' })) });
+  check('BETA15 after a Passport transfer the new operator adopts the beta home; the old one is refused; the entitlement stays with the token', staleOld.s === 403 && adopt.s === 200 && adopt.j.kind === 'adopt' && entOf(TB) === JSON.stringify(be), adopt.body);
+
+  // --- grandfathering: beta OFF, payments ON
+  tick(); const gf = await publishCfg(TB, goodConfig(TB, { headline: 'After the beta' }), W2, { env: PAID });
+  const gq = await request(TB, W2, { env: PAID });
+  check('BETA16 beta ended (payments on): the beta project keeps publishing for free and is never quoted', gf.s === 200 && gq.s === 409 && gq.j.code === 'already_active' && entOf(TB) === JSON.stringify(be), gf.body + gq.body);
+  const closedEnv = { ...ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'false' };
+  tick(); const gc = await publishCfg(TB, goodConfig(TB, { headline: 'Both off' }), W2, { env: closedEnv });
+  check('BETA17 beta AND payments off: beta entitlements still publish (grandfathered)', gc.s === 200 && entOf(TB) === JSON.stringify(be));
+  reset(T2);
+  tick(); const up = await publishCfg(T2, goodConfig(T2), W, { env: PAID });
+  const uq = await request(T2, W, { env: PAID });
+  check('BETA18 beta off, payments on: an unentitled project must use the paid activation (402, then a paid quote at the configured price)', up.s === 402 && up.j.code === 'activation_required' && uq.s === 201 && uq.j.intent.priceUsdCents === (await cfgV(PAID)).price.priceUsdCents && !entOf(T2), up.body + uq.body);
+
+  // --- existing paid / complimentary entitlements are never replaced
+  const paidRaw = entOf(T6);
+  tick(); const pp = await publishCfg(T6, goodConfig(T6, { headline: 'Paid, during beta' }), W, { env: BETA });
+  check('BETA19 a PAID entitlement is reused as is during beta (never downgraded or rewritten)', pp.s === 200 && entOf(T6) === paidRaw && JSON.parse(paidRaw).kind === 'paid', pp.body);
+  const compRaw = entOf(T8);
+  tick(); const cp = await publishCfg(T8, goodConfig(T8, { headline: 'Complimentary, during beta' }), W, { env: BETA });
+  check('BETA20 a COMPLIMENTARY entitlement is reused as is during beta', cp.s === 200 && entOf(T8) === compRaw && JSON.parse(compRaw).kind === 'complimentary', cp.body);
+  // a paid entitlement landing concurrently is never overwritten by a beta grant
+  reset(TN); tick();
+  storeMode.beforeCas = async () => { MAP.set('site:entitlement:v1:' + TN, { type: 'string', value: JSON.stringify({ token: TN, kind: 'paid', status: 'ACTIVE', txHash: '0x' + 'ab'.repeat(32) }), expiresAt: null }); };
+  const race = await publishCfg(TN, goodConfig(TN), W, { env: BETA });
+  check('BETA21 an entitlement created concurrently makes the beta publish fail (atomic expectation), never overwritten', race.s === 409 && JSON.parse(entOf(TN)).kind === 'paid');
+  MAP.delete('site:entitlement:v1:' + TN);
+
+  // --- suspension applies to beta homes
+  await Susp.suspend(store, TB, { category: 'abuse', actor: 'ops:test', now: () => clock.now() });
+  const sp = await site('/site/' + TB, { env: BETA });
+  tick(); const spPub = await publishCfg(TB, goodConfig(TB, { headline: 'Bypass?' }), W2, { env: BETA });
+  check('BETA22 SyncNet suspension blocks a free-beta home (not served, operator cannot publish around it); entitlement untouched', sp.statusCode === 503 && spPub.s === 403 && spPub.j.code === 'suspended' && entOf(TB) === JSON.stringify(be));
+  await Susp.reinstate(store, TB, { actor: 'ops:test', now: () => clock.now() });
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');
+  check('BETA23 the paid system stays intact: intent/verify/reconcile/receipt/Terms-version code paths unchanged in behaviour', /async function createIntent\(/.test(src) && /async function verifyPayment\(/.test(src) && /b\.termsVersion !== Site\.TERMS_VERSION/.test(src) && /exactSyncDisplay/.test(src));
+}
+
 // ============================================================================================ G. source-level invariants
 {
   const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');

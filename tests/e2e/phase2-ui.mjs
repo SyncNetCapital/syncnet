@@ -376,6 +376,34 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   await c.close();
 });
 
+// ================================================================= FREE BETA: no payment UI, free publish, FREE BETA ACTIVATION
+await suite('Project Home · FREE BETA (payments off): no $12/SYNC controls, free publish, beta activation block', async () => {
+  fresh({ projectHome: true, projectHomePayments: false, projectHomeFreeBeta: true });
+  const c = await ctx(); const p = await c.newPage(); const errs = errorsOf(p);
+  await syncProject(p);
+  await p.goto(BASE + '/home-editor.html?token=' + T + '&step=pay'); await p.waitForSelector('#heBar:not([hidden])', { timeout: 20000 });
+  await p.fill('#heHeadline', 'Beta home'); await p.waitForTimeout(300);
+  const visible = await text(p, 'main');
+  check('beta: primary action is PUBLISH FREE BETA', (await text(p, '#hePrimary')).trim() === 'PUBLISH FREE BETA' && !(await p.isDisabled('#hePrimary')));
+  check('beta: says "Project Home is currently free during beta." and that free-beta activations stay with the project', /Project Home is currently free during beta\./.test(await text(p, '#heBarNote')) && /Free-beta activations stay with the project\./.test(await text(p, '#heBarNote')));
+  check('beta: no payment UI even with &step=pay — no offer, quote, sink, checkbox or PAY NOW', await p.locator('#hePay').isHidden() && (await p.locator('#heQuoteBtn').count()) === 0 && (await p.locator('#hePayBtn').count()) === 0 && (await p.locator('#heAccept').count()) === 0 && !/\$12|USD 12|PAY NOW|Non-refundable|Project Home sink|Continue to activation/i.test(visible), visible.slice(0, 200));
+  await p.click('#hePrimary');
+  await p.waitForFunction(() => /Published/.test(document.getElementById('heStatus').textContent), null, { timeout: 15000 });
+  const typed = JSON.parse(await p.evaluate(() => window.__typed));
+  const ent = store.get('site:entitlement:v1:' + T);
+  check('beta: publishing is one free SitePublish signature, no transaction; creates a FREE BETA entitlement', typed.primaryType === 'SitePublish' && ((await p.evaluate(() => window.__sentTxs)) || []).length === 0 && ent && ent.kind === 'beta' && ent.label === 'FREE BETA' && !ent.payer && !ent.txHash);
+  const blk = await text(p, '#heReceipt');
+  check('beta: FREE BETA ACTIVATION block (not a payment receipt): project, token, activation date, kind, status; no USD, SYNC or tx; no print/download', await p.isVisible('#heReceipt') && (await text(p, '#heReceiptTitle')) === 'FREE BETA ACTIVATION' && blk.includes(T) && /FREE BETA · belongs to the project/.test(blk) && /ACTIVE/.test(blk) && /Activated/.test(blk) && !/USD|SYNC paid|Transaction|Receipt/i.test(blk) && await p.locator('.he-receipt-actions').isHidden(), blk.slice(0, 300));
+  await p.reload(); await p.waitForSelector('#heReceipt:not([hidden])', { timeout: 20000 });
+  check('beta: the activation block is rebuilt after reload; next action is an ordinary free PUBLISH (no second activation)', (await text(p, '#heReceiptTitle')) === 'FREE BETA ACTIVATION' && /PUBLISH/.test(await text(p, '#hePrimary')) && !/FREE BETA/.test(await text(p, '#hePrimary')));
+  const site = await (await p.request.get(BASE + '/site/' + T)).text();
+  check('beta: the public Project Home is live', /PASSPORT OPERATOR VERIFIED/.test(site) && /Beta home/.test(site));
+  await openProject(p);
+  check('beta: Project Page HOME row shows Live', /Live/.test(await text(p, '[data-row="home"]')));
+  check('beta: no JS errors', errs.length === 0, errs.join(' | '));
+  await c.close();
+});
+
 // ================================================================= transfer → review & adopt; old operator restricted
 await suite('Project Home · previous operator home: links disabled, REVIEW & ADOPT, old operator restricted', async () => {
   fresh();

@@ -409,6 +409,7 @@ activation, because allocations are pooled before they are converted.
 ```
 SYNCNET_PROJECT_HOME_ENABLED=true            # default: closed (site reads/writes, /site, /site-img)
 SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true   # default: closed
+SYNCNET_PROJECT_HOME_FREE_BETA=true          # FREE BETA (§20); must not be combined with PAYMENTS_ENABLED=true
 PROJECT_HOME_PRICE_VERSION=2
 PROJECT_HOME_PRICE_USD_CENTS=1200            # must equal the reviewed price ($12, price version 2)
 PROJECT_HOME_SINK_ADDRESS=<deployed sink>    # no default
@@ -697,3 +698,29 @@ node netlify/ops/project-home-suspension.mjs reinstate <token> --actor <ops-id> 
   activation fee.
 - Not covered: `/site-img/<cid>` serves any sanitised CID, not per project. To stop serving one image, remove its
   `site:img:v1:<cid>` record (that also blocks publishing it again); unpinning at Pinata is separate.
+
+## 20. FREE BETA (paid activation dormant)
+
+`SYNCNET_PROJECT_HOME_FREE_BETA=true` (with `SYNCNET_PROJECT_HOME_ENABLED=true` and
+`SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=false`) makes Project Home free. The paid system (sink, converter, pricing, signed
+`ActivationRequest` with `termsVersion`, verification, receipts) is unchanged and dormant.
+
+- **Entitlement.** A project with no entitlement gets one only through the CURRENT Passport operator's first successful
+  `publish`, in the same `cas` as the revision: `{kind: 'beta', label: 'FREE BETA', status: 'ACTIVE', token,
+  activatedAt, firstRevisionId, operatorAtActivation}` (history only). It records no payer, amount, price, rate, quote
+  or transaction, is never in the paid activation registry and never counts as revenue (`countsAsRevenue: false`,
+  metrics `freeBetaEntitlements`). The token is added to `site:beta:v1` and `beta-activated` to the audit set. Reads,
+  previews, quotes, non-operators and failed commits create nothing. An existing paid, complimentary or beta
+  entitlement is always reused as is; a concurrent entitlement makes the beta publish fail rather than be overwritten.
+- **Configuration.** `config` exposes `enabled`, `freeBeta`, `payments` and `mode` (`free-beta` | `paid` | `closed`).
+  FREE_BETA and PAYMENTS both `true`, or a FREE_BETA value other than `true`/`false`, closes BOTH new-activation paths
+  (logged); existing entitlements keep working. Verification of a payment sent earlier keeps its own gate
+  (`SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED`), exactly as before.
+- **UI.** In beta the editor never shows the offer, quote, sink, Terms checkbox or PAY NOW (not even with `&step=pay`);
+  the action is `PUBLISH FREE BETA` and the status shows a FREE BETA ACTIVATION block (not a receipt).
+- **Grandfathering.** Beta entitlements stay `ACTIVE` forever (reconcile only touches paid ones), so they keep
+  publishing, editing and adopting for free after the beta ends, with payments on or off.
+- **Back to paid** (environment only, no migration): `SYNCNET_PROJECT_HOME_FREE_BETA=false` (or unset) and
+  `SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED=true`, with the existing price/sink configuration. Projects without an
+  entitlement then see the $12 activation flow; beta, paid and complimentary entitlements are untouched.
+- **Suspension** (§19) applies to beta homes exactly as to paid and complimentary ones.
