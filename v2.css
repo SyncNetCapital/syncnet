@@ -69,6 +69,8 @@
 .topology-tree{display:grid;justify-items:center}
 .topology-label{color:#5f6f71;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;margin:4px 0 14px}
 .topology-row{width:100%;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;position:relative}
+.topology-more{width:100%;display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.topology-more:empty{display:none}
 .topology-node,.topology-root{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;border:1px solid #252d2e;background:#040606;border-radius:16px;padding:14px 16px;min-width:132px;max-width:210px}
 .topology-node strong,.topology-root strong{font-size:14px;font-weight:400;overflow-wrap:anywhere}
 .topology-node span,.topology-root span{color:#5c6869;font-size:11px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}

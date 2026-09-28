@@ -8,6 +8,10 @@ const DEMO='0xb0a3d82Bf46AE6303Aee263fc4d48E5c657fC967';
 const FALLBACK_LIMIT=200;
 const PAGE_SIZE=500;
 const MAX_HISTORY=5000;
+// Child row: the first CHILD_INITIAL connections render immediately; the rest are revealed on request,
+// in batches of CHILD_BATCH so a pathological set never lands in the DOM all at once. Nothing is truncated.
+const CHILD_INITIAL=12;
+const CHILD_BATCH=100;
 const CANONICAL=new Map([[SYNC.toLowerCase(),{rank:0,label:'SYNCNET NETWORK ASSET',symbol:'SYNC'}],[DEMO.toLowerCase(),{rank:1,label:'SYNCNET ORIGIN',symbol:'SYNCAT'}]]);
 let historyCoverage={mode:'unknown',count:0,indexed:0};
 const $=id=>document.getElementById(id);
@@ -255,6 +259,25 @@ function branchCard(x){
   const label=x.symbol&&x.symbol!=='TOKEN'?`$${x.symbol}`:(x.name||short(x.address));
   return `<a class="branch-chip" href="/network.html?token=${encodeURIComponent(x.address)}"><strong>${esc(label)}</strong><span>shares ${esc(via)} · ${esc(provenance(x).label)}</span></a>`;
 }
+// Pure: how many child cards to show after one more reveal step, and the copy for the controls.
+function childView(total,shown){
+  const s=Math.max(0,Math.min(total,shown));
+  const remaining=total-s;
+  const next=remaining<=CHILD_BATCH?total:s+CHILD_BATCH;
+  return {
+    shown:s,total,
+    moreLabel:remaining<=0?'':(next===total?`SHOW ALL ${total} CONNECTIONS`:`SHOW NEXT ${CHILD_BATCH} · ${s} OF ${total} SHOWN`),
+    nextShown:next,
+    canCollapse:s>CHILD_INITIAL,
+    countNote:total<=CHILD_INITIAL?'':(s>=total?` (all ${total} shown)`:` (showing ${s} of ${total})`)
+  };
+}
+function childMoreMarkup(v){
+  if(v.total<=CHILD_INITIAL) return '';
+  const more=v.moreLabel?`<button class="btn" type="button" data-child-more aria-controls="topologyChildren">${esc(v.moreLabel)}</button>`:'';
+  const less=v.canCollapse?`<button class="btn" type="button" data-child-collapse aria-controls="topologyChildren">SHOW FIRST ${CHILD_INITIAL}</button>`:'';
+  return more+less;
+}
 function setProfileState(meta){
   const el=$('profileState');if(!el)return;
   const p=provenance(meta);
@@ -310,7 +333,7 @@ async function loadTopology(address,opts={}){
 
     const parentAll=uniqByAddress(parents),childAll=uniqByAddress(children);
     const parentUnique=parentAll.slice(0,8);
-    const childUnique=childAll.slice(0,12);
+    const childUnique=childAll.slice(0,CHILD_INITIAL);
     let rootCode=null;if(!rootLaunch){try{rootCode=await rpc('eth_getCode',[address,'latest'])}catch{}}
     const siblingRaw=[];
     const branchParents=parentUnique.filter(p=>!['ETH','WETH','USDG'].includes(String(p.symbol||'').toUpperCase()));
@@ -337,7 +360,9 @@ async function loadTopology(address,opts={}){
     if(seq!==mapSeq) return; // a newer MAP request superseded this one
     const rootLabel=rootMeta.symbol&&rootMeta.symbol!=='TOKEN'?`$${rootMeta.symbol}`:rootMeta.name;
     if($('topologyTitle')) $('topologyTitle').innerHTML=`${esc(rootLabel)}<br><span class="cyan">IN CONTEXT.</span>`;
-    if($('topologyMeta')) $('topologyMeta').textContent=rootCode==='0x'?'No contract exists at this address on Robinhood Chain.':`${rootLaunch?parentAll.length+' direct market'+(parentAll.length===1?'':'s'):'Not a PAR launch'} · ${childAll.length} project${childAll.length===1?'':'s'} use${childAll.length===1?'s':''} it as a market${childAll.length>childUnique.length?` (showing ${childUnique.length})`:''}. ${coverageText()}`;
+    const metaText=v=>rootCode==='0x'?'No contract exists at this address on Robinhood Chain.':`${rootLaunch?parentAll.length+' direct market'+(parentAll.length===1?'':'s'):'Not a PAR launch'} · ${childAll.length} project${childAll.length===1?'':'s'} use${childAll.length===1?'s':''} it as a market${v.countNote}. ${coverageText()}`;
+    let childState=childView(childAll.length,childUnique.length);
+    if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
     if($('attentionQuery')) $('attentionQuery').value=rootMeta.name&&rootMeta.name!=='Token'?rootMeta.name:(rootMeta.symbol||'');
     setProfileState(rootMeta);
 
@@ -351,8 +376,28 @@ async function loadTopology(address,opts={}){
         <a class="topology-root" href="/project/${esc(address)}"><strong>${esc(rootLabel)}</strong><span>${esc(short(address))}</span>${provenanceMarkup(rootMeta)}</a>
         <div class="topology-line"><span>MARKET</span></div>
         <div class="topology-label">PROJECTS USING THIS TOKEN AS A MARKET</div>
-        <div class="topology-row">${bottom}</div>
+        <div class="topology-row" id="topologyChildren">${bottom}</div>
+        <div class="topology-more" id="topologyChildMore">${childMoreMarkup(childState)}</div>
       </div>`;
+    // Reveal/collapse re-slices the already-deduplicated childAll: no refetch, no rediscovery.
+    const moreHost=$('topologyChildMore'),childHost=$('topologyChildren');
+    if(moreHost&&childHost&&childAll.length>CHILD_INITIAL){
+      const showChildren=(n,focusSel)=>{
+        const prev=childState.shown;
+        childState=childView(childAll.length,n);
+        if(childState.shown>prev) childHost.insertAdjacentHTML('beforeend',childAll.slice(prev,childState.shown).map(c=>node(c,'child')).join(''));
+        else childHost.innerHTML=childAll.slice(0,childState.shown).map(c=>node(c,'child')).join('');
+        moreHost.innerHTML=childMoreMarkup(childState);
+        if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
+        const f=moreHost.querySelector(focusSel)||moreHost.querySelector('button');
+        if(f) f.focus({preventScroll:true});
+      };
+      moreHost.addEventListener('click',e=>{
+        const b=e.target.closest('button');if(!b)return;
+        if(b.hasAttribute('data-child-more')) showChildren(childState.nextShown,'[data-child-more]');
+        else if(b.hasAttribute('data-child-collapse')){showChildren(CHILD_INITIAL,'[data-child-more]');reveal(childHost,'nearest');}
+      });
+    }
 
     if($('sameBranch')){
       if(siblings.length){
