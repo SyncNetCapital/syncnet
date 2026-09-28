@@ -1,5 +1,5 @@
 {
-  "passed": 434,
+  "passed": 447,
   "failed": 0,
   "checks": [
     {
@@ -1372,6 +1372,58 @@
     },
     {
       "name": "duplicate token addresses (any case) are removed",
+      "ok": true
+    },
+    {
+      "name": "fixture: the raw 5000-row response would exceed the Netlify limit",
+      "ok": true
+    },
+    {
+      "name": "5000 launches still indexed",
+      "ok": true
+    },
+    {
+      "name": "5000-launch response is comfortably below 5 MiB (and the 6 MiB Netlify limit)",
+      "ok": true
+    },
+    {
+      "name": "response shape unchanged",
+      "ok": true
+    },
+    {
+      "name": "consumer metadata survives (token, name, symbol, logoUrl, createdAt, deployer, creatorFeeRecipient)",
+      "ok": true
+    },
+    {
+      "name": "every row keeps both market connections",
+      "ok": true
+    },
+    {
+      "name": "large irrelevant upstream fields are stripped",
+      "ok": true
+    },
+    {
+      "name": "alias fields map to the primary names",
+      "ok": true
+    },
+    {
+      "name": "a row without a markets list keeps its top-level market",
+      "ok": true
+    },
+    {
+      "name": "malformed fields are left out, never invented",
+      "ok": true
+    },
+    {
+      "name": "pathological upstream strings and market lists are bounded",
+      "ok": true
+    },
+    {
+      "name": "every row at its bounds -> refresh refused (generic 503 / stale), never an oversized response",
+      "ok": true
+    },
+    {
+      "name": "escaped characters cannot evade the size guard (budget counts respond.js \\uXXXX escaping)",
       "ok": true
     },
     {

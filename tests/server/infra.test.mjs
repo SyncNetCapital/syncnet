@@ -792,6 +792,70 @@ await section('par-launches-all.js: single flight and concurrency', async () => 
   check('duplicate token addresses (any case) are removed', body(r5).indexed === 550);
 });
 
+await section('par-launches-all.js: compact launch rows (Netlify 6 MiB response limit)', async () => {
+  const NETLIFY_LIMIT = 6 * 1024 * 1024;
+  const hex = (n, pad = 40) => '0x' + n.toString(16).padStart(pad, '0');
+  const LOGO = 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
+  // A PAR-shaped row: the fields consumers read plus the large nested data they do not.
+  const fatRow = (i) => ({
+    token: hex(i + 1).toUpperCase().replace('0X', '0x'), name: `Token ${i}`, symbol: `T${i}`, logoUrl: LOGO, createdAt: new Date(T0 - i * 1000).toISOString(),
+    deployer: hex(0xd000 + i), creatorFeeRecipient: hex(0xf000 + i), feeMode: 'creator',
+    markets: [
+      { pairToken: hex(0xa1), quoteSymbol: 'SYNC', pool: hex(0xb000 + i), poolId: hex(i, 64), tick: -887220 + i, liquidity: '123456789012345678901234', reserves: { base: '1'.repeat(30), quote: '2'.repeat(30) }, stats: { volume24h: '98765.4321', trades: 12345, priceUsd: '0.000123456789' } },
+      { quoteToken: hex(0xa2), pairSymbol: 'USDG', pool: hex(0xc000 + i), poolId: hex(i + 1, 64), liquidity: '9'.repeat(24), stats: { volume24h: '1.5', trades: 3 } },
+    ],
+    description: 'Long project description. '.repeat(12), website: 'https://example.org/project/' + i, twitter: 'https://x.com/p' + i, telegram: 'https://t.me/p' + i,
+    metadata: { image: LOGO, attributes: Array.from({ length: 4 }, (_, k) => ({ trait: 'k' + k, value: 'v'.repeat(20) })) },
+    tx: { hash: hex(i, 64), block: 1_000_000 + i, gasUsed: '1234567' },
+  });
+
+  launchesFn._resetCache();
+  const c = clock(T0);
+  const up = fakePar({ total: 5000, pageBody: (offset, rows) => rows.map((_, i) => fatRow(offset + i)) });
+  const r = await runLaunches({ fetch: up.fetch, now: c, store: memStore(c) });
+  const b = body(r);
+  const rawBytes = Buffer.byteLength(JSON.stringify({ count: 5000, indexed: 5000, launches: Array.from({ length: 5000 }, (_, i) => fatRow(i)), fetchedAt: new Date(T0).toISOString(), stale: false, degraded: false }));
+  const bytes = Buffer.byteLength(r.body);
+  check('fixture: the raw 5000-row response would exceed the Netlify limit', rawBytes > NETLIFY_LIMIT, String(rawBytes));
+  check('5000 launches still indexed', r.statusCode === 200 && b.count === 5000 && b.indexed === 5000 && b.launches.length === 5000);
+  check('5000-launch response is comfortably below 5 MiB (and the 6 MiB Netlify limit)', bytes < 5 * 1024 * 1024 && bytes < NETLIFY_LIMIT / 2, `${bytes} bytes (raw ${rawBytes})`);
+  check('response shape unchanged', same(Object.keys(b).sort(), ['count', 'degraded', 'fetchedAt', 'indexed', 'launches', 'stale']));
+  const first = b.launches[0];
+  check('consumer metadata survives (token, name, symbol, logoUrl, createdAt, deployer, creatorFeeRecipient)', same(first, {
+    token: hex(1), name: 'Token 0', symbol: 'T0', logoUrl: LOGO, createdAt: new Date(T0).toISOString(), deployer: hex(0xd000), creatorFeeRecipient: hex(0xf000),
+    markets: [{ pairToken: hex(0xa1), quoteSymbol: 'SYNC' }, { pairToken: hex(0xa2), quoteSymbol: 'USDG' }],
+  }), JSON.stringify(first));
+  check('every row keeps both market connections', b.launches.every((l) => l.markets.length === 2 && l.markets[0].pairToken === hex(0xa1) && l.markets[1].pairToken === hex(0xa2)));
+  check('large irrelevant upstream fields are stripped', !/description|website|twitter|telegram|metadata|poolId|liquidity|reserves|stats|gasUsed|feeMode/.test(r.body));
+
+  const compact = launchesFn._internals.compactLaunch;
+  check('alias fields map to the primary names', same(compact({ tokenAddress: hex(7), tokenName: 'Seven', tokenSymbol: '$SEV', logo: '/assets/x.png', created_at: 1_700_000_000, deployer: hex(8), feeRecipient: hex(9), markets: [{ pairTokenAddress: hex(10), pairTokenSymbol: 'TEN' }, { quoteTokenAddress: hex(11) }] }),
+    { token: hex(7), name: 'Seven', symbol: '$SEV', logoUrl: '/assets/x.png', createdAt: 1_700_000_000, deployer: hex(8), creatorFeeRecipient: hex(9), markets: [{ pairToken: hex(10), quoteSymbol: 'TEN' }, { pairToken: hex(11) }] }));
+  check('a row without a markets list keeps its top-level market', same(compact({ token: hex(1), pairToken: hex(2), quoteSymbol: 'ETH' }).markets, [{ pairToken: hex(2), quoteSymbol: 'ETH' }]) && same(compact({ token: hex(1), markets: [], quoteToken: hex(3) }).markets, [{ pairToken: hex(3) }]));
+  const bad = compact({ token: '0x123', name: 42, symbol: '', deployer: 'not-an-address', creatorFeeRecipient: null, createdAt: 'x'.repeat(41), logoUrl: 'ipfs://' + 'a'.repeat(600), markets: [{ pairToken: 'junk', quoteSymbol: 'JUNK' }, null, { pairToken: hex(4) }] });
+  check('malformed fields are left out, never invented', same(bad, { markets: [{ pairToken: hex(4) }] }), JSON.stringify(bad));
+  const huge = compact({ token: hex(1), name: 'N'.repeat(1e6), symbol: 'S'.repeat(1e6), markets: Array.from({ length: 1000 }, (_, i) => ({ pairToken: hex(i + 1), quoteSymbol: 'Q'.repeat(1e4) })) });
+  check('pathological upstream strings and market lists are bounded', Buffer.byteLength(JSON.stringify(huge)) < 4096 && huge.name.length === 128 && huge.symbol.length === 64 && huge.markets.length === 16 && huge.markets.every((m) => m.quoteSymbol.length === 64));
+  launchesFn._resetCache();
+  const worst = (i) => ({ token: hex(i + 1), name: 'N'.repeat(500), symbol: 'S'.repeat(500), logoUrl: 'ipfs://' + 'a'.repeat(500), createdAt: new Date(T0).toISOString(), deployer: hex(2), creatorFeeRecipient: hex(3), markets: Array.from({ length: 16 }, (_, k) => ({ pairToken: hex(k + 1), quoteSymbol: 'Q'.repeat(500) })) });
+  const hostile = fakePar({ total: 5000, pageBody: (offset, rows) => rows.map((_, i) => worst(offset + i)) });
+  const n = logs.length;
+  const rh = await runLaunches({ fetch: hostile.fetch, now: c, store: memStore(c) });
+  check('every row at its bounds -> refresh refused (generic 503 / stale), never an oversized response', rh.statusCode === 503 && Buffer.byteLength(rh.body) < 1024 && logs.slice(n).some((l) => l.includes('compacted history too large')) && launchesFn._internals.MAX_LAUNCHES_BYTES < NETLIFY_LIMIT);
+  // Characters respond.js escapes to \uXXXX: under the budget as raw JSON, over 6 MiB once escaped.
+  launchesFn._resetCache();
+  const esc = '<>&\u2028\u2029'.repeat(24).slice(0, 120);
+  const escRow = (i) => ({ token: hex(i + 1), name: esc.slice(0, 120), symbol: esc.slice(0, 60), markets: Array.from({ length: 3 }, (_, k) => ({ pairToken: hex(k + 1), quoteSymbol: esc.slice(0, 60) })) });
+  const escRows = Array.from({ length: 5000 }, (_, i) => launchesFn._internals.compactLaunch(escRow(i)));
+  const escRaw = Buffer.byteLength(JSON.stringify(escRows));
+  const escSent = Buffer.byteLength(JSON.stringify(escRows).replace(/[<>&\u2028\u2029]/g, (ch) => '\\u' + ch.charCodeAt(0).toString(16).padStart(4, '0')));
+  const escUp = fakePar({ total: 5000, pageBody: (offset, rows) => rows.map((_, i) => escRow(offset + i)) });
+  const n2 = logs.length;
+  const re = await runLaunches({ fetch: escUp.fetch, now: c, store: memStore(c) });
+  check('escaped characters cannot evade the size guard (budget counts respond.js \\uXXXX escaping)', escRaw < launchesFn._internals.MAX_LAUNCHES_BYTES && escSent > NETLIFY_LIMIT && re.statusCode === 503 && logs.slice(n2).some((l) => l.includes('compacted history too large')), `raw ${escRaw}, sent ${escSent}, status ${re.statusCode}`);
+  launchesFn._resetCache();
+});
+
 await section('par-launches-all.js: retries, stale, degraded, 503', async () => {
   launchesFn._resetCache();
   const c = clock(T0);
