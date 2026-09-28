@@ -483,7 +483,7 @@ html{scroll-behavior:smooth}
 .activity-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:28px}.activity-card{border:1px solid #1d2829;border-radius:16px;background:#020404;padding:18px;text-align:left;min-width:0}.activity-card strong{display:block;color:var(--cyan);font-size:18px;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.activity-card span{display:block;color:#929a9b;font-size:11px;margin-top:8px;line-height:1.4}.activity-card:hover{border-color:#31565a}.small-title{font-size:clamp(34px,5vw,62px)}@media(max-width:720px){.activity-grid{grid-template-columns:1fr 1fr}.activity-card:last-child{grid-column:1/-1}}
 .hero-sync-mark.is-offscreen .sync-flow,.hero-sync-mark.is-offscreen .sync-point-halo,.hero-sync-mark.is-offscreen .sync-point{animation-play-state:paused}.sync-flow{filter:none}
 
-.topology-line{position:relative}.topology-line span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#000;padding:2px 6px;color:#768183;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.topology-line{position:relative}.topology-line span{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#000;padding:2px 6px;color:#768183;font-size:11px;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 
 /* Final readability / accessibility pass */
 .page-head .tiny,.tiny{color:#858585!important;font-size:11px!important}

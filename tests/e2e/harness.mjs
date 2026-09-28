@@ -170,6 +170,7 @@ function routerQuote(from, value, d) {
 }
 
 const S = {};
+const AGG3 = Core.functionSelector('aggregate3((address,bool,bytes)[])');
 for (const sig of ['transferCreatorFeeRecipient(address,address)', 'launchForwarder()', 'route(address)', 'balanceOf(address)', 'name()', 'symbol()', 'decimals()', 'totalSupply()', 'canLaunch(address)', 'launchFee()', 'baseFeeBps()',
   'maxCreatorTaxBps()', 'protocolFeeShareBps()', 'isPriceable(address)', 'getLaunchedToken(address)', 'getMarkets(address)', 'logo()', 'description()', 'socials()', 'deployer()', 'launchFactory()',
   'contractURI()', 'weth()', 'quotePricer()', 'factory()', 'swapRouter()', 'manager()', 'launchEnabled()', 'owner()', 'getLaunchConfig(uint256)', 'pairTokenEconomics(address)',
@@ -256,6 +257,12 @@ function ethCall(call) {
       if (chain.routeHops.has(q)) return enc(T, [chain.routeHops.get(q).map((h) => [[h[0], h[1], h[2], h[3], h[4]], h[5]]), !chain.routeNotQualified.has(q)]);
       return enc(T, [[[[ZERO, q, 10000, 200, chain.routeHooks.get(q) || ZERO], false]], !chain.routeNotQualified.has(q)]);
     }
+  }
+  // Multicall3.aggregate3((address,bool,bytes)[]) -> (bool,bytes)[]: each sub-call answered by this same mock.
+  if (to === lc(R.multicall3) && s === AGG3) {
+    if (chain.multicallDown) throw new Error('multicall unavailable');
+    const calls = Core.abiDecode(['(address,bool,bytes)[]'], args)[0];
+    return enc(['(bool,bytes)[]'], [calls.map(([t, , d]) => { if ((chain.brokenTokens || new Set()).has(lc(t))) return [false, '0x']; try { const r = ethCall({ to: t, data: d }); return [true, r && r !== '0x' ? r : '0x']; } catch { return [false, '0x']; } })]);
   }
   if (chain.ponsV1.has(to) && s === S.launchFactory) return enc(['address'], [chain.ponsV1.get(to).factory]);
   // Pons factories (exact ABI layouts from ponsdotdev/pons-labs @ 162310f)
@@ -499,7 +506,7 @@ export function cidFor(bytes) {
 }
 /** The logo CID the browser tests type in (a valid CID; the old placeholder 'bafytestcid' is correctly refused by /api/ipfs-check). */
 export const TEST_CID = cidFor(PNG);
-export const serverState = { pins: [], secondary: [], logs: [], fixedIp: null, pinataDown: false, upstash: new Map(), upstashDown: false, gateways: { pinata: 'ok', ipfs: 'ok', dweb: 'ok' }, gatewayHits: [] };
+export const serverState = { zcommands: [], pins: [], secondary: [], logs: [], fixedIp: null, pinataDown: false, upstash: new Map(), upstashDown: false, gateways: { pinata: 'ok', ipfs: 'ok', dweb: 'ok' }, gatewayHits: [] };
 // What the BROWSER sees when an <img> asks a public gateway (rc-ipfs-display drives the fallback chain with this).
 export const browserGateways = { pinata: 'ok', ipfs: 'ok', dweb: 'ok', hits: [] };
 const BASE_ENV = {
@@ -507,7 +514,7 @@ const BASE_ENV = {
   UPSTASH_REDIS_REST_URL: 'https://upstash.mock', UPSTASH_REDIS_REST_TOKEN: 'upstash-test-token',
   SYNCNET_PIN_SECONDARY_URL: 'https://psa.mock', SYNCNET_PIN_SECONDARY_TOKEN: 'psa-token',
 };
-const FLAG_ENV = ['SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
+const FLAG_ENV = ['SYNCNET_PONS_DISCOVERY_ENABLED', 'SYNCNET_PUBLIC_LAUNCH', 'SYNCNET_PUBLIC_UPLOADS', 'SYNCNET_REGISTRY_SUBMISSIONS', 'SYNCNET_UPLOADS_DISABLED', 'SYNCNET_ECONOMY_CURATION', 'SYNCNET_ECONOMIES_DISABLED',
   'SYNCNET_PROJECT_HOME_ENABLED', 'SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED', 'SYNCNET_PROJECT_HOME_FREE_BETA', 'PROJECT_HOME_PRICE_VERSION', 'PROJECT_HOME_PRICE_USD_CENTS', 'PROJECT_HOME_RATE_VERSION', 'PROJECT_HOME_SINK_ADDRESS'];
 /** Project Home test fixture sink (never deployed). The SYNCNET REFERENCE RATE is automatic: it is read from the mocked
  *  canonical SYNC/USDG market (ratePool, $0.00005 by default), exactly as production reads the real one. */
@@ -522,9 +529,10 @@ function phDeployChain() {
   if (!phChain) phChain = deploymentChain({ sink: PH_SINK, converter: PH_CONVERTER, treasury: DEPLOYMENT.treasury, sync: A.SYNC, usdg: A.USDG, router: DEPLOYMENT.router }, (x) => Core.functionSelector(x));
   return phChain;
 }
-export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome, projectHomeFreeBeta = false } = {}) {
+export function setFlags({ publicLaunch = false, publicUploads = false, registry = false, uploadsDisabled = false, economyCuration = false, durable = true, projectHome = false, projectHomePayments = projectHome, projectHomeFreeBeta = false, ponsDiscovery = false } = {}) {
   Object.assign(process.env, BASE_ENV);
   for (const k of FLAG_ENV) delete process.env[k];
+  if (ponsDiscovery) process.env.SYNCNET_PONS_DISCOVERY_ENABLED = 'true';
   if (publicLaunch) process.env.SYNCNET_PUBLIC_LAUNCH = 'true';
   if (publicUploads) process.env.SYNCNET_PUBLIC_UPLOADS = 'true';
   if (registry) process.env.SYNCNET_REGISTRY_SUBMISSIONS = 'true';
@@ -543,7 +551,7 @@ export function setFlags({ publicLaunch = false, publicUploads = false, registry
   const store = require(path.join(ROOT, 'netlify/lib/store.js'));
   store.getStore(durable ? { env: process.env } : { env: {} });
 }
-export function resetServer() { serverState.pins = []; serverState.secondary = []; serverState.logs = []; serverState.fixedIp = null; serverState.pinataDown = false; serverState.upstash.clear(); serverState.upstashDown = false; serverState.gateways = { pinata: 'ok', ipfs: 'ok', dweb: 'ok' }; serverState.gatewayHits = []; browserGateways.pinata = 'ok'; browserGateways.ipfs = 'ok'; browserGateways.dweb = 'ok'; browserGateways.hits = []; ipfsCheckFn()._internals.passed.clear(); setFlags(); }
+export function resetServer() { serverState.zcommands = []; serverState.pins = []; serverState.secondary = []; serverState.logs = []; serverState.fixedIp = null; serverState.pinataDown = false; serverState.upstash.clear(); serverState.upstashDown = false; serverState.gateways = { pinata: 'ok', ipfs: 'ok', dweb: 'ok' }; serverState.gatewayHits = []; browserGateways.pinata = 'ok'; browserGateways.ipfs = 'ok'; browserGateways.dweb = 'ok'; browserGateways.hits = []; ipfsCheckFn()._internals.passed.clear(); setFlags(); }
 
 // Upstash REST emulation (the subset store.js uses).
 function upstashExec(cmd) {
@@ -557,6 +565,20 @@ function upstashExec(cmd) {
     case 'DEL': return U.delete(key) ? 1 : 0;
     case 'SADD': { const e = live(key) || { set: new Set(), exp: 0 }; const had = e.set.has(rest[0]); e.set.add(rest[0]); U.set(key, e); return had ? 0 : 1; }
     case 'SMEMBERS': { const e = live(key); return e && e.set ? [...e.set] : []; }
+    // Sorted sets (the subset store.js uses): member -> integer score.
+    case 'ZADD': { const e = live(key) || { z: new Map(), exp: 0 }; let n = 0; for (let i = 0; i < rest.length; i += 2) { if (!e.z.has(rest[i + 1])) n++; e.z.set(rest[i + 1], Number(rest[i])); } U.set(key, e); serverState.zcommands.push(op + ' ' + key); return n; }
+    case 'ZCARD': { const e = live(key); return e && e.z ? e.z.size : 0; }
+    case 'ZREM': { const e = live(key); if (!e || !e.z) return 0; let n = 0; for (const m of rest) if (e.z.delete(m)) n++; return n; }
+    case 'ZREVRANGEBYSCORE': case 'ZREMRANGEBYSCORE': {
+      const e = live(key); if (!e || !e.z) return op.toUpperCase() === 'ZREVRANGEBYSCORE' ? [] : 0;
+      const rev = op.toUpperCase() === 'ZREVRANGEBYSCORE'; const [hiB, loB] = rev ? [rest[0], rest[1]] : [rest[1], rest[0]];
+      const test = (b, up) => b === '+inf' ? () => true : b === '-inf' ? () => !up : b.startsWith('(') ? (x) => (up ? x < Number(b.slice(1)) : x > Number(b.slice(1))) : (x) => (up ? x <= Number(b) : x >= Number(b));
+      const hi = test(hiB, true), lo = test(loB, false);
+      const hits = [...e.z].filter(([, sc]) => hi(sc) && lo(sc)).sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? 1 : -1));
+      if (!rev) { for (const [m] of hits) e.z.delete(m); return hits.length; }
+      serverState.zcommands.push(op + ' ' + key + ' LIMIT ' + rest[5]);
+      return hits.slice(Number(rest[4]), Number(rest[4]) + Number(rest[5])).flatMap(([m, sc]) => [m, String(sc)]);
+    }
     case 'EVAL': {
       // Emulates netlify/lib/store.js CAS_SCRIPT exactly (the only script SyncNet runs): all-or-nothing compare-and-set.
       // JS is single-threaded here, so the whole block runs without interleaving, like Redis running the Lua script.
@@ -616,7 +638,7 @@ export { realFetch };
 const origLog = console.log;
 console.log = (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) { try { serverState.logs.push(JSON.parse(a[0])); } catch { serverState.logs.push(a[0]); } return; } origLog(...a); };
 
-const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies', 'project-home', 'site', 'site-img'];
+const FUNCTIONS = ['config', 'canary-auth', 'ipfs-upload', 'upload-auth', 'launch-guard', 'registry', 'par-tokenlist', 'ipfs-check', 'marketplace', 'economies', 'project-home', 'site', 'site-img', 'pons-economy'];
 const fnModules = Object.fromEntries(FUNCTIONS.map((n) => [n, require(path.join(ROOT, 'netlify/functions', n + '.js'))]));
 function ipfsCheckFn() { return fnModules['ipfs-check']; }
 let ipCounter = 0;

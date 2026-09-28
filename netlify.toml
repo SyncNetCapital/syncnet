@@ -206,6 +206,17 @@
   force = true
 
 [[redirects]]
+  from = "/api/pons-economy"
+  to = "/.netlify/functions/pons-economy"
+  status = 200
+  force = true
+
+# PONS V2 discovery: incremental indexer. Scheduled only (no /api route); it does nothing unless
+# SYNCNET_PONS_DISCOVERY_ENABLED=true AND the backfill script has seeded its cursor.
+[functions."pons-indexer"]
+  schedule = "*/10 * * * *"
+
+[[redirects]]
   from = "/api/project-home"
   to = "/.netlify/functions/project-home"
   status = 200

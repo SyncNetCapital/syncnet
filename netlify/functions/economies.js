@@ -16,7 +16,12 @@
  *  - The curator of R is, in order: the Project Passport operator (mp:passport:v1:<R>, READ ONLY — never written
  *    here), else a reviewed entry in syncnet-economies.json. Nothing else (no symbol, no owner(), no body field).
  *    Events count only while their signer is the CURRENT curator; an operator change makes old ones inert.
- *  - A 'recognize' is accepted only if the child's live PAR factory record has a market paired with R.
+ *  - A 'recognize' is accepted only if the child's live PAR factory record has a market paired with R, or — with
+ *    PONS discovery enabled (SYNCNET_PONS_DISCOVERY_ENABLED) — a verified PONS V2 factory's LIVE record of the child
+ *    names R as its pairToken (lib/syncnet-origins.js readPonsV2Launch). The discovery index is never consulted
+ *    here: it can neither authorize a recognition nor, when down, invalidate one already stored.
+ *  - claim-request: a PAR launch root — and, with PONS discovery enabled, a PONS V2 launch root — is refused: its
+ *    curator comes from the existing Project Passport claim in the Marketplace, not from a manual request.
  *  - Soft cap: at MAX_EVENTS_PER_ROOT stored events a root accepts no new recognitions (nor no-op revokes); a
  *    revoke of a currently recognized child is ALWAYS accepted, so a curator can always clean up.
  *  - Rollout gate: flags.js economyCuration (SYNCNET_ECONOMY_CURATION=true + durable store, kill switch
@@ -28,6 +33,7 @@
  *    stale / full, all no-ops), cannot exhaust their bucket. Pre-verification limits are per IP only.
  */
 const Chain = require('../../lib/syncnet-chain.js');
+const Origins = require('../../lib/syncnet-origins.js');
 const Economy = require('../../lib/syncnet-economy.js');
 const GRANTS_FILE = require('../../syncnet-economies.json');
 const { json, publicError, tooManyRequests } = require('../lib/respond');
@@ -83,12 +89,24 @@ async function verifySig(rpc, wallet, digest, signature) {
   return verifyDigest(rpc, wallet, digest, signature); // ECDSA, then EIP-1271 (netlify/lib/sig-verify.js, shared)
 }
 
-/** Live PAR factory read: is `child` a PAR launch with a market paired with `root`? true | false | throws. */
-async function connectedOnChain(rpc, root, child) {
+/**
+ * Live factory reads only. 'PAR' when `child` is a PAR launch with a market paired with `root`; 'PONS_V2' (only when
+ * opts.pons) when a verified Pons V2 factory's live record of `child` has pairToken == root; else null. Throws when
+ * the chain cannot be read. A native-ETH Pons pair (address 0) can never equal a root (roots are non-zero).
+ */
+async function connectionOnChain(rpc, root, child, opts) {
   const launch = await Chain.readLaunch(rpc, child);
-  if (!launch) return false;
-  const markets = await Chain.readMarkets(rpc, child, launch);
-  return markets.some((m) => lc(m.pairToken) === root);
+  if (launch) {
+    const markets = await Chain.readMarkets(rpc, child, launch);
+    return markets.some((m) => lc(m.pairToken) === root) ? 'PAR' : null;
+  }
+  if (!(opts && opts.pons)) return null;
+  const rec = await Origins.readPonsV2Launch(rpc, child);
+  return rec && Economy.isRootAddr(rec.pairToken) && lc(rec.pairToken) === root ? 'PONS_V2' : null;
+}
+/** Live PAR factory read: is `child` a PAR launch with a market paired with `root`? true | false | throws. */
+async function connectedOnChain(rpc, root, child, opts) {
+  return Boolean(await connectionOnChain(rpc, root, child, opts));
 }
 
 /** Per-wallet write limit. Call ONLY after `wallet`'s signature has verified. Returns a response when denied, else null. */
@@ -144,8 +162,9 @@ async function handler(event = {}, deps = {}) {
   const b = readJsonBody(event, 8192);
   if (!b || typeof b.action !== 'string') return bad('A JSON body with an action is required.');
   try {
-    if (b.action === 'curate') return await curate(b, { store, rpc, ip, grants });
-    if (b.action === 'claim-request') return await claimRequest(b, { store, rpc, ip, grants });
+    const pons = gate.ponsDiscovery;
+    if (b.action === 'curate') return await curate(b, { store, rpc, ip, grants, pons });
+    if (b.action === 'claim-request') return await claimRequest(b, { store, rpc, ip, grants, pons });
     return bad('Unknown action.');
   } catch (err) {
     logError(FN, 'write-crashed', err, { action: String(b.action).slice(0, 24) });
@@ -154,13 +173,13 @@ async function handler(event = {}, deps = {}) {
 }
 
 // ---------------------------------------------------------------- curate: recognize / revoke one child
-async function curate(b, { store, rpc, ip, grants }) {
+async function curate(b, { store, rpc, ip, grants, pons }) {
   const checked = Economy.curationMessage(b);
   if (!checked.ok) return bad('Invalid or missing field: ' + checked.field + '.');
   const msg = checked.message;
   if (!skewOk(msg.issuedAt)) return bad('issuedAt must be within ' + Economy.MAX_SKEW + ' seconds of the current time. Check your device clock and sign again.');
   const curator = await resolveCurator(store, msg.root, grants);
-  if (!curator) return publicError(403, 'no_curator', 'This root has no curator yet. For a PAR launch, its deployer or creator-fee recipient can claim the Project Passport in the Marketplace.');
+  if (!curator) return publicError(403, 'no_curator', pons ? 'This root has no curator yet. For a PAR or PONS V2 launch, its deployer or creator-fee recipient can claim the Project Passport in the Marketplace.' : 'This root has no curator yet. For a PAR launch, its deployer or creator-fee recipient can claim the Project Passport in the Marketplace.');
   if (msg.curator !== curator.address) return publicError(403, 'not_curator', 'Only the current curator of this root can recognize or revoke projects.');
   if (!Economy.counts(msg, curator)) return publicError(409, 'before_curatorship', 'This signature predates the current curatorship. Sign again.');
   const id = Economy.digest('EconomyCuration', msg);
@@ -189,12 +208,12 @@ async function curate(b, { store, rpc, ip, grants }) {
   const limited = await walletLimited(store, curator.address);
   if (limited) return limited;
   if (msg.decision === 'recognize') {
-    let ok;
-    try { ok = await connectedOnChain(rpc, msg.root, msg.child); } catch (err) {
+    let via;
+    try { via = await connectionOnChain(rpc, msg.root, msg.child, { pons }); } catch (err) {
       logError(FN, 'chain-unavailable', err, { root: msg.root });
       return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now. Try again.');
     }
-    if (!ok) return publicError(422, 'not_connected', 'This project has no on-chain PAR market paired with this root, so it cannot be recognized.');
+    if (!via) return publicError(422, 'not_connected', pons ? 'This project has no on-chain PAR market paired with this root and no canonical PONS V2 launch against it, so it cannot be recognized.' : 'This project has no on-chain PAR market paired with this root, so it cannot be recognized.');
   }
   const added = await store.sadd(K.curation(msg.root), Economy.member('EconomyCuration', msg, b.signature));
   log(FN, msg.decision === 'recognize' ? 'recognized' : 'revoked', { root: msg.root, child: msg.child, curator: hashId(curator.address) });
@@ -202,7 +221,7 @@ async function curate(b, { store, rpc, ip, grants }) {
 }
 
 // ---------------------------------------------------------------- claim request (roots with no provable curator)
-async function claimRequest(b, { store, rpc, ip, grants }) {
+async function claimRequest(b, { store, rpc, ip, grants, pons }) {
   // Only the per-IP limit applies before verification; the global bucket counts verified requests only, so
   // invalid requests from many IPs cannot exhaust it and block legitimate claimants.
   const rl = await limit(store, { bucket: 'eco-claim', id: ip, limit: 5, windowSeconds: 3600 });
@@ -218,6 +237,14 @@ async function claimRequest(b, { store, rpc, ip, grants }) {
     return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now. Try again.');
   }
   if (launch) return publicError(409, 'use_passport_claim', 'This root is a PAR launch: its curator is proven on-chain by claiming the Project Passport in the Marketplace, not by a manual request.');
+  if (pons) {
+    let ponsLaunch;
+    try { ponsLaunch = await Origins.readPonsV2Launch(rpc, msg.root); } catch (err) {
+      logError(FN, 'chain-unavailable', err, { root: msg.root });
+      return publicError(503, 'unavailable', 'Robinhood Chain could not be read right now. Try again.');
+    }
+    if (ponsLaunch) return publicError(409, 'use_passport_claim', 'This root is a PONS V2 launch: its curator is proven on-chain by claiming the Project Passport in the Marketplace, not by a manual request.');
+  }
   if (!code || code === '0x') return publicError(422, 'not_contract', 'This address is not a contract on Robinhood Chain.');
   const id = Economy.digest('EconomyClaimRequest', msg);
   if (!(await verifySig(rpc, msg.claimant, id, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
@@ -236,4 +263,4 @@ async function claimRequest(b, { store, rpc, ip, grants }) {
 
 exports.handler = (event) => handler(event);
 exports._handler = handler;
-exports._internals = { K, loadGrants, resolveCurator, verifySig, connectedOnChain };
+exports._internals = { K, loadGrants, resolveCurator, verifySig, connectedOnChain, connectionOnChain };

@@ -8,7 +8,15 @@
 //
 // Adapter: { durable, kind, incrWindow(key, ttlSeconds) -> number, get(key) -> string|null,
 //            set(key, value, {ttlSeconds}?), del(key), sadd(key, member), smembers(key) -> string[],
-//            cas({expect, set, sadd}) -> boolean }
+//            cas({expect, set, sadd}) -> boolean,
+//            zaddMany([[key, [[score, member], ...]], ...]) -> {added, commands, requests},
+//            zrevrangeByScore(key, max, min, limit) -> [{member, score}], zcard(key) -> number,
+//            zrem(key, members) -> number, zremRangeByScore(key, min, max) -> number }
+//
+// Sorted sets exist for bounded, ordered, paginated indexes (PONS V2 discovery): a reader never needs an unbounded
+// SMEMBERS. zaddMany is command-efficient: ONE `ZADD key s1 m1 s2 m2 ...` per key (at most ZADD_CHUNK pairs per
+// command) and all commands go out in pipelines of at most PIPELINE_MAX commands / PIPELINE_MAX_BYTES per request. Scores are
+// non-negative safe integers; range bounds use Redis syntax ('+inf', '-inf', '123', '(123' = exclusive).
 //
 // cas() is the ONE multi-key atomic primitive (Project Home payment activation and site writes). It is a single
 // fixed Lua script (EVAL) on Upstash — Redis runs a script atomically, with no other command interleaved — and a
@@ -66,6 +74,55 @@ function casSpec(spec) {
     set: set.map(([k, v, ttl]) => [key(k), String(v), ttlSecondsOf(ttl)]),
     sadd: sadd.map(([k, m]) => [key(k), String(m)]),
   };
+}
+const ZADD_CHUNK = 1000;
+const PIPELINE_MAX = 100;
+const PIPELINE_MAX_BYTES = 512 * 1024; // request-body bound per pipeline HTTP request (Upstash request-size limits)
+const ZRANGE_MAX = 1000;
+const zkey = (k) => { if (typeof k !== 'string' || !k || k.length > 512) throw new TypeError('zset: invalid key'); return k; };
+const zmember = (m) => { if (typeof m !== 'string' || !m || m.length > 256) throw new TypeError('zset: invalid member'); return m; };
+const zscore = (n) => { if (!Number.isSafeInteger(n) || n < 0) throw new TypeError('zset: invalid score'); return n; };
+const zbound = (b) => { const v = String(b); if (!/^(\+inf|-inf|\(?\d{1,16})$/.test(v)) throw new TypeError('zset: invalid bound'); return v; };
+const zlimit = (n) => { if (!Number.isInteger(n) || n < 1 || n > ZRANGE_MAX) throw new TypeError('zset: invalid limit'); return n; };
+// [[key, [[score, member]...]]...] -> [[key, [[score, member]...]]...] validated, empty groups dropped.
+function zaddGroups(groups) {
+  if (!Array.isArray(groups)) throw new TypeError('zaddMany: groups must be an array');
+  return groups.map(([k, pairs]) => {
+    if (!Array.isArray(pairs)) throw new TypeError('zaddMany: pairs must be an array');
+    return [zkey(k), pairs.map(([sc, m]) => [zscore(sc), zmember(m)])];
+  }).filter(([, pairs]) => pairs.length);
+}
+/**
+ * The exact write plan of zaddMany (shared by both adapters and by capacity estimates): one ZADD per key per
+ * ZADD_CHUNK members, packed into pipeline requests of at most PIPELINE_MAX commands and PIPELINE_MAX_BYTES of body
+ * (a single larger command travels alone). -> {commands: [[...cmd]], requests: [[cmdIndex...]], bytes}
+ */
+function zaddPlan(groups) {
+  const commands = [];
+  for (const [k, pairs] of zaddGroups(groups)) {
+    for (let i = 0; i < pairs.length; i += ZADD_CHUNK) {
+      const cmd = ['ZADD', k];
+      for (const [sc, m] of pairs.slice(i, i + ZADD_CHUNK)) cmd.push(String(sc), m);
+      commands.push(cmd);
+    }
+  }
+  const requests = [];
+  let cur = [], curBytes = 2, bytes = 0;
+  commands.forEach((cmd, i) => {
+    const b = Buffer.byteLength(JSON.stringify(cmd)) + 1;
+    bytes += b;
+    if (cur.length && (cur.length >= PIPELINE_MAX || curBytes + b > PIPELINE_MAX_BYTES)) { requests.push(cur); cur = []; curBytes = 2; }
+    cur.push(i); curBytes += b;
+  });
+  if (cur.length) requests.push(cur);
+  return { commands, requests, bytes };
+}
+// Parses a validated bound into a predicate on a score.
+function boundTest(b, upper) {
+  if (b === '+inf') return () => true;
+  if (b === '-inf') return () => upper ? false : true;
+  const ex = b.startsWith('('), n = Number(ex ? b.slice(1) : b);
+  return upper ? (s) => (ex ? s < n : s <= n) : (s) => (ex ? s > n : s >= n);
 }
 const MEMORY_MAX_ENTRIES = 50000;
 const MEMORY = new Map(); // module-level: shared by the singleton for the lifetime of the instance
@@ -185,6 +242,41 @@ function upstashAdapter({ url, token, fetchImpl, timeoutMs }) {
       if (n !== 0 && n !== 1) throw new StoreUnavailable('Upstash EVAL reply malformed');
       return n === 1;
     },
+    async zaddMany(groups) {
+      const plan = zaddPlan(groups);
+      let added = 0;
+      for (const idx of plan.requests) {
+        const replies = await pipeline(idx.map((i) => plan.commands[i]));
+        for (const r of replies) { const n = Number(r); if (!Number.isInteger(n)) throw new StoreUnavailable('Upstash ZADD reply malformed'); added += n; }
+      }
+      return { added, commands: plan.commands.length, requests: plan.requests.length };
+    },
+    async zrevrangeByScore(key, max, min, limit) {
+      const flat = await command('ZREVRANGEBYSCORE', zkey(key), zbound(max), zbound(min), 'WITHSCORES', 'LIMIT', '0', String(zlimit(limit)));
+      if (!Array.isArray(flat) || flat.length % 2) throw new StoreUnavailable('Upstash ZREVRANGEBYSCORE reply malformed');
+      const out = [];
+      for (let i = 0; i < flat.length; i += 2) {
+        const score = Number(flat[i + 1]);
+        if (!Number.isSafeInteger(score)) throw new StoreUnavailable('Upstash ZREVRANGEBYSCORE score malformed');
+        out.push({ member: String(flat[i]), score });
+      }
+      return out;
+    },
+    async zcard(key) {
+      const n = Number(await command('ZCARD', zkey(key)));
+      if (!Number.isInteger(n) || n < 0) throw new StoreUnavailable('Upstash ZCARD reply malformed');
+      return n;
+    },
+    async zrem(key, members) {
+      const list = (Array.isArray(members) ? members : []).map(zmember);
+      if (!list.length) return 0;
+      let removed = 0;
+      for (let i = 0; i < list.length; i += ZADD_CHUNK) removed += Number(await command('ZREM', zkey(key), ...list.slice(i, i + ZADD_CHUNK))) || 0;
+      return removed;
+    },
+    async zremRangeByScore(key, min, max) {
+      return Number(await command('ZREMRANGEBYSCORE', zkey(key), zbound(min), zbound(max))) || 0;
+    },
   };
 }
 
@@ -280,6 +372,51 @@ function memoryAdapter({ map, now }) {
       }
       return true;
     },
+    async zaddMany(groups) {
+      const valid = zaddGroups(groups);
+      for (const [k] of valid) { const e = live(k); if (e && e.type !== 'zset') throw wrongType(k); }
+      const plan = zaddPlan(valid);
+      let added = 0;
+      for (const [k, pairs] of valid) {
+        let entry = live(k);
+        if (!entry) { entry = { type: 'zset', value: new Map(), expiresAt: null }; put(k, entry); }
+        for (const [sc, m] of pairs) { if (!entry.value.has(m)) added += 1; entry.value.set(m, sc); }
+      }
+      return { added, commands: plan.commands.length, requests: plan.requests.length };
+    },
+    async zrevrangeByScore(key, max, min, limit) {
+      const hi = boundTest(zbound(max), true), lo = boundTest(zbound(min), false), n = zlimit(limit);
+      const entry = live(zkey(key));
+      if (!entry) return [];
+      if (entry.type !== 'zset') throw wrongType(key);
+      return [...entry.value].filter(([, sc]) => hi(sc) && lo(sc))
+        .sort((a, b) => b[1] - a[1] || (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
+        .slice(0, n).map(([member, score]) => ({ member, score }));
+    },
+    async zcard(key) {
+      const entry = live(zkey(key));
+      if (!entry) return 0;
+      if (entry.type !== 'zset') throw wrongType(key);
+      return entry.value.size;
+    },
+    async zrem(key, members) {
+      const list = (Array.isArray(members) ? members : []).map(zmember);
+      const entry = live(zkey(key));
+      if (!entry) return 0;
+      if (entry.type !== 'zset') throw wrongType(key);
+      let removed = 0;
+      for (const m of list) if (entry.value.delete(m)) removed += 1;
+      return removed;
+    },
+    async zremRangeByScore(key, min, max) {
+      const lo = boundTest(zbound(min), false), hi = boundTest(zbound(max), true);
+      const entry = live(zkey(key));
+      if (!entry) return 0;
+      if (entry.type !== 'zset') throw wrongType(key);
+      let removed = 0;
+      for (const [m, sc] of [...entry.value]) if (lo(sc) && hi(sc)) { entry.value.delete(m); removed += 1; }
+      return removed;
+    },
   };
 }
 
@@ -307,4 +444,4 @@ function _resetForTests() {
   MEMORY.clear();
 }
 
-module.exports = { getStore, createStore, StoreUnavailable, _resetForTests, CAS_SCRIPT };
+module.exports = { getStore, createStore, StoreUnavailable, _resetForTests, CAS_SCRIPT, ZADD_CHUNK, PIPELINE_MAX, PIPELINE_MAX_BYTES, ZRANGE_MAX, zaddPlan };
