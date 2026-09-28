@@ -12,6 +12,10 @@ const MAX_HISTORY=5000;
 // in batches of CHILD_BATCH so a pathological set never lands in the DOM all at once. Nothing is truncated.
 const CHILD_INITIAL=12;
 const CHILD_BATCH=100;
+// PONS V2 discovery (only when /api/pons-economy answers enabled:true): children LAUNCHED AGAINST the mapped token
+// arrive in server pages of PONS_PAGE. "Show all" reveals what is already loaded; "load more from PONS V2" fetches the
+// next server page. The two are never conflated, and nothing claims to be complete while the server has more.
+const PONS_PAGE=50;
 const CANONICAL=new Map([[SYNC.toLowerCase(),{rank:0,label:'SYNCNET NETWORK ASSET',symbol:'SYNC'}],[DEMO.toLowerCase(),{rank:1,label:'SYNCNET ORIGIN',symbol:'SYNCAT'}]]);
 let historyCoverage={mode:'unknown',count:0,indexed:0};
 const $=id=>document.getElementById(id);
@@ -245,14 +249,43 @@ function provenance(meta){
   if(r.status==='origin') return {label:'SYNCNET ORIGIN',cls:'origin'};
   if(meta?.profile) return {label:'SYNCNET PROFILE · SEE REGISTRY',cls:'profile'};
   if(impostorOf(meta)) return {label:'NOT THE CANONICAL $'+impostorOf(meta),cls:'impostor'};
+  if(meta?.pons&&!meta?.par) return {label:ponsLabel(meta.pons),cls:'auto'};
   return {label:meta?.isLaunch===false?'INDEXED MARKET ASSET':'PAR INDEXED',cls:'auto'};
 }
 function skeleton(v){const C=window.SyncNetCore;return C?C.confusableSkeleton(String(v||'')):String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function impostorOf(meta){if(!meta||!valid(meta.address))return'';for(const [addr,c] of CANONICAL){if(same(addr,meta.address))return'';const sym=c.symbol||'';if(sym&&skeleton(meta.symbol)===skeleton(sym))return sym}return''}
-function provenanceMarkup(meta){const p=provenance(meta);return `<em class="node-status ${p.cls}">${p.label}</em>`;}
+function ponsLabel(item){const l=String(item?.phaseLabel||'');return l?l.replace(/^PONS · /,'PONS V2 · '):'PONS V2 · PHASE UNAVAILABLE'}
+function provenanceMarkup(meta){
+  const p=provenance(meta);
+  // Roles are kept side by side: a PONS launch that also carries SyncNet / PAR provenance shows both facts.
+  const extra=meta?.pons&&p.label!==ponsLabel(meta.pons)?`<em class="node-status auto">${esc(ponsLabel(meta.pons))}</em>`:'';
+  return `<em class="node-status ${p.cls}">${esc(p.label)}</em>${extra}`;
+}
 function node(meta,kind=''){
   const label=meta.symbol&&meta.symbol!=='TOKEN'?`$${meta.symbol}`:(meta.name||short(meta.address));
   return `<a class="topology-node ${kind}" href="/network.html?token=${encodeURIComponent(meta.address)}"><strong>${esc(label)}</strong><span>${esc(short(meta.address))}</span>${provenanceMarkup(meta)}</a>`;
+}
+/** One PONS V2 page for `root`: {enabled:false} | {enabled:true,error:true} | {enabled:true,total,items,nextCursor}. */
+async function ponsPage(root,cursor){
+  if(!valid(root)||same(root,ZERO)) return {enabled:false};
+  try{
+    const r=await fetch(`/api/pons-economy?root=${encodeURIComponent(String(root).toLowerCase())}&limit=${PONS_PAGE}${cursor?'&cursor='+encodeURIComponent(cursor):''}`,{cache:'no-store'});
+    const j=await r.json().catch(()=>({}));
+    if(j&&j.enabled===false) return {enabled:false};
+    if(!r.ok||!Array.isArray(j.items)) return {enabled:true,error:true};
+    return {enabled:true,total:Number(j.total)||0,items:j.items.filter(i=>valid(i?.token)),nextCursor:typeof j.nextCursor==='string'?j.nextCursor:null};
+  }catch{return {enabled:true,error:true}}
+}
+/** The mapped token's own canonical PONS V2 record (live factory read — never the discovery index). */
+async function ponsCenterOf(address){
+  const O=window.SyncNetOrigins,C=window.SyncNetChain;
+  if(!O||!C||typeof O.readPonsV2Launch!=='function') return null;
+  try{return await O.readPonsV2Launch(C.makeRpc(RPC,{timeoutMs:10000,retries:1}),address)}catch{return 'unavailable'}
+}
+function ponsMeta(item,profileMap){
+  const a=String(item.token).toLowerCase(),profile=profileMap.get(a)||null;
+  const symbol=safeSymbol(item.symbol)||'TOKEN',name=safeName(item.name)||(symbol!=='TOKEN'?symbol:'');
+  return {address:a,name:profile?.profile?.name||name||short(a),symbol,profile,isLaunch:true,pons:item};
 }
 function branchCard(x){
   const via=x.via?.symbol&&x.via.symbol!=='TOKEN'?`$${x.via.symbol}`:short(x.via?.address);
@@ -260,23 +293,27 @@ function branchCard(x){
   return `<a class="branch-chip" href="/network.html?token=${encodeURIComponent(x.address)}"><strong>${esc(label)}</strong><span>shares ${esc(via)} · ${esc(provenance(x).label)}</span></a>`;
 }
 // Pure: how many child cards to show after one more reveal step, and the copy for the controls.
-function childView(total,shown){
+// `server` = {remaining, total} when the PONS V2 source still has unloaded pages: local reveal then says LOADED and a
+// separate LOAD MORE FROM PONS V2 control fetches the next server page. Without it the copy is unchanged.
+function childView(total,shown,server){
   const s=Math.max(0,Math.min(total,shown));
   const remaining=total-s;
   const next=remaining<=CHILD_BATCH?total:s+CHILD_BATCH;
+  const pend=server&&server.remaining>0?server:null;
   return {
-    shown:s,total,
-    moreLabel:remaining<=0?'':(next===total?`SHOW ALL ${total} CONNECTIONS`:`SHOW NEXT ${CHILD_BATCH} · ${s} OF ${total} SHOWN`),
+    shown:s,total,server:pend,
+    moreLabel:remaining<=0?'':(next===total?(pend?`SHOW ALL ${total} LOADED CONNECTIONS`:`SHOW ALL ${total} CONNECTIONS`):`SHOW NEXT ${CHILD_BATCH} · ${s} OF ${total} SHOWN`),
     nextShown:next,
     canCollapse:s>CHILD_INITIAL,
-    countNote:total<=CHILD_INITIAL?'':(s>=total?` (all ${total} shown)`:` (showing ${s} of ${total})`)
+    countNote:pend?` (showing ${s} of ${total} loaded)`:total<=CHILD_INITIAL?'':(s>=total?` (all ${total} shown)`:` (showing ${s} of ${total})`)
   };
 }
 function childMoreMarkup(v){
-  if(v.total<=CHILD_INITIAL) return '';
+  const server=v.server?`<button class="btn" type="button" data-child-server aria-controls="topologyChildren">LOAD MORE FROM PONS V2 · ${v.server.loaded} OF ${v.server.total} LOADED</button>`:'';
+  if(v.total<=CHILD_INITIAL) return server;
   const more=v.moreLabel?`<button class="btn" type="button" data-child-more aria-controls="topologyChildren">${esc(v.moreLabel)}</button>`:'';
   const less=v.canCollapse?`<button class="btn" type="button" data-child-collapse aria-controls="topologyChildren">SHOW FIRST ${CHILD_INITIAL}</button>`:'';
-  return more+less;
+  return more+server+less;
 }
 function setProfileState(meta){
   const el=$('profileState');if(!el)return;
@@ -313,7 +350,7 @@ async function loadTopology(address,opts={}){
   if(reveal_&&section) reveal(section,'start');
 
   try{
-    const [rootLaunch,recent]=await Promise.all([resolve(address),detailedRecent(),profiles()]);
+    const [rootLaunch,recent,profileMap,pons]=await Promise.all([resolve(address),detailedRecent(),profiles(),ponsPage(address)]);
     if(seq!==mapSeq) return;
     const rootMeta=await metaFor(address,rootLaunch);
     const parents=[];
@@ -323,15 +360,46 @@ async function loadTopology(address,opts={}){
         if(valid(a)&&!same(a,address)) parents.push(await metaFor(a,null,pairSym(m)));
       }
     }
+    // PONS V2 center: the mapped token's own launch pair, from its canonical factory record (one relationship).
+    let ponsCenter=null;
+    if(pons.enabled&&!rootLaunch){
+      const rec=await ponsCenterOf(address);
+      if(seq!==mapSeq) return;
+      if(rec==='unavailable') ponsCenter='unavailable';
+      else if(rec){
+        const phase=window.SyncNetOrigins.phaseOf(rec.phase);
+        ponsCenter={native:same(rec.pairToken,ZERO),pair:rec.pairToken,phaseLabel:'PONS · '+phase.label};
+        rootMeta.pons=ponsCenter;rootMeta.isLaunch=true;
+        if(!ponsCenter.native) parents.push(await metaFor(rec.pairToken,null));
+      }
+    }
 
     const children=[];
     for(const d of recent){
       const a=tokenAddr(d);
       if(!valid(a)||same(a,address)) continue;
-      if(markets(d).some(m=>same(pairAddr(m),address))) children.push(await metaFor(a,d));
+      if(markets(d).some(m=>same(pairAddr(m),address))){const cm=await metaFor(a,d);cm.par=true;children.push(cm);}
     }
 
     const parentAll=uniqByAddress(parents),childAll=uniqByAddress(children);
+    const parCount=childAll.length;
+    // PONS V2 children join the same deduplicated list (identity = contract address; roles are merged, never erased).
+    const ponsState={enabled:Boolean(pons.enabled),error:Boolean(pons.error),total:pons.total||0,loaded:0,next:pons.nextCursor||null,loading:false};
+    const byAddr=new Map(childAll.map(c=>[c.address.toLowerCase(),c]));
+    const addPons=(items)=>{
+      let added=0;
+      for(const it of items||[]){
+        const k=String(it.token).toLowerCase();
+        if(same(k,address)) continue;
+        ponsState.loaded++;
+        const have=byAddr.get(k);
+        if(have){have.pons=it;continue}
+        const m=ponsMeta(it,profileMap);byAddr.set(k,m);childAll.push(m);added++;
+      }
+      return added;
+    };
+    if(pons.enabled&&!pons.error) addPons(pons.items);
+    const serverState=()=>ponsState.next?{remaining:Math.max(1,ponsState.total-ponsState.loaded),loaded:ponsState.loaded,total:ponsState.total}:null;
     const parentUnique=parentAll.slice(0,8);
     const childUnique=childAll.slice(0,CHILD_INITIAL);
     let rootCode=null;if(!rootLaunch){try{rootCode=await rpc('eth_getCode',[address,'latest'])}catch{}}
@@ -360,31 +428,40 @@ async function loadTopology(address,opts={}){
     if(seq!==mapSeq) return; // a newer MAP request superseded this one
     const rootLabel=rootMeta.symbol&&rootMeta.symbol!=='TOKEN'?`$${rootMeta.symbol}`:rootMeta.name;
     if($('topologyTitle')) $('topologyTitle').innerHTML=`${esc(rootLabel)}<br><span class="cyan">IN CONTEXT.</span>`;
-    const metaText=v=>rootCode==='0x'?'No contract exists at this address on Robinhood Chain.':`${rootLaunch?parentAll.length+' direct market'+(parentAll.length===1?'':'s'):'Not a PAR launch'} · ${childAll.length} project${childAll.length===1?'':'s'} use${childAll.length===1?'s':''} it as a market${v.countNote}. ${coverageText()}`;
-    let childState=childView(childAll.length,childUnique.length);
+    const centerText=()=>rootLaunch?parentAll.length+' direct market'+(parentAll.length===1?'':'s'):ponsCenter&&ponsCenter!=='unavailable'?'PONS V2 launch · launched against '+(ponsCenter.native?'native ETH':(parentAll[0]?.symbol&&parentAll[0].symbol!=='TOKEN'?'$'+parentAll[0].symbol:short(ponsCenter.pair))):'Not a PAR launch';
+    const ponsNote=()=>ponsState.enabled&&ponsState.error?' PONS discovery is temporarily unavailable.':'';
+    const metaText=v=>rootCode==='0x'?'No contract exists at this address on Robinhood Chain.':ponsState.total>0
+      ?`${centerText()} · ${parCount} PAR connection${parCount===1?'':'s'} · ${ponsState.total} PONS V2 connection${ponsState.total===1?'':'s'}${v.countNote}. ${coverageText()}`
+      :`${centerText()} · ${childAll.length} project${childAll.length===1?'':'s'} use${childAll.length===1?'s':''} it as a market${v.countNote}. ${coverageText()}${ponsNote()}`;
+    let childState=childView(childAll.length,childUnique.length,serverState());
     if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
     if($('attentionQuery')) $('attentionQuery').value=rootMeta.name&&rootMeta.name!=='Token'?rootMeta.name:(rootMeta.symbol||'');
     setProfileState(rootMeta);
 
-    const top=parentUnique.length?parentUnique.map(p=>node(p)).join(''):(rootLaunch?'<div class="topology-empty">No direct markets were found in this token’s PAR launch record.</div>':rootCode==='0x'?'<div class="topology-empty">No contract exists at this address on Robinhood Chain.</div>':'<div class="topology-empty">Not launched on PAR, so SyncNet cannot read this token’s own markets. The projects below use it as a market.</div>');
-    const bottom=childUnique.length?childUnique.map(c=>node(c,'child')).join(''):'<div class="topology-empty">No projects using this contract as a market were found in the currently indexed PAR history.</div>';
+    const nativePair='<span class="topology-node"><strong>ETH</strong><span>native · not a contract</span><em class="node-status auto">PONS V2 PAIR</em></span>';
+    const top=ponsCenter&&ponsCenter!=='unavailable'?(ponsCenter.native?nativePair:parentUnique.map(p=>node(p)).join('')):parentUnique.length?parentUnique.map(p=>node(p)).join(''):(rootLaunch?'<div class="topology-empty">No direct markets were found in this token’s PAR launch record.</div>':rootCode==='0x'?'<div class="topology-empty">No contract exists at this address on Robinhood Chain.</div>':'<div class="topology-empty">Not launched on PAR, so SyncNet cannot read this token’s own markets. The projects below use it as a market.</div>');
+    const withPons=ponsState.total>0;
+    const shownFirst=childAll.slice(0,childState.shown);
+    const bottom=shownFirst.length?shownFirst.map(c=>node(c,'child')).join(''):`<div class="topology-empty">No projects using this contract as a market were found in the currently indexed PAR history${ponsState.enabled&&!ponsState.error?' or PONS V2 launch index':''}.</div>`;
+    const isPonsCenter=ponsCenter&&ponsCenter!=='unavailable';
     if($('topologyGraph')) $('topologyGraph').innerHTML=`
       <div class="topology-tree">
-        <div class="topology-label">THIS TOKEN IS CONNECTED TO</div>
+        <div class="topology-label">${isPonsCenter?'THIS TOKEN WAS LAUNCHED AGAINST':'THIS TOKEN IS CONNECTED TO'}</div>
         <div class="topology-row">${top}</div>
-        <div class="topology-line"><span>MARKET</span></div>
+        <div class="topology-line"><span>${isPonsCenter?'LAUNCHED AGAINST · PONS V2':'MARKET'}</span></div>
         <a class="topology-root" href="/project/${esc(address)}"><strong>${esc(rootLabel)}</strong><span>${esc(short(address))}</span>${provenanceMarkup(rootMeta)}</a>
-        <div class="topology-line"><span>MARKET</span></div>
-        <div class="topology-label">PROJECTS USING THIS TOKEN AS A MARKET</div>
+        <div class="topology-line"><span>${withPons?'MARKET · PONS V2 LAUNCH PAIR':'MARKET'}</span></div>
+        <div class="topology-label">${withPons?'PROJECTS USING THIS TOKEN AS A MARKET OR PONS V2 LAUNCH PAIR':'PROJECTS USING THIS TOKEN AS A MARKET'}</div>
         <div class="topology-row" id="topologyChildren">${bottom}</div>
         <div class="topology-more" id="topologyChildMore">${childMoreMarkup(childState)}</div>
       </div>`;
-    // Reveal/collapse re-slices the already-deduplicated childAll: no refetch, no rediscovery.
+    // Reveal/collapse re-slices the already-deduplicated childAll: no refetch, no rediscovery. Only the explicit
+    // LOAD MORE FROM PONS V2 control fetches (the next server page), and it appends to the same deduplicated list.
     const moreHost=$('topologyChildMore'),childHost=$('topologyChildren');
-    if(moreHost&&childHost&&childAll.length>CHILD_INITIAL){
+    if(moreHost&&childHost&&(childAll.length>CHILD_INITIAL||ponsState.next)){
       const showChildren=(n,focusSel)=>{
         const prev=childState.shown;
-        childState=childView(childAll.length,n);
+        childState=childView(childAll.length,n,serverState());
         if(childState.shown>prev) childHost.insertAdjacentHTML('beforeend',childAll.slice(prev,childState.shown).map(c=>node(c,'child')).join(''));
         else childHost.innerHTML=childAll.slice(0,childState.shown).map(c=>node(c,'child')).join('');
         moreHost.innerHTML=childMoreMarkup(childState);
@@ -395,6 +472,19 @@ async function loadTopology(address,opts={}){
       moreHost.addEventListener('click',e=>{
         const b=e.target.closest('button');if(!b)return;
         if(b.hasAttribute('data-child-more')) showChildren(childState.nextShown,'[data-child-more]');
+        else if(b.hasAttribute('data-child-server')){
+          if(ponsState.loading||!ponsState.next) return;
+          ponsState.loading=true;b.disabled=true;b.textContent='LOADING FROM PONS V2…';
+          ponsPage(address,ponsState.next).then(pg=>{
+            ponsState.loading=false;
+            if(seq!==mapSeq) return;
+            if(!pg.enabled||pg.error){ponsState.error=true;b.disabled=false;b.textContent='PONS V2 UNAVAILABLE · RETRY';return}
+            ponsState.error=false;ponsState.total=pg.total;ponsState.next=pg.nextCursor;
+            const added=addPons(pg.items);
+            // Newly loaded connections are revealed right away (they were explicitly requested).
+            showChildren(childState.shown+added,'[data-child-server]');
+          });
+        }
         else if(b.hasAttribute('data-child-collapse')){showChildren(CHILD_INITIAL,'[data-child-more]');reveal(childHost,'nearest');}
       });
     }
