@@ -123,7 +123,7 @@ const TA = '0x8' + '0'.repeat(39), TB = '0x8' + '1'.repeat(39);
 for (const t of [TA, TB]) await up.set('mp:passport:v1:' + t, JSON.stringify({ token: t, operator: W, operatorSince: new Date(clock.now()).toISOString(), history: [] }));
 let ipn = 0;
 const call = async (body) => { const r = await ph._handler({ httpMethod: 'POST', headers: { 'x-nf-client-connection-ip': '203.0.113.' + (ipn++ % 250) }, body: JSON.stringify(body) }, { store: up, env: ENV, rpc, now: () => clock.now(), pricingFile: PRICING, deploymentFile: DEPLOYMENT }); return { s: r.statusCode, j: JSON.parse(r.body || '{}') }; };
-const intentFor = async (token) => { const m = { token, operator: W, issuedAt: Math.floor(clock.now() / 1000), nonce: rnd32() }; return call({ action: 'intent', ...m, signature: signDigest(W, Site.digest('ActivationRequest', m)) }); };
+const intentFor = async (token) => { const m = { token, operator: W, issuedAt: Math.floor(clock.now() / 1000), nonce: rnd32(), termsVersion: Site.TERMS_VERSION }; return call({ action: 'intent', ...m, signature: signDigest(W, Site.digest('ActivationRequest', m)) }); };
 const ia = await intentFor(TA), ib = await intentFor(TB);
 check('R13 intents created through the Upstash adapter on real Redis', ia.s === 201 && ib.s === 201, JSON.stringify(ia.j) + JSON.stringify(ib.j));
 check('R14 the two concurrent intents received different exact amounts (tag reservation)', ia.j.intent.exactTaggedSyncAmount !== ib.j.intent.exactTaggedSyncAmount);

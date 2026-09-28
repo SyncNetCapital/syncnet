@@ -6,6 +6,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import {
   A, ROOT, Core, SYNC, SINK, OTHER_SINK, CONVERTER, TREASURY_FIXTURE, PRICING, ENV, DEPLOYMENT, clock, pc, resetPc, resetChain, pay, reorg, setTags, rpc, signDigest, lc, rnd32, hex, ratePool, resetRatePool,
 } from './fixtures.mjs';
@@ -64,7 +65,7 @@ for (const t of [T2, T4, T5, T6, T7, T8, T9]) seedPassport(t, W);
 seedPassport(T3, SAFE); // contract-wallet operator (EIP-1271)
 
 const request = (token, who = W, over = {}) => {
-  const m = { token, operator: who, issuedAt: nowSec(), nonce: rnd32(), ...over.message };
+  const m = { token, operator: who, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION, ...over.message };
   const signature = over.signature || signDigest(over.signer || (who === SAFE ? A.SAFE_OWNER : who), over.digest || Site.digest('ActivationRequest', m));
   return api('POST', { action: 'intent', ...m, signature, ...over.extra }, null, over);
 };
@@ -159,11 +160,11 @@ let I1;
   }
   const badSig = await request(T2, W, { signer: A.ATTACKER });
   check('B13 signature by another wallet → 401', badSig.s === 401);
-  const mMsg = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const mMsg = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION };
   const mktDigest = Core.hashTypedData({ ...Site.typedData('ActivationRequest', mMsg), domain: { ...Market.DOMAIN } });
   const cross = await request(T2, W, { message: mMsg, digest: mktDigest });
   check('B14 same struct signed in the Marketplace domain → 401 (no cross-domain replay)', cross.s === 401);
-  const mMsg2 = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const mMsg2 = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION };
   const wrongChain = await request(T2, W, { message: mMsg2, digest: Core.hashTypedData({ ...Site.typedData('ActivationRequest', mMsg2), domain: { name: 'SyncNet Website', version: '1', chainId: 1 } }) });
   check('B15 wrong EIP-712 chainId → 401', wrongChain.s === 401);
   const skew = await request(T2, W, { message: { issuedAt: nowSec() - 1000 } });
@@ -631,11 +632,243 @@ let ACT1;
   check('H05 metrics with the sink unreachable: registry figures served, sink/converter marked unavailable, never guessed', mtDown.sink.unavailable === true && mtDown.projectHomesActivated >= 1);
 }
 
+// ============================================================================================ T. Terms of Use version signed in the ActivationRequest
+{
+  const TT = T6;
+  for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(TT)) MAP.delete(k); // clean slate for this project (Passport kept)
+  const noTerms = await request(TT, W, { message: { termsVersion: undefined }, signature: '0x' + '11'.repeat(65) }); // field absent from the body
+  check('T01 missing termsVersion → 400 terms_version, no intent', noTerms.s === 400 && noTerms.j.code === 'terms_version' && !MAP.has('site:open:v1:' + TT), noTerms.body);
+  const old = await request(TT, W, { message: { termsVersion: '2026-09-23' } });
+  check('T02 old/unknown termsVersion (signed and sent) → 400 terms_version', old.s === 400 && old.j.code === 'terms_version' && !MAP.has('site:open:v1:' + TT), old.body);
+  const mOld = { token: TT, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: '2026-09-23' };
+  const forged = await request(TT, W, { message: { ...mOld, termsVersion: Site.TERMS_VERSION }, digest: Site.digest('ActivationRequest', mOld) });
+  check('T03 body claims the current version but the wallet signed another → 401 (the version is inside the signature)', forged.s === 401 && !MAP.has('site:open:v1:' + TT), forged.body);
+  const q = await request(TT, W);
+  const stored = JSON.parse(MAP.get('site:intent:v1:' + q.j.intent.requestId).value);
+  check('T04 current termsVersion → quote; stored in the intent and in its signed request digest; exposed in the public quote', q.s === 201 && stored.termsVersion === Site.TERMS_VERSION && q.j.intent.termsVersion === Site.TERMS_VERSION && stored.request.digest === Site.digest('ActivationRequest', { token: TT, operator: W, issuedAt: stored.request.issuedAt, nonce: stored.request.nonce, termsVersion: Site.TERMS_VERSION }), q.body);
+  const p = payIntent(q.j.intent);
+  const v = await verify(q.j.intent.requestId, p.txHash);
+  const ent = JSON.parse(MAP.get('site:entitlement:v1:' + TT).value);
+  const actRec = JSON.parse(MAP.get('site:act:v1:' + p.txHash + ':' + v.j.entitlement.logIndex).value);
+  check('T05 termsVersion copied to the entitlement and the activation record', v.s === 200 && ent.termsVersion === Site.TERMS_VERSION && actRec.termsVersion === Site.TERMS_VERSION, v.body);
+  const st = await status(TT);
+  const acts = (await api('GET', null, { view: 'activations' })).j.activations;
+  check('T06 public status and activations views carry termsVersion + receipt data (payer, sink, tx, block, amount display, rate, requestId)', st.entitlement.termsVersion === Site.TERMS_VERSION && acts.some((a) => a.token === TT && a.termsVersion === Site.TERMS_VERSION) && st.entitlement.payer && st.entitlement.sink && st.entitlement.txHash === p.txHash && st.entitlement.blockNumber && st.entitlement.exactSyncDisplay === q.j.intent.exactTaggedSyncDisplay && st.entitlement.syncUsdReferenceRate && st.entitlement.requestId === q.j.intent.requestId);
+  // legacy quote (issued before termsVersion existed): re-signing records the acceptance on the SAME quote
+  const TL = T7;
+  for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(TL)) MAP.delete(k);
+  const lq = await request(TL, W);
+  const lraw = JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value);
+  delete lraw.termsVersion;
+  MAP.set('site:intent:v1:' + lq.j.intent.requestId, { type: 'string', value: JSON.stringify(lraw), expiresAt: null });
+  check('T07 a legacy open quote is exposed with termsVersion null', (await status(TL)).openIntent.termsVersion === null);
+  const re = await request(TL, W);
+  const up = JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value);
+  check('T08 re-signing a legacy open quote records the current Terms on it (same quote, same amount, earlier request kept)', re.s === 200 && re.j.reused === true && re.j.intent.requestId === lq.j.intent.requestId && re.j.intent.exactTaggedSyncAmount === lq.j.intent.exactTaggedSyncAmount && up.termsVersion === Site.TERMS_VERSION && up.request.operator === W && up.earlierRequest && up.earlierRequest.nonce !== up.request.nonce, re.body);
+  const same = await request(TL, W);
+  check('T09 a quote already carrying the current Terms is reused unchanged', same.s === 200 && same.j.reused === true && JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value).request.nonce === up.request.nonce);
+  // a legacy quote PAID without re-signing still activates (a payment is never lost) and says the Terms were not recorded
+  const lraw2 = { ...up }; delete lraw2.termsVersion;
+  MAP.set('site:intent:v1:' + lq.j.intent.requestId, { type: 'string', value: JSON.stringify(lraw2), expiresAt: null });
+  const lp = payIntent(lq.j.intent);
+  const lv = await verify(lq.j.intent.requestId, lp.txHash);
+  check('T10 a legacy quote paid without Terms still activates; entitlement termsVersion is null (not invented)', lv.s === 200 && JSON.parse(MAP.get('site:entitlement:v1:' + TL).value).termsVersion === null, lv.body);
+}
+
+// ============================================================================================ S. SyncNet ops suspension
+{
+  const Susp = require(path.join(ROOT, 'netlify/lib/project-home-suspension.js'));
+  const T = T8; // complimentary entitlement, published by the current operator W (F01/F02)
+  const live0 = await site('/site/' + T);
+  check('S00 fixture: the Project Home is live before suspension', live0.statusCode === 200 && live0.body.includes(Site.AUTHORITY_LABEL));
+  // nothing over HTTP can suspend or reinstate — not an unauthenticated caller, not the Passport operator
+  const m = { token: T, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const viaHttp = [
+    await api('POST', { action: 'suspend', token: T, category: 'abuse', actor: 'x' }),
+    await api('POST', { action: 'reinstate', token: T, actor: 'x' }),
+    await api('POST', { action: 'suspend', ...m, signature: signDigest(W, Site.digest('SiteUnpublish', m)) }),
+    await api('GET', null, { view: 'suspend', token: T }),
+  ];
+  check('S01 no HTTP action or view can suspend/reinstate (unauthenticated or operator-signed → 400, nothing written)', viaHttp.every((r) => r.s === 400) && !MAP.has(Susp.K.suspension(T)), viaHttp.map((r) => r.s).join());
+  const fnSrc = fs.readdirSync(path.join(ROOT, 'netlify/functions')).map((f) => fs.readFileSync(path.join(ROOT, 'netlify/functions', f), 'utf8')).join('\n');
+  check('S02 no Netlify function calls suspend()/reinstate() (ops CLI only; no route exists)', !/\.(suspend|reinstate)\(/.test(fnSrc) && !/\bsuspend\(|reinstate\(/.test(fnSrc));
+  let bad = [];
+  for (const [label, f] of [['no actor', () => Susp.suspend(store, T, { category: 'abuse' })], ['unknown category', () => Susp.suspend(store, T, { category: 'spam!', actor: 'ops:a' })], ['bad token', () => Susp.suspend(store, '0x12', { category: 'abuse', actor: 'ops:a' })], ['reinstate while not suspended', () => Susp.reinstate(store, T, { actor: 'ops:a' })]]) {
+    try { await f(); bad.push(label); } catch { /* refused */ }
+  }
+  check('S03 invalid ops calls are refused (actor required, fixed categories, reinstate needs a suspension)', bad.length === 0 && !MAP.has(Susp.K.suspension(T)), bad.join());
+  const cli = spawnSync(process.execPath, [path.join(ROOT, 'netlify/ops/project-home-suspension.mjs'), 'suspend', T, '--category', 'abuse', '--actor', 'ops:x'], { env: { PATH: process.env.PATH }, encoding: 'utf8' });
+  check('S04 ops CLI refuses to run without the durable production store (fail closed)', cli.status === 2 && /no durable store/.test(cli.stderr), cli.stderr);
+
+  // suspend: snapshot everything that is NOT suspension state, suspend, compare
+  const skip = (k) => k === Susp.K.index || k.startsWith('site:suspension:') || k.startsWith('site:audit:') || k.startsWith('rl:') || /^ph-|ratelimit|:rl:/.test(k);
+  // durable records only: TTL-bound locks/counters (e.g. an expiring open-quote lock of another project) may lapse meanwhile
+  const snap = () => JSON.stringify([...MAP.entries()].filter(([k, v]) => !skip(k) && !v.expiresAt).map(([k, v]) => [k, v.value instanceof Set ? [...v.value].sort() : v.value]).sort());
+  const auditBefore = (await store.smembers('site:audit:v1:' + T)).length;
+  const before = snap();
+  await Susp.suspend(store, T, { category: 'abuse', note: 'PRIVATE-NOTE phishing report #12', actor: 'ops:alice', now: () => clock.now() });
+  const pg = await site('/site/' + T);
+  check('S05 suspended Project Home is not publicly served (neutral 503 page)', pg.statusCode === 503 && pg.body.includes('This Project Home is currently unavailable.') && !pg.body.includes('The synced home of this project'));
+  check('S06 the public page exposes no note, actor or category', !/PRIVATE-NOTE|ops:alice|abuse/i.test(pg.body));
+  const st = await status(T);
+  check('S07 status view: SUSPENDED + public category only (no note, no actor)', st.suspension && st.suspension.status === 'SUSPENDED' && st.suspension.category === 'abuse' && !/PRIVATE-NOTE|ops:alice/.test(JSON.stringify(st)), JSON.stringify(st.suspension));
+  check('S08 homes view reports "suspended" (never "live")', (await api('GET', null, { view: 'homes', tokens: T })).j.homes[T].state === 'suspended');
+  const revId = st.site.revisionId;
+  const rv = await api('GET', null, { view: 'revision', id: revId });
+  check('S09 revision content is not served while suspended; the revision list (history) still is', rv.s === 403 && !rv.body.includes('synced home') && (await api('GET', null, { view: 'revisions', token: T })).j.revisions.length >= 1);
+  const pub = await publishCfg(T, goodConfig(T, { headline: 'Trying to publish around the suspension' }));
+  const readopt = await publishCfg(T, null, W, { byHash: true, configHash: st.site.configHash });
+  check('S10 operator publish / restore cannot bypass the suspension (403 suspended, pointer unchanged)', pub.s === 403 && pub.j.code === 'suspended' && readopt.s === 403 && JSON.parse(MAP.get('site:cur:v1:' + T).value).revisionId === revId, pub.body);
+  const q = await request(T, W);
+  check('S11 no activation quote is issued for a suspended Project Home', q.s === 403 && q.j.code === 'suspended', q.body);
+  // a suspension landing between publish's reads and its commit is caught atomically
+  await Susp.reinstate(store, T, { actor: 'ops:alice', now: () => clock.now() });
+  storeMode.beforeCas = async () => { await Susp.suspend(store, T, { category: 'security', actor: 'ops:bob', now: () => clock.now() }); };
+  clock.advance(2);
+  const race = await publishCfg(T, goodConfig(T, { headline: 'Racing the suspension' }));
+  check('S12 a suspension committed during publish aborts the publish (atomic expectation)', race.s === 409 && JSON.parse(MAP.get('site:cur:v1:' + T).value).revisionId === revId && (await site('/site/' + T)).statusCode === 503, race.body);
+  const after = snap();
+  check('S13 entitlement, payments, activations, revisions and Passport are untouched by suspension', after === before, JSON.parse(after).filter((e) => !before.includes(JSON.stringify(e))).map((e) => e[0]).join(' ') + ' | removed: ' + JSON.parse(before).filter((e) => !after.includes(JSON.stringify(e))).map((e) => e[0]).join(' '));
+  // fail closed: a record that cannot be parsed counts as suspended
+  const good = MAP.get(Susp.K.suspension(T));
+  MAP.set(Susp.K.suspension(T), { type: 'string', value: '{not json', expiresAt: null });
+  const corrupt = await site('/site/' + T);
+  check('S14 unreadable suspension record → treated as suspended (fail closed)', corrupt.statusCode === 503 && (await publishCfg(T, goodConfig(T, { headline: 'Corrupt record attempt' }))).j.code === 'suspended');
+  MAP.set(Susp.K.suspension(T), good);
+  // the operator's own unpublish still works while suspended and is a separate state
+  clock.advance(2);
+  const un = await unpublishSite(T);
+  check('S15 operator unpublish is separate and still allowed while suspended', un.s === 200 && JSON.parse(MAP.get('site:cur:v1:' + T).value).state === 'UNPUBLISHED');
+  // reinstatement
+  await Susp.reinstate(store, T, { actor: 'ops:carol', note: 'reviewed, content removed by operator', now: () => clock.now() });
+  const st2 = await status(T);
+  check('S16 reinstated: no suspension in the status view; the entitlement is still valid', st2.suspension === null && st2.entitlement && st2.entitlement.status === 'ACTIVE');
+  clock.advance(2);
+  const again = await publishCfg(T, goodConfig(T, { headline: 'Back after review' }));
+  const pg2 = await site('/site/' + T);
+  check('S17 after reinstatement the operator can publish again without a new activation fee, and it is served', again.s === 200 && pg2.statusCode === 200 && pg2.body.includes('Back after review'), again.body);
+  // audit trail
+  const h = await Susp.history(store, T);
+  check('S18 append-only ops audit: every suspend/reinstate kept, in order, with actor, category, note and time', h.map((e) => e.type).join() === 'ops-suspend,ops-reinstate,ops-suspend,ops-reinstate' && h[0].actor === 'ops:alice' && h[0].note.startsWith('PRIVATE-NOTE') && h[0].category === 'abuse' && h[2].actor === 'ops:bob' && h[3].actor === 'ops:carol' && h.every((e) => e.at && e.token === T), JSON.stringify(h.map((e) => [e.type, e.actor, e.seq])));
+  check('S19 pre-existing audit events (complimentary, publish) are retained', (await store.smembers('site:audit:v1:' + T)).length >= auditBefore + 4 && (await store.smembers(Susp.K.index)).includes(T));
+  check('S20 the Passport operator is still W and unchanged by moderation', JSON.parse(MAP.get('mp:passport:v1:' + T).value).operator === W);
+}
+
+// ============================================================================================ B. FREE BETA (dormant paid system untouched)
+{
+  const Susp = require(path.join(ROOT, 'netlify/lib/project-home-suspension.js'));
+  const BETA = { ...ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'false', SYNCNET_PROJECT_HOME_FREE_BETA: 'true' };
+  const PAID = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'false' };
+  const reset = (t) => { for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(t)) MAP.delete(k); };
+  const entOf = (t) => (MAP.get('site:entitlement:v1:' + t) || {}).value || null;
+  const tick = () => clock.advance(2);
+  const cfgV = async (env) => (await api('GET', null, { view: 'config' }, { env })).j;
+  const TB = T4, TN = T5;
+  reset(TB); reset(TN);
+
+  // --- configuration
+  const cb = await cfgV(BETA);
+  check('BETA01 beta config: enabled, freeBeta, payments OFF, mode free-beta, no sink, no quote', cb.enabled === true && cb.freeBeta === true && cb.payments === false && cb.mode === 'free-beta' && cb.sink === null && cb.quote === null, JSON.stringify(cb).slice(0, 200));
+  const both = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'true' };
+  const cc = await cfgV(both);
+  const cPub = await publishCfg(TN, goodConfig(TN), W, { env: both });
+  const cQ = await request(TN, W, { env: both });
+  check('BETA02 conflicting config (beta AND payments true) fails closed: no free publish, no paid quote', cc.freeBeta === false && cc.payments === false && cc.mode === 'closed' && cPub.s === 402 && cQ.s === 503 && cQ.j.code === 'payments_closed' && !entOf(TN), cPub.body + cQ.body);
+  const bad = { ...ENV, SYNCNET_PROJECT_HOME_FREE_BETA: 'yes' };
+  const bc = await cfgV(bad);
+  const bQ = await request(TN, W, { env: bad });
+  tick();
+  const bPub = await publishCfg(TN, goodConfig(TN), W, { env: bad });
+  check('BETA03 invalid FREE_BETA value fails closed for BOTH paths (payments not silently opened)', bc.freeBeta === false && bc.payments === false && bQ.s === 503 && bPub.s === 402 && !entOf(TN));
+  const off = { ...BETA, SYNCNET_PROJECT_HOME_ENABLED: 'false' };
+  const oc = await cfgV(off);
+  tick();
+  const oPub = await publishCfg(TN, goodConfig(TN), W, { env: off });
+  check('BETA04 beta flag without SYNCNET_PROJECT_HOME_ENABLED → Project Home stays closed', oc.enabled === false && oc.freeBeta === false && oPub.s === 503 && !entOf(TN));
+
+  // --- no entitlement from reads, quotes, or unauthorised publishes
+  await api('GET', null, { view: 'status', token: TB }, { env: BETA });
+  await api('GET', null, { view: 'homes', tokens: TB }, { env: BETA });
+  await api('GET', null, { view: 'revisions', token: TB }, { env: BETA });
+  const bq = await request(TB, W, { env: BETA });
+  check('BETA05 viewing status/homes/revisions and asking for a quote create NO entitlement; no quote exists in beta', !entOf(TB) && bq.s === 503 && bq.j.code === 'payments_closed' && !MAP.has('site:open:v1:' + TB));
+  tick();
+  const np = await publishCfg(TB, goodConfig(TB), X, { env: BETA });
+  const bs = await publishCfg(TB, goodConfig(TB), W, { env: BETA, signer: X, signature: signDigest(X, Site.digest('SitePublish', { token: TB, operator: W, configHash: Site.configHash(goodConfig(TB)), issuedAt: nowSec(), nonce: rnd32() })) });
+  check('BETA06 a non-operator (or a bad signature) cannot create a beta entitlement', np.s === 403 && np.j.code === 'not_operator' && bs.s === 401 && !entOf(TB), np.body + bs.body);
+  // atomicity: a failed commit leaves no entitlement
+  storeMode.failCas = true; tick();
+  const failed = await publishCfg(TB, goodConfig(TB), W, { env: BETA });
+  storeMode.failCas = false;
+  check('BETA07 store fails at the commit → 503, no entitlement, no revision (atomic with the publish)', failed.s === 503 && !entOf(TB) && !MAP.has('site:cur:v1:' + TB));
+
+  // --- first beta publish
+  tick();
+  const actsBefore = (await store.smembers('site:acts:v1')).length;
+  const first = await publishCfg(TB, goodConfig(TB, { headline: 'Free beta home' }), W, { env: BETA });
+  const be = JSON.parse(entOf(TB));
+  check('BETA08 current operator publishes for free during beta', first.s === 200 && first.j.kind === 'publish', first.body);
+  check('BETA09 the first publish atomically created a durable FREE BETA entitlement bound to the token', be.kind === 'beta' && be.label === 'FREE BETA' && be.status === 'ACTIVE' && be.token === TB && be.firstRevisionId === first.j.site.revisionId && (await store.smembers('site:beta:v1')).includes(TB) && (await store.smembers('site:audit:v1:' + TB)).some((m) => JSON.parse(m).type === 'beta-activated'));
+  check('BETA10 no fake payment: no payer, tx, amount, price, rate, quote or block; not in the paid activation registry', ['payer', 'txHash', 'logIndex', 'exactAmount', 'baseSyncAmount', 'priceUsdCents', 'syncUsdReferenceRate', 'requestId', 'blockNumber', 'sink', 'termsVersion'].every((k) => !(k in be)) && (await store.smembers('site:acts:v1')).length === actsBefore);
+  const stB = (await api('GET', null, { view: 'status', token: TB }, { env: BETA })).j;
+  const mt = (await api('GET', null, { view: 'metrics' }, { env: BETA })).j;
+  check('BETA11 public status: FREE BETA, zero revenue; metrics count it separately, never as paid activation', stB.entitlement.label === 'FREE BETA' && stB.entitlement.countsAsRevenue === false && stB.entitlement.exactSyncDisplay === null && mt.freeBetaEntitlements >= 1, JSON.stringify({ label: stB.entitlement && stB.entitlement.label, rev: stB.entitlement && stB.entitlement.countsAsRevenue, disp: stB.entitlement && stB.entitlement.exactSyncDisplay, fb: mt.freeBetaEntitlements, acts: mt.projectHomesActivated }));
+  const pg = await site('/site/' + TB, { env: BETA });
+  check('BETA12 the free-beta home is served publicly, operator-verified', pg.statusCode === 200 && pg.body.includes('Free beta home') && pg.body.includes(Site.AUTHORITY_LABEL));
+  check('BETA13 homes view distinguishes the kind (beta) and shows it live', (await api('GET', null, { view: 'homes', tokens: TB }, { env: BETA })).j.homes[TB].kind === 'beta');
+  // edit, unpublish, republish/restore: the same entitlement is reused
+  tick(); const ed = await publishCfg(TB, goodConfig(TB, { headline: 'Edited in beta' }), W, { env: BETA });
+  tick(); const un = await unpublishSite(TB, W, { env: BETA });
+  tick(); const rs = await publishCfg(TB, null, W, { env: BETA, byHash: true, configHash: Site.configHash(goodConfig(TB, { headline: 'Edited in beta' })) });
+  check('BETA14 edit, unpublish and restore work for free and reuse the SAME entitlement (no second grant)', ed.s === 200 && un.s === 200 && rs.s === 200 && rs.j.kind === 'restore' && entOf(TB) === JSON.stringify(be), [ed.s, un.s, rs.s].join());
+  // Passport transfer → the new operator controls / adopts
+  const pk = 'mp:passport:v1:' + TB; const pass = JSON.parse(MAP.get(pk).value);
+  MAP.set(pk, { type: 'string', value: JSON.stringify({ ...pass, operator: W2 }), expiresAt: null });
+  const staleOld = await publishCfg(TB, goodConfig(TB, { headline: 'Old operator' }), W, { env: BETA });
+  tick(); const adopt = await publishCfg(TB, null, W2, { env: BETA, byHash: true, configHash: Site.configHash(goodConfig(TB, { headline: 'Edited in beta' })) });
+  check('BETA15 after a Passport transfer the new operator adopts the beta home; the old one is refused; the entitlement stays with the token', staleOld.s === 403 && adopt.s === 200 && adopt.j.kind === 'adopt' && entOf(TB) === JSON.stringify(be), adopt.body);
+
+  // --- grandfathering: beta OFF, payments ON
+  tick(); const gf = await publishCfg(TB, goodConfig(TB, { headline: 'After the beta' }), W2, { env: PAID });
+  const gq = await request(TB, W2, { env: PAID });
+  check('BETA16 beta ended (payments on): the beta project keeps publishing for free and is never quoted', gf.s === 200 && gq.s === 409 && gq.j.code === 'already_active' && entOf(TB) === JSON.stringify(be), gf.body + gq.body);
+  const closedEnv = { ...ENV, SYNCNET_PROJECT_HOME_PAYMENTS_ENABLED: 'false' };
+  tick(); const gc = await publishCfg(TB, goodConfig(TB, { headline: 'Both off' }), W2, { env: closedEnv });
+  check('BETA17 beta AND payments off: beta entitlements still publish (grandfathered)', gc.s === 200 && entOf(TB) === JSON.stringify(be));
+  reset(T2);
+  tick(); const up = await publishCfg(T2, goodConfig(T2), W, { env: PAID });
+  const uq = await request(T2, W, { env: PAID });
+  check('BETA18 beta off, payments on: an unentitled project must use the paid activation (402, then a paid quote at the configured price)', up.s === 402 && up.j.code === 'activation_required' && uq.s === 201 && uq.j.intent.priceUsdCents === (await cfgV(PAID)).price.priceUsdCents && !entOf(T2), up.body + uq.body);
+
+  // --- existing paid / complimentary entitlements are never replaced
+  const paidRaw = entOf(T6);
+  tick(); const pp = await publishCfg(T6, goodConfig(T6, { headline: 'Paid, during beta' }), W, { env: BETA });
+  check('BETA19 a PAID entitlement is reused as is during beta (never downgraded or rewritten)', pp.s === 200 && entOf(T6) === paidRaw && JSON.parse(paidRaw).kind === 'paid', pp.body);
+  const compRaw = entOf(T8);
+  tick(); const cp = await publishCfg(T8, goodConfig(T8, { headline: 'Complimentary, during beta' }), W, { env: BETA });
+  check('BETA20 a COMPLIMENTARY entitlement is reused as is during beta', cp.s === 200 && entOf(T8) === compRaw && JSON.parse(compRaw).kind === 'complimentary', cp.body);
+  // a paid entitlement landing concurrently is never overwritten by a beta grant
+  reset(TN); tick();
+  storeMode.beforeCas = async () => { MAP.set('site:entitlement:v1:' + TN, { type: 'string', value: JSON.stringify({ token: TN, kind: 'paid', status: 'ACTIVE', txHash: '0x' + 'ab'.repeat(32) }), expiresAt: null }); };
+  const race = await publishCfg(TN, goodConfig(TN), W, { env: BETA });
+  check('BETA21 an entitlement created concurrently makes the beta publish fail (atomic expectation), never overwritten', race.s === 409 && JSON.parse(entOf(TN)).kind === 'paid');
+  MAP.delete('site:entitlement:v1:' + TN);
+
+  // --- suspension applies to beta homes
+  await Susp.suspend(store, TB, { category: 'abuse', actor: 'ops:test', now: () => clock.now() });
+  const sp = await site('/site/' + TB, { env: BETA });
+  tick(); const spPub = await publishCfg(TB, goodConfig(TB, { headline: 'Bypass?' }), W2, { env: BETA });
+  check('BETA22 SyncNet suspension blocks a free-beta home (not served, operator cannot publish around it); entitlement untouched', sp.statusCode === 503 && spPub.s === 403 && spPub.j.code === 'suspended' && entOf(TB) === JSON.stringify(be));
+  await Susp.reinstate(store, TB, { actor: 'ops:test', now: () => clock.now() });
+  const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');
+  check('BETA23 the paid system stays intact: intent/verify/reconcile/receipt/Terms-version code paths unchanged in behaviour', /async function createIntent\(/.test(src) && /async function verifyPayment\(/.test(src) && /b\.termsVersion !== Site\.TERMS_VERSION/.test(src) && /exactSyncDisplay/.test(src));
+}
+
 // ============================================================================================ G. source-level invariants
 {
   const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');
   const passportRefs = [...src.matchAll(/\[K\.passport\(token\),\s*(\w+)\]/g)].map((m) => m[1]);
-  check('G01 project-home never WRITES the Passport (only an expectation inside cas)', passportRefs.length === 3 && passportRefs.every((x) => x === 'pRaw') && !/set:\s*\[[^\n]*K\.passport/.test(src) && !/store\.set\(/.test(src), passportRefs.join());
+  check('G01 project-home never WRITES the Passport (only an expectation inside cas)', passportRefs.length === 4 && passportRefs.every((x) => x === 'pRaw') && !/set:\s*\[[^\n]*K\.passport/.test(src) && !/store\.set\(/.test(src), passportRefs.join());
   check('G02 the only store mutations are atomic cas() calls', (src.match(/store\.(set|del|sadd)\(/g) || []).length === 0);
   check('G03 no unbounded log scans (eth_getLogs never used)', !/eth_getLogs|getLogs/.test(src) && !/eth_getLogs/.test(fs.readFileSync(path.join(ROOT, 'netlify/lib/project-home-chain.js'), 'utf8')));
   check('G04 no refund logic exists', !/refund\s*\(|action === 'refund'/.test(src));

@@ -38,7 +38,7 @@ const cat = (i) => '0x8' + String(i).repeat(39);
 const T_FAIL = cat(0), T_OK = cat(1), T_REUSE = cat(2);
 resetChain(); resetPc();
 for (const t of [T_FAIL, T_OK, T_REUSE]) MAP.set('mp:passport:v1:' + t, { type: 'string', value: JSON.stringify({ schema: 'syncnet.passport.v1', token: t, chainId: 4663, launchpad: 'PAR', operator: W, operatorSince: new Date(clock.now()).toISOString(), claims: [], listing: null, history: [] }), expiresAt: null });
-const quote = (token, over = {}) => { const m = { token, operator: W, issuedAt: Math.floor(clock.now() / 1000), nonce: rnd32() }; return api('POST', { action: 'intent', ...m, signature: signDigest(W, Site.digest('ActivationRequest', m)) }, null, over); };
+const quote = (token, over = {}) => { const m = { token, operator: W, issuedAt: Math.floor(clock.now() / 1000), nonce: rnd32(), termsVersion: Site.TERMS_VERSION }; return api('POST', { action: 'intent', ...m, signature: signDigest(W, Site.digest('ActivationRequest', m)) }, null, over); };
 const noIntentStored = async (t) => !(await store.get('site:open:v1:' + t)) && (await store.smembers('site:intents:v1:' + t)).length === 0;
 const reset = () => { Dep._internals.reset(); resetPc(); };
 const OTHER = '0x' + '42'.repeat(20);

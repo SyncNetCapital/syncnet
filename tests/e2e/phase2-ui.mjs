@@ -287,6 +287,9 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   check('progressive: payment details stay hidden until Continue', await p.locator('#hePay').isHidden() && (await text(p, '#hePrimary')) === 'Continue to activation');
   await p.click('#hePrimary');
   check('activation copy: $12 ONE-TIME · Pay with $SYNC · 60% burned · 40% converted to USDG', /\$12/.test(await text(p, '.he-price')) && !/\$39/.test(await text(p, 'body')) && /Pay with \$SYNC · 60% burned · 40% converted to USDG for SyncNet treasury/.test(await text(p, '#hePay')));
+  const offer = await text(p, '.he-offer');
+  check('offer (before any quote): USD 12 · ONE-TIME · paid in SYNC, non-refundable, belongs to the project, lasts while SyncNet operates, Terms link', /USD 12 · ONE-TIME · paid in SYNC/.test(offer) && /Non-refundable after successful activation/.test(offer) && /belongs to this project \(the token\)/.test(offer) && /for as long as SyncNet operates the Project Home service/.test(offer) && (await p.getAttribute('.he-offer a[href="/terms.html"]', 'href')) === '/terms.html' && await p.isVisible('.he-offer a[href="/terms.html"]'));
+  check('technical steps are stated: quote → review + accept Terms → pay in wallet → verify → receipt', /get a quote.*review the exact payment and accept the Terms.*pay in your wallet.*verifies the payment.*receipt/i.test(offer));
   // Incident 27 Sep 2026: a wallet transfer request left open by an earlier page load was approved next to a fresh quote.
   // While such a request may be open, no quote and no Pay action are offered; the user must reject it first.
   await p.evaluate((t) => localStorage.setItem('syncnet_home_pay_' + t, JSON.stringify({ requestId: '0x' + '9'.repeat(64), sending: true, amount: '293398.533008033454581141', at: Date.now() })), T);
@@ -301,6 +304,20 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   check('never says oracle; never a per-activation revenue figure', !/oracle|15\.60/i.test(await text(p, 'main')));
   const typed = JSON.parse(await p.evaluate(() => window.__typed));
   check('quote request is a SyncNet Website ActivationRequest signature', typed.primaryType === 'ActivationRequest' && typed.domain.name === 'SyncNet Website');
+  check('the signed ActivationRequest carries the current Terms version (2026-09-28)', typed.message.termsVersion === '2026-09-28' && typed.types.ActivationRequest.some((f) => f.name === 'termsVersion' && f.type === 'string'));
+  const openId = serverState.upstash.get('site:open:v1:' + T).v;
+  const shownAmt = (await text(p, '#heAmount')).replace(' $SYNC', '').trim(); const [aw, af = ''] = shownAmt.split('.');
+  const quoteRec = store.get('site:intent:v1:' + openId);
+  check('final review shows project name, full token, $12, exact amount, full sink, expiry (countdown + local + UTC)', q.includes(quoteRec.token) && (await text(p, '#heQuoteToken')) === T && /\$12(\.00)? · one-time · paid in \$SYNC/.test(q) && BigInt(aw + af.padEnd(18, '0')) === BigInt(quoteRec.exactTaggedSyncAmount) && (await text(p, '#heQuoteSink')) === lc(quoteRec.sink) && /Expires .+ \(your time\) · \d{4}-\d\d-\d\d \d\d:\d\d UTC/.test(await text(p, '#heExpires')) && /60% burned · 40% converted to USDG/.test(q) && /Non-refundable after successful activation/.test(q), q.slice(0, 300));
+  check('Pay is disabled until the Terms checkbox is ticked; the checkbox starts unchecked and links /terms.html', (await p.isDisabled('#hePayBtn')) && !(await p.isChecked('#heAccept')) && (await p.getAttribute('.he-accept a', 'href')) === '/terms.html' && /I have read and accept the Terms of Use and understand that this is a one-time USD 12 Project Home activation paid in SYNC and is non-refundable after successful activation\./.test(await text(p, '.he-accept')));
+  await p.check('#heAccept');
+  check('ticking the Terms enables Pay; unticking disables it again', !(await p.isDisabled('#hePayBtn')) && (await (async () => { await p.uncheck('#heAccept'); return p.isDisabled('#hePayBtn'); })()));
+  check('the paying action names the payment: "PAY NOW · <exact amount> SYNC" + "One-time payment · Non-refundable after successful activation"', /^PAY NOW · [0-9]+\.[0-9]+ SYNC$/.test((await text(p, '#hePayBtn')).trim()) && (await text(p, '#hePayBtn')).includes((await text(p, '#heAmount')).replace(' $SYNC', '')) && /One-time payment · Non-refundable after successful activation/.test(await text(p, '.he-paynote')) && !/^(activate|continue|complete)/i.test((await text(p, '#hePayBtn')).trim()));
+  { const vp0 = p.viewportSize(); await p.setViewportSize({ width: 320, height: 740 }); await p.waitForTimeout(200);
+    const fit = await p.evaluate(() => { const b = document.getElementById('hePayBtn').getBoundingClientRect(); return { ov: document.documentElement.scrollWidth - innerWidth, right: b.right, w: innerWidth, h: b.height }; });
+    check('320px: final review + long PAY NOW button fit (no horizontal overflow, button wraps inside the viewport)', fit.ov <= 1 && fit.right <= fit.w && fit.h >= 44, JSON.stringify(fit));
+    await p.setViewportSize(vp0); }
+  check('no email collection anywhere in the activation flow', (await p.locator('input[type="email"], input[name*="mail" i], input[id*="mail" i]').count()) === 0 && !/e-?mail/i.test(await text(p, 'main')));
   await openProject(p);
   check('HOME: Needs payment while a quote is open', /Needs payment/.test(await text(p, '[data-row="home"]')));
   // expiry guard: jump the browser clock to 29.5 minutes later
@@ -310,6 +327,7 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   await p.reload(); await p.waitForSelector('#hePayBtn', { timeout: 20000 });
   // pay, with the chain not yet SAFE
   chain.safeLag = 50;
+  await p.check('#heAccept');
   await p.click('#hePayBtn');
   await p.waitForFunction(() => /Payment seen/.test(document.getElementById('hePayStatus').textContent), null, { timeout: 20000 });
   const sent = await p.evaluate(() => window.__sentTxs);
@@ -323,6 +341,15 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   chain.safeLag = 0; chain.finalLag = 100;
   await p.waitForFunction(() => /Activated/.test(document.getElementById('hePayStatus').textContent), null, { timeout: 30000 });
   check('ACTIVATED (finality later)', /Finality is confirmed later/.test(await text(p, '#hePayStatus')) && store.get('site:entitlement:v1:' + T).status === 'ACTIVE');
+  const entR = store.get('site:entitlement:v1:' + T);
+  const rc = await text(p, '#heReceipt');
+  check('receipt from the durable activation record: project, token, USD 12, exact SYNC, payer, sink, tx link, block, rate, quote ID, Terms version, status, entitlement, 60/40, non-refundable', await p.isVisible('#heReceipt') && /SyncNet Project Home activation/.test(rc) && rc.includes(T) && /USD 12\.00 · one-time/.test(rc) && rc.includes(entR.payer) && rc.includes(entR.sink) && rc.includes(entR.txHash) && (await p.getAttribute('#heReceipt a[href*="/tx/"]', 'href')).endsWith(entR.txHash) && rc.includes(entR.blockNumber) && rc.includes(entR.syncUsdReferenceRate) && rc.includes(entR.requestId) && /Terms of Use version 2026-09-28/.test(rc) && /ACTIVE/.test(rc) && /Belongs to the project \(token\)/.test(rc) && /60% burned · 40% converted to USDG/.test(rc) && /Non-refundable after successful activation/.test(rc) && entR.termsVersion === '2026-09-28', rc.slice(0, 400));
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#heDownloadReceipt')]);
+  const rj = JSON.parse(fs.readFileSync(await dl.path(), 'utf8'));
+  check('Download receipt (JSON): same durable fields', rj.schema === 'syncnet.project-home.receipt.v1' && rj.project.token === T && rj.txHash === entR.txHash && rj.termsVersionAccepted === '2026-09-28' && rj.priceUsd === '12.00' && rj.payer === entR.payer && rj.requestId === entR.requestId && rj.refund === 'Non-refundable after successful activation.');
+  await p.reload(); await p.waitForSelector('#heReceipt:not([hidden])', { timeout: 20000 });
+  check('receipt survives a page reload (rebuilt from the server status view, not from browser storage)', (await text(p, '#heReceipt')).includes(entR.txHash) && (await p.evaluate((t) => localStorage.getItem('syncnet_home_pay_' + t), T)) === null);
+  check('Print / Save receipt control present', await p.isVisible('#hePrintReceipt'));
   check('HOME: Draft · Activated, not published', await (async () => { const q2 = await (await c.newPage()); await openProject(q2); const t = await text(q2, '[data-row="home"]'); await q2.close(); return /Activated · not published/.test(t); })());
   chain.finalLag = 0;
   await p.waitForFunction(() => /Finalized/.test(document.getElementById('hePayStatus').textContent), null, { timeout: 20000 });
@@ -349,6 +376,34 @@ await suite('Project Home · quote, expiry guard, payment seen, recovery, activa
   await c.close();
 });
 
+// ================================================================= FREE BETA: no payment UI, free publish, FREE BETA ACTIVATION
+await suite('Project Home · FREE BETA (payments off): no $12/SYNC controls, free publish, beta activation block', async () => {
+  fresh({ projectHome: true, projectHomePayments: false, projectHomeFreeBeta: true });
+  const c = await ctx(); const p = await c.newPage(); const errs = errorsOf(p);
+  await syncProject(p);
+  await p.goto(BASE + '/home-editor.html?token=' + T + '&step=pay'); await p.waitForSelector('#heBar:not([hidden])', { timeout: 20000 });
+  await p.fill('#heHeadline', 'Beta home'); await p.waitForTimeout(300);
+  const visible = await text(p, 'main');
+  check('beta: primary action is PUBLISH FREE BETA', (await text(p, '#hePrimary')).trim() === 'PUBLISH FREE BETA' && !(await p.isDisabled('#hePrimary')));
+  check('beta: says "Project Home is currently free during beta." and that free-beta activations stay with the project', /Project Home is currently free during beta\./.test(await text(p, '#heBarNote')) && /Free-beta activations stay with the project\./.test(await text(p, '#heBarNote')));
+  check('beta: no payment UI even with &step=pay — no offer, quote, sink, checkbox or PAY NOW', await p.locator('#hePay').isHidden() && (await p.locator('#heQuoteBtn').count()) === 0 && (await p.locator('#hePayBtn').count()) === 0 && (await p.locator('#heAccept').count()) === 0 && !/\$12|USD 12|PAY NOW|Non-refundable|Project Home sink|Continue to activation/i.test(visible), visible.slice(0, 200));
+  await p.click('#hePrimary');
+  await p.waitForFunction(() => /Published/.test(document.getElementById('heStatus').textContent), null, { timeout: 15000 });
+  const typed = JSON.parse(await p.evaluate(() => window.__typed));
+  const ent = store.get('site:entitlement:v1:' + T);
+  check('beta: publishing is one free SitePublish signature, no transaction; creates a FREE BETA entitlement', typed.primaryType === 'SitePublish' && ((await p.evaluate(() => window.__sentTxs)) || []).length === 0 && ent && ent.kind === 'beta' && ent.label === 'FREE BETA' && !ent.payer && !ent.txHash);
+  const blk = await text(p, '#heReceipt');
+  check('beta: FREE BETA ACTIVATION block (not a payment receipt): project, token, activation date, kind, status; no USD, SYNC or tx; no print/download', await p.isVisible('#heReceipt') && (await text(p, '#heReceiptTitle')) === 'FREE BETA ACTIVATION' && blk.includes(T) && /FREE BETA · belongs to the project/.test(blk) && /ACTIVE/.test(blk) && /Activated/.test(blk) && !/USD|SYNC paid|Transaction|Receipt/i.test(blk) && await p.locator('.he-receipt-actions').isHidden(), blk.slice(0, 300));
+  await p.reload(); await p.waitForSelector('#heReceipt:not([hidden])', { timeout: 20000 });
+  check('beta: the activation block is rebuilt after reload; next action is an ordinary free PUBLISH (no second activation)', (await text(p, '#heReceiptTitle')) === 'FREE BETA ACTIVATION' && /PUBLISH/.test(await text(p, '#hePrimary')) && !/FREE BETA/.test(await text(p, '#hePrimary')));
+  const site = await (await p.request.get(BASE + '/site/' + T)).text();
+  check('beta: the public Project Home is live', /PASSPORT OPERATOR VERIFIED/.test(site) && /Beta home/.test(site));
+  await openProject(p);
+  check('beta: Project Page HOME row shows Live', /Live/.test(await text(p, '[data-row="home"]')));
+  check('beta: no JS errors', errs.length === 0, errs.join(' | '));
+  await c.close();
+});
+
 // ================================================================= transfer → review & adopt; old operator restricted
 await suite('Project Home · previous operator home: links disabled, REVIEW & ADOPT, old operator restricted', async () => {
   fresh();
@@ -357,7 +412,7 @@ await suite('Project Home · previous operator home: links disabled, REVIEW & AD
   // activate + publish through the UI
   await p.goto(BASE + '/home-editor.html?token=' + T); await p.waitForSelector('#heBar:not([hidden])', { timeout: 20000 });
   await p.fill('#heHeadline', 'First operator'); await p.selectOption('#heCtaLabel', 'TRADE'); await p.fill('#heCtaUrl', 'https://par.family/token/' + T);
-  await p.click('#hePrimary'); await p.click('#heQuoteBtn'); await p.waitForSelector('#hePayBtn', { timeout: 15000 }); await p.click('#hePayBtn');
+  await p.click('#hePrimary'); await p.click('#heQuoteBtn'); await p.waitForSelector('#hePayBtn', { timeout: 15000 }); await p.check('#heAccept'); await p.click('#hePayBtn');
   await p.waitForFunction(() => /Activated/.test(document.getElementById('hePayStatus').textContent), null, { timeout: 30000 });
   await p.click('#hePrimary'); await p.waitForFunction(() => /Published/.test(document.getElementById('heStatus').textContent), null, { timeout: 15000 });
   // the Passport moves to WALLET2 (as the Marketplace two-party transfer would record it)

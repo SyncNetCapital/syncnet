@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-27T16:10:10.742Z",
-  "passed": 163,
+  "at": "2026-09-28T11:31:45.165Z",
+  "passed": 166,
   "failed": 0,
   "results": [
     {
@@ -30,6 +30,16 @@
     },
     {
       "name": "Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "ActivationRequest type is exactly (token, operator, issuedAt, nonce, termsVersion:string); TERMS_VERSION is the Terms \"Last updated\" date",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the Terms version is covered by the ActivationRequest signature (changing it changes the digest)",
       "ok": true,
       "detail": ""
     },
@@ -705,6 +715,11 @@
     },
     {
       "name": "Passport disclaimer: authority, not original-team identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "operator-content disclaimer: SyncNet does not verify or endorse the operator's claims; report path named without a link",
       "ok": true,
       "detail": ""
     },

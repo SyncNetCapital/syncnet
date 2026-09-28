@@ -33,7 +33,10 @@ const msg = { token: TOKEN, operator: OP, issuedAt: 1790000000, nonce: '0x' + '0
 const inSite = Site.digest('SiteUnpublish', msg);
 const inMarket = Core.hashTypedData({ ...Site.typedData('SiteUnpublish', msg), domain: { ...Market.DOMAIN } });
 check('identical struct → different digest in the Marketplace domain', inSite !== inMarket);
-check('Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)', Site.digest('ActivationRequest', msg) !== inSite);
+check('Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)', Site.digest('ActivationRequest', { ...msg, termsVersion: Site.TERMS_VERSION }) !== inSite);
+check('ActivationRequest type is exactly (token, operator, issuedAt, nonce, termsVersion:string); TERMS_VERSION is the Terms "Last updated" date', JSON.stringify(Site.TYPES.ActivationRequest) === JSON.stringify([{ name: 'token', type: 'address' }, { name: 'operator', type: 'address' }, { name: 'issuedAt', type: 'uint256' }, { name: 'nonce', type: 'bytes32' }, { name: 'termsVersion', type: 'string' }]) && Site.TERMS_VERSION === '2026-09-28' && fs.readFileSync(path.join(ROOT, 'terms.html'), 'utf8').includes('Last updated: 28 September 2026') && fs.readFileSync(path.join(ROOT, 'terms.html'), 'utf8').includes('version ' + Site.TERMS_VERSION));
+const aMsg = { ...msg, termsVersion: Site.TERMS_VERSION };
+check('the Terms version is covered by the ActivationRequest signature (changing it changes the digest)', Site.digest('ActivationRequest', aMsg) !== Site.digest('ActivationRequest', { ...aMsg, termsVersion: '2026-01-01' }));
 const key = '0x' + '4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318';
 const signer = Core._internal.secp256k1.privateKeyToAddress(key).toLowerCase();
 const mSig = Core._internal.secp256k1.sign(Market.digest('ListingCancel', { listingId: '0x' + '0f'.repeat(32), seller: signer, nonce: '0x' + '0f'.repeat(32) }), key);
@@ -122,6 +125,7 @@ check('HTML in about is escaped', cur.includes('&lt;b&gt;bold&lt;/b&gt;') && !cu
 check('verified identity comes before any operator content', cur.indexOf('<header class="identity">') < cur.indexOf('Written by the Passport operator'));
 check('operator content is labelled as such', (cur.match(/Written by the Passport operator/g) || []).length === 2);
 check('Passport disclaimer: authority, not original-team identity', cur.includes('does not prove the identity of the historical or original team'));
+check('operator-content disclaimer: SyncNet does not verify or endorse the operator\'s claims; report path named without a link', cur.includes('Project Home content is provided by the Project Passport operator who signed it. SyncNet does not verify or endorse its claims.') && cur.includes('syncnet.capital/contact.html#report') && !/href="[^"]*contact/.test(cur));
 check('product wording: active for as long as SyncNet operates the service (no perpetual promise)', cur.includes('for as long as SyncNet operates the Project Home service') && !/forever|perpetual/i.test(cur));
 check('never OFFICIAL WEBSITE', !/official website/i.test(cur + stale + prev));
 check('invalid config → no operator content at all', (() => { const h = Site.render({ config: { ...full, html: '<script>x</script>' }, facts, authority: { signer: OP } }); return !h.includes('Written by the Passport operator') && !h.includes('<script'); })());
