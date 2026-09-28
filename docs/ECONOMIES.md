@@ -10,6 +10,11 @@ An **Economy** is a view over existing PAR market data, not a stored object.
 | PARENT-RECOGNIZED | The latest signed decision of the **current** curator for that child is `recognize`. | `eco:cur:v1:<R>` — one append-only Redis SET. |
 | Curator request | Signed request for a root that is not a PAR launch and has no curator. **Grants nothing.** | `eco:req:v1:<R>` — one append-only Redis SET. |
 
+With `SYNCNET_PONS_DISCOVERY_ENABLED=true` an Economy is also the set of canonical **PONS V2** launches whose factory
+`TokenLaunched` event names `R` as `pairToken` (relationship `LAUNCHED_AGAINST`), served page by page from a
+root-scoped sorted-set index by `/api/pons-economy` — see [PONS_DISCOVERY.md](PONS_DISCOVERY.md). PAR and PONS
+are loaded and labelled separately; neither can make the other fail.
+
 There is no "active" Economy state, no stored child list, no `officialChildren[]`, no ranking of Economies,
 no volume/TVL/fee aggregate, and no recursive graph.
 
@@ -63,10 +68,14 @@ new recognitions for that root until a compaction mechanism exists (see limitati
 `curate`: gate open → IP rate limits (20/min + 200/h) → body ≤ 8 KB → field validation, `root ≠ child`
 → `issuedAt` skew → resolve curator (none: 403) → `curator` must equal it (403) → signed within the current
 curatorship (409) → signature (ECDSA, or EIP-1271 by live chain call) (401) → duplicate (200, no-op) / stale (409) → cap → **wallet limit (120/h, charged only now)** →
-for `recognize`: live `readLaunch(child)` + `readMarkets(child)` must include `R` (422; chain down 503) → `SADD`.
+for `recognize`: live `readLaunch(child)` + `readMarkets(child)` must include `R` — or, with PONS discovery enabled,
+a verified PONS V2 factory's **live** record of the child (`Origins.readPonsV2Launch`) must have `pairToken == R`
+(422; chain down 503) → `SADD`. The PONS discovery index is never read here: a forged index record authorizes
+nothing, and an index outage does not affect stored recognitions.
 
 `claim-request`: gate → IP rate limit (5/h) → validation (https evidence URL ≤ 200 chars) → the
-root must have no curator (409), must NOT be a PAR launch (409 — PAR roots use the Passport claim), must be a
+root must have no curator (409), must NOT be a PAR launch (409 — PAR roots use the Passport claim) nor, with PONS
+discovery enabled, a PONS V2 launch (409 — same Passport claim; PONS V1 roots are unchanged), must be a
 contract (422) → signature → exact duplicate (200, no-op) / per-root cap 20 (409) → wallet limit (120/h) → global
 verified-claim limit (50/h) → `SADD`. Status `PENDING`; approval is a reviewed
 commit to `syncnet-economies.json`.

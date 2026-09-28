@@ -11,6 +11,8 @@
 //   SYNCNET_MARKETPLACE_DISABLED=true  kill switch for Marketplace writes; Marketplace also needs the durable store
 //   SYNCNET_ECONOMY_CURATION=true      signed Economy curation writes (needs a durable store)
 //   SYNCNET_ECONOMIES_DISABLED=true    kill switch for Economy curation writes
+//   SYNCNET_PONS_DISCOVERY_ENABLED=true  PONS V2 discovery: /api/pons-economy, the scheduled indexer, the PONS V2
+//                                      sections of Economy + Network Map and PONS-aware curation (needs a durable store)
 //
 // "Durable store" = Upstash Redis REST (see store.js). Without it, rate limits and quotas would only be
 // per function instance, which is not enough for anything public.
@@ -39,6 +41,7 @@ function flags(options = {}) {
     publicUploads: truthy(env.SYNCNET_PUBLIC_UPLOADS),
     registrySubmissions: truthy(env.SYNCNET_REGISTRY_SUBMISSIONS),
     economyCuration: truthy(env.SYNCNET_ECONOMY_CURATION),
+    ponsDiscovery: truthy(env.SYNCNET_PONS_DISCOVERY_ENABLED),
   };
   const marketplaceKilled = truthy(env.SYNCNET_MARKETPLACE_DISABLED);
   const economiesKilled = truthy(env.SYNCNET_ECONOMIES_DISABLED);
@@ -51,6 +54,7 @@ function flags(options = {}) {
     publicLaunch: requested.publicLaunch && durable,
     registrySubmissions: requested.registrySubmissions && durable,
     economyCuration: requested.economyCuration && durable && !economiesKilled,
+    ponsDiscovery: requested.ponsDiscovery && durable,
     requested,
   };
   // Log (once per instance and configuration) when a requested public feature stays closed.
@@ -66,6 +70,7 @@ function flags(options = {}) {
   }
   if (requested.registrySubmissions && !out.registrySubmissions) missing.push('SYNCNET_REGISTRY_SUBMISSIONS needs a durable store');
   if (requested.economyCuration && !out.economyCuration) missing.push('SYNCNET_ECONOMY_CURATION stays closed: ' + (economiesKilled ? 'SYNCNET_ECONOMIES_DISABLED is true' : 'no durable store'));
+  if (requested.ponsDiscovery && !out.ponsDiscovery) missing.push('SYNCNET_PONS_DISCOVERY_ENABLED needs a durable store');
   const key = missing.join('|');
   if (key && key !== warned) {
     warned = key;
