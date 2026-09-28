@@ -99,6 +99,14 @@ the cap) and re-submitting an already-stored claim request write nothing and con
   on-chain when recorded; PAR markets are immutable) but is labelled
   **CONNECTION PREVIOUSLY VERIFIED · OUTSIDE CURRENT INDEX WINDOW** (or **… · INDEXER UNAVAILABLE**), never CONNECTED.
 - "Create a project in the $R Economy" is only `/build.html?with=<R>` (the Builder's existing prefill).
+- PONS V2 (flag on only): a separate **CONNECTED VIA PONS V2** section (the PAR section becomes **CONNECTED VIA
+  PAR**), labelled **CONNECTED · PONS V2 LAUNCH PAIR** plus the live phase (`PONS · BONDING CURVE`,
+  `PONS · CURVE CLOSED · POOL PENDING`, `PONS · GRADUATED · V4`, `PONS · RESCUED`, or `PONS · PHASE UNAVAILABLE`).
+  Counts and coverage are per source (`PAR: … indexed launches` / `PONS V2: N indexed launches · indexed through
+  block X`). 24 per page with **LOAD MORE**; the loaded/total count is always shown. If PONS is unavailable the PAR
+  section renders normally and the PONS section shows only "PONS discovery is temporarily unavailable." A token seen
+  through both sources is one card with both labels. A PONS V2 root without a Passport points to the existing
+  Passport claim; the manual request form is never offered for it.
 - A root whose ticker matches a canonical asset but whose address does not is flagged as not canonical.
 
 ## Security model
