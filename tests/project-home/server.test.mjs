@@ -65,7 +65,7 @@ for (const t of [T2, T4, T5, T6, T7, T8, T9]) seedPassport(t, W);
 seedPassport(T3, SAFE); // contract-wallet operator (EIP-1271)
 
 const request = (token, who = W, over = {}) => {
-  const m = { token, operator: who, issuedAt: nowSec(), nonce: rnd32(), ...over.message };
+  const m = { token, operator: who, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION, ...over.message };
   const signature = over.signature || signDigest(over.signer || (who === SAFE ? A.SAFE_OWNER : who), over.digest || Site.digest('ActivationRequest', m));
   return api('POST', { action: 'intent', ...m, signature, ...over.extra }, null, over);
 };
@@ -160,11 +160,11 @@ let I1;
   }
   const badSig = await request(T2, W, { signer: A.ATTACKER });
   check('B13 signature by another wallet → 401', badSig.s === 401);
-  const mMsg = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const mMsg = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION };
   const mktDigest = Core.hashTypedData({ ...Site.typedData('ActivationRequest', mMsg), domain: { ...Market.DOMAIN } });
   const cross = await request(T2, W, { message: mMsg, digest: mktDigest });
   check('B14 same struct signed in the Marketplace domain → 401 (no cross-domain replay)', cross.s === 401);
-  const mMsg2 = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32() };
+  const mMsg2 = { token: T2, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: Site.TERMS_VERSION };
   const wrongChain = await request(T2, W, { message: mMsg2, digest: Core.hashTypedData({ ...Site.typedData('ActivationRequest', mMsg2), domain: { name: 'SyncNet Website', version: '1', chainId: 1 } }) });
   check('B15 wrong EIP-712 chainId → 401', wrongChain.s === 401);
   const skew = await request(T2, W, { message: { issuedAt: nowSec() - 1000 } });
@@ -632,6 +632,49 @@ let ACT1;
   check('H05 metrics with the sink unreachable: registry figures served, sink/converter marked unavailable, never guessed', mtDown.sink.unavailable === true && mtDown.projectHomesActivated >= 1);
 }
 
+// ============================================================================================ T. Terms of Use version signed in the ActivationRequest
+{
+  const TT = T6;
+  for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(TT)) MAP.delete(k); // clean slate for this project (Passport kept)
+  const noTerms = await request(TT, W, { message: { termsVersion: undefined }, signature: '0x' + '11'.repeat(65) }); // field absent from the body
+  check('T01 missing termsVersion → 400 terms_version, no intent', noTerms.s === 400 && noTerms.j.code === 'terms_version' && !MAP.has('site:open:v1:' + TT), noTerms.body);
+  const old = await request(TT, W, { message: { termsVersion: '2026-09-23' } });
+  check('T02 old/unknown termsVersion (signed and sent) → 400 terms_version', old.s === 400 && old.j.code === 'terms_version' && !MAP.has('site:open:v1:' + TT), old.body);
+  const mOld = { token: TT, operator: W, issuedAt: nowSec(), nonce: rnd32(), termsVersion: '2026-09-23' };
+  const forged = await request(TT, W, { message: { ...mOld, termsVersion: Site.TERMS_VERSION }, digest: Site.digest('ActivationRequest', mOld) });
+  check('T03 body claims the current version but the wallet signed another → 401 (the version is inside the signature)', forged.s === 401 && !MAP.has('site:open:v1:' + TT), forged.body);
+  const q = await request(TT, W);
+  const stored = JSON.parse(MAP.get('site:intent:v1:' + q.j.intent.requestId).value);
+  check('T04 current termsVersion → quote; stored in the intent and in its signed request digest; exposed in the public quote', q.s === 201 && stored.termsVersion === Site.TERMS_VERSION && q.j.intent.termsVersion === Site.TERMS_VERSION && stored.request.digest === Site.digest('ActivationRequest', { token: TT, operator: W, issuedAt: stored.request.issuedAt, nonce: stored.request.nonce, termsVersion: Site.TERMS_VERSION }), q.body);
+  const p = payIntent(q.j.intent);
+  const v = await verify(q.j.intent.requestId, p.txHash);
+  const ent = JSON.parse(MAP.get('site:entitlement:v1:' + TT).value);
+  const actRec = JSON.parse(MAP.get('site:act:v1:' + p.txHash + ':' + v.j.entitlement.logIndex).value);
+  check('T05 termsVersion copied to the entitlement and the activation record', v.s === 200 && ent.termsVersion === Site.TERMS_VERSION && actRec.termsVersion === Site.TERMS_VERSION, v.body);
+  const st = await status(TT);
+  const acts = (await api('GET', null, { view: 'activations' })).j.activations;
+  check('T06 public status and activations views carry termsVersion + receipt data (payer, sink, tx, block, amount display, rate, requestId)', st.entitlement.termsVersion === Site.TERMS_VERSION && acts.some((a) => a.token === TT && a.termsVersion === Site.TERMS_VERSION) && st.entitlement.payer && st.entitlement.sink && st.entitlement.txHash === p.txHash && st.entitlement.blockNumber && st.entitlement.exactSyncDisplay === q.j.intent.exactTaggedSyncDisplay && st.entitlement.syncUsdReferenceRate && st.entitlement.requestId === q.j.intent.requestId);
+  // legacy quote (issued before termsVersion existed): re-signing records the acceptance on the SAME quote
+  const TL = T7;
+  for (const k of [...MAP.keys()]) if (k.startsWith('site:') && k.includes(TL)) MAP.delete(k);
+  const lq = await request(TL, W);
+  const lraw = JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value);
+  delete lraw.termsVersion;
+  MAP.set('site:intent:v1:' + lq.j.intent.requestId, { type: 'string', value: JSON.stringify(lraw), expiresAt: null });
+  check('T07 a legacy open quote is exposed with termsVersion null', (await status(TL)).openIntent.termsVersion === null);
+  const re = await request(TL, W);
+  const up = JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value);
+  check('T08 re-signing a legacy open quote records the current Terms on it (same quote, same amount, earlier request kept)', re.s === 200 && re.j.reused === true && re.j.intent.requestId === lq.j.intent.requestId && re.j.intent.exactTaggedSyncAmount === lq.j.intent.exactTaggedSyncAmount && up.termsVersion === Site.TERMS_VERSION && up.request.operator === W && up.earlierRequest && up.earlierRequest.nonce !== up.request.nonce, re.body);
+  const same = await request(TL, W);
+  check('T09 a quote already carrying the current Terms is reused unchanged', same.s === 200 && same.j.reused === true && JSON.parse(MAP.get('site:intent:v1:' + lq.j.intent.requestId).value).request.nonce === up.request.nonce);
+  // a legacy quote PAID without re-signing still activates (a payment is never lost) and says the Terms were not recorded
+  const lraw2 = { ...up }; delete lraw2.termsVersion;
+  MAP.set('site:intent:v1:' + lq.j.intent.requestId, { type: 'string', value: JSON.stringify(lraw2), expiresAt: null });
+  const lp = payIntent(lq.j.intent);
+  const lv = await verify(lq.j.intent.requestId, lp.txHash);
+  check('T10 a legacy quote paid without Terms still activates; entitlement termsVersion is null (not invented)', lv.s === 200 && JSON.parse(MAP.get('site:entitlement:v1:' + TL).value).termsVersion === null, lv.body);
+}
+
 // ============================================================================================ S. SyncNet ops suspension
 {
   const Susp = require(path.join(ROOT, 'netlify/lib/project-home-suspension.js'));
@@ -715,7 +758,7 @@ let ACT1;
 {
   const src = fs.readFileSync(path.join(ROOT, 'netlify/functions/project-home.js'), 'utf8');
   const passportRefs = [...src.matchAll(/\[K\.passport\(token\),\s*(\w+)\]/g)].map((m) => m[1]);
-  check('G01 project-home never WRITES the Passport (only an expectation inside cas)', passportRefs.length === 3 && passportRefs.every((x) => x === 'pRaw') && !/set:\s*\[[^\n]*K\.passport/.test(src) && !/store\.set\(/.test(src), passportRefs.join());
+  check('G01 project-home never WRITES the Passport (only an expectation inside cas)', passportRefs.length === 4 && passportRefs.every((x) => x === 'pRaw') && !/set:\s*\[[^\n]*K\.passport/.test(src) && !/store\.set\(/.test(src), passportRefs.join());
   check('G02 the only store mutations are atomic cas() calls', (src.match(/store\.(set|del|sadd)\(/g) || []).length === 0);
   check('G03 no unbounded log scans (eth_getLogs never used)', !/eth_getLogs|getLogs/.test(src) && !/eth_getLogs/.test(fs.readFileSync(path.join(ROOT, 'netlify/lib/project-home-chain.js'), 'utf8')));
   check('G04 no refund logic exists', !/refund\s*\(|action === 'refund'/.test(src));

@@ -303,7 +303,9 @@ EIP-712 domain `{name: 'SyncNet Website', version: '1', chainId: 4663}` has thre
 
 - `SitePublish(token, operator, configHash, issuedAt, nonce)`
 - `SiteUnpublish(token, operator, issuedAt, nonce)`
-- `ActivationRequest(token, operator, issuedAt, nonce)`
+- `ActivationRequest(token, operator, issuedAt, nonce, termsVersion)` — `termsVersion` must equal `Site.TERMS_VERSION`
+  (the Terms of Use date, currently `2026-09-28`); it is stored in the intent, the entitlement and the activation record.
+  An open quote from before this field existed is upgraded in place when the operator signs again (same amount, same lock).
 
 Marketplace and Economy signatures cannot be replayed here, and these cannot be replayed there.
 

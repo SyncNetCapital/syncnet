@@ -408,6 +408,11 @@ a.sn-row:hover .sn-proj-name{text-decoration:underline;text-decoration-color:var
 .he-incl li{display:grid;grid-template-columns:18px minmax(0,1fr);gap:8px}.he-incl li::before{content:"—";color:var(--accent)}
 .he-flow .sn-steps{margin:0 0 14px}
 .he-quote{margin:14px 0 0}
+.he-accept{margin:16px 0 0;font-size:14px;color:var(--bone)}.he-accept label{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;cursor:pointer}.he-accept input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--accent)}
+.sn-btn.he-paybtn{white-space:normal;height:auto;min-height:48px;padding:10px 18px;text-align:center;overflow-wrap:anywhere;max-width:100%}
+.he-paynote{margin:8px 0 0;font-size:14px;color:var(--bone)}
+.he-receipt{margin-top:40px;padding:32px 0;border-top:1px solid var(--line-2)}.he-receipt[hidden]{display:none}.he-receipt .sn-kv{margin:14px 0 18px}.he-receipt-actions{display:flex;flex-wrap:wrap;gap:10px}
+@media print{body.he-printing *{visibility:hidden}body.he-printing #heReceipt,body.he-printing #heReceipt *{visibility:visible;color:#000}body.he-printing #heReceipt{position:absolute;left:0;top:0;width:100%;margin:0;border:0}body.he-printing .he-receipt-actions{display:none}}
 .he-recover{margin-top:22px;border-top:1px solid var(--line);padding-top:6px}
 .he-recover summary{display:flex;align-items:center;min-height:44px;cursor:pointer;color:var(--bone-2);font-size:14px}
 .he-review{margin-top:18px}

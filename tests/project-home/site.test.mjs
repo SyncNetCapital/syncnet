@@ -33,7 +33,10 @@ const msg = { token: TOKEN, operator: OP, issuedAt: 1790000000, nonce: '0x' + '0
 const inSite = Site.digest('SiteUnpublish', msg);
 const inMarket = Core.hashTypedData({ ...Site.typedData('SiteUnpublish', msg), domain: { ...Market.DOMAIN } });
 check('identical struct → different digest in the Marketplace domain', inSite !== inMarket);
-check('Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)', Site.digest('ActivationRequest', msg) !== inSite);
+check('Unpublish and ActivationRequest share fields but never a digest (distinct type hashes)', Site.digest('ActivationRequest', { ...msg, termsVersion: Site.TERMS_VERSION }) !== inSite);
+check('ActivationRequest type is exactly (token, operator, issuedAt, nonce, termsVersion:string); TERMS_VERSION is the Terms "Last updated" date', JSON.stringify(Site.TYPES.ActivationRequest) === JSON.stringify([{ name: 'token', type: 'address' }, { name: 'operator', type: 'address' }, { name: 'issuedAt', type: 'uint256' }, { name: 'nonce', type: 'bytes32' }, { name: 'termsVersion', type: 'string' }]) && Site.TERMS_VERSION === '2026-09-28' && fs.readFileSync(path.join(ROOT, 'terms.html'), 'utf8').includes('Last updated: 28 September 2026') && fs.readFileSync(path.join(ROOT, 'terms.html'), 'utf8').includes('version ' + Site.TERMS_VERSION));
+const aMsg = { ...msg, termsVersion: Site.TERMS_VERSION };
+check('the Terms version is covered by the ActivationRequest signature (changing it changes the digest)', Site.digest('ActivationRequest', aMsg) !== Site.digest('ActivationRequest', { ...aMsg, termsVersion: '2026-01-01' }));
 const key = '0x' + '4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318';
 const signer = Core._internal.secp256k1.privateKeyToAddress(key).toLowerCase();
 const mSig = Core._internal.secp256k1.sign(Market.digest('ListingCancel', { listingId: '0x' + '0f'.repeat(32), seller: signer, nonce: '0x' + '0f'.repeat(32) }), key);

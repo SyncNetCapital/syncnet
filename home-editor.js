@@ -12,6 +12,9 @@
  *          locked exact amount (30 minutes); ONE ERC-20 transfer to the sink; the server verifies it from the chain.
  *          QUOTE READY → PAYMENT SEEN (confirming) → ACTIVATED → FINALIZED (later). The user may leave and return:
  *          recovery uses the server's own request state (status view) plus the tx hash remembered in this browser.
+ *          The quote request signs the current Terms of Use version (Site.TERMS_VERSION); the quote box is the final
+ *          review (project, token, price, exact amount, sink, expiry) and Pay stays disabled until the Terms checkbox is
+ *          ticked. RECEIPT: rebuilt on every visit from the server's durable activation record (status view).
  * PUBLISH  a fresh SitePublish signature by the CURRENT Passport operator (free). REVIEW & ADOPT re-signs the exact
  *          configHash a previous operator published (free, no payment).
  * Authority, entitlement, amounts and facts are always decided by the server; this page only asks and shows.
@@ -309,7 +312,7 @@
       $('heClearPending').addEventListener('click', () => { if (confirm('Only continue if your wallet shows NO pending Project Home transfer. Continue?')) { store.set(PAY, null); renderQuoteArea(); } });
       return;
     }
-    box.innerHTML = `<p class="sn-small sn-dim">Get a quote to lock the exact $SYNC amount for 30 minutes. Asking for a quote is a free signature.</p>
+    box.innerHTML = `<p class="sn-small sn-dim">Step 1 · Get a quote to lock the exact $SYNC amount for 30 minutes. Asking for a quote is a free signature. It records which <a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> version (${esc(Site.TERMS_VERSION)}) applies to this activation and does not send a payment.</p>
 <p style="margin:14px 0 0"><button class="sn-btn primary" type="button" id="heQuoteBtn">Get quote</button></p>
 <p class="sn-small sn-muted">SYNCNET REFERENCE RATE · read from the canonical SYNC/USDG market on Robinhood Chain when you request a quote, then locked for 30 minutes. A SyncNet reference rate, not a price feed.</p>`;
     $('heQuoteBtn').addEventListener('click', getQuote);
@@ -319,10 +322,10 @@
     if (walletRequestOpen()) { renderQuoteArea(); return; }
     S.busy = true;
     try {
-      const message = { token, operator: S.account, issuedAt: nowSec(), nonce: nonce() };
-      payStatus('Sign in your wallet to request a quote (free, no transaction).');
+      const message = { token, operator: S.account, issuedAt: nowSec(), nonce: nonce(), termsVersion: Site.TERMS_VERSION };
+      payStatus('Sign in your wallet to request a quote (free, no transaction). The signature records which Terms of Use version (' + Site.TERMS_VERSION + ') applies to this activation; it does not send a payment.');
       const signature = await sign('ActivationRequest', message);
-      const r = await post({ action: 'intent', token, operator: S.account, issuedAt: message.issuedAt, nonce: message.nonce, signature });
+      const r = await post({ action: 'intent', token, operator: S.account, issuedAt: message.issuedAt, nonce: message.nonce, termsVersion: message.termsVersion, signature });
       if (!r.ok) {
         if (r.body && r.body.code === 'payment_pending') { payStatus(errText(r), 'warn'); await refreshStatus(); resume(); return; }
         throw new Error(errText(r, 'The quote could not be created.'));
@@ -336,22 +339,40 @@
   function renderQuote(i) {
     paySteps('quote');
     const box = $('heQuote');
-    box.innerHTML = `<dl class="sn-kv he-quote">
+    if (i.termsVersion !== Site.TERMS_VERSION) { // a quote issued before the current Terms: re-sign (same quote, same amount)
+      box.innerHTML = `<p class="sn-warn-line">This quote was requested before the current <a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> (version ${esc(Site.TERMS_VERSION)}). Sign the quote request again to record the current version. The amount and the lock stay the same.</p>
+<p style="margin:14px 0 0"><button class="sn-btn primary" type="button" id="heQuoteBtn">Sign to record the current Terms version</button></p>`;
+      $('heQuoteBtn').addEventListener('click', getQuote);
+      return;
+    }
+    const exp = new Date(i.expiresAt);
+    const local = exp.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    const utc = exp.toISOString().slice(0, 16).replace('T', ' ');
+    box.innerHTML = `<p class="sn-small sn-dim">Step 2 · Final review. Check every line, accept the Terms, then pay in your wallet.</p>
+<dl class="sn-kv he-quote">
+<dt>Project</dt><dd>${esc((S.facts && S.facts.name) || 'Project')}<br><span class="sn-mono" id="heQuoteToken">${esc(i.token)}</span></dd>
+<dt>Price</dt><dd>$${esc(i.priceUsd)} · one-time · paid in $SYNC</dd>
 <dt>Amount</dt><dd><span class="sn-amount" id="heAmount">${esc(i.exactTaggedSyncDisplay)} $SYNC</span> <button class="sn-textbtn sn-small" type="button" data-copy-text="${esc(i.exactTaggedSyncDisplay)}">Copy</button></dd>
-<dt>To</dt><dd><span class="sn-mono">${esc(i.sink)}</span> <span class="sn-small sn-muted">Project Home sink</span></dd>
-<dt>Price</dt><dd>$${esc(i.priceUsd)} · one-time</dd>
+<dt>To</dt><dd><span class="sn-mono" id="heQuoteSink">${esc(i.sink)}</span> <span class="sn-small sn-muted">Project Home sink</span></dd>
 <dt>Rate</dt><dd>SYNCNET REFERENCE RATE · Your rate is locked for 30 minutes<br><span class="sn-small sn-muted">1 $SYNC = $${esc(i.syncUsdReferenceRate)} · ${i.rateSource && i.rateSource.block ? `canonical SYNC/USDG market · block ${esc(i.rateSource.block)}` : `version ${esc(i.rateVersion)}`}</span></dd>
-<dt>Locked for</dt><dd><span class="sn-mono" id="heLeft">—</span></dd></dl>
+<dt>Locked for</dt><dd><span class="sn-mono" id="heLeft">—</span><br><span class="sn-small sn-muted" id="heExpires">Expires ${esc(local)} (your time) · ${esc(utc)} UTC</span></dd>
+<dt>Allocation</dt><dd>60% burned · 40% converted to USDG for the SyncNet treasury</dd>
+<dt>Refunds</dt><dd>Non-refundable after successful activation. The activation belongs to this project (the token).</dd></dl>
 <p class="sn-warn-line">Send only the exact quoted amount before the quote expires. Late or duplicate payments cannot be automatically refunded.</p>
-<p style="margin:16px 0 0"><button class="sn-btn primary" type="button" id="hePayBtn">PAY WITH $SYNC</button></p>
-<p class="sn-small sn-muted">One $SYNC transfer that you review in your wallet. Non-refundable after activation.</p>`;
+<p class="he-accept"><label><input type="checkbox" id="heAccept"><span>I have read and accept the <a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> and understand that this is a one-time USD 12 Project Home activation paid in SYNC and is non-refundable after successful activation.</span></label></p>
+<p style="margin:16px 0 0"><button class="sn-btn primary he-paybtn" type="button" id="hePayBtn" disabled>PAY NOW · ${esc(i.exactTaggedSyncDisplay)} SYNC</button></p>
+<p class="he-paynote"><strong>One-time payment · Non-refundable after successful activation</strong></p>
+<p class="sn-small sn-muted">Step 3 · One $SYNC transfer that you review in your wallet. Step 4 · SyncNet verifies it on Robinhood Chain and shows your receipt.</p>`;
     $('hePayBtn').addEventListener('click', () => pay(i));
+    const accept = $('heAccept');
     const tick = () => {
       const left = Math.floor((Date.parse(i.expiresAt) - Date.now()) / 1000);
       const el = $('heLeft'); if (el) el.textContent = fmtLeft(left);
       const b = $('hePayBtn');
+      if (b && left >= MIN_PAY_SECONDS && !S.busy) b.disabled = !(accept && accept.checked); // Pay only after the Terms are accepted
       if (b && left < MIN_PAY_SECONDS) { b.disabled = true; clearInterval(S.countdown); payStatus(left <= 0 ? 'This quote expired. Nothing was paid. Get a new quote.' : 'This quote is about to expire. Get a new quote before paying.', 'warn'); if (left <= 0) { S.st.openIntent = null; renderQuoteArea(); } }
     };
+    accept.addEventListener('change', tick);
     tick(); S.countdown = setInterval(tick, 1000);
   }
   function transferData(to, amountWei) {
@@ -365,6 +386,7 @@
     if (walletRequestOpen()) { renderQuoteArea(); return; } // an earlier wallet request may still be open
     const left = Math.floor((Date.parse(i.expiresAt) - Date.now()) / 1000);
     if (left < MIN_PAY_SECONDS) { payStatus('This quote is too close to expiry. Get a new quote.', 'warn'); return; }
+    if (!$('heAccept') || !$('heAccept').checked || i.termsVersion !== Site.TERMS_VERSION) { payStatus('Accept the Terms of Use to pay.', 'warn'); return; }
     if (lc(i.canonicalSync) !== SYNC || Number(i.chainId) !== CHAIN_ID || !S.cfg.sink || lc(i.sink) !== lc(S.cfg.sink) || lc(i.token) !== token) { payStatus('This quote does not match the payment configuration. Nothing was sent.', 'bad'); return; }
     S.busy = true; $('hePayBtn').disabled = true;
     try {
@@ -390,8 +412,8 @@
         store.set(PAY, null);
         await refreshStatus();
         paySteps(b.status === 'FINALIZED' ? 'final' : 'active');
-        payStatus(b.status === 'FINALIZED' ? 'Activated and finalized. You can publish now.' : 'Activated. You can publish now. Finality is confirmed later on its own.', 'ok');
-        S.polling = 0; refreshBar(); watchFinality();
+        payStatus(b.status === 'FINALIZED' ? 'Activated and finalized. You can publish now. Your receipt is below.' : 'Activated. You can publish now. Finality is confirmed later on its own. Your receipt is below.', 'ok');
+        S.polling = 0; refreshBar(); renderReceipt(); watchFinality();
         return;
       }
       if (r.status === 202) {
@@ -418,7 +440,7 @@
     let tries = 0;
     const run = async () => {
       const r = await post({ action: 'reconcile', token }).catch(() => null);
-      if (r && r.ok && r.body.status && r.body.status !== S.st.entitlement.status) { await refreshStatus(); refreshBar(); if (S.st.entitlement && S.st.entitlement.status === 'FINALIZED') { paySteps('final'); payStatus('Finalized.', 'ok'); return; } if (S.st.entitlement && S.st.entitlement.status === 'INVALIDATED_BY_REORG') { payStatus('The activation payment left the canonical chain. Publishing is paused until it is confirmed again.', 'bad'); return; } }
+      if (r && r.ok && r.body.status && r.body.status !== S.st.entitlement.status) { await refreshStatus(); refreshBar(); renderReceipt(); if (S.st.entitlement && S.st.entitlement.status === 'FINALIZED') { paySteps('final'); payStatus('Finalized.', 'ok'); return; } if (S.st.entitlement && S.st.entitlement.status === 'INVALIDATED_BY_REORG') { payStatus('The activation payment left the canonical chain. Publishing is paused until it is confirmed again.', 'bad'); return; } }
       if (++tries < 20) S.finalTimer = setTimeout(run, 60000);
     };
     S.finalTimer = setTimeout(run, 2000);
@@ -446,6 +468,64 @@
       payStatus(errText(r), 'bad'); return;
     }
     payStatus('That transaction does not match any payment request for this project.', 'bad');
+  }
+
+  // ------------------------------------------------------------------ receipt (from the server's durable activation record)
+  /** The receipt data, or null when this project has no PAID activation. Only server-recorded values are used. */
+  function receiptData() {
+    const e = S.st && S.st.entitlement;
+    if (!e || e.kind !== 'paid' || !e.txHash) return null;
+    return {
+      schema: 'syncnet.project-home.receipt.v1', issuer: 'SyncNet', product: 'SyncNet Project Home activation (one-time)',
+      project: { name: (S.facts && S.facts.name) || '', token: e.token }, chainId: e.chainId,
+      priceUsd: (Number(e.priceUsdCents) / 100).toFixed(2), priceVersion: e.priceVersion,
+      syncPaid: e.exactSyncDisplay, syncPaidWei: e.exactAmount, payer: e.payer, paidTo: e.sink, canonicalSync: e.canonicalSync,
+      txHash: e.txHash, logIndex: e.logIndex, blockNumber: e.blockNumber, blockTime: e.blockTimestamp ? new Date(e.blockTimestamp * 1000).toISOString() : null,
+      activatedAt: e.activatedAt, finalizedAt: e.finalizedAt || null, status: e.status,
+      syncnetReferenceRate: { syncUsd: e.syncUsdReferenceRate, rateVersion: e.rateVersion },
+      requestId: e.requestId, termsVersionAccepted: e.termsVersion || null,
+      entitlement: 'Belongs to the project (token), not to the paying wallet.',
+      allocation: { burnPercent: 60, treasuryPercent: 40, treasuryAsset: 'USDG' },
+      refund: 'Non-refundable after successful activation.',
+      source: location.origin + '/api/project-home?view=status&token=' + e.token,
+    };
+  }
+  function renderReceipt() {
+    const r = receiptData(), sec = $('heReceipt');
+    if (!r) { sec.hidden = true; return; }
+    const row = (k, v) => `<dt>${esc(k)}</dt><dd>${v}</dd>`;
+    const mono = (v) => `<span class="sn-mono">${esc(v == null ? '—' : v)}</span>`;
+    const statusText = { ACTIVE: 'ACTIVE · paid and confirmed (finality follows)', FINALIZED: 'FINALIZED · paid and final', INVALIDATED_BY_REORG: 'PAUSED · the payment left the canonical chain; awaiting re-confirmation' }[r.status] || r.status;
+    $('heReceiptBody').innerHTML = `<dl class="sn-kv">
+${row('Product', esc(r.product))}
+${row('Project', esc(r.project.name || '—'))}
+${row('Token contract', mono(r.project.token))}
+${row('Price', 'USD ' + esc(r.priceUsd) + ' · one-time')}
+${row('SYNC paid', mono(r.syncPaid + ' SYNC'))}
+${row('Payer wallet', mono(r.payer))}
+${row('Paid to', mono(r.paidTo) + ' <span class="sn-small sn-muted">Project Home sink</span>')}
+${row('Transaction', `<a class="sn-mono" href="https://robinhoodchain.blockscout.com/tx/${esc(r.txHash)}" target="_blank" rel="noreferrer">${esc(r.txHash)} ↗</a>`)}
+${row('Block', mono(r.blockNumber) + (r.blockTime ? ' · ' + esc(r.blockTime.replace('T', ' ').slice(0, 19)) + ' UTC' : ''))}
+${row('Activation recorded', esc(String(r.activatedAt || '').replace('T', ' ').slice(0, 19)) + ' UTC')}
+${row('SyncNet reference rate', '1 SYNC = $' + esc(r.syncnetReferenceRate.syncUsd) + ' · version ' + esc(r.syncnetReferenceRate.rateVersion))}
+${row('Quote ID', mono(r.requestId))}
+${row('Terms accepted', r.termsVersionAccepted ? `<a href="/terms.html" target="_blank" rel="noopener">Terms of Use</a> version ${esc(r.termsVersionAccepted)} (version recorded in the signed quote request)` : 'Not recorded (quote issued before Terms versions were signed)')}
+${row('Status', esc(statusText))}
+${row('Entitlement', esc(r.entitlement))}
+${row('Allocation', '60% burned · 40% converted to USDG for the SyncNet treasury')}
+${row('Refunds', esc(r.refund))}
+</dl>
+<p class="sn-small sn-muted">Issued by SyncNet from its activation record, which anyone can re-check at <span class="sn-mono">/api/project-home?view=status&amp;token=${esc(r.project.token)}</span> and against the transaction on Robinhood Chain.</p>`;
+    sec.hidden = false;
+  }
+  function downloadReceipt() {
+    const r = receiptData();
+    if (!r) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify({ ...r, generatedAt: new Date().toISOString() }, null, 2)], { type: 'application/json' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = 'syncnet-project-home-receipt-' + r.project.token + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   // ------------------------------------------------------------------ boot
@@ -490,6 +570,7 @@
       $('heTitle').textContent = (facts.name || 'Project') + ' · Home';
       document.title = (facts.name || 'Project') + ' Home — SyncNet';
       status('');
+      renderReceipt(); // any connected wallet can reopen the receipt, operator or not
       if (!S.passport) { gate(`<p>Sync this project first. A Project Home belongs to the Project Passport operator.</p><p style="margin:14px 0 0"><a class="sn-btn primary" href="/project/${esc(token)}">Open project</a></p>`); return; }
       if (lc(S.passport.operator) !== account) { gate(`<p>Only the current Passport operator can edit this Project Home.</p><p class="sn-small sn-muted">Connected: <span class="sn-mono">${esc(short(account))}</span> · Operator: <span class="sn-mono">${esc(short(S.passport.operator))}</span></p>`); return; }
       const site = S.st.site;
@@ -516,6 +597,8 @@
     $('hePrimary').addEventListener('click', onPrimary);
     $('heUnpublish').addEventListener('click', unpublish);
     $('heRecover').addEventListener('click', recover);
+    $('hePrintReceipt').addEventListener('click', () => { document.body.classList.add('he-printing'); addEventListener('afterprint', () => document.body.classList.remove('he-printing'), { once: true }); window.print(); });
+    $('heDownloadReceipt').addEventListener('click', downloadReceipt);
     S.images = { logoCid: '', heroCid: '' };
     S.device = matchMedia('(max-width: 959px)').matches ? 'mobile' : 'desktop';
     document.querySelectorAll('[data-device]').forEach((b) => b.addEventListener('click', () => setDevice(b.dataset.device)));

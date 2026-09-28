@@ -142,7 +142,7 @@ function publicIntent(i) {
     rateLabel: 'SYNCNET REFERENCE RATE', syncUsdReferenceRate: i.syncUsdReferenceRate, rateVersion: i.rateVersion, rateEffectiveAt: i.rateEffectiveAt,
     rateSource: i.rateSource ? { chainId: i.rateSource.chainId, market: i.rateSource.market, route: i.rateSource.route, poolId: i.rateSource.poolId, block: i.rateSource.block, blockTimestamp: i.rateSource.blockTimestamp, derivedAt: i.rateSource.derivedAt } : null,
     baseSyncAmount: i.baseSyncAmount, exactTaggedSyncAmount: i.exactTaggedSyncAmount, exactTaggedSyncDisplay: Pricing.formatUnits(i.exactTaggedSyncAmount),
-    createdAt: i.createdAt, createdBlock: i.createdBlock, expiresAt: i.expiresAt, lockedUntil: i.expiresAt, status: i.status,
+    createdAt: i.createdAt, createdBlock: i.createdBlock, expiresAt: i.expiresAt, lockedUntil: i.expiresAt, status: i.status, termsVersion: i.termsVersion || null,
     observed: i.observed || null, consumedBy: i.consumedBy || null,
     split: { burnPercent: 60, treasuryPercent: 40, note: SPLIT_NOTE },
     refund: 'Non-refundable after successful activation. There is no refund mechanism.',
@@ -150,7 +150,7 @@ function publicIntent(i) {
 }
 function publicEntitlement(e) {
   if (!e) return null;
-  return { ...e, label: e.kind === 'complimentary' ? 'COMPLIMENTARY' : 'PAID', countsAsRevenue: e.kind === 'paid', lifetime: 'ONE-TIME PROJECT HOME ACTIVATION · active for as long as SyncNet operates the Project Home service' };
+  return { ...e, termsVersion: e.termsVersion || null, exactSyncDisplay: e.exactAmount ? Pricing.formatUnits(e.exactAmount) : null, label: e.kind === 'complimentary' ? 'COMPLIMENTARY' : 'PAID', countsAsRevenue: e.kind === 'paid', lifetime: 'ONE-TIME PROJECT HOME ACTIVATION · active for as long as SyncNet operates the Project Home service' };
 }
 const publicCur = (c) => c && { token: c.token, state: c.state, revisionId: c.revisionId || null, configHash: c.configHash || null, signer: c.signer, issuedAt: c.issuedAt, at: c.at };
 
@@ -375,13 +375,17 @@ async function snapshot(store, key, identity) {
 
 // ---------------------------------------------------------------- 1. payment intent (current Passport operator only)
 async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
-  const extra = onlyFields(b, ['action', 'token', 'operator', 'issuedAt', 'nonce', 'signature']);
+  const extra = onlyFields(b, ['action', 'token', 'operator', 'issuedAt', 'nonce', 'termsVersion', 'signature']);
   if (extra) return extra;
   if (!cfg.paymentsEnabled) return publicError(503, 'payments_closed', PAY_CLOSED);
   const env = signedEnvelope(b, now());
   if (env.error) return env.error;
   const { token, operator, nonce, issuedAt } = env;
-  if (!(await verifySig(rpc, operator, 'ActivationRequest', { token, operator, issuedAt, nonce }, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
+  // The signed request must name exactly the current Terms of Use version (missing, old or unknown → refused).
+  if (b.termsVersion !== Site.TERMS_VERSION) return publicError(400, 'terms_version', 'A quote request must record the current Terms of Use version (' + Site.TERMS_VERSION + '). Reload the page and sign again.');
+  const termsVersion = Site.TERMS_VERSION;
+  const signed = { token, operator, issuedAt, nonce, termsVersion };
+  if (!(await verifySig(rpc, operator, 'ActivationRequest', signed, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this request.');
   // PAYMENT DEPLOYMENT VALIDATION: no payable amount (new OR reused quote) unless the configured sink, its converter and
   // the treasury verify on-chain against the reviewed deployment (cached PASS, bounded reads, RPC failure = no quote).
   const dv = await deploymentStatus(rpc, cfg.deployment, cfg.sink, { now: () => now() });
@@ -407,8 +411,20 @@ async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
   }
   const openRaw = await store.get(K.open(token));
   if (openRaw) {
-    const existing = (await getJson(store, K.intent(openRaw))).value;
-    if (existing && existing.status === 'OPEN' && now() < Date.parse(existing.expiresAt)) return json(200, { ok: true, reused: true, intent: publicIntent(existing) });
+    const ex = await getJson(store, K.intent(openRaw));
+    const existing = ex.value;
+    if (existing && existing.status === 'OPEN' && now() < Date.parse(existing.expiresAt)) {
+      if (existing.termsVersion === termsVersion) return json(200, { ok: true, reused: true, intent: publicIntent(existing) });
+      // A quote issued before this Terms version (same amount, same lock): record the signed Terms version on it.
+      const upgraded = { ...existing, termsVersion, request: { operator, issuedAt, nonce, signature: b.signature, digest: Site.digest('ActivationRequest', signed) }, earlierRequest: existing.request || null };
+      const ok = await store.cas({
+        expect: [[K.intent(openRaw), ex.raw], [K.nonce(operator, nonce), null], [K.passport(token), pRaw]],
+        set: [[K.intent(openRaw), JSON.stringify(upgraded), INTENT_TTL], [K.nonce(operator, nonce), '1', NONCE_TTL]],
+      });
+      if (!ok) return publicError(409, 'conflict', 'The quote changed while the Terms version was recorded. Try again.');
+      log(FN, 'intent-terms-recorded', { token, termsVersion });
+      return json(200, { ok: true, reused: true, intent: publicIntent(upgraded) });
+    }
   }
   const price = cfg.price;
   if (!(await snapshot(store, K.price(price.priceVersion), Pricing.priceIdentity(price)))) return publicError(503, 'config_conflict', PAY_CLOSED);
@@ -428,7 +444,7 @@ async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
   try { base = Pricing.baseSyncWei(price.priceUsdCents, BigInt(rate.rateUsdE18)); } catch (err) { logError(FN, 'pricing-failed', err, {}); return publicError(503, 'config_invalid', PAY_CLOSED); }
   const createdAtMs = now();
   const createdAtSec = Math.floor(createdAtMs / 1000);
-  const request = { issuedAt, nonce, signature: b.signature, digest: Site.digest('ActivationRequest', { token, operator, issuedAt, nonce }) };
+  const request = { issuedAt, nonce, signature: b.signature, digest: Site.digest('ActivationRequest', signed) };
   for (let attempt = 0; attempt < 6; attempt++) {
     const tag = Pricing.randomTag(random);
     const exact = Pricing.taggedAmount(base, tag);
@@ -441,7 +457,7 @@ async function createIntent(b, { store, rpc, cfg, now, random, rateSource }) {
       baseSyncAmount: base.toString(), exactTaggedSyncAmount: exact.toString(), tag: tag.toString(),
       createdAt: new Date(createdAtMs).toISOString(), createdAtSec, createdBlock: createdBlock.toString(),
       expiresAt: new Date((createdAtSec + LOCK) * 1000).toISOString(), expiresAtSec: createdAtSec + LOCK,
-      status: 'OPEN', request,
+      status: 'OPEN', request, termsVersion,
     };
     const ok = await store.cas({
       expect: [[K.amount(exact.toString()), null], [K.open(token), openRaw], [K.nonce(operator, nonce), null], [K.entitlement(token), ent.raw], [K.passport(token), pRaw]],
@@ -534,6 +550,7 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
     syncUsdReferenceRate: intent.syncUsdReferenceRate, rateUsdE18: intent.rateUsdE18, rateVersion: intent.rateVersion, rateEffectiveAt: intent.rateEffectiveAt, rateSource: intent.rateSource || null,
     requestId, activatedAt: at, safeAt: at, finalizedAt: finalized ? at : null,
     operatorAtActivation: intent.operatorAtRequest, // HISTORY ONLY — never authority
+    termsVersion: intent.termsVersion || null, // the Terms version signed in the ActivationRequest (null: legacy quote)
     previous: entNow.value && entNow.value.status === 'INVALIDATED_BY_REORG' ? { txHash: entNow.value.txHash, logIndex: entNow.value.logIndex, invalidatedAt: entNow.value.invalidatedAt } : null,
   };
   const activation = {
@@ -541,7 +558,7 @@ async function verifyPayment(b, { store, rpc, cfg, now, env }) {
     amount: intent.exactTaggedSyncAmount, exactTaggedSyncAmount: intent.exactTaggedSyncAmount, baseSyncAmount: intent.baseSyncAmount,
     priceUsdCents: intent.priceUsdCents, priceVersion: intent.priceVersion, syncUsdReferenceRate: intent.syncUsdReferenceRate, rateVersion: intent.rateVersion,
     rateEffectiveAt: intent.rateEffectiveAt, rateSource: intent.rateSource || null, blockNumber: receiptHeight.toString(), blockHash: blk.hash, blockTimestamp: Number(blk.timestamp),
-    sink: intent.sink, activatedAt: at, operatorAtActivation: intent.operatorAtRequest, kind: 'paid',
+    sink: intent.sink, activatedAt: at, operatorAtActivation: intent.operatorAtRequest, kind: 'paid', termsVersion: intent.termsVersion || null,
   };
   const consumed = { ...intent, status: 'CONSUMED', consumedBy: { txHash, logIndex: pick.logIndex, at } };
   const auditEvent = JSON.stringify({ type: 'activated', token, requestId, txHash, logIndex: pick.logIndex, status: entitlement.status, at });
