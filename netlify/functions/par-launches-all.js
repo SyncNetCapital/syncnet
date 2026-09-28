@@ -7,7 +7,9 @@
 //  - upstream: /launches/count, then pages of 500 (offsets 0..4500, so at most 5000 launches), at most 3
 //    page requests in flight, 12 s timeout each, one retry with backoff on 429/5xx, redirects not followed;
 //  - any query string -> 301 to /api/par-launches-all, so query strings cannot bypass the CDN cache;
-//  - 60 requests per minute per client IP. Upstream error details are logged, never returned.
+//  - 60 requests per minute per client IP. Upstream error details are logged, never returned;
+//  - each launch is compacted to the fields SyncNet's consumers read (compactLaunch), so 5000 launches stay far
+//    below Netlify's 6 MiB function response limit.
 const { json, publicError, tooManyRequests } = require('../lib/respond');
 const { log, logError, hashId } = require('../lib/log');
 const { getStore } = require('../lib/store');
@@ -36,6 +38,13 @@ const REDIRECT_HEADERS = Object.freeze({
   'netlify-cdn-cache-control': 'public, s-maxage=86400',
 });
 const UNAVAILABLE = 'PAR launch history is temporarily unavailable.';
+const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
+const MAX_NAME = 128;
+const MAX_SYMBOL = 64;
+const MAX_LOGO = 512; // a longer URI is dropped, never truncated into a different one
+const MAX_DATE = 40;
+const MAX_MARKETS = 16;
+const MAX_LAUNCHES_BYTES = 5 * 1024 * 1024; // compacted history budget; Netlify rejects function responses > 6 MiB
 
 let cache = null; // { count, launches, fetchedAt }
 let inflight = null; // shared refresh promise
@@ -141,6 +150,56 @@ function rowsOf(body) {
   return null; // unexpected shape: treated as a failed refresh, never as "no launches"
 }
 
+const addr = (...vs) => {
+  const v = vs.find((x) => typeof x === 'string' && x);
+  return v && ADDRESS.test(v) ? v.toLowerCase() : undefined;
+};
+const text = (max, ...vs) => {
+  const v = vs.find((x) => typeof x === 'string' && x.trim());
+  return v ? v.trim().slice(0, max) : undefined;
+};
+const whole = (max, ...vs) => {
+  const v = vs.find((x) => typeof x === 'string' && x.trim());
+  return v && v.trim().length <= max ? v.trim() : undefined;
+};
+
+// One market connection: the paired token's address (required) and its symbol. Consumers read
+// pairToken||quoteToken||pairTokenAddress||quoteTokenAddress and quoteSymbol||pairSymbol||pairTokenSymbol.
+function compactMarket(m) {
+  if (!m || typeof m !== 'object') return null;
+  const pairToken = addr(m.pairToken, m.quoteToken, m.pairTokenAddress, m.quoteTokenAddress);
+  if (!pairToken) return null;
+  const out = { pairToken };
+  const quoteSymbol = text(MAX_SYMBOL, m.quoteSymbol, m.pairSymbol, m.pairTokenSymbol);
+  if (quoteSymbol) out.quoteSymbol = quoteSymbol;
+  return out;
+}
+
+// The subset of a PAR launch row read by explore.js, you.js, builder-v2.js, v2-network.js, v2-token.js and
+// economy-v2.js (lib/syncnet-economy.js), under each field's primary name. Absent or malformed fields are left
+// out, never invented; a row without a top-level `markets` list keeps its single top-level market.
+function compactLaunch(row) {
+  const out = {};
+  const token = addr(row.token, row.tokenAddress, row.address);
+  if (token) out.token = token;
+  const name = text(MAX_NAME, row.name, row.tokenName);
+  if (name) out.name = name;
+  const symbol = text(MAX_SYMBOL, row.symbol, row.tokenSymbol);
+  if (symbol) out.symbol = symbol;
+  const logoUrl = whole(MAX_LOGO, row.logoUrl, row.logo);
+  if (logoUrl) out.logoUrl = logoUrl;
+  const created = [row.createdAt, row.created_at].find((v) => v !== undefined && v !== null && v !== '');
+  if (typeof created === 'number' && Number.isFinite(created)) out.createdAt = created;
+  else if (typeof created === 'string' && created.length <= MAX_DATE) out.createdAt = created;
+  const deployer = addr(row.deployer);
+  if (deployer) out.deployer = deployer;
+  const creatorFeeRecipient = addr(row.creatorFeeRecipient, row.feeRecipient);
+  if (creatorFeeRecipient) out.creatorFeeRecipient = creatorFeeRecipient;
+  const source = Array.isArray(row.markets) && row.markets.length ? row.markets : [row];
+  out.markets = source.slice(0, MAX_MARKETS).map(compactMarket).filter(Boolean);
+  return out;
+}
+
 async function refresh(deps) {
   const started = Date.now();
   const ctl = new AbortController();
@@ -183,11 +242,15 @@ async function refresh(deps) {
         const key = address ? address.toLowerCase() : JSON.stringify([row.createdAt, row.symbol, row.name, row.deployer]);
         if (seen.has(key)) continue;
         seen.add(key);
-        launches.push(row);
+        launches.push(compactLaunch(row));
         if (launches.length >= MAX_LAUNCHES) break;
       }
     }
     if (count && !launches.length) throw new UpstreamError('count > 0 but no launch rows');
+    // Size as sent: respond.js serialize() escapes < > & (1 byte -> 6) and U+2028/U+2029 (3 bytes -> 6) to \uXXXX.
+    const raw = JSON.stringify(launches);
+    const bytes = Buffer.byteLength(raw) + (raw.match(/[<>&]/g) || []).length * 5 + (raw.match(/[\u2028\u2029]/g) || []).length * 3;
+    if (bytes > MAX_LAUNCHES_BYTES) throw new UpstreamError(`compacted history too large (${bytes} bytes)`); // stale / 503, not a Netlify crash
     log(FN, 'refreshed', { count, indexed: launches.length, pages: lastPage + 1, ms: Date.now() - started });
     return { count: count || launches.length, launches };
   } catch (err) {
@@ -297,4 +360,4 @@ function _resetCache() {
 exports.handler = (event) => handler(event);
 exports._handler = handler; // tests inject {fetch, now, store, sleep, timeoutMs, budgetMs}
 exports._resetCache = _resetCache;
-exports._internals = { API, PAGE, MAX_LAUNCHES, FRESH_MS, STALE_MS, PAGE_CONCURRENCY, REQUEST_TIMEOUT_MS, RESPONSE_BUDGET_MS, RATE_LIMIT, OK_HEADERS };
+exports._internals = { compactLaunch, MAX_LAUNCHES_BYTES, API, PAGE, MAX_LAUNCHES, FRESH_MS, STALE_MS, PAGE_CONCURRENCY, REQUEST_TIMEOUT_MS, RESPONSE_BUDGET_MS, RATE_LIMIT, OK_HEADERS };
