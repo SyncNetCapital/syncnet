@@ -24,6 +24,17 @@
 - There are no hosted accounts, server-side profiles or automated posting.
 - Legal pages (Terms, Privacy, Risk) were updated for this build but are not legal advice. Have them reviewed before opening to the public.
 
+## Labs · EARLY (pilot, off by default)
+
+- **Ordering is an application guarantee.** A receipt proves the fan signature, the creator manifest and the matching transfer independently; it does not prove that the intent was signed before the transfer (SyncNet enforces persist-then-enable and records `createdBlock`).
+- **Default cards are attested, not independently verifiable.** Hiding the transaction hides wallet and amount, so a public card without a revealed transaction rests on SyncNet's anchored attestations. Revealing is a Phase 2 signed action.
+- **Mobile depends on wallets' in-app browsers.** Path A (universal links into MetaMask / Coinbase Wallet / Trust) is the primary phone path; WalletConnect is not included. The real-device matrix (`docs/early-device-matrix.md`) has not been run yet and is the Phase 1 exit gate.
+- **Confirmation latency.** Measured on the public RPC: SAFE ≈ 12.5 min, FINALIZED ≈ 19 min behind the head. A receipt is CONFIRMED at SAFE; the card unlocks at FINALIZED.
+- **OpenTimestamps is "submitted" until upgraded.** Bitcoin verifiability arrives later; the `.ots` file is verified with the OpenTimestamps client, and the keccak256-digest header form should be confirmed with `ots verify` once on a real proof.
+- **Count me in is not Sybil-resistant.** Counts are of signed records; rate limits bound flooding only.
+- **Attestations need the key.** Without `SYNCNET_EARLY_ATTESTATION_KEY` no creator can join, no snapshot is taken and no rotation completes (fail closed); verification of existing receipts keeps working.
+- **Real-Redis atomicity test not run here.** The `cas` script is the same one Project Home tests on a real `redis-server`; this environment had none, so EARLY's races were tested on the in-memory adapter only.
+
 ## Economies V0
 
 - **Membership is only as complete as the PAR index window.** `/api/par-launches-all` covers at most 5,000 launches; older connected projects are not listed. A recognized project outside the window is shown as *connection previously verified · outside current index window*, never as indexer-confirmed.

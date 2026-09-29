@@ -721,11 +721,15 @@ valid intents; it exists only as a defence in depth.
 - Block range: `fromBlock = I.createdBlock` (stored), `toBlock = min(head, blockAtOrAfter(I.expiry + 86400))` where
   `blockAtOrAfter` is estimated from head and the chain's observed block time then corrected by reading the block
   timestamp (2 reads). Robinhood Chain produces ≈10 blocks/s, so a 2 h window is ≈72,000 blocks.
-- `eth_getLogs` with `address = I.token`, `topics = [Transfer, pad(sender), pad(receiver)]`, in chunks. **Phase 1
-  task E-1 measures the public RPC's maximum range**; the chunk size is a constant (`EARLY_GETLOGS_CHUNK`, default
-  10,000) and the total call budget per verify is 24 (`bounded()`); exceeding it returns `202 VERIFY_DEFERRED` and the
-  client retries later. The `txHash` hint is checked first with a targeted `eth_getTransactionReceipt` so the happy
-  path costs ≤ 6 RPC calls; the sweep still runs once before CONFIRMED to rule out ambiguity, and again at FINALIZED.
+- `eth_getLogs` with `address = I.token`, `topics = [Transfer, pad(sender), pad(receiver)]`, in chunks. **Task E-1
+  result (29 Sep 2026, public RPC, `tests/live/early-rpc-capability.mjs`):** the RPC caps `eth_getLogs` by *result
+  count* (10,000 logs), not by block range; the exact three-topic filter succeeded over 200,000 blocks in one ≈120 ms
+  call. Block time ≈0.10 s, `safe` lag ≈12.5 min, `finalized` lag ≈19 min. The chunk size (`EARLY_GETLOGS_CHUNK`)
+  therefore defaults to 50,000 (a 2 h window in 2 calls); the total call budget per verify is 24 (`bounded()`);
+  exceeding it returns `202 VERIFY_DEFERRED` and the client retries later. The `txHash` hint is checked first with a
+  targeted `eth_getTransactionReceipt` so the happy path costs ≤ 6 RPC calls; the sweep still runs once before
+  CONFIRMED to rule out ambiguity, and again at FINALIZED. Late (recovery) candidates are accepted from the hint only,
+  never from the sweep, so the outcome does not depend on the chunk size.
 - For each candidate: rule 6 (canonical block) and 8 (safe/finalized) are checked with targeted reads.
 - Any RPC failure → `503 chain_unavailable`, no state change.
 

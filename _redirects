@@ -30,6 +30,11 @@
 /api/marketplace /.netlify/functions/marketplace 200
 /api/economies /.netlify/functions/economies 200
 /api/project-home /.netlify/functions/project-home 200
+/api/early /.netlify/functions/early 200
+/api/early-youtube-auth /.netlify/functions/early-youtube-auth 200
+/labs/early/creator /labs-early-creator.html 200
+/labs/early /labs-early.html 200
+/labs/early/* /labs-early.html 200
 /site/:token /.netlify/functions/site?token=:token 200!
 /site-img/:cid /.netlify/functions/site-img?cid=:cid 200!
 /economy /economy.html 200

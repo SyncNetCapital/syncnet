@@ -24,6 +24,22 @@ Set these in Netlify under Site configuration → Environment variables. **Redep
 | `SYNCNET_LOG_SALT` | Log pseudonymisation | Optional random string used to hash IPs and wallets in logs. |
 | `SYNCNET_RPC_URL` | Server-side chain reads (registry verification) | Optional private `https` RPC. Defaults to the public Robinhood Chain RPC. |
 
+### Labs · EARLY (SYNC Proof) — pilot, OFF by default
+
+| Variable | Needed for | Value |
+|---|---|---|
+| `SYNCNET_EARLY_ENABLED` | the master switch for `/api/early`, the OAuth function and both scheduled jobs | exactly `true` (plus Upstash) |
+| `SYNCNET_EARLY_SESSION_KEY` | fan/creator sessions and the OAuth state | ≥ 32 random characters; never the upload key |
+| `SYNCNET_EARLY_ATTESTATION_KEY` + `SYNCNET_EARLY_ATTESTATION_KEY_ID` | signing SyncNet attestations | 32-byte hex private key whose address is listed under that key id in the public registry `syncnet-early-keys.json` |
+| `SYNCNET_EARLY_ANCHOR_KEY` | the daily anchor transaction (gas-only key, self-transfers only) | 32-byte hex private key whose address is in the registry's `anchor` list; must differ from the attestation key |
+| `SYNCNET_GOOGLE_CLIENT_ID`, `SYNCNET_GOOGLE_CLIENT_SECRET`, `SYNCNET_EARLY_OAUTH_REDIRECT` | YouTube OAuth (creator identity) | redirect = exactly `https://<site>/api/early-youtube-auth` |
+| `SYNCNET_YOUTUBE_API_KEY` | channel resolver + daily audience snapshots | key restricted to YouTube Data API v3 |
+| `SYNCNET_EARLY_WRITES_DISABLED`, `SYNCNET_EARLY_ANCHOR_DISABLED`, `SYNCNET_EARLY_DISABLED` | kill switches | `true` |
+| `EARLY_GETLOGS_CHUNK` | optional tuning of `eth_getLogs` sweeps | default 50000 (measured on the public RPC) |
+
+Private keys live only in the environment. `syncnet-early-keys.json` may contain public addresses and key ids only
+(the static audit refuses any 32-byte value). Full procedure: `docs/early/RUNBOOK.md`.
+
 ## 2. Server-side rollout gate (keep closed for the first launch)
 
 | Flag | Opens | Also requires |
@@ -33,6 +49,7 @@ Set these in Netlify under Site configuration → Environment variables. **Redep
 | `SYNCNET_REGISTRY_SUBMISSIONS=true` | `POST /api/registry` (proofs are verified on-chain before they are stored) | Upstash |
 | `SYNCNET_UPLOADS_DISABLED=true` | Kill switch: refuses every upload, founder uploads included | — |
 | `SYNCNET_MARKETPLACE_DISABLED=true` | Kill switch: closes `/api/marketplace` (reads answer `enabled:false`, writes refuse 503) | — |
+| `SYNCNET_EARLY_ENABLED=true` | Labs · EARLY pilot behind `/labs/early` (reads, verification, creator pages; writes need the keys and OAuth above) | Upstash + the EARLY variables |
 
 The Marketplace itself has no opening flag: it is on exactly when a durable store (Upstash) is configured and the kill switch is off. Without Upstash it fails closed and the page says the Marketplace is not enabled.
 

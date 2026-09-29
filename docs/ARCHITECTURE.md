@@ -35,7 +35,7 @@ SyncNet is a static multi-page site on Netlify with a small set of Netlify Funct
    - A hash → TX_HASH_RECEIVED, then receipt → MINED, then `verifyDeployment` → ONCHAIN_VERIFIED → INDEXER_PENDING / FULLY_VERIFIED.
    - A non-rejection error → BROADCAST_UNKNOWN, and the chain is watched for the predicted token.
 
-The only transaction SyncNet ever requests is this launch, to the PAR multi factory or the PAR multi router. There are no approvals, permits or other contract calls. The static audit enforces this.
+The only transaction SyncNet ever requests is this launch, to the PAR multi factory or the PAR multi router. There are no approvals, permits or other contract calls. The static audit enforces this. (The Project Home editor and the EARLY fan page each request exactly one standard ERC-20 `transfer`, from the user's wallet to a fixed recipient shown in the review; the static audit pins both.)
 
 ## Netlify Functions (`netlify/functions`, shared helpers in `netlify/lib`)
 
@@ -50,6 +50,10 @@ The only transaction SyncNet ever requests is this launch, to the PAR multi fact
 | `/api/site-check` | SSRF-safe read of `https://<site>/syncnet.json`: pinned DNS, blocked ranges, streamed 16 KiB cap. |
 | `/api/par-launches-all`, `/api/par-tokenlist` | Cached, schema-validated PAR data. These are JSON only and never a proxy. |
 | `/api/economies` | Economies V0 (see `docs/ECONOMIES.md`): signed, append-only parent recognitions (`eco:*` Redis sets, SADD only) by a root's current Project Passport operator or reviewed curator. Economy membership itself is derived in the browser from `/api/par-launches-all`, never stored. |
+| `/api/early` | Labs · EARLY (SYNC Proof, `docs/sync-proof-early-spec.md`): private Count me in signals, creator manifests (YouTube channel id ↔ receiving wallet, versioned, 48 h rotation), server-drafted fan-signed `SupportIntent`s in the "SyncNet SYNC Proof" EIP-712 domain, the public matching rule over direct fan→creator ERC-20 transfers (unique in-window at SAFE finalises without a signature; ambiguous/late need `SupportFinalize`), private receipts, opt-in cards, fan/creator sessions. Every critical transition is one `cas`. `early:*` keys only. |
+| `/api/early-youtube-auth` | Google OAuth (youtube.readonly, online) → `channels.mine` → 15-minute link record + 2 h creator session in the URL fragment. No token or refresh token stored. |
+| scheduled `early-snapshot` | Hourly: first successful YouTube read of the UTC day = the audience snapshot (attested, never replaced or backfilled); due wallet rotations; finality reconciliation. |
+| scheduled `early-anchor` | Daily bundle (attestation leaves, Merkle root), the **one server-sent transaction** in SyncNet (a zero-value self-transfer of the gas-only anchor key carrying the root, strictly validated in `netlify/lib/early-tx.js`), OpenTimestamps submission and upgrades. |
 
 Every function answers with fixed JSON messages, `nosniff`, and a CSP of `default-src 'none'`. Logs use hashed identifiers. Rate limits and quotas need Upstash to be durable. Every public feature stays closed without it.
 

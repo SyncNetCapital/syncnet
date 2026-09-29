@@ -436,3 +436,36 @@ a.sn-row:hover .sn-proj-name{text-decoration:underline;text-decoration-color:var
 body.is-rehearsal .site-nav{border-color:var(--line-3)!important}
 .check-line input{accent-color:var(--bone)}
 .status-pill.danger,.danger-btn,.error-box,.final-ack,.notsent-box{border-style:dashed!important}
+
+/* ------------------------------------------------------------------ Labs · EARLY (SYNC Proof): mobile-first, same system */
+.sn-early .sn-main{padding-top:28px}
+.early-facts{margin:22px 0 0;padding:0 0 0 18px;max-width:620px;color:var(--bone-2);font-size:15px;line-height:1.55}
+.early-facts li{margin:6px 0}
+.early-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:32px}
+.early-row{display:flex;gap:8px;align-items:stretch;margin-top:10px}
+.early-row .sn-input,.early-row .sn-select{flex:1;min-width:0}
+.early-row .sn-btn{flex:none}
+.early-found{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.early-head{display:flex;align-items:center;gap:18px;margin:18px 0 8px;min-width:0}
+.early-head.small{gap:12px;margin:0 0 10px}
+.early-head .sn-logo{width:64px;height:64px;font-size:24px;border-color:var(--line-2)}
+.early-head.small .sn-logo{width:40px;height:40px;font-size:15px}
+.early-title{font-size:clamp(28px,4vw,44px);overflow-wrap:anywhere}
+.early-kv{margin-top:18px}
+.early-support{margin-top:22px}
+.early-steps{margin-top:18px}
+.early-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.early-actions .sn-btn{min-width:200px}
+.early-apps{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.early-apps-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.early-card{margin:22px 0 0;padding:26px 24px;border:1px solid var(--line-3);border-radius:var(--r);max-width:420px;background:var(--ink)}
+.early-card-k{font-size:12px;font-weight:700;letter-spacing:.22em;color:var(--accent)}
+.early-card-l{font-size:20px;font-weight:600;letter-spacing:-.01em;margin-top:6px}
+.early-card-name{font-size:clamp(28px,6vw,40px);font-weight:600;letter-spacing:-.02em;margin-top:22px;overflow-wrap:anywhere}
+.early-card-line{font-size:15px;color:var(--bone-2);margin-top:6px}
+.early-card-v{margin-top:18px;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--bone)}
+.early-pre{white-space:pre-wrap;overflow-wrap:anywhere;font-family:var(--mono);font-size:12px;color:var(--bone-2);margin:0}
+.early-asset-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;min-height:44px;padding:10px 0;border-bottom:1px solid var(--line)}
+.early-asset-row .sn-input{width:140px;flex:none}
+.early-asset-row input[type="checkbox"]{width:20px;height:20px;accent-color:var(--bone)}
+@media (max-width:759px){.early-two{grid-template-columns:1fr}.early-actions .sn-btn{width:100%}.early-row{flex-wrap:wrap}.early-row .sn-btn{width:100%}}

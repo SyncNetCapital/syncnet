@@ -42,7 +42,7 @@ async function sweep(rpc, intent, options = {}) {
   try { fin = await PhChain.block(r, 'finalized'); } catch { fin = null; }
   out.chain.finalized = fin ? fin.number.toString() : null;
 
-  async function consider(rcpt) {
+  async function consider(rcpt, fromHint) {
     if (!rcpt || E.lc(rcpt.status) !== '0x1') return;
     const matches = E.matchingTransfers(rcpt, want);
     if (!matches.length) return;
@@ -50,14 +50,17 @@ async function sweep(rpc, intent, options = {}) {
     if (n <= BigInt(intent.createdBlock)) return; // mined before the signed intent was persisted: never a candidate
     const blk = await blockAt(n);
     if (!blk || blk.hash !== E.lc(rcpt.blockHash)) return; // not canonical right now (reorg in progress): not a candidate
+    const state = E.windowState(msg, blk.timestamp);
+    // Late (recovery) transfers are found through the fan's hint only, never incidentally by the sweep: the result must
+    // not depend on the chunk size (docs §13.3).
+    if (state !== 'in-window' && !fromHint) return;
     for (const m of matches) {
       const key = m.txHash + ':' + m.logIndex;
       if (seen.has(key)) continue;
       seen.add(key);
       out.candidates.push({
         txHash: m.txHash, logIndex: m.logIndex, from: m.from, to: m.to, value: m.value,
-        blockNumber: n.toString(), blockHash: blk.hash, blockTimestamp: Number(blk.timestamp),
-        state: E.windowState(msg, blk.timestamp),
+        blockNumber: n.toString(), blockHash: blk.hash, blockTimestamp: Number(blk.timestamp), state,
         safe: Boolean(safe && n <= safe.number), finalized: Boolean(fin && n <= fin.number),
       });
     }
@@ -66,7 +69,7 @@ async function sweep(rpc, intent, options = {}) {
   try {
     if (E.isBytes32(options.hintTx)) {
       const rcpt = await PhChain.receipt(r, E.lc(options.hintTx));
-      if (rcpt) await consider(rcpt);
+      if (rcpt) await consider(rcpt, true);
     }
     // In-window sweep: createdBlock + 1 … head, stopping once a chunk's last block is past expiry.
     let from = BigInt(intent.createdBlock) + 1n;
@@ -75,7 +78,7 @@ async function sweep(rpc, intent, options = {}) {
       const to = from + BigInt(chunk) - 1n < head.number ? from + BigInt(chunk) - 1n : head.number;
       const logs = await r('eth_getLogs', [{ fromBlock: hex(from), toBlock: hex(to), address: E.lc(msg.token), topics: [E.TRANSFER_TOPIC, pad(msg.sender), pad(msg.receiver)] }]);
       const txs = [...new Set((Array.isArray(logs) ? logs : []).map((l) => E.lc(l && l.transactionHash)).filter(E.isBytes32))];
-      for (const h of txs) { if ([...seen].some((k) => k.startsWith(h + ':'))) continue; const rcpt = await PhChain.receipt(r, h); if (rcpt) await consider(rcpt); }
+      for (const h of txs) { if ([...seen].some((k) => k.startsWith(h + ':'))) continue; const rcpt = await PhChain.receipt(r, h); if (rcpt) await consider(rcpt, false); }
       const last = await blockAt(to);
       if (!last || last.timestamp > expiry) break;
       from = to + 1n;

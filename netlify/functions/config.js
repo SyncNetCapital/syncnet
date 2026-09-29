@@ -15,6 +15,7 @@ async function handler(event = {}, deps = {}) {
     publicUploads: f.publicUploads,
     registrySubmissions: f.registrySubmissions,
     marketplace: f.marketplace === true,
+    early: f.early === true,
     founderGate: true,
     chainId: 4663,
     version: 'v2.5-rc',

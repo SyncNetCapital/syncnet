@@ -10,7 +10,7 @@
 //   SYNCNET_EARLY_ANCHOR_KEY                32-byte hex; gas-only key; its address MUST be in the registry's `anchor` list
 //   SYNCNET_GOOGLE_CLIENT_ID / SYNCNET_GOOGLE_CLIENT_SECRET / SYNCNET_EARLY_OAUTH_REDIRECT   YouTube OAuth
 //   SYNCNET_YOUTUBE_API_KEY                 YouTube Data API v3 (resolver + daily snapshots)
-//   EARLY_GETLOGS_CHUNK                     optional; blocks per eth_getLogs call (default 10000)
+//   EARLY_GETLOGS_CHUNK                     optional; blocks per eth_getLogs call (default 50000; measured, see below)
 //
 // Private keys never leave this module except as a closure that signs a digest (signer()). Nothing here is ever
 // serialised into a response. Any missing prerequisite closes the related capability and is logged once.
@@ -47,7 +47,8 @@ function earlyConfig(options = {}) {
   const requested = truthy(env.SYNCNET_EARLY_ENABLED);
   if (!requested) reasons.push('SYNCNET_EARLY_ENABLED is not true');
   if (requested && !durable) reasons.push('no durable store');
-  const enabled = requested && durable;
+  if (requested && truthy(env.SYNCNET_EARLY_DISABLED)) reasons.push('SYNCNET_EARLY_DISABLED is true');
+  const enabled = requested && durable && !truthy(env.SYNCNET_EARLY_DISABLED);
   const writesEnabled = enabled && !truthy(env.SYNCNET_EARLY_WRITES_DISABLED);
   if (enabled && !writesEnabled) reasons.push('SYNCNET_EARLY_WRITES_DISABLED is true');
 
@@ -77,8 +78,11 @@ function earlyConfig(options = {}) {
   if (!oauth.configured) reasons.push('Google OAuth not configured (client id/secret, https redirect ending in /api/early-youtube-auth)');
   const youtube = { configured: Boolean(String(env.SYNCNET_YOUTUBE_API_KEY || '').trim()) };
   if (!youtube.configured) reasons.push('SYNCNET_YOUTUBE_API_KEY missing');
+  // Measured on the public Robinhood Chain RPC on 29 Sep 2026 (tests/live/early-rpc-capability.mjs): eth_getLogs is
+  // capped by RESULT count (10,000 logs), not by block range; the exact three-topic EARLY filter succeeds across
+  // 200,000 blocks in one call. At ≈0.1 s/block a 2 h window is ≈71,000 blocks: 50,000-block chunks = 2 calls.
   const chunk = Number(env.EARLY_GETLOGS_CHUNK);
-  const getLogsChunk = Number.isInteger(chunk) && chunk >= 100 && chunk <= 50000 ? chunk : 10000;
+  const getLogsChunk = Number.isInteger(chunk) && chunk >= 100 && chunk <= 200000 ? chunk : 50000;
 
   if (requested) {
     const key = reasons.join('|');

@@ -1,0 +1,56 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000"><title>EARLY creator setup — SyncNet Labs</title><meta name="description" content="Join EARLY: verify your YouTube channel, connect the wallet that receives support."><meta name="robots" content="noindex"><link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png"></head><body class="sn-early">
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><span class="nav-mark" aria-hidden="true">S</span><span>SyncNet</span></a><form class="sn-top-search" action="/" method="get" role="search"><input name="q" aria-label="Search projects by name, ticker or contract" placeholder="Search name, ticker or contract" autocomplete="off" spellcheck="false"><button type="submit" aria-label="Open">→</button></form><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<main class="sn-main" id="main"><div class="sn-wrap">
+<a class="sn-back" href="/labs/early">← EARLY</a>
+<p class="sn-label">Labs · EARLY · creator</p>
+<h1 class="sn-h1">Join EARLY</h1>
+<p class="sn-lede">Fans pay your wallet directly. SyncNet verifies that the wallet belongs to your YouTube channel and gives each supporter a private proof that they were there.</p>
+<p class="sn-status sn-small" id="cStatus" role="status" aria-live="polite"></p>
+<div class="sn-panel" id="cGate" hidden><p>Creator onboarding is not open on this deployment.</p></div>
+
+<ol class="sn-steps" id="cSteps" aria-label="Progress"><li data-step="wallet"><b>1</b> Wallet</li><li data-step="youtube"><b>2</b> YouTube</li><li data-step="manifest"><b>3</b> Sign</li><li data-step="live"><b>4</b> Live</li></ol>
+
+<section class="sn-panel" id="cWallet" hidden>
+  <h2 class="sn-h2">1 · Connect the wallet that receives support</h2>
+  <p class="sn-dim">Use a wallet you control and keep. Fans will send directly to it. You can change it later, with a 48-hour waiting period that your current wallet can cancel.</p>
+  <p><button class="sn-btn primary" type="button" id="cConnect">Connect wallet</button> <span class="sn-mono sn-small" id="cWalletAddr"></span></p>
+  <p><button class="sn-btn primary" type="button" id="cLink" hidden>Continue with YouTube</button></p>
+  <p class="sn-small sn-muted">Continuing signs a free message with your wallet, then opens Google to confirm which YouTube channel you control (read-only access, nothing is posted).</p>
+</section>
+
+<section class="sn-panel" id="cManifest" hidden>
+  <h2 class="sn-h2">3 · Sign your creator manifest</h2>
+  <div class="early-head small" id="cYou"></div>
+  <p class="sn-dim">What fans can send you. Minimums are yours to choose. Identity is your channel id; your handle and name can change freely.</p>
+  <div id="cAssets"></div>
+  <p><button class="sn-btn primary" type="button" id="cSign">Sign manifest</button></p>
+  <p class="sn-small sn-muted">The signature comes from the receiving wallet. It is free and creates no transaction.</p>
+</section>
+
+<section id="cDash" hidden>
+  <h2 class="sn-h2">You are on EARLY</h2>
+  <div class="early-head"><span class="sn-logo early-avatar" id="dAvatar" aria-hidden="true"></span><div><strong id="dTitle"></strong><br><span class="sn-small sn-muted" id="dHandle"></span></div></div>
+  <dl class="sn-kv early-kv">
+    <dt>Your page</dt><dd><a id="dPage" class="sn-mono"></a> <button class="sn-textbtn sn-small" type="button" id="dCopy">Copy link</button></dd>
+    <dt>Receiving wallet</dt><dd><span class="sn-mono" id="dWallet"></span></dd>
+    <dt>Status</dt><dd id="dStatus"></dd>
+    <dt>Interest signals</dt><dd id="dSignals"></dd>
+  </dl>
+  <div class="pj-warn" id="dRotation" hidden><span class="pj-warn-mark" aria-hidden="true">!</span><span id="dRotationText"></span></div>
+  <div class="early-actions">
+    <button class="sn-btn" type="button" id="dPause">Pause support</button>
+    <button class="sn-btn" type="button" id="dResume" hidden>Resume support</button>
+    <button class="sn-btn" type="button" id="dCancelRotation" hidden>Cancel wallet change</button>
+    <button class="sn-btn" type="button" id="dRotate">Change receiving wallet</button>
+  </div>
+  <div class="sn-panel" id="dRotatePanel" hidden>
+    <h3 class="sn-h2">Change the receiving wallet</h3>
+    <p class="sn-dim">Connect the <strong>new</strong> wallet and sign a new manifest. The change takes effect after 48 hours. Your page shows the pending change, support meanwhile still goes to your current wallet, and your current wallet can cancel it. If you suspect your current wallet is compromised, pause support first.</p>
+    <p class="sn-small sn-muted" id="dRotateFresh"></p>
+    <p><button class="sn-btn primary" type="button" id="dRotateSign">Sign new manifest with the connected wallet</button></p>
+  </div>
+  <p class="sn-small sn-muted" style="margin-top:20px">Money moves directly from fans to your wallet. SyncNet never receives or holds it and takes no fee. Nothing here shows who supports you; supporters keep their receipts private unless they share a card.</p>
+</section>
+</div></main>
+<footer class="sn-foot"><div class="sn-wrap sn-foot-inner"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a><a href="/network.html">Network</a><a href="/for-sale">For sale</a><a href="/registry.html">Registry</a><a href="/labs.html">Labs</a><a href="/kit.html">Project Kit</a><a href="/launches.html">My launches</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><p class="sn-foot-note">Independent software on Robinhood Chain. EARLY is a pilot experiment. SyncNet never holds your keys or your funds.</p></div></footer><nav class="sn-tabbar" aria-label="Primary"><a href="/" data-nav="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>Explore</a><a href="/build.html" data-nav="create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</a><a href="/you.html" data-nav="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>You</a></nav>
+<script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-early.js" defer></script><script src="/sn-wallet.js" defer></script><script src="/sn-ui.js" defer></script><script src="/labs-early-creator.js" defer></script></body></html>

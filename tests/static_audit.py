@@ -161,8 +161,9 @@ for f in site_js:
     t=open(f,encoding='utf-8').read()
     assert '0x095ea7b3' not in t and 'approve(address' not in t and 'permit(' not in t, 'approval code in '+f
     if not (f.endswith('builder-v2.js') or f.endswith('marketplace-v2.js') or f.endswith('sn-wallet.js')): assert "method:'eth_sendTransaction'" not in t and 'method: \'eth_sendTransaction\'' not in t, 'only the builder, the marketplace deal room and the shared wallet may send: '+f
-    # the shared wallet's sendTransaction is called ONLY by the Project Home editor (one $SYNC transfer, below)
-    if not (f.endswith('home-editor.js') or f.endswith('sn-wallet.js')): assert '.sendTransaction(' not in t, 'shared-wallet send outside the Project Home editor: '+f
+    # the shared wallet's sendTransaction is called ONLY by the Project Home editor (one $SYNC transfer, below) and by
+    # the EARLY fan page (one standard ERC-20 transfer fan -> creator, audited in the EARLY section below)
+    if not (f.endswith('home-editor.js') or f.endswith('sn-wallet.js') or f.endswith('labs-early.js')): assert '.sendTransaction(' not in t, 'shared-wallet send outside the Project Home editor / EARLY fan page: '+f
 # Project Home: exactly one send — ERC-20 transfer(sink, exact quoted amount) on canonical $SYNC, never value, never approve
 _he=(root/'home-editor.js').read_text()
 assert _he.count('.sendTransaction(')==1 and "W.sendTransaction({ to: SYNC, data: transferData(i.sink, i.exactTaggedSyncAmount), value: '0x0' })" in _he
@@ -197,7 +198,7 @@ assert 'controlChallenge' not in lib_prov and 'verifyControl' not in lib_prov  #
 ipfs_lib=(root/'lib/syncnet-ipfs.js').read_text()
 assert ipfs_lib.index('gateway.pinata.cloud/ipfs/') < ipfs_lib.index('https://ipfs.io/ipfs/') < ipfs_lib.index('dweb.link/ipfs/')  # display gateway order
 for f in site_js:
-    if f.endswith('syncnet-ipfs.js') or f.endswith('kit.js') or '/netlify/' in f.replace('\\\\','/'): continue
+    if f.endswith('syncnet-ipfs.js') or f.endswith('kit.js') or '/netlify/' in f.replace('\\','/'): continue  # (path separator normalised for Windows checkouts)
     t=open(f,encoding='utf-8').read()
     assert 'ipfs.io/ipfs/' not in t and 'dweb.link/ipfs/' not in t and 'gateway.pinata.cloud/ipfs/' not in t, 'gateway concatenation outside the canonical utility: '+f
 assert 'Expected (signed intent)' in tok and 'INSECURE LINK' in tok and "'Token'" not in tok.split('function websiteView')[0][-400:]
@@ -334,3 +335,62 @@ _dc=(root/'contracts/project-home-sink/script/DeployChecks.sol').read_text()
 assert '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168' in _dc and '0x458D2a59c2F3dd32775a64eE72004561440d64Df' in _dc and 'SYNC_USDG_MARKET = 1' in _dc
 assert not list((root/'contracts/project-home-sink').glob('broadcast/**/*.json')), 'no deployment broadcast may exist'
 print('SyncNet Project Home foundation static audit: PASS')
+
+# ======================================================================================= Labs · EARLY (SYNC Proof)
+# docs/sync-proof-early-spec.md: closed by default, own EIP-712 domain, direct fan->creator ERC-20 transfer only,
+# no custody / fee / swap / escrow, private by default, honest metrics, consumer language without investment framing,
+# the ONE server-sent transaction (the daily anchor) confined to its own module and strictly validated.
+_el=(root/'lib/syncnet-early.js').read_text(encoding='utf-8'); _efn=(root/'netlify/functions/early.js').read_text(encoding='utf-8')
+_eauth=(root/'netlify/functions/early-youtube-auth.js').read_text(encoding='utf-8'); _esnap=(root/'netlify/functions/early-snapshot.js').read_text(encoding='utf-8')
+_eanchor=(root/'netlify/functions/early-anchor.js').read_text(encoding='utf-8'); _etx=(root/'netlify/lib/early-tx.js').read_text(encoding='utf-8')
+_ecfg=(root/'netlify/lib/early-config.js').read_text(encoding='utf-8'); _epage=(root/'labs-early.js').read_text(encoding='utf-8'); _ecreator=(root/'labs-early-creator.js').read_text(encoding='utf-8')
+_ehtml=(root/'labs-early.html').read_text(encoding='utf-8')+(root/'labs-early-creator.html').read_text(encoding='utf-8')
+# 1. domain pinned; no other product's domain
+assert "name: 'SyncNet SYNC Proof'" in _el and "version: '1'" in _el and 'chainId: 4663' in _el
+for _d in ["'SyncNet Marketplace'","'SyncNet Website'","'SyncNet Economies'"]: assert _d not in _el and _d not in _efn, 'foreign EIP-712 domain in EARLY: '+_d
+# 2. gate: closed by default; flags.js master switch; config exposes it
+assert "early: truthy(env.SYNCNET_EARLY_ENABLED)" in _fl and "early: requested.early && durable && !earlyKilled" in _fl and 'early: f.early === true' in (root/'netlify/functions/config.js').read_text(encoding='utf-8')
+assert "truthy(env.SYNCNET_EARLY_ENABLED)" in _ecfg and "SYNCNET_EARLY_DISABLED" in _ecfg
+# 3. routes + scheduled jobs
+for _r in ['/api/early /.netlify/functions/early 200','/api/early-youtube-auth /.netlify/functions/early-youtube-auth 200','/labs/early/creator /labs-early-creator.html 200','/labs/early /labs-early.html 200','/labs/early/* /labs-early.html 200']: assert _r in red, 'redirect missing: '+_r
+assert red.index('/labs/early/creator /labs-early-creator.html 200') < red.index('/labs/early/* /labs-early.html 200')
+assert 'from = "/api/early"' in toml and '[functions."early-snapshot"]' in toml and '[functions."early-anchor"]' in toml and 'lib/syncnet-early.js' in toml and 'syncnet-early-keys.json' in toml and 'syncnet-early-assets.json' in toml
+# 4. EARLY functions never touch other products' keys; the anchor is the only server-sent transaction, from its own module
+for _name,_t in [('early.js',_efn),('early-youtube-auth.js',_eauth),('early-snapshot.js',_esnap),('early-anchor.js',_eanchor)]:
+    assert not _re3.search(r"['`](mp:|site:|eco:|reg:|pons2:|pump:)", _t), 'foreign store key in '+_name
+    assert 'eth_sendTransaction' not in _t, 'wallet send in a function: '+_name
+    assert not _re3.search(r"json\(\s*5\d\d\s*,\s*\{\s*error:\s*String\(", _t), 'raw error text returned in '+_name
+assert _efn.count('eth_sendRawTransaction')==0 and _esnap.count('eth_sendRawTransaction')==0 and _eauth.count('eth_sendRawTransaction')==0
+assert _eanchor.count("r('eth_sendRawTransaction'")==1 and 'Tx.anchorTransaction(' in _eanchor, 'the anchor is sent exactly once, through the validated builder'
+assert "if (back.from !== to || back.to !== to || back.value !== 0n || back.data !== data" in _etx and 'MAX_GAS_LIMIT' in _etx and 'MAX_GAS_PRICE_WEI' in _etx and "Number(chainId) !== E.CHAIN_ID" in _etx
+assert 'privateKey' not in _eanchor and 'SYNCNET_EARLY_ANCHOR_KEY' not in _eanchor and 'SYNCNET_EARLY_ATTESTATION_KEY' not in _efn, 'key material must stay inside early-config.js closures'
+# 5. public key registry: no 32-byte value may ever be committed
+_ek=(root/'syncnet-early-keys.json').read_text(encoding='utf-8'); _ekj=_je.loads(_ek)
+assert _ekj['schema']=='syncnet.early.keys.v1' and not _re3.search(r'[0-9a-fA-F]{64}', _ek), 'a 32-byte hex value is present in syncnet-early-keys.json'
+for _k in _ekj['attestation']+_ekj['anchor']: assert set(_k.keys()) <= {'keyId','address','validFrom','validUntil','status','note'} and _re3.fullmatch(r'0x[0-9a-fA-F]{40}', _k['address'])
+# 6. the fan page: exactly one send, a standard transfer built by the shared 68-byte builder, compared with the stored intent
+assert _epage.count('.sendTransaction(')==1 and "W.sendTransaction({ to: msg.token, data, value: '0x0' })" in _epage and "const data = E.transferCalldata(msg.receiver, msg.amount);" in _epage and "if (data !== i.tx.data" in _epage
+assert '0x095ea7b3' not in _epage+_ecreator+_el and 'approve(' not in _epage+_ecreator
+assert "'0xa9059cbb'" in _el and 'padStart(64' in _el and 'transferCalldata' in _el  # the only calldata EARLY ever builds
+assert 'eth_sendTransaction' not in _ecreator and '.sendTransaction(' not in _ecreator, 'the creator page never sends'
+assert _ecreator.count('signTyped(')==2 and 'personal_sign' not in _epage+_ecreator  # typed signatures only: the link request and the manifest (rotation reuses it)
+# 7. persist-then-enable and the happy path: the send button exists only after intent-store; a finalize signature only in the AMBIGUOUS/RECOVERY branch
+assert _epage.index("action: 'intent-store'") < _epage.index("async function sendTransfer") and "eSend').hidden = !(s.connected && i && i.status === 'OPEN')" in _epage
+assert _epage.count("E.typedData('SupportFinalize'")==1 and _epage.index("function chooseCandidate") < _epage.index("E.typedData('SupportFinalize'")
+# 8. server: no admin path can finalise; every receipt comes from finalise() after the public rule; extra fields refused
+assert _efn.count('async function finalise(')==1 and "return finalise(ctx, it, c, 'auto', null)" in _efn and "if (!['AMBIGUOUS', 'RECOVERY_AVAILABLE', 'EXPIRED', 'REORGED'].includes(i.status))" in _efn
+assert 'onlyFields(b' in _efn and "'receiver'" not in _efn.split('async function intentDraft')[1].split('async function intentStore')[0].split('onlyFields(b, [')[1].split(']')[0]
+# 9. privacy: no public view lists supporters; wallet-scoped reads need a session; count wording
+assert "sessionOf(ctx, 'fan')" in _efn and "if (view === 'mine')" in _efn and _efn.index("if (view === 'mine')") < _efn.index("sessionOf(ctx, 'fan')", _efn.index("if (view === 'mine')"))
+assert 'records, not as people' in _efn and 'signed interest signal' in _efn
+# 10. consumer language (fan + creator surfaces and server messages): no investment / ranking framing, no "people" counts
+_banned=[r'\bROI\b',r'\binvest(or|ment)s?\b',r'\bleaderboard',r'\bSupporter #',r'\bearly investor',r'\btop supporters',r'verified supporters',r'anchored in Bitcoin',r'\bescrow\b',r'\bwe hold\b']
+_nocomment=lambda s: _re3.sub(r"/\*[\s\S]*?\*/|//[^\n]*", '', s)  # what the user can see: markup and string literals, not source comments
+for _b in _banned: assert not _re3.search(_b, _ehtml+_nocomment(_epage)+_nocomment(_ecreator), _re3.I), 'banned consumer wording in EARLY pages: '+_b
+for _b in _banned: assert not _re3.search(_b, _re3.sub(r"//[^\n]*", '', _efn), _re3.I), 'banned wording in EARLY server messages: '+_b
+assert 'I was there when' in _ehtml and 'I WAS THERE WHEN' in _ehtml and 'SYNC Proof verified' in _ehtml
+assert 'never receives or holds' in _ehtml.lower() or 'never receives or holds funds' in _ehtml
+# 11. OpenTimestamps wording and the daily bundle: only attestation leaves (no intent/receipt commitments)
+_eots=(root/'netlify/lib/early-ots.js').read_text(encoding='utf-8')
+assert 'Bitcoin-verifiable later' in _eots and "'submitted'" in _eots and 'commitment:intent' not in _el and 'commitment:receipt' not in _el
+print('SyncNet Labs · EARLY static audit: PASS')

@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#000"><title>EARLY — SyncNet Labs</title><meta name="description" content="EARLY. I was there when. Support a YouTube creator directly from your wallet; SyncNet proves the relationship."><meta name="robots" content="noindex"><link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png"></head><body class="sn-early">
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><span class="nav-mark" aria-hidden="true">S</span><span>SyncNet</span></a><form class="sn-top-search" action="/" method="get" role="search"><input name="q" aria-label="Search projects by name, ticker or contract" placeholder="Search name, ticker or contract" autocomplete="off" spellcheck="false"><button type="submit" aria-label="Open">→</button></form><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<main class="sn-main" id="main"><div class="sn-wrap">
+<p class="sn-status sn-small" id="eStatus" role="status" aria-live="polite"></p>
+<div class="sn-panel" id="eGate" hidden><p class="sn-label">Labs · EARLY</p><p class="sn-lede">EARLY is not enabled on this deployment.</p></div>
+
+<section id="eLanding" hidden>
+  <p class="sn-label">Labs · experiment</p>
+  <h1 class="sn-h1">EARLY</h1>
+  <p class="sn-lede"><strong>I was there when.</strong> Support a YouTube creator directly from your wallet. Money goes straight to the creator’s verified wallet. SyncNet only proves that it happened, privately, and lets you make an EARLY card later if you want to.</p>
+  <ul class="early-facts">
+    <li>Your wallet pays the creator’s wallet directly. SyncNet never receives or holds funds and takes no fee.</li>
+    <li>Two wallet prompts: sign what you mean, then send the transfer.</li>
+    <li>Everything is private unless you choose to share a card.</li>
+  </ul>
+  <div class="early-two">
+    <div class="sn-panel">
+      <p class="sn-label">Creator not on EARLY yet?</p>
+      <h2 class="sn-h2">Count me in</h2>
+      <p class="sn-dim">A free, private, non-binding signal that you would support a creator when they join. No amount, no payment, nothing reserved.</p>
+      <label class="sn-label" for="eCmiInput">YouTube channel link or @handle</label>
+      <div class="early-row"><input class="sn-input" id="eCmiInput" autocomplete="off" spellcheck="false" placeholder="youtube.com/@creator"><button class="sn-btn" type="button" id="eCmiFind">Find</button></div>
+      <div id="eCmiResult" class="early-found" hidden></div>
+    </div>
+    <div class="sn-panel">
+      <p class="sn-label">Are you a YouTube creator?</p>
+      <h2 class="sn-h2">Join EARLY</h2>
+      <p class="sn-dim">Verify your channel with YouTube, connect the wallet that receives support, and your creator page goes live. Fans pay you directly.</p>
+      <p><a class="sn-btn" href="/labs/early/creator">Creator setup →</a></p>
+      <p class="sn-small sn-muted" style="margin:12px 0 0"><a href="/labs/early/mine">My EARLY</a> · your private receipts and signals.</p>
+    </div>
+  </div>
+</section>
+
+<section id="eCreator" hidden>
+  <a class="sn-back" href="/labs/early">← EARLY</a>
+  <div class="early-head"><span class="sn-logo early-avatar" id="eAvatar" aria-hidden="true"></span><div><p class="sn-label">EARLY · YouTube creator</p><h1 class="sn-h1 early-title" id="eTitle">…</h1><p class="sn-dim" id="eHandle"></p></div></div>
+  <div class="pj-warn" id="eWarn" hidden><span class="pj-warn-mark" aria-hidden="true">!</span><span id="eWarnText"></span></div>
+  <dl class="sn-kv early-kv"><dt>Receiving wallet</dt><dd><span class="sn-mono" id="eWallet"></span> <span class="sn-small sn-muted">verified for this channel by SyncNet</span></dd><dt>Accepts</dt><dd id="eAssets"></dd></dl>
+  <div class="sn-panel early-support" id="eSupportPanel">
+    <p class="sn-label">Support directly</p>
+    <div class="early-row">
+      <select class="sn-select" id="eAsset" aria-label="Asset"></select>
+      <input class="sn-input" id="eAmount" inputmode="decimal" autocomplete="off" placeholder="Amount" aria-label="Amount">
+    </div>
+    <p class="sn-small sn-muted" id="eMin"></p>
+    <ol class="sn-steps early-steps" id="eSteps" aria-label="Progress"><li data-step="connect"><b>1</b> Connect</li><li data-step="sign"><b>2</b> Sign what you mean</li><li data-step="send"><b>3</b> Send</li><li data-step="done"><b>4</b> Verified</li></ol>
+    <div class="early-actions">
+      <button class="sn-btn primary" type="button" id="eConnect">Connect wallet</button>
+      <button class="sn-btn primary" type="button" id="eSign" hidden>Sign what you mean</button>
+      <button class="sn-btn primary" type="button" id="eSend" hidden>Send to the creator</button>
+      <a class="sn-btn" id="eOpenReceipt" hidden>Open receipt →</a>
+    </div>
+    <p class="sn-status sn-small" id="eFlowStatus" role="status" aria-live="polite"></p>
+    <div id="eWalletApps" class="early-apps" hidden><p class="sn-small sn-dim">No wallet was found in this browser. Open this page inside your wallet app, then connect, sign and send without leaving it.</p><div class="early-apps-row" id="eWalletAppLinks"></div></div>
+    <p class="sn-warn-line">You send directly to the creator’s verified wallet, from your own wallet. SyncNet never receives or holds funds. Send only after signing, and send the exact amount shown.</p>
+  </div>
+</section>
+
+<section id="eReceipt" hidden>
+  <a class="sn-back" href="/labs/early">← EARLY</a>
+  <p class="sn-label">Your receipt · private</p>
+  <h1 class="sn-h1" id="eRTitle">…</h1>
+  <p class="sn-status sn-small" id="eRStatus" role="status" aria-live="polite"></p>
+  <div class="early-card" id="eRCard" hidden>
+    <div class="early-card-k">EARLY</div>
+    <div class="early-card-l">I WAS THERE WHEN.</div>
+    <div class="early-card-name" id="eRName"></div>
+    <div class="early-card-line" id="eRDate"></div>
+    <div class="early-card-line" id="eRAudience"></div>
+    <div class="early-card-v" id="eRVerified">SYNC Proof verified</div>
+  </div>
+  <div class="early-actions" id="eRActions">
+    <button class="sn-btn" type="button" id="eRVerify">Check again</button>
+    <button class="sn-btn" type="button" id="eRDownload" hidden>Download receipt (JSON)</button>
+    <button class="sn-btn primary" type="button" id="eRCardBtn" hidden>Make my EARLY card</button>
+  </div>
+  <div id="eRShare" class="sn-panel" hidden><p class="sn-label">Your card link</p><div class="early-row"><input class="sn-input sn-mono" id="eRShareUrl" readonly aria-label="Card link"><button class="sn-btn" type="button" id="eRCopy">Copy link</button></div><p class="sn-small sn-muted">The card shows the creator, the date and the audience then. Your wallet, the amount and the transaction stay hidden.</p></div>
+  <div id="eRRecover" class="sn-panel" hidden><p class="sn-label">Sent from another device?</p><div class="early-row"><input class="sn-input sn-mono" id="eRTx" placeholder="0x… transaction hash" aria-label="Transaction hash"><button class="sn-btn" type="button" id="eRTxBtn">Check</button></div></div>
+  <div id="eRChoose" class="sn-panel" hidden><p class="sn-label">More than one transfer matches</p><p class="sn-dim">Choose the one you meant. One signature finalises it; the other transfer stays a direct gift to the creator without a receipt.</p><div id="eRCandidates"></div></div>
+  <details class="pj-details" id="eRDetails" hidden><summary>Verification details</summary><div class="pj-details-body"><pre class="early-pre" id="eRJson"></pre></div></details>
+</section>
+
+<section id="eMine" hidden>
+  <a class="sn-back" href="/labs/early">← EARLY</a>
+  <p class="sn-label">Private</p>
+  <h1 class="sn-h1">My EARLY</h1>
+  <p class="sn-dim">Your receipts and signals, visible only to you. Signing in is a free wallet signature.</p>
+  <p><button class="sn-btn primary" type="button" id="eMineSignIn">Sign in with your wallet</button></p>
+  <div id="eMineLists" hidden>
+    <h2 class="sn-h2">Receipts</h2><ol class="sn-list" id="eMineReceipts"></ol>
+    <h2 class="sn-h2" style="margin-top:28px">Count me in signals</h2><ol class="sn-list" id="eMineSignals"></ol>
+    <h2 class="sn-h2" style="margin-top:28px">Open intents</h2><ol class="sn-list" id="eMineIntents"></ol>
+  </div>
+</section>
+
+<section id="eCard" hidden>
+  <p class="sn-label">EARLY · verification</p>
+  <div class="early-card" id="eCCard">
+    <div class="early-card-k">EARLY</div>
+    <div class="early-card-l">I WAS THERE WHEN.</div>
+    <div class="early-card-name" id="eCName"></div>
+    <div class="early-card-line" id="eCDate"></div>
+    <div class="early-card-line" id="eCAudience"></div>
+    <div class="early-card-v">SYNC Proof verified</div>
+  </div>
+  <p class="sn-dim" id="eCWhat"></p>
+  <details class="pj-details"><summary>What this verifies</summary><div class="pj-details-body"><ul id="eCList" class="early-facts"></ul><p class="sn-small sn-muted" id="eCNot"></p><p class="sn-small sn-muted">Audience size is an approximate, dated snapshot from YouTube recorded by SyncNet. It never changes afterwards.</p></div></details>
+  <p class="sn-small sn-muted"><a href="/labs/early">What is EARLY?</a></p>
+</section>
+</div></main>
+<footer class="sn-foot"><div class="sn-wrap sn-foot-inner"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a><a href="/network.html">Network</a><a href="/for-sale">For sale</a><a href="/registry.html">Registry</a><a href="/labs.html">Labs</a><a href="/kit.html">Project Kit</a><a href="/launches.html">My launches</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><p class="sn-foot-note">Independent software on Robinhood Chain. EARLY is a pilot experiment. SyncNet never holds your keys or your funds.</p></div></footer><nav class="sn-tabbar" aria-label="Primary"><a href="/" data-nav="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>Explore</a><a href="/build.html" data-nav="create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</a><a href="/you.html" data-nav="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>You</a></nav>
+<script src="/lib/syncnet-core.js" defer></script><script src="/lib/syncnet-early.js" defer></script><script src="/sn-wallet.js" defer></script><script src="/sn-ui.js" defer></script><script src="/labs-early.js" defer></script></body></html>

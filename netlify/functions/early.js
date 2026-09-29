@@ -607,7 +607,7 @@ async function finalise(ctx, it, c, mode, fin) {
   else { try { await store.zaddMany([[K.pendingFinal, [[Number(c.blockNumber), receiptId]]]]); } catch (err) { logError(FN, 'pending-index', err, {}); } } // the scheduled job reconciles it; the UI can too
   await bump(store, 'receipts_mode_' + mode.replace(/-/g, '_'), now);
   log(FN, 'receipt', { receipt: receiptId.slice(0, 18), mode, status: receipt.status, creatorId: i.creatorId.slice(0, 18) });
-  return json(200, { ok: true, status: receipt.status, receiptId, mode, receipt: await receiptSummary(ctx, receipt), message: receipt.status === 'FINALIZED' ? 'Support verified and final.' : 'Support verified. Finalising (about 15 minutes on Robinhood Chain); your EARLY card unlocks then.' });
+  return json(200, { ok: true, status: receipt.status, receiptId, mode, receipt: await receiptSummary(ctx, receipt), message: receipt.status === 'FINALIZED' ? 'Support verified and final.' : 'Support verified. Finalising (typically 15–20 minutes on Robinhood Chain); your EARLY card unlocks then.' });
 }
 
 /** Finality / reorg reconciliation (permissionless). Mirrors Project Home: two agreeing reads before invalidating. */
