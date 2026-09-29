@@ -12,6 +12,8 @@
  *    launches LAUNCHED AGAINST the root, loaded independently of PAR, page by page ("LOAD MORE"), in their own
  *    section and with their own labels. A PONS failure shows one neutral note and never hides the PAR data. When the
  *    endpoint answers enabled:false the page renders exactly as it did before PONS discovery existed.
+ *  - Solana (?root=<mint>, case preserved via lib/syncnet-assets.js): a separate read-only view fed only by
+ *    /api/pump-economy (see solanaEconomy below). The EVM path above is untouched by it.
  *  - No volume/TVL/fee aggregates. No global ranking of Economies. Nothing is written to browser storage.
  */
 const Core=window.SyncNetCore,Chain=window.SyncNetChain,Eco=window.SyncNetEconomy,Origins=window.SyncNetOrigins;
@@ -27,10 +29,18 @@ const nonce=()=>{const a=new Uint8Array(32);crypto.getRandomValues(a);return'0x'
 const rpc=Chain.makeRpc(Chain.ROBINHOOD.rpcUrl,{timeoutMs:10000,retries:1});
 const SHOW=120;
 
-const root=lc(new URL(location.href).searchParams.get('root')||'');
+const Assets=window.SyncNetAssets;
+// The raw ?root= value, case preserved: a Solana mint is case-sensitive and is never lowercased. A 0x root is
+// lowercased exactly as before.
+const rawRoot=String(new URL(location.href).searchParams.get('root')||'').trim();
+if(Assets&&Assets.isSolanaMint(rawRoot)){solanaEconomy(rawRoot);return}
+const root=lc(rawRoot);
 if(!Eco.isRootAddr(root)){
  $('ecoPick').hidden=false;$('ecoTitle').textContent='OPEN AN ECONOMY';
- const go=()=>{const a=$('ecoRootInput').value.trim();if(Eco.isRootAddr(a))location.href='/economy.html?root='+encodeURIComponent(a.toLowerCase());else{$('ecoPickStatus').textContent='That is not a contract address (0x followed by 40 hex characters).';$('ecoPickStatus').className='asset-status fail'}};
+ const bad=m=>{$('ecoPickStatus').textContent=m;$('ecoPickStatus').className='asset-status fail'};
+ const nativeMsg='Native SOL is not a token mint. Pump.fun launches against native SOL are not included in this V0 index.';
+ if(rawRoot)bad(Assets&&Assets.isNativeSol(rawRoot)?nativeMsg:'That is not a Robinhood Chain contract address or a Solana mint (base58, exact case).');
+ const go=()=>{const a=$('ecoRootInput').value.trim();if(Eco.isRootAddr(a))location.href='/economy.html?root='+encodeURIComponent(a.toLowerCase());else if(Assets&&Assets.isSolanaMint(a))location.href='/economy.html?root='+encodeURIComponent(a);else bad(Assets&&Assets.isNativeSol(a)?nativeMsg:'That is not a contract address (0x followed by 40 hex characters) or a Solana mint (base58, exact case).')};
  $('ecoOpen').addEventListener('click',go);$('ecoRootInput').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
  return;
 }
@@ -264,4 +274,73 @@ async function requestCurator(){
 document.addEventListener('click',e=>{const b=e.target.closest('[data-eco-act]');if(b)curate(lc(b.dataset.child),b.dataset.ecoAct)});
 
 load().then(render).catch(()=>{$('ecoTitle').textContent='ECONOMY UNAVAILABLE';$('ecoLead').textContent='The indexer and the chain did not answer. Nothing has been inferred.'});
+
+// ---------------------------------------------------------------- Solana (read-only, Pump.fun V0)
+/*
+ * /economy.html?root=<Solana mint>. Read-only: the only request is /api/pump-economy (Pump.fun launches LAUNCHED
+ * AGAINST the mint, newest first, page by page). No Robinhood RPC, no PAR, no curation, no wallet, no Builder, no
+ * Passport. No name, symbol or logo is fetched or guessed: identity is the case-preserved mint.
+ */
+function solanaEconomy(mint){
+ const PAGE=24;
+ const shortMint=m=>m.length>12?m.slice(0,4)+'…'+m.slice(-4):m;
+ const P={enabled:null,error:false,status:0,total:0,items:[],seen:new Set(),nextCursor:null,loading:false,historyComplete:false,historyFromSlot:null,through:null,stale:false};
+ async function page(cursor){
+  if(P.loading)return;P.loading=true;
+  try{
+   const r=await fetch('/api/pump-economy?root='+encodeURIComponent(mint)+'&limit='+PAGE+(cursor?'&cursor='+encodeURIComponent(cursor):''),{cache:'no-store'});
+   const j=await r.json().catch(()=>({}));
+   // enabled:false on a later page (flag flipped mid-session) keeps what is already loaded and reads as a failed page.
+   if(j&&j.enabled===false){if(P.enabled===null)P.enabled=false;else P.error=true;return}
+   P.enabled=true;
+   if(!r.ok||!Array.isArray(j.items)){P.error=true;P.status=r.status;return}
+   // Dedupe by the exact, case-sensitive mint. Earlier pages are never refetched.
+   for(const it of j.items){const m=it&&it.mint;if(typeof m==='string'&&Assets.isSolanaMint(m)&&m!==mint&&!P.seen.has(m)){P.seen.add(m);P.items.push({mint:m,launchSlot:Number.isFinite(it.launchSlot)?it.launchSlot:null})}}
+   P.error=false;P.total=Number(j.total)||0;P.nextCursor=typeof j.nextCursor==='string'&&j.nextCursor?j.nextCursor:null;
+   P.historyComplete=j.historyComplete===true;P.historyFromSlot=Number.isFinite(j.historyFromSlot)?j.historyFromSlot:null;P.through=Number.isFinite(j.indexedThroughSlot)?j.indexedThroughSlot:null;P.stale=j.stale===true;
+  }catch{P.enabled=true;P.error=true}
+  finally{P.loading=false}
+ }
+ const fact=(l,v)=>`<div><span>${esc(l)}</span><strong>${esc(v)}</strong></div>`;
+ const card=it=>`<article class="network-card" data-child="${esc(it.mint)}"><div class="network-card-top"><div><h3 class="mono">${esc(shortMint(it.mint))}</h3><div class="ticker">Solana · name not read by SyncNet</div></div></div><div class="chip-row"><span class="badge registry-badge indexed">CONNECTED · PUMP.FUN LAUNCH PAIR</span><span class="badge">SOLANA</span></div><p class="mono" style="font-size:11px;margin-top:10px;overflow-wrap:anywhere;user-select:all">${esc(it.mint)}</p><p class="coverage-note">LAUNCHED AGAINST · PUMP.FUN${it.launchSlot!=null?' · slot '+esc(it.launchSlot.toLocaleString()):''}</p></article>`;
+ function render(){
+  const s=shortMint(mint);
+  document.title='Solana Economy '+s+' — SyncNet';
+  $('ecoEyebrow').textContent='Economy · Solana · derived from indexed Pump.fun launches';
+  $('ecoTitle').textContent='SOLANA ECONOMY';
+  $('ecoLead').textContent='Pump.fun launches with an observable launch relationship to this Solana mint, read from indexed Pump.fun launch records by mint address (exact case). SyncNet endorses nothing.';
+  $('ecoRootName').textContent=s;$('ecoRootAddr').textContent=mint;$('ecoRootAddr').style.overflowWrap='anywhere';
+  $('ecoBadges').innerHTML='<span class="badge registry-badge network">SOLANA</span>';
+  $('ecoImpostor').innerHTML='';
+  const off=P.enabled===false,down=P.enabled&&P.error&&!P.items.length;
+  $('ecoFacts').innerHTML=fact('Chain','SOLANA MAINNET')+fact('Connected via Pump.fun (indexed launches)',off?'not enabled':down?'unavailable':P.enabled?P.total.toLocaleString():'…');
+  $('ecoCoverage').textContent='Indexed from Solana · Pump.fun non-SOL quote launches. Native-SOL Pump.fun launches are not included in this V0 index.';
+  ['ecoBuild','ecoProject'].forEach(id=>{$(id).hidden=true});
+  $('ecoMap').href='/network.html?token='+encodeURIComponent(mint);
+  $('ecoCard').hidden=false;$('ecoSolanaSection').hidden=false;
+  ['ecoCuratorSection','ecoRecognizedSection','ecoConnectedSection','ecoPonsSection'].forEach(id=>{$(id).hidden=true});
+  const sec=$('ecoPumpSection'),more=$('ecoPumpMore');sec.hidden=false;
+  if(P.enabled===null){$('ecoPump').innerHTML='<div class="network-empty">Reading indexed Pump.fun launches…</div>';more.hidden=true;return}
+  if(off||down){
+   $('ecoPumpCountTitle').textContent='CONNECTIONS.';$('ecoPumpCoverage').textContent='';$('ecoPumpCount').textContent='';more.hidden=true;
+   $('ecoPump').innerHTML=`<div class="network-empty">${off?'Pump.fun discovery is not enabled on this deployment.':P.status===400?'Pump.fun discovery cannot serve this mint.':'Pump.fun discovery is temporarily unavailable.'} No relationship has been inferred.</div>`;return;
+  }
+  $('ecoPumpCountTitle').textContent=P.total.toLocaleString()+' CONNECTION'+(P.total===1?'':'S')+'.';
+  $('ecoPumpCoverage').textContent='Indexed from Solana · Pump.fun non-SOL quote launches'+(P.historyComplete?' · historical V0 coverage is complete'+(P.historyFromSlot!=null?' from slot '+P.historyFromSlot.toLocaleString():''):' · historical coverage is still being indexed')+(P.through!=null?' · indexed through slot '+P.through.toLocaleString():'')+'.'+(P.stale?' Index data may be stale; newer launches may be missing.':'')+' Native-SOL Pump.fun launches are not included in this V0 index.';
+  $('ecoPump').innerHTML=P.items.length?P.items.map(card).join(''):'<div class="network-empty">No Pump.fun launch against this mint was found in the indexed non-SOL quote history.</div>';
+  $('ecoPumpCount').textContent=(P.items.length<P.total?'Loaded '+P.items.length.toLocaleString()+' of '+P.total.toLocaleString()+' Pump.fun launches, newest first.':P.total?'All '+P.total.toLocaleString()+' Pump.fun launch'+(P.total===1?'':'es')+' loaded.':'')+(P.error?' Pump.fun discovery is temporarily unavailable; try again.':'');
+  more.hidden=!P.nextCursor;more.disabled=P.loading;
+ }
+ $('ecoPumpMore').addEventListener('click',async()=>{
+  if(!P.nextCursor||P.loading)return;
+  const b=$('ecoPumpMore');b.disabled=true;b.textContent='LOADING…';
+  const before=P.items.length;
+  await page(P.nextCursor);
+  b.textContent='LOAD MORE FROM PUMP.FUN';b.disabled=false;
+  render();
+  const first=$('ecoPump').querySelectorAll('.network-card')[Math.max(0,before-1)];if(first)first.scrollIntoView?.({block:'nearest'});
+ });
+ render();
+ page(null).then(render);
+}
 })();
