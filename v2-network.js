@@ -16,6 +16,10 @@ const CHILD_BATCH=100;
 // arrive in server pages of PONS_PAGE. "Show all" reveals what is already loaded; "load more from PONS V2" fetches the
 // next server page. The two are never conflated, and nothing claims to be complete while the server has more.
 const PONS_PAGE=50;
+// Solana (Pump.fun V0): a pasted base58 mint is mapped directly, case preserved (lib/syncnet-assets.js), from
+// /api/pump-economy only — never through the EVM lookup, PAR, the Robinhood RPC or any metadata URL.
+const PUMP_PAGE=50;
+const Assets=window.SyncNetAssets||null;
 const CANONICAL=new Map([[SYNC.toLowerCase(),{rank:0,label:'SYNCNET NETWORK ASSET',symbol:'SYNC'}],[DEMO.toLowerCase(),{rank:1,label:'SYNCNET ORIGIN',symbol:'SYNCAT'}]]);
 let historyCoverage={mode:'unknown',count:0,indexed:0};
 const $=id=>document.getElementById(id);
@@ -308,8 +312,8 @@ function childView(total,shown,server){
     countNote:pend?` (showing ${s} of ${total} loaded)`:total<=CHILD_INITIAL?'':(s>=total?` (all ${total} shown)`:` (showing ${s} of ${total})`)
   };
 }
-function childMoreMarkup(v){
-  const server=v.server?`<button class="btn" type="button" data-child-server aria-controls="topologyChildren">LOAD MORE FROM PONS V2 · ${v.server.loaded} OF ${v.server.total} LOADED</button>`:'';
+function childMoreMarkup(v,source='PONS V2'){
+  const server=v.server?`<button class="btn" type="button" data-child-server aria-controls="topologyChildren">LOAD MORE FROM ${esc(source)} · ${v.server.loaded} OF ${v.server.total} LOADED</button>`:'';
   if(v.total<=CHILD_INITIAL) return server;
   const more=v.moreLabel?`<button class="btn" type="button" data-child-more aria-controls="topologyChildren">${esc(v.moreLabel)}</button>`:'';
   const less=v.canCollapse?`<button class="btn" type="button" data-child-collapse aria-controls="topologyChildren">SHOW FIRST ${CHILD_INITIAL}</button>`:'';
@@ -339,8 +343,8 @@ async function loadTopology(address,opts={}){
   if($('searchStatus')){$('searchStatus').className='asset-status';$('searchStatus').textContent='Mapping live connections…';}
   if($('topologyGraph')) $('topologyGraph').innerHTML='<div class="network-empty">Reading live PAR connections…</div>';
   if($('sameBranch')) $('sameBranch').innerHTML='';
-  if($('buildAround')) $('buildAround').href=`/build.html?with=${encodeURIComponent(address)}`;
-  if($('openProjectPage')) $('openProjectPage').href=`/project/${encodeURIComponent(address)}`;
+  if($('buildAround')){$('buildAround').hidden=false;$('buildAround').href=`/build.html?with=${encodeURIComponent(address)}`;}
+  if($('openProjectPage')){$('openProjectPage').hidden=false;$('openProjectPage').href=`/project/${encodeURIComponent(address)}`;}
   if($('openEconomy')) $('openEconomy').href=`/economy.html?root=${encodeURIComponent(String(address).toLowerCase())}`;
   if($('topologyTitle')) $('topologyTitle').innerHTML='MAPPING<br><span class="cyan">CONNECTIONS…</span>';
   if($('topologyMeta')) $('topologyMeta').textContent=`Reading PAR markets for ${short(address)}…`;
@@ -512,6 +516,111 @@ async function loadTopology(address,opts={}){
     if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
   }
 }
+/** One Pump.fun page for a Solana mint: {enabled:false} | {enabled:true,error:true,status} | {enabled:true,total,items,nextCursor,…}. */
+async function pumpPage(mint,cursor){
+  try{
+    const r=await fetch(`/api/pump-economy?root=${encodeURIComponent(mint)}&limit=${PUMP_PAGE}${cursor?'&cursor='+encodeURIComponent(cursor):''}`,{cache:'no-store'});
+    const j=await r.json().catch(()=>({}));
+    if(j&&j.enabled===false) return {enabled:false};
+    if(!r.ok||!Array.isArray(j.items)) return {enabled:true,error:true,status:r.status};
+    return {enabled:true,total:Number(j.total)||0,items:j.items.filter(i=>typeof i?.mint==='string'&&Assets.isSolanaMint(i.mint)),nextCursor:typeof j.nextCursor==='string'&&j.nextCursor?j.nextCursor:null,
+      historyComplete:j.historyComplete===true,historyFromSlot:Number.isFinite(j.historyFromSlot)?j.historyFromSlot:null,stale:j.stale===true};
+  }catch{return {enabled:true,error:true,status:0}}
+}
+const shortMint=m=>String(m||'').length>12?`${m.slice(0,4)}…${m.slice(-4)}`:String(m||'');
+// Pump children are not linked: V0 has no child → root lookup, so a child mint cannot be mapped on its own yet.
+function pumpNode(it){
+  return `<span class="topology-node child" data-mint="${esc(it.mint)}" title="${esc(it.mint)}"><strong>${esc(shortMint(it.mint))}</strong><span>SOLANA${Number.isFinite(it.launchSlot)?' · slot '+esc(it.launchSlot.toLocaleString()):''}</span><em class="node-status auto">PUMP.FUN INDEXED</em></span>`;
+}
+async function loadSolanaTopology(mint,opts={}){
+  const reveal_=opts.reveal!==false;
+  const seq=++mapSeq;
+  currentRoot=mint;
+  const label=shortMint(mint);
+  if($('tokenSearch')) $('tokenSearch').value=mint;
+  if($('searchStatus')){$('searchStatus').className='asset-status';$('searchStatus').textContent='Mapping indexed Pump.fun launches…';}
+  if($('topologyGraph')) $('topologyGraph').innerHTML='<div class="network-empty">Reading indexed Pump.fun launches…</div>';
+  if($('sameBranch')) $('sameBranch').innerHTML='';
+  // Builder and Project Page are Robinhood Chain features: hidden for a Solana asset, restored by the next EVM map.
+  if($('buildAround')) $('buildAround').hidden=true;
+  if($('openProjectPage')) $('openProjectPage').hidden=true;
+  if($('openEconomy')) $('openEconomy').href=`/economy.html?root=${encodeURIComponent(mint)}`;
+  if($('topologyTitle')) $('topologyTitle').innerHTML='MAPPING<br><span class="cyan">CONNECTIONS…</span>';
+  if($('topologyMeta')) $('topologyMeta').textContent=`Reading Pump.fun launches for ${label}…`;
+  const section=showTopologySection();
+  if(section) section.setAttribute('aria-busy','true');
+  if(reveal_&&section) reveal(section,'start');
+
+  const pg=await pumpPage(mint,null);
+  if(seq!==mapSeq) return;
+  if(section) section.setAttribute('aria-busy','false');
+  if($('topologyTitle')) $('topologyTitle').innerHTML=`${esc(label)}<br><span class="cyan">IN CONTEXT.</span>`;
+  if($('profileState')){$('profileState').className='profile-state auto';$('profileState').innerHTML='<strong>INDEXED FROM SOLANA</strong> · Pump.fun launch records only, matched by mint address (exact case). No name, logo, Project Passport, verification, endorsement or affiliation is inferred.';}
+  const u=new URL(location.href);u.searchParams.set('token',mint);history.replaceState(null,'',u);
+  const V0='Indexed from Solana · Pump.fun non-SOL quote launches. Native-SOL Pump.fun launches are not included in this V0 index.';
+  if(!pg.enabled||pg.error){
+    const why=!pg.enabled?'Pump.fun discovery is not enabled on this deployment.':pg.status===400?'Pump.fun discovery cannot serve this mint.':'Pump.fun discovery is temporarily unavailable.';
+    if($('topologyMeta')) $('topologyMeta').textContent=`SOLANA · ${why}`;
+    if($('topologyGraph')) $('topologyGraph').innerHTML=`<div class="network-empty">${esc(why)} No relationship has been inferred.</div>`;
+    if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent=why;}
+    if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
+    return;
+  }
+  const st={total:pg.total,next:pg.nextCursor,loading:false,error:false,stale:pg.stale,historyComplete:pg.historyComplete,historyFromSlot:pg.historyFromSlot};
+  const kids=[],seen=new Set();
+  // Dedupe by the exact, case-sensitive mint; the root itself is never its own child.
+  const add=items=>{let n=0;for(const it of items||[]){if(it.mint===mint||seen.has(it.mint))continue;seen.add(it.mint);kids.push({mint:it.mint,launchSlot:it.launchSlot});n++}return n};
+  add(pg.items);
+  const serverState=()=>st.next?{remaining:Math.max(1,st.total-kids.length),loaded:kids.length,total:st.total}:null;
+  const coverage=()=>`${st.historyComplete?`Historical V0 coverage is complete${st.historyFromSlot!=null?' from slot '+st.historyFromSlot.toLocaleString():''}.`:'Historical coverage is still being indexed.'}${st.stale?' Index data may be stale; newer launches may be missing.':''} ${V0}`;
+  const metaText=v=>`SOLANA · ${st.total.toLocaleString()} PUMP.FUN CONNECTION${st.total===1?'':'S'}${v.countNote}. ${coverage()}${st.error?' Pump.fun discovery is temporarily unavailable; try again.':''}`;
+  let childState=childView(kids.length,Math.min(kids.length,CHILD_INITIAL),serverState());
+  if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
+  const bottom=kids.length?kids.slice(0,childState.shown).map(pumpNode).join(''):'<div class="topology-empty">No Pump.fun launch against this mint was found in the indexed non-SOL quote history.</div>';
+  if($('topologyGraph')) $('topologyGraph').innerHTML=`
+      <div class="topology-tree">
+        <div class="topology-label">THIS SOLANA ASSET</div>
+        <div class="topology-row"><div class="topology-empty">SyncNet does not read this Solana asset’s own markets in V0. The Pump.fun launches below were launched against it.</div></div>
+        <span class="topology-root" title="${esc(mint)}"><strong>${esc(label)}</strong><span>SOLANA ASSET</span></span>
+        <div class="topology-line"><span>MARKET · PUMP.FUN LAUNCH PAIR</span></div>
+        <div class="topology-label">PUMP.FUN LAUNCHES USING THIS TOKEN AS THEIR QUOTE ASSET</div>
+        <div class="topology-row" id="topologyChildren">${bottom}</div>
+        <div class="topology-more" id="topologyChildMore">${childMoreMarkup(childState,'PUMP.FUN')}</div>
+      </div>`;
+  // Same contract as the PONS path: local reveal re-slices what is loaded; only LOAD MORE FROM PUMP.FUN fetches.
+  const moreHost=$('topologyChildMore'),childHost=$('topologyChildren');
+  if(moreHost&&childHost){
+    const showChildren=(n,focusSel)=>{
+      const prev=childState.shown;
+      childState=childView(kids.length,n,serverState());
+      if(childState.shown>prev) childHost.insertAdjacentHTML('beforeend',kids.slice(prev,childState.shown).map(pumpNode).join(''));
+      else childHost.innerHTML=kids.slice(0,childState.shown).map(pumpNode).join('');
+      moreHost.innerHTML=childMoreMarkup(childState,'PUMP.FUN');
+      if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
+      const f=moreHost.querySelector(focusSel)||moreHost.querySelector('button');
+      if(f) f.focus({preventScroll:true});
+    };
+    moreHost.addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;
+      if(b.hasAttribute('data-child-more')) showChildren(childState.nextShown,'[data-child-more]');
+      else if(b.hasAttribute('data-child-server')){
+        if(st.loading||!st.next) return;
+        st.loading=true;b.disabled=true;b.textContent='LOADING FROM PUMP.FUN…';
+        pumpPage(mint,st.next).then(p=>{
+          st.loading=false;
+          if(seq!==mapSeq) return;
+          if(!p.enabled||p.error){st.error=true;b.disabled=false;b.textContent='PUMP.FUN UNAVAILABLE · RETRY';if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);return}
+          st.error=false;st.total=p.total;st.next=p.nextCursor;st.stale=p.stale;st.historyComplete=p.historyComplete;st.historyFromSlot=p.historyFromSlot;
+          const added=add(p.items);
+          showChildren(childState.shown+added,'[data-child-server]');
+        });
+      }
+      else if(b.hasAttribute('data-child-collapse')){showChildren(CHILD_INITIAL,'[data-child-more]');reveal(childHost,'nearest');}
+    });
+  }
+  if($('searchStatus')){$('searchStatus').className='asset-status pass';$('searchStatus').textContent=`${label} (Solana) mapped below. Launch connection ≠ affiliation.`;}
+  if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
+}
 async function searchTokens(raw){
   const seq=++searchSeq;
   setMapBusy(true);
@@ -528,6 +637,21 @@ async function searchTokensInner(raw,seq){
     return;
   }
   if(valid(q)){ await loadTopology(q); return; }
+  // Solana: a canonical base58 pubkey is mapped directly and exactly as typed (never lowercased, never looked up by name).
+  if(Assets&&Assets.isSolanaPubkey(q)){
+    if(Assets.isNativeSol(q)){
+      if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='Native SOL is not a token mint. Pump.fun launches against native SOL are not included in this V0 index.';}
+      flashStatus();
+      return;
+    }
+    await loadSolanaTopology(q); return;
+  }
+  // Mint-shaped but not a canonical 32-byte key (e.g. a mis-cased or truncated mint): say so, never substitute.
+  if(Assets&&q.length>=32&&q.length<=44&&Assets.base58Decode(q)){
+    if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='That is not a valid Solana mint. Solana mints are case-sensitive: paste the exact base58 address.';}
+    flashStatus();
+    return;
+  }
   const normalized=cleanText(q).replace(/^\$/,'').toLowerCase();
   if(normalized.length>64){
     if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='Search terms are limited to 64 characters. Paste a contract address for an exact lookup.';}
@@ -696,6 +820,7 @@ const initial=new URLSearchParams(location.search).get('token');
 if($('topologyGraph')){
   // Arriving with ?token= (e.g. from a MAP link) is an explicit map request: show the result.
   if(valid(initial)) loadTopology(initial,{reveal:true});
+  else if(Assets&&Assets.isSolanaMint(String(initial||''))) loadSolanaTopology(initial,{reveal:true});
   else if(document.body.dataset.topologyDemo!=='false') loadTopology(DEMO,{reveal:false});
 }
 loadRecentSync();
