@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-29T06:46:43.965Z",
+  "at": "2026-09-29T06:51:30.853Z",
   "passed": 129,
   "failed": 0,
   "results": [
@@ -346,7 +346,7 @@
     {
       "name": "E11 after finalisation a new same-tuple intent is allowed (notBefore > transfer time)",
       "ok": true,
-      "detail": "{\"ok\":true,\"intentId\":\"0x8fcc737ff40fe7b5edcceba562110bffc192519396109010ed32fb55a55a1657\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},"
+      "detail": "{\"ok\":true,\"intentId\":\"0x03abd7748bba274140d66d96582550e73b186e4f16e5c4b68c3aff76d4d22647\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},"
     },
     {
       "name": "E12 the consumed transfer is not a candidate for the new intent (window + txlog claim)",
@@ -451,7 +451,7 @@
     {
       "name": "E30b the default chunk size covers the window inside the budget (WAITING, not deferred)",
       "ok": true,
-      "detail": "{\"ok\":false,\"status\":\"WAITING\",\"intent\":{\"intentId\":\"0xcf808788813730be7810ece366badbeb18bf57ecf5053c9250de14fc6e51fb62\",\"status\":\"OPEN\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"by"
+      "detail": "{\"ok\":false,\"status\":\"WAITING\",\"intent\":{\"intentId\":\"0xa80c12544d88fb37babb3d1bf478dec9e6d82e0bfbcc309133b1674ab5ea8718\",\"status\":\"OPEN\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"by"
     },
     {
       "name": "E31 RPC without a safe tag never confirms (fail closed)",

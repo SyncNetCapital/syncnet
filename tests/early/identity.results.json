@@ -1,0 +1,237 @@
+{
+  "at": "2026-09-29T06:51:30.438Z",
+  "passed": 46,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A01 parseInput: channel id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A02 parseInput: @handle and URL forms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A03 parseInput: junk / other hosts refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A04 resolve by handle → channel id, title, https avatar, handle",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A05 resolve unknown → null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A06 channelsById dedupes, filters, returns counts and hidden flags",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A07 hidden subscriber count → null + hidden:true",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A08 5xx → YouTubeError unavailable, no retry",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A09 quota → code quota",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A10 timeout → unavailable",
+      "ok": true,
+      "detail": "timeout"
+    },
+    {
+      "name": "A11 authUrl: youtube.readonly only, online access, no offline/refresh",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A12 malformed code refused before any request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 closed deployment → 302 #e=closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 forged/unknown state token → #e=state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B03 creator-link (wallet signature) returns a start URL with a wallet-bound state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 start → 302 to Google consent with that state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B05 user denies consent → #e=denied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 invalid grant → #e=denied and the state is consumed (single use)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B07 the same state cannot be used again → #e=state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B08 valid callback → 302 to /labs/early/creator#s=<creator session>",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B09 session bound to the channel from channels.mine and the wallet from the state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B10 link record stores channel id, title, count, wallet, time; never the access token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B11 the code exchange and channels.mine happened once each, with the bearer token in memory only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B12 account without a channel → #e=no_channel",
+      "ok": true,
+      "detail": "/labs/early/creator#e=no_channel"
+    },
+    {
+      "name": "B13 token without the youtube.readonly scope → #e=denied",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B14 OAuth endpoint rate-limited per IP (5/min)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B15 POST not allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B16 the OAuth-issued session activates the creator (end-to-end identity)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt3.example/UC_x5XG1OV2P6uZZ5FSM9Ttw.jpg\",\"handle\":\"@alice\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1790664690,\"currentManifest\":{\"manifestHash\":\"0x99b598c466f1a62f1c8ed"
+    },
+    {
+      "name": "B17 /api/early resolve view uses the client and caches",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B18 resolve unknown → 404 (identical whether or not signals exist)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C01 enrolment snapshot exists for the join day (from the OAuth link value)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 job on the join day: today already snapshotted → skipped, no overwrite (first success wins)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 next day, YouTube down → failure counted, no snapshot, no state change",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 hourly retry succeeds → snapshot for that day with the value read then (5000), attested and queued",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 a later run the same day never replaces the day’s snapshot",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 a day that ended without a snapshot is never backfilled (d2 missing, d3 taken)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 hidden subscriber count recorded as hidden (null count)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 handle/title change refreshes display metadata only; identity (channel id, creatorId, wallet) unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 without the attestation key the job takes no snapshots (fail closed) and says so",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 receipt CONFIRMED and indexed for finality",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 receipt audience = the transfer day’s snapshot (42), display ~42",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C12 a later day’s value never mutates the historical receipt context",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 the job reconciles CONFIRMED receipts to FINALIZED and clears the index",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C14 the job completes a due rotation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C15 one run at a time (lock)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C16 disabled deployment → skipped",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

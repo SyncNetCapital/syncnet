@@ -65,6 +65,7 @@ const K = {
   resolve: (h) => `early:yt:resolve:v1:${h}`,
   snap: (ch, d) => `early:snap:v1:${ch}:${d}`,
   snapDays: (ch) => `early:snap-days:v1:${ch}`,
+  pendingFinal: 'early:pending-final:v1', // zset: CONFIRMED receipts awaiting finality (score = block number)
   ...Attest.K,
 };
 const C = E.CONST;
@@ -603,6 +604,7 @@ async function finalise(ctx, it, c, mode, fin) {
   }
   await bump(store, 'receipts_confirmed', now);
   if (receipt.status === 'FINALIZED') await bump(store, 'receipts_finalized', now);
+  else { try { await store.zaddMany([[K.pendingFinal, [[Number(c.blockNumber), receiptId]]]]); } catch (err) { logError(FN, 'pending-index', err, {}); } } // the scheduled job reconciles it; the UI can too
   await bump(store, 'receipts_mode_' + mode.replace(/-/g, '_'), now);
   log(FN, 'receipt', { receipt: receiptId.slice(0, 18), mode, status: receipt.status, creatorId: i.creatorId.slice(0, 18) });
   return json(200, { ok: true, status: receipt.status, receiptId, mode, receipt: await receiptSummary(ctx, receipt), message: receipt.status === 'FINALIZED' ? 'Support verified and final.' : 'Support verified. Finalising (about 15 minutes on Robinhood Chain); your EARLY card unlocks then.' });
