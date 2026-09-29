@@ -1,0 +1,217 @@
+{
+  "at": "2026-09-29T06:58:15.714Z",
+  "passed": 42,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A01 EIP-155 vector: signing hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A02 EIP-155 vector: raw signed transaction",
+      "ok": true,
+      "detail": "0xf86c098504a817c800825208943535353535353535353535353535353535353535880de0b6b3a76400008025a028ef61340bd939bc2195fe537567866003e1a15d3c71ff63e1590620aa636276a067cbe9d8997f761aecb703304b3800ccf555c9f3dc64214b297fb1966a3b6d83"
+    },
+    {
+      "name": "A03 decodeSigned recovers the sender and fields",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A04 RLP round trip of nested lists and edge values",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A05 RLP non-canonical single byte refused",
+      "ok": true,
+      "detail": "rlp: non-canonical"
+    },
+    {
+      "name": "A06 anchor tx: self-transfer, zero value, exact 47-byte calldata, chain 4663, decodes root+date",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A07 anchor tx refuses another chain id",
+      "ok": true,
+      "detail": "anchor: chain id must be 4663"
+    },
+    {
+      "name": "A08 anchor tx refuses a gas limit above the cap",
+      "ok": true,
+      "detail": "anchor: gas limit outside [21000, 300000]"
+    },
+    {
+      "name": "A09 anchor tx refuses a gas price above the ceiling",
+      "ok": true,
+      "detail": "anchor: gas price above the ceiling"
+    },
+    {
+      "name": "A10 anchor tx refuses a bad root / date",
+      "ok": true,
+      "detail": "anchorCalldata"
+    },
+    {
+      "name": "A11 the anchor code path has no way to name another destination or a value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A12 verifyAnchorTx accepts the mined shape and rejects another sender",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 synthetic pending timestamp parses fully and re-serialises identically",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 commitment = sha256(root ‖ x) for the pending attestation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B03 submit: both calendars ok, one merged proof, status \"submitted\" (never Bitcoin)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 merged proof holds one pending attestation per calendar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B05 upgrade: one calendar answered with a Bitcoin attestation → bitcoin-verifiable, other still pending",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 .ots file: magic header, version 1, keccak256 digest op, the root, then the timestamp",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B07 calendars down → proof null, status failed, no throw",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B08 unknown op refused",
+      "ok": true,
+      "detail": "ots: unknown op 0x99"
+    },
+    {
+      "name": "C01 seed: creator active, 3 leaves queued for today",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 today is never built; the look-back builds earlier (empty) days with date-specific empty roots",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 yesterday built: sorted de-duplicated leaves, root reproducible",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 anchor tx sent once, write-ahead recorded before broadcast, self-transfer with the root",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 OTS submitted with honest wording",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 next run: the mined receipt confirms the anchor; nothing is re-sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 bundleDate rule: an attestation issued \"yesterday\" after yesterday was built goes to the next unbuilt day",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 rebuilding a built day reproduces its root and changes nothing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 manifest attestations carry inclusion proofs that verify under the anchored root",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 public bundle view: leaves, root, anchors (tx hash, OTS status), enough to recompute",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 OTS upgrade → bitcoin-verifiable with the height recorded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C12 SYNCNET_EARLY_ANCHOR_DISABLED: bundles still build and OTS still submits, no chain tx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 no anchor key → anchoring off (fail closed), everything else proceeds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C14 gas price above the ceiling → anchor attempt refused (error recorded), retried later, never sent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C15 next hour at a normal price: anchored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C16 disabled deployment → skipped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C17 one run at a time",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D01 verifier: FINALIZED auto receipt verifies offline + on the mock chain + attestations + inclusion",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "D02 verifier states that ordering is not independently verifiable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D03 verifier rejects a tampered amount",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D04 verifier rejects a tampered attestation (id/signature)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D05 verifier rejects an intent signed by someone else",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

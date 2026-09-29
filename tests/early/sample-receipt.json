@@ -1,0 +1,413 @@
+{
+  "receipt": {
+    "schema": "syncnet.sync-proof.receipt.v1",
+    "receiptId": "0xd10b881347bb4a3ec31043fd7516419fcf44c258f1fcb228c5292d6155bc9bfb",
+    "matchingRule": "syncnet.sync-proof.matching.v1",
+    "mode": "auto",
+    "status": "FINALIZED",
+    "fact": {
+      "chainId": 4663,
+      "txHash": "0x69c073cd9f7d4b1495b080358e5046f9198be392647ed236fc0bb4e8ab795075",
+      "logIndex": 0,
+      "blockNumber": "175301",
+      "blockHash": "0xf05225dab6b3aacd6fcc0f7d5f15ab51f369ed0f9c099bb3ed0f54de899e9694",
+      "blockTimestamp": 1790839395,
+      "transfer": {
+        "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+        "from": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+        "to": "0x1563915e194d8cfba1943570603f7606a3115508",
+        "value": "1500000"
+      },
+      "confirmation": {
+        "policy": "safe-then-finalized",
+        "safeAt": "2026-10-01T07:23:15.000Z",
+        "finalizedAt": "2026-10-01T07:23:15.000Z"
+      }
+    },
+    "intent": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            }
+          ],
+          "SupportIntent": [
+            {
+              "name": "schema",
+              "type": "string"
+            },
+            {
+              "name": "intentId",
+              "type": "bytes32"
+            },
+            {
+              "name": "manifestHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "creatorId",
+              "type": "bytes32"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "sender",
+              "type": "address"
+            },
+            {
+              "name": "receiver",
+              "type": "address"
+            },
+            {
+              "name": "token",
+              "type": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "name": "notBefore",
+              "type": "uint256"
+            },
+            {
+              "name": "expiry",
+              "type": "uint256"
+            },
+            {
+              "name": "privacy",
+              "type": "string"
+            }
+          ]
+        },
+        "primaryType": "SupportIntent",
+        "domain": {
+          "name": "SyncNet SYNC Proof",
+          "version": "1",
+          "chainId": 4663
+        },
+        "message": {
+          "schema": "syncnet.early.support-intent.v1",
+          "intentId": "0xd8a26f3af8f91d9d3c96a283328d03a73a9d9893643ba5c6c02bdca4f46d8ab0",
+          "manifestHash": "0x7c047f2a9c3c325c4c32afd52eab15139a659e6951675aa42f87f6739e44170d",
+          "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+          "chainId": 4663,
+          "sender": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+          "receiver": "0x1563915e194d8cfba1943570603f7606a3115508",
+          "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "amount": "1500000",
+          "notBefore": 1790839335,
+          "expiry": 1790846535,
+          "privacy": "PRIVATE"
+        }
+      },
+      "signature": "0xee0cd6cd926dff402df73450487f3f20559c7cfdfafe74eae174cd2e22c94461348d0f644335684ca7b8c3af8f2c8051443166abb6c0fa474840fe44cd20cae31c",
+      "digest": "0x9a2e00d8eb6c9bc174e85e43726d024fec359ddc70dfd7f1da0021806425f3f6"
+    },
+    "finalize": null,
+    "creatorManifest": {
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            }
+          ],
+          "CreatorManifest": [
+            {
+              "name": "schema",
+              "type": "string"
+            },
+            {
+              "name": "creatorId",
+              "type": "bytes32"
+            },
+            {
+              "name": "platform",
+              "type": "string"
+            },
+            {
+              "name": "channelId",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "receivingWallet",
+              "type": "address"
+            },
+            {
+              "name": "acceptedAssetsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "manifestVersion",
+              "type": "uint32"
+            },
+            {
+              "name": "previousManifestHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32"
+            }
+          ]
+        },
+        "primaryType": "CreatorManifest",
+        "domain": {
+          "name": "SyncNet SYNC Proof",
+          "version": "1",
+          "chainId": 4663
+        },
+        "message": {
+          "schema": "syncnet.early.creator-manifest.v1",
+          "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+          "platform": "youtube",
+          "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+          "chainId": 4663,
+          "receivingWallet": "0x1563915e194d8cfba1943570603f7606a3115508",
+          "acceptedAssetsHash": "0xcb000c61fac1f5b9b4fb1e4db3f1ef12f8d3687b8d707082b2c88df3ad8b9552",
+          "manifestVersion": 1,
+          "previousManifestHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "issuedAt": 1790665095,
+          "nonce": "0xb77bf820ad5401faf14c3cfa94f19ace3d374fb36d6d1fbed219bf3626d27293"
+        }
+      },
+      "acceptedAssets": [
+        {
+          "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+          "minAmount": "1000000"
+        }
+      ],
+      "signature": "0xb2c9c9f5bdf59911fa151358ddba24e65389e7773ae93fdddb4cfda342db219e3304aa0fa4c037e821b483bff3922b0c10f06e94563988c9494b99a8f47ca76b1c",
+      "manifestHash": "0x7c047f2a9c3c325c4c32afd52eab15139a659e6951675aa42f87f6739e44170d"
+    },
+    "attestations": [
+      {
+        "schema": "syncnet.attestation.v1",
+        "type": "creator-identity",
+        "subject": {
+          "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+          "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+        },
+        "claims": {
+          "platform": "youtube",
+          "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+          "receivingWallet": "0x1563915e194d8cfba1943570603f7606a3115508",
+          "manifestHash": "0x7c047f2a9c3c325c4c32afd52eab15139a659e6951675aa42f87f6739e44170d",
+          "manifestVersion": 1,
+          "verifiedAt": 1790665095,
+          "method": "google-oauth2 youtube.readonly channels.mine",
+          "title": "Alice"
+        },
+        "issuedAt": 1790665095,
+        "bundleDate": "2026-09-29",
+        "id": "0xf938a428926af4d304a5b495d6b3932854add61cae8cd6fc4c0f9d0ccc6705cc",
+        "keyId": "early-att-test-k1",
+        "signature": "0x741e3921add14b54e2ec1a48a87fa26e82bf32f7da1da29bbdb3abd5f19ebfbd084b29204d64c96945b10b770ffd08bba47473994ec548ab27ee58ef21c17e171b",
+        "inclusion": {
+          "bundleDate": "2026-09-29",
+          "root": "0x2fd117a850331c393000b4fdfbd73cb8a911560dda4c54074f1af431b9298b30",
+          "leaf": "0x3897adc45455c733cf638350da905b56af815e1a589d5bdd3adf24801daaa06a",
+          "leafIndex": 0,
+          "siblings": [
+            {
+              "hash": "0x8dc42cbf920554bbf08e2e789c50ff5257718e80e5596699585bd22672389539",
+              "side": "R"
+            },
+            {
+              "hash": "0x0d08011eb6fcd005678543397bb47d0f310958dda79d591d44dc25f3fef19008",
+              "side": "R"
+            }
+          ],
+          "anchors": {
+            "robinhood": {
+              "status": "confirmed",
+              "txHash": "0x9daf6666c0767876cfabde9de9daaa4c5e2a0c575d7ff5d8ffd30b90d2cbbae1",
+              "from": "0xe1fae9b4fab2f5726677ecfa912d96b0b683e6a9",
+              "nonce": "30",
+              "gasPrice": "100000000",
+              "gasLimit": "25200",
+              "sentAt": "2026-09-30T07:23:15.000Z",
+              "attempts": 1,
+              "blockNumber": "88901",
+              "blockHash": "0xbc31171f3c83d99e4832d38c2e09922c67b248bd2fb771c55a26feca843178ce",
+              "blockTimestamp": null,
+              "confirmedAt": "2026-09-30T07:23:15.000Z"
+            },
+            "opentimestamps": {
+              "submittedAt": "2026-09-30T07:23:15.000Z",
+              "calendars": [
+                {
+                  "url": "https://a.example",
+                  "ok": true
+                }
+              ],
+              "proof": "8A1jYWw6YS5leGFtcGxlCAAFiJYNc9cZAQOwxTc=",
+              "status": "bitcoin-verifiable",
+              "note": "Submitted to OpenTimestamps at submittedAt; becomes Bitcoin-verifiable later (typically within hours). Not Bitcoin-anchored yet unless status says so.",
+              "upgradedAt": "2026-09-30T07:23:15.000Z",
+              "bitcoinHeights": [
+                910000
+              ]
+            }
+          }
+        }
+      },
+      {
+        "schema": "syncnet.attestation.v1",
+        "type": "creator-manifest",
+        "subject": {
+          "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+          "manifestHash": "0x7c047f2a9c3c325c4c32afd52eab15139a659e6951675aa42f87f6739e44170d"
+        },
+        "claims": {
+          "manifestVersion": 1,
+          "previousManifestHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "status": "ACTIVE",
+          "effectiveAt": 1790665095,
+          "supersededAt": null,
+          "at": 1790665095
+        },
+        "issuedAt": 1790665095,
+        "bundleDate": "2026-09-29",
+        "id": "0xe33bba48d8a669d9ded01dd7d1053655e94ab13326910b40b5c248718f82c07e",
+        "keyId": "early-att-test-k1",
+        "signature": "0xa63474f3c7b811e74c545ebf316d90df89c9e4f55184ee587d172d8bd540413f6dea2a4c0349e6fd1dff185f899f99893cd736c1a8a1761e5113dc3e7cd33df31c",
+        "inclusion": {
+          "bundleDate": "2026-09-29",
+          "root": "0x2fd117a850331c393000b4fdfbd73cb8a911560dda4c54074f1af431b9298b30",
+          "leaf": "0x8dc42cbf920554bbf08e2e789c50ff5257718e80e5596699585bd22672389539",
+          "leafIndex": 1,
+          "siblings": [
+            {
+              "hash": "0x3897adc45455c733cf638350da905b56af815e1a589d5bdd3adf24801daaa06a",
+              "side": "L"
+            },
+            {
+              "hash": "0x0d08011eb6fcd005678543397bb47d0f310958dda79d591d44dc25f3fef19008",
+              "side": "R"
+            }
+          ],
+          "anchors": {
+            "robinhood": {
+              "status": "confirmed",
+              "txHash": "0x9daf6666c0767876cfabde9de9daaa4c5e2a0c575d7ff5d8ffd30b90d2cbbae1",
+              "from": "0xe1fae9b4fab2f5726677ecfa912d96b0b683e6a9",
+              "nonce": "30",
+              "gasPrice": "100000000",
+              "gasLimit": "25200",
+              "sentAt": "2026-09-30T07:23:15.000Z",
+              "attempts": 1,
+              "blockNumber": "88901",
+              "blockHash": "0xbc31171f3c83d99e4832d38c2e09922c67b248bd2fb771c55a26feca843178ce",
+              "blockTimestamp": null,
+              "confirmedAt": "2026-09-30T07:23:15.000Z"
+            },
+            "opentimestamps": {
+              "submittedAt": "2026-09-30T07:23:15.000Z",
+              "calendars": [
+                {
+                  "url": "https://a.example",
+                  "ok": true
+                }
+              ],
+              "proof": "8A1jYWw6YS5leGFtcGxlCAAFiJYNc9cZAQOwxTc=",
+              "status": "bitcoin-verifiable",
+              "note": "Submitted to OpenTimestamps at submittedAt; becomes Bitcoin-verifiable later (typically within hours). Not Bitcoin-anchored yet unless status says so.",
+              "upgradedAt": "2026-09-30T07:23:15.000Z",
+              "bitcoinHeights": [
+                910000
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "anchors": [
+      {
+        "bundleDate": "2026-09-29",
+        "root": "0x2fd117a850331c393000b4fdfbd73cb8a911560dda4c54074f1af431b9298b30",
+        "built": true,
+        "robinhood": {
+          "status": "confirmed",
+          "txHash": "0x9daf6666c0767876cfabde9de9daaa4c5e2a0c575d7ff5d8ffd30b90d2cbbae1",
+          "from": "0xe1fae9b4fab2f5726677ecfa912d96b0b683e6a9",
+          "nonce": "30",
+          "gasPrice": "100000000",
+          "gasLimit": "25200",
+          "sentAt": "2026-09-30T07:23:15.000Z",
+          "attempts": 1,
+          "blockNumber": "88901",
+          "blockHash": "0xbc31171f3c83d99e4832d38c2e09922c67b248bd2fb771c55a26feca843178ce",
+          "blockTimestamp": null,
+          "confirmedAt": "2026-09-30T07:23:15.000Z"
+        },
+        "opentimestamps": {
+          "submittedAt": "2026-09-30T07:23:15.000Z",
+          "calendars": [
+            {
+              "url": "https://a.example",
+              "ok": true
+            }
+          ],
+          "proof": "8A1jYWw6YS5leGFtcGxlCAAFiJYNc9cZAQOwxTc=",
+          "status": "bitcoin-verifiable",
+          "note": "Submitted to OpenTimestamps at submittedAt; becomes Bitcoin-verifiable later (typically within hours). Not Bitcoin-anchored yet unless status says so.",
+          "upgradedAt": "2026-09-30T07:23:15.000Z",
+          "bitcoinHeights": [
+            910000
+          ]
+        }
+      }
+    ],
+    "ordering": {
+      "createdBlock": "175300",
+      "storedAt": "2026-10-01T07:23:15.000Z",
+      "note": "SyncNet-recorded: the signed intent was persisted at this block, before the transfer was enabled. Not independently verifiable."
+    },
+    "context": {
+      "earlyDate": "2026-10-01",
+      "creatorTitleThen": "Alice",
+      "audienceThen": {
+        "state": "unavailable"
+      }
+    },
+    "privacy": {
+      "state": "PRIVATE",
+      "revealed": []
+    },
+    "invalidated": null,
+    "issuedAt": "2026-10-01T07:23:15.000Z",
+    "keys": "/api/early?view=keys",
+    "verify": "docs/early/verify-receipt.mjs"
+  }
+}
