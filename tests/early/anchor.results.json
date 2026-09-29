@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-29T07:15:29.942Z",
+  "at": "2026-09-29T10:43:03.655Z",
   "passed": 42,
   "failed": 0,
   "results": [
@@ -69,7 +69,7 @@
       "detail": ""
     },
     {
-      "name": "B02 commitment = sha256(root ‖ x) for the pending attestation",
+      "name": "B02 the stamped message is sha256(root); commitment = sha256(sha256(root) ‖ x) for the pending attestation",
       "ok": true,
       "detail": ""
     },
@@ -89,7 +89,7 @@
       "detail": ""
     },
     {
-      "name": "B06 .ots file: magic header, version 1, keccak256 digest op, the root, then the timestamp",
+      "name": "B06 .ots file: the reference HEADER_MAGIC (31 bytes, python-opentimestamps), version 1, sha256 digest op, sha256(root), then the timestamp",
       "ok": true,
       "detail": ""
     },

@@ -127,7 +127,7 @@ async function handler(event = {}, deps = {}) {
   const rpc = deps.rpc || serverRpc({ retries: 2 });
   const ip = clientIp(event);
   const cfg = earlyConfig({ env, store, now, assetsFile: deps.assetsFile, keysFile: deps.keysFile });
-  const ctx = { store, rpc, env, now, cfg, ip, ipHash: hashId(ip), random: deps.random || ((n) => crypto.randomBytes(n)), youtube: deps.youtube || null, signer: cfg.attestation.configured ? makeSigner(env, cfg) : null, event };
+  const ctx = { store, rpc, env, now, cfg, ip, ipHash: hashId(ip), random: deps.random || ((n) => crypto.randomBytes(n)), youtube: deps.youtube || null, signer: cfg.attestation.configured ? makeSigner(env, cfg) : null, event, internal: deps.internal === true };
   const denied = (rl) => (rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter));
 
   if (method === 'GET') {
@@ -254,11 +254,14 @@ async function readView(view, ctx) {
     return json(200, { enabled: true, intent: publicIntent(i) });
   }
   if (view === 'receipt') {
+    // A receipt is reachable ONLY through the intent id (a 256-bit capability held by the fan) or the fan's own session.
+    // Never through the receiptId: it derives from public chain data (tx hash + log index), so anyone watching the
+    // creator's wallet could otherwise fetch the private receipt of every transfer (review finding, 29 Sep 2026).
     const iid = lc(query(ctx.event, 'intent')), rid = lc(query(ctx.event, 'receiptId'));
     let r = null;
-    if (E.isBytes32(rid)) r = (await getJson(store, K.receipt(rid))).value;
-    else if (E.isBytes32(iid)) { const i = (await getJson(store, K.intent(iid))).value; if (i && i.receiptId) r = (await getJson(store, K.receipt(i.receiptId))).value; }
-    else return bad('Provide intent or receiptId.');
+    if (E.isBytes32(iid)) { const i = (await getJson(store, K.intent(iid))).value; if (i && i.receiptId) r = (await getJson(store, K.receipt(i.receiptId))).value; }
+    else if (E.isBytes32(rid)) { const s = sessionOf(ctx, 'fan'); if (!s) return publicError(401, 'session', 'A fan session is required to open a receipt by its id.'); const x = (await getJson(store, K.receipt(rid))).value; r = x && lc(x.fact.transfer.from) === s.wallet ? x : null; }
+    else return bad('Provide the intent id.');
     if (!r) return publicError(404, 'not_found', 'Receipt not found.');
     return json(200, { enabled: true, receipt: await receiptDocument(ctx, r) });
   }
@@ -434,7 +437,9 @@ async function intentDraft(b, ctx) {
     expiryCap = Number(c.rotation.effectiveAt);
   }
   const tuple = { sender, receiver: m.struct.receivingWallet, token, amount };
-  if (await store.get(K.open(tuple))) return publicError(409, 'intent_open', 'You already have an open support intent for this exact creator, asset and amount. Finish or wait for it to expire.', { 'x-early-open-intent': (await store.get(K.open(tuple))) || '' });
+  // The open intent's id is a private capability held by the fan's own browser: it is NEVER returned here, otherwise
+  // anyone guessing (sender, creator, asset, amount) could obtain it and read the intent and its receipt.
+  if (await store.get(K.open(tuple))) return publicError(409, 'intent_open', 'You already have an open support intent for this exact creator, asset and amount. Open it from this browser or My EARLY, or wait for it to expire.');
   const last = Number(await store.get(K.tupleLast(tuple))) || 0;
   const notBefore = Math.max(t - C.INTENT_NOT_BEFORE_SLACK_S, last + 1);
   if (notBefore > t) return publicError(409, 'tuple_cooldown', 'A previous intent for this exact amount is still winding down. Try again in a minute.');
@@ -615,8 +620,10 @@ async function reconcile(b, ctx) {
   const { store, rpc, now } = ctx;
   const extra = onlyFields(b, ['action', 'intentId', 'receiptId']);
   if (extra) return extra;
-  let receiptId = lc(b.receiptId);
-  if (!E.isBytes32(receiptId)) { const iid = lc(b.intentId); if (!E.isBytes32(iid)) return bad('Provide intentId or receiptId.'); const i = (await getJson(store, K.intent(iid))).value; receiptId = i && i.receiptId; }
+  // By receiptId only from the scheduled job (internal): a public caller could otherwise learn whether a receipt exists
+  // for a transfer it sees on chain. Public callers reconcile through the intent id capability.
+  let receiptId = ctx.internal ? lc(b.receiptId) : '';
+  if (!E.isBytes32(receiptId)) { const iid = lc(b.intentId); if (!E.isBytes32(iid)) return bad('Provide the intent id.'); const i = (await getJson(store, K.intent(iid))).value; receiptId = i && i.receiptId; }
   if (!E.isBytes32(receiptId || '')) return publicError(404, 'not_found', 'No receipt for this intent.');
   const rc = await getJson(store, K.receipt(receiptId));
   const r = rc.value;
@@ -816,10 +823,15 @@ async function creatorManifest(b, ctx) {
   if (wallet === cur.struct.receivingWallet) return publicError(409, 'same_wallet', 'The new receiving wallet must differ from the current one. To change accepted assets only, this pilot requires a new wallet version too; contact SyncNet.');
   const lock = c.rotation && c.rotation.lockedUntil && Number(c.rotation.lockedUntil) > t;
   if (lock) {
-    // Locked after a current-wallet cancel: the OAuth holder needs two verified sessions ≥ 24 h apart, the later one now.
+    // Locked after a current-wallet cancel: the OAuth holder needs two verified sessions ≥ 24 h apart AFTER the lock,
+    // the later one now. The refused attempt itself must be remembered as the first session, otherwise the account
+    // holder could never satisfy the rule (review finding, 29 Sep 2026).
     const since = Number(c.rotation.lockedAt || 0);
-    const earlier = oauthSeen.some((x) => x >= since && Number(link.value.at) - x >= 86400);
-    if (!earlier) return publicError(409, 'rotation_locked', 'The current wallet cancelled a change recently. To change the wallet anyway, sign in with YouTube again at least 24 hours after your last sign-in; the change then takes 48 hours.');
+    const earlier = oauthSeen.some((x) => x > since && Number(link.value.at) - x >= 86400); // strictly AFTER the lock
+    if (!earlier) {
+      if (!(c.oauthSeen || []).includes(Number(link.value.at))) await store.cas({ expect: [[K.creator(creatorId), cr2.raw]], set: [[K.creator(creatorId), JSON.stringify({ ...c, oauthSeen })]] }).catch(() => false);
+      return publicError(409, 'rotation_locked', 'The current wallet cancelled a change recently. This YouTube sign-in has been recorded: sign in with YouTube again at least 24 hours from now to change the wallet; the change then takes 48 hours.');
+    }
   }
   const effectiveAt = t + C.ROTATION_COOLDOWN_S;
   const attM = Attest.build(signer, { type: 'creator-manifest', subject: { creatorId, manifestHash }, claims: { manifestVersion: version, previousManifestHash: prev, status: 'PENDING', effectiveAt, supersededAt: null, at: t }, issuedAt: t, bundleDate: bd });

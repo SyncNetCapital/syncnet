@@ -68,18 +68,18 @@ async function calFetch(url, init) {
   const p = Ots.pendingTimestamp('https://cal.example', Core.utf8Bytes('x'));
   const [node, end] = Ots.parseTimestamp(p);
   check('B01 synthetic pending timestamp parses fully and re-serialises identically', end === p.length && Core.bytesToHex(Ots.serializeTimestamp(node)) === Core.bytesToHex(p));
-  const atts = Ots.attestationsOf(node, Core.hexToBytes(root));
-  check('B02 commitment = sha256(root ‖ x) for the pending attestation', atts.length === 1 && atts[0].tag === Ots.TAG.PENDING && atts[0].commitment === '0x' + require('node:crypto').createHash('sha256').update(Buffer.concat([Buffer.from(root.slice(2), 'hex'), Buffer.from('x')])).digest('hex'));
+  const atts = Ots.attestationsOf(node, Ots.otsDigest(root));
+  check('B02 the stamped message is sha256(root); commitment = sha256(sha256(root) ‖ x) for the pending attestation', atts.length === 1 && atts[0].tag === Ots.TAG.PENDING && atts[0].commitment === '0x' + require('node:crypto').createHash('sha256').update(Buffer.concat([Buffer.from(Ots.otsDigest(root)), Buffer.from('x')])).digest('hex'));
   const sub = await Ots.submit(root, { fetch: calFetch, calendars: ['https://a.example', 'https://b.example'], now: () => clock.now() });
   check('B03 submit: both calendars ok, one merged proof, status "submitted" (never Bitcoin)', sub.calendars.every((c) => c.ok) && sub.proof && Ots.status(root, sub.proof) === 'submitted' && !Ots.hasBitcoin(root, sub.proof));
   const [mergedNode] = Ots.parseTimestamp(Uint8Array.from(Buffer.from(sub.proof, 'base64')));
-  const pend = Ots.attestationsOf(mergedNode, Core.hexToBytes(root)).filter((x) => x.tag === Ots.TAG.PENDING);
+  const pend = Ots.attestationsOf(mergedNode, Ots.otsDigest(root)).filter((x) => x.tag === Ots.TAG.PENDING);
   check('B04 merged proof holds one pending attestation per calendar', pend.length === 2);
   CAL.upgrades.set(pend[0].commitment.slice(2), Ots.bitcoinTimestamp(900000, Core.utf8Bytes('btc')));
   const up = await Ots.upgrade(root, sub.proof, { fetch: calFetch });
   check('B05 upgrade: one calendar answered with a Bitcoin attestation → bitcoin-verifiable, other still pending', up.upgraded === 1 && up.bitcoin === true && Ots.status(root, up.proof) === 'bitcoin-verifiable' && Ots.bitcoinHeights(root, up.proof).includes(900000) && up.errors.length === 1);
   const file = Ots.otsFile(root, up.proof);
-  check('B06 .ots file: magic header, version 1, keccak256 digest op, the root, then the timestamp', Core.bytesToHex(file.subarray(0, 31)) === Core.bytesToHex(Ots.MAGIC) + '01' && file[31] === Ots.OP.KECCAK256 && Core.bytesToHex(file.subarray(32, 64)) === root);
+  check('B06 .ots file: the reference HEADER_MAGIC (31 bytes, python-opentimestamps), version 1, sha256 digest op, sha256(root), then the timestamp', Core.bytesToHex(Ots.MAGIC) === '0x004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294' && Core.bytesToHex(file.subarray(0, 32)) === Core.bytesToHex(Ots.MAGIC) + '01' && file[32] === Ots.OP.SHA256 && Core.bytesToHex(file.subarray(33, 65)) === Core.bytesToHex(Ots.otsDigest(root)));
   CAL.mode = 'down';
   const down = await Ots.submit(root, { fetch: calFetch, calendars: ['https://a.example'] });
   check('B07 calendars down → proof null, status failed, no throw', down.proof === null && Ots.status(root, down.proof) === 'failed' && down.calendars[0].ok === false);
@@ -123,7 +123,7 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   check('C10 public bundle view: leaves, root, anchors (tx hash, OTS status), enough to recompute', bv.built && bv.bundle.leaves.length === 3 && bv.bundle.anchors.robinhood.txHash && bv.bundle.anchors.opentimestamps.status === 'submitted');
   // OTS upgrade on a later run
   const [node] = Ots.parseTimestamp(Uint8Array.from(Buffer.from(b2.anchors.opentimestamps.proof, 'base64')));
-  const pend = Ots.attestationsOf(node, Core.hexToBytes(b.root)).find((x) => x.tag === Ots.TAG.PENDING);
+  const pend = Ots.attestationsOf(node, Ots.otsDigest(b.root)).find((x) => x.tag === Ots.TAG.PENDING);
   CAL.upgrades.set(pend.commitment.slice(2), Ots.bitcoinTimestamp(910000));
   const r3 = await job();
   check('C11 OTS upgrade → bitcoin-verifiable with the height recorded', r3.j.report.upgraded[today] === 'bitcoin-verifiable' && JSON.parse(MAP.get('early:bundle:v1:' + today).value).anchors.opentimestamps.bitcoinHeights.includes(910000));

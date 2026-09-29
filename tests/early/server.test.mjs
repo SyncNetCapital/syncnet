@@ -174,7 +174,7 @@ let M1; // manifest v1 hash for CH
   const s2 = await storeIntent(d);
   check('D10 storing again is idempotent (lost POST after signing is safe)', s2.s === 200 && s2.j.idempotent === true);
   const dup = await draft(M1);
-  check('D11 second draft for the same (sender, receiver, token, amount) while one is OPEN → 409 intent_open', dup.s === 409 && dup.j.code === 'intent_open');
+  check('D11 second draft for the same (sender, receiver, token, amount) while one is OPEN → 409 intent_open, and the open intent id is never disclosed', dup.s === 409 && dup.j.code === 'intent_open' && !JSON.stringify(dup.headers).includes(s1.j.intent.intentId) && !dup.body.includes(s1.j.intent.intentId));
   const other = await draft(M1, { amount: '2000000' });
   check('D12 a different amount is a different tuple → allowed', other.s === 201);
   const iv = (await get('intent', { intent: s1.j.intent.intentId })).j;
@@ -356,12 +356,17 @@ let M1; // manifest v1 hash for CH
   const cancel = await post({ action: 'rotation-cancel', creatorId: cm.creatorId, pendingManifestHash: P2, issuedAt: cm.issuedAt, nonce: cm.nonce, signature: sign('RotationCancel', cm, W.creator) });
   check('G09 current wallet cancels → ACTIVE again, locked', cancel.s === 200 && cancel.j.cancelledBy === 'current-wallet' && cancel.j.locked === true && (await get('creator', { channelId: CH })).j.rotation === null);
   check('G10 the cancelled manifest is CANCELLED and immutable in history', (await get('manifest', { manifestHash: P2 })).j.manifest.status === 'CANCELLED');
+  // realistic sequence: the lock lands AFTER every sign-in recorded so far; the first attempt under the lock is refused
+  // but recorded; a second sign-in ≥ 24 h later succeeds (a compromised old wallet cannot veto forever).
+  clock.advance(3600); syncHead();
   const lockedTry = await manifest({ wallet: W.creator2, version: 2, prev: M1 });
-  check('G11 while locked, one fresh OAuth session is not enough (409 rotation_locked)', lockedTry.r.s === 409 && lockedTry.r.j.code === 'rotation_locked');
-  // the legitimate account holder: a second OAuth sign-in ≥ 24 h later overrides the lock (fresh link at = now, earlier seen = now-25h)
-  clock.advance(25 * 3600); syncHead();
+  check('G11 while locked, one fresh OAuth session is not enough (409 rotation_locked) and is recorded', lockedTry.r.s === 409 && lockedTry.r.j.code === 'rotation_locked' && JSON.parse(MAP.get('early:creator:v1:' + E.creatorIdOf(CH)).value).oauthSeen.includes(nowSec()));
+  clock.advance(23 * 3600); syncHead();
+  const tooEarly = await manifest({ wallet: W.creator2, version: 2, prev: M1 });
+  check('G11b a second sign-in only 23 h later is still refused', tooEarly.r.s === 409 && tooEarly.r.j.code === 'rotation_locked');
+  clock.advance(2 * 3600); syncHead();
   const override = await manifest({ wallet: W.creator2, version: 2, prev: M1 });
-  check('G12 two OAuth sessions ≥ 24 h apart override the wallet’s cancel (compromised old wallet cannot veto forever)', override.r.s === 201 && override.r.j.creator.status === 'ROTATION_PENDING');
+  check('G12 two OAuth sessions ≥ 24 h apart after the lock override the wallet’s cancel', override.r.s === 201 && override.r.j.creator.status === 'ROTATION_PENDING', override.r.body);
   const P3 = override.hash;
   const cm2 = { schema: E.SCHEMA.rotationCancel, creatorId: E.creatorIdOf(CH), pendingManifestHash: P3, issuedAt: nowSec(), nonce: rnd32() };
   const repeat = await post({ action: 'rotation-cancel', creatorId: cm2.creatorId, pendingManifestHash: P3, issuedAt: cm2.issuedAt, nonce: cm2.nonce, signature: sign('RotationCancel', cm2, W.creator) });
@@ -399,6 +404,18 @@ let M1; // manifest v1 hash for CH
   check('H02 no public read contains a per-creator receipt count or ranking word', pages.every((t) => !/receiptCount|supporters|rank|leaderboard|Supporter #/i.test(t)));
   const err = await post({ action: 'intent-draft', manifestHash: 'nope' });
   check('H03 errors are fixed sentences with codes (no stack, no env names)', err.s === 400 && typeof err.j.code === 'string' && !/SYNCNET_|at .*\.js/.test(err.body));
+  // receiptId derives from PUBLIC chain data (tx hash + log index): it must never open a receipt or reveal its existence
+  const R5 = globalThis.__R5;
+  const byId = await get('receipt', { receiptId: R5 });
+  check('H04 receipt by receiptId without a session → 401 (never a document, never existence)', byId.s === 401);
+  const byIdOther = await get('receipt', { receiptId: R5 }, { session: fanSession(W.fan2) });
+  const byIdMine = await get('receipt', { receiptId: R5 }, { session: fanSession(W.fan) });
+  check('H05 receipt by receiptId: another wallet’s session → 404 identical to unknown; the owner’s session → 200', byIdOther.s === 404 && (await get('receipt', { receiptId: rnd32() }, { session: fanSession(W.fan2) })).s === 404 && byIdMine.s === 200);
+  const recPub = await post({ action: 'reconcile', receiptId: R5 });
+  const recUnknown = await post({ action: 'reconcile', receiptId: rnd32() });
+  check('H06 public reconcile by receiptId is refused identically whether or not the receipt exists (400)', recPub.s === 400 && recUnknown.s === 400 && recPub.body === recUnknown.body);
+  const recInternal = parse(await early._handler({ httpMethod: 'POST', headers: {}, queryStringParameters: {}, body: JSON.stringify({ action: 'reconcile', receiptId: R5 }) }, { store, env: ENV, rpc, now: () => clock.now(), keysFile: TEST_KEYS_FILE, internal: true }));
+  check('H07 the scheduled job (internal) may reconcile by receiptId', recInternal.s === 200);
 }
 
 fs.writeFileSync(path.join(ROOT, 'tests/early/server.results.json'), JSON.stringify({ at: new Date().toISOString(), passed: results.length - failures, failed: failures, results }, null, 2));

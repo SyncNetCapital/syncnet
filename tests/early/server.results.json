@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-29T07:15:29.375Z",
-  "passed": 129,
+  "at": "2026-09-29T10:43:03.076Z",
+  "passed": 134,
   "failed": 0,
   "results": [
     {
@@ -259,7 +259,7 @@
       "detail": ""
     },
     {
-      "name": "D11 second draft for the same (sender, receiver, token, amount) while one is OPEN → 409 intent_open",
+      "name": "D11 second draft for the same (sender, receiver, token, amount) while one is OPEN → 409 intent_open, and the open intent id is never disclosed",
       "ok": true,
       "detail": ""
     },
@@ -346,7 +346,7 @@
     {
       "name": "E11 after finalisation a new same-tuple intent is allowed (notBefore > transfer time)",
       "ok": true,
-      "detail": "{\"ok\":true,\"intentId\":\"0xcb9136848ccf8573419126b01bcc8f90ed09dc6a2b88a81ff803ea5c5e7271f1\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},"
+      "detail": "{\"ok\":true,\"intentId\":\"0x39d35450d789da17bf01c930b7958fb981a266a798a1dab1c3e08d9155af9bdd\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},"
     },
     {
       "name": "E12 the consumed transfer is not a candidate for the new intent (window + txlog claim)",
@@ -451,7 +451,7 @@
     {
       "name": "E30b the default chunk size covers the window inside the budget (WAITING, not deferred)",
       "ok": true,
-      "detail": "{\"ok\":false,\"status\":\"WAITING\",\"intent\":{\"intentId\":\"0x782ede50217dc12bb8aaefc17c387345767eb137594c782003d60c083fef0f6d\",\"status\":\"OPEN\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"by"
+      "detail": "{\"ok\":false,\"status\":\"WAITING\",\"intent\":{\"intentId\":\"0x8c1bf47f832cc38f1a5732cfc389fee500db9b3035d78d1779cbb6c8493cbc17\",\"status\":\"OPEN\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"by"
     },
     {
       "name": "E31 RPC without a safe tag never confirms (fail closed)",
@@ -579,14 +579,19 @@
       "detail": ""
     },
     {
-      "name": "G11 while locked, one fresh OAuth session is not enough (409 rotation_locked)",
+      "name": "G11 while locked, one fresh OAuth session is not enough (409 rotation_locked) and is recorded",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "G12 two OAuth sessions ≥ 24 h apart override the wallet’s cancel (compromised old wallet cannot veto forever)",
+      "name": "G11b a second sign-in only 23 h later is still refused",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "G12 two OAuth sessions ≥ 24 h apart after the lock override the wallet’s cancel",
+      "ok": true,
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\"},\"status\":\"ROTATION_PENDING\",\"paused\":false,\"joinedAt\":1790678582,\"currentManifest\":{\"manifestHash\":\"0xca979935a39a9f2bab6683b61303909b8aa"
     },
     {
       "name": "G13 the same old wallet cannot cancel again within 30 days (409 cancel_repeat)",
@@ -645,6 +650,26 @@
     },
     {
       "name": "H03 errors are fixed sentences with codes (no stack, no env names)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H04 receipt by receiptId without a session → 401 (never a document, never existence)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H05 receipt by receiptId: another wallet’s session → 404 identical to unknown; the owner’s session → 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H06 public reconcile by receiptId is refused identically whether or not the receipt exists (400)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H07 the scheduled job (internal) may reconcile by receiptId",
       "ok": true,
       "detail": ""
     }

@@ -69,8 +69,11 @@ Per UTC day `D`: `leaf = keccak256(0x00 ‖ utf8("attestation") ‖ 0x00 ‖ att
 root = `keccak256(0x02 ‖ utf8(D))`. Public: `/api/early?view=bundle&date=D` → leaves, root, anchors.
 
 Robinhood anchor: a transaction from the registry anchor address to **itself**, value 0, `data = "SYNC" ‖ 0x01 ‖ root ‖ utf8(D)`
-(47 bytes). Anchor time = its block timestamp. OpenTimestamps: the root is submitted as a 32-byte digest to public
-calendars; the stored proof is **submitted** until an upgrade yields a Bitcoin attestation (`ots upgrade` / `ots verify`).
+(47 bytes). Anchor time = its block timestamp. OpenTimestamps: the message stamped is `sha256(root bytes)` (the
+reference client's default file digest), submitted to public calendars; the stored proof is **submitted** until an
+upgrade yields a Bitcoin attestation. Verify with the official client: write the 32 root bytes to `root.bin`, then
+`ots verify -f root.bin bundle.ots` (or `ots verify -d <sha256(root) hex> bundle.ots`); `ots upgrade bundle.ots` fetches
+the Bitcoin attestation once it exists. Validated against opentimestamps-client 0.7.2 on 29 Sep 2026.
 
 ## 7. Audience snapshot
 

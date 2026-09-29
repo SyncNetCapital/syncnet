@@ -86,7 +86,7 @@ async function handler(event = {}, deps = {}) {
     try { pending = await store.zrevrangeByScore(K.pendingFinal, '+inf', '-inf', 200); } catch (err) { logError(FN, 'pending-index', err, {}); }
     for (const { member: receiptId } of pending) {
       if (now() > deadline) { report.timedOut = true; break; }
-      const r = await early._handler({ httpMethod: 'POST', headers: {}, queryStringParameters: {}, body: JSON.stringify({ action: 'reconcile', receiptId }) }, { store, env, rpc, now, keysFile: deps.keysFile, assetsFile: deps.assetsFile });
+      const r = await early._handler({ httpMethod: 'POST', headers: {}, queryStringParameters: {}, body: JSON.stringify({ action: 'reconcile', receiptId }) }, { store, env, rpc, now, keysFile: deps.keysFile, assetsFile: deps.assetsFile, internal: true });
       let j = {}; try { j = JSON.parse(r.body); } catch { j = {}; }
       if (r.statusCode === 200 && j.status !== 'CONFIRMED') { report.reconciled++; if (j.status === 'FINALIZED') report.finalized++; if (j.status === 'INVALIDATED_BY_REORG') report.invalidated++; try { await store.zrem(K.pendingFinal, [receiptId]); } catch { /* next run */ } }
       if (r.statusCode === 404) { try { await store.zrem(K.pendingFinal, [receiptId]); } catch { /* next run */ } }

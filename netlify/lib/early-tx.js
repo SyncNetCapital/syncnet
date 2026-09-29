@@ -65,7 +65,9 @@ function signLegacy({ signer, chainId, nonce, gasPrice, gasLimit, to, value, dat
   const unsigned = [BigInt(nonce), BigInt(gasPrice), BigInt(gasLimit), to, BigInt(value), data, cid, 0n, 0n];
   const digest = Core.keccak256(rlpEncode(unsigned));
   const sig = Core.hexToBytes(signer.sign(digest));
-  const r = sig.subarray(0, 32), s = sig.subarray(32, 64), recid = BigInt(sig[64] - 27);
+  // r and s are RLP INTEGERS: minimal big-endian bytes, never zero-padded (a leading 0x00 byte would be non-canonical
+  // RLP and produce a different transaction hash; found by the ethers cross-check, tests/early/anchor-crosscheck.mjs).
+  const r = bnOf(sig.subarray(0, 32)), s = bnOf(sig.subarray(32, 64)), recid = BigInt(sig[64] - 27);
   const v = recid + cid * 2n + 35n;
   const raw = rlpEncode([BigInt(nonce), BigInt(gasPrice), BigInt(gasLimit), to, BigInt(value), data, v, r, s]);
   return { raw: Core.bytesToHex(raw), hash: Core.keccak256(raw), signingDigest: digest, v };

@@ -42,6 +42,8 @@ try {
     const o = b.value && b.value.anchors && b.value.anchors.opentimestamps;
     if (!o || !o.proof) { console.error('no OpenTimestamps proof stored for that day'); process.exit(1); }
     fs.writeFileSync(arg2, Buffer.from(Ots.otsFile(b.value.root, o.proof)));
-    console.log(JSON.stringify({ written: arg2, root: b.value.root, status: o.status, note: 'Verify with the OpenTimestamps client: `ots upgrade` then `ots verify`. "submitted" means not yet Bitcoin-verifiable.' }, null, 2));
+    const rootFile = arg2.replace(/\.ots$/, '') + '.root.bin';
+    fs.writeFileSync(rootFile, Buffer.from(b.value.root.slice(2), 'hex'));
+    console.log(JSON.stringify({ written: arg2, rootFile, root: b.value.root, status: o.status, note: 'Verify with the official OpenTimestamps client: `ots verify -f ' + rootFile + ' ' + arg2 + '` (pending until Bitcoin attests), then `ots upgrade ' + arg2 + '`. "submitted" means not yet Bitcoin-verifiable.' }, null, 2));
   } else { console.error('Usage: card-suspend|card-reinstate <shareId> --actor … | bundle <date> | ots-file <date> <out>'); process.exit(2); }
 } catch (err) { console.error('Failed: ' + (err && err.message)); process.exit(1); }

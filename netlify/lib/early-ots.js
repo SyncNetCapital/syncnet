@@ -17,11 +17,20 @@ const Core = require('../../lib/syncnet-core.js');
 const E = require('../../lib/syncnet-early.js');
 
 const DEFAULT_CALENDARS = Object.freeze(['https://a.pool.opentimestamps.org', 'https://b.pool.opentimestamps.org', 'https://alice.btc.calendar.opentimestamps.org']);
-const MAGIC = Uint8Array.from([0x00, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x73, 0x00, 0x00, 0x50, 0x72, 0x6f, 0x6f, 0x66, 0x00, 0xbf, 0x89, 0xe2, 0xe8, 0xe4, 0x9b, 0xc4]);
+// HEADER_MAGIC of python-opentimestamps DetachedTimestampFile: b'\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94'
+// (31 bytes). Verified against the reference client 0.7.2 on 29 Sep 2026 (an earlier draft had the wrong tail bytes).
+const MAGIC = Uint8Array.from([0x00, 0x4f, 0x70, 0x65, 0x6e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x73, 0x00, 0x00, 0x50, 0x72, 0x6f, 0x6f, 0x66, 0x00, 0xbf, 0x89, 0xe2, 0xe8, 0x84, 0xe8, 0x92, 0x94]);
 const TAG = Object.freeze({ PENDING: '83dfe30d2ef90c8e', BITCOIN: '0588960d73d71901', LITECOIN: '06869a0d73d71b45', ETHEREUM: '30c46b5d9f6a5ec3' });
 const OP = Object.freeze({ APPEND: 0xf0, PREPEND: 0xf1, REVERSE: 0xf2, HEXLIFY: 0xf3, SHA1: 0x02, RIPEMD160: 0x03, SHA256: 0x08, KECCAK256: 0x67 });
 const MAX_PROOF = 64 * 1024;
 const hex = Core.bytesToHex, unhex = Core.hexToBytes;
+/**
+ * The message OpenTimestamps stamps is sha256(root bytes) — the reference client's default file digest — so anyone can
+ * write the 32 root bytes to a file and run `ots verify -f root.bin bundle.ots` (or `ots verify -d <sha256 hex>`) with the
+ * official tooling. (Using the keccak root directly as the file digest parses, but `ots info` in client 0.7.2 cannot
+ * name that hash op; validated against the reference client on 29 Sep 2026.)
+ */
+const otsDigest = (root) => { if (!E.isBytes32(root)) throw new TypeError('ots: root'); return Uint8Array.from(crypto.createHash('sha256').update(Buffer.from(unhex(root))).digest()); };
 
 // ---------------------------------------------------------------- varints / bytes
 function varint(n) { const out = []; let v = BigInt(n); if (v < 0n) throw new RangeError('varint'); while (v >= 0x80n) { out.push(Number(v & 0x7fn) | 0x80); v >>= 7n; } out.push(Number(v)); return Uint8Array.from(out); }
@@ -116,8 +125,8 @@ async function submit(root, options = {}) {
   const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : 8000;
   const calendars = Array.isArray(options.calendars) && options.calendars.length ? options.calendars : DEFAULT_CALENDARS;
   const submittedAt = new Date(typeof options.now === 'function' ? options.now() : Date.now()).toISOString();
-  const out = { submittedAt, calendars: [], proof: null };
-  const digest = unhex(root);
+  const out = { submittedAt, calendars: [], proof: null, digest: hex(otsDigest(root)), digestOp: 'sha256(root)' };
+  const digest = otsDigest(root);
   let merged = null;
   for (const url of calendars) {
     try {
@@ -143,7 +152,7 @@ async function upgrade(root, proofBase64, options = {}) {
   const timeoutMs = Number(options.timeoutMs) > 0 ? Number(options.timeoutMs) : 8000;
   const bytes = Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64'));
   const [node] = parseTimestamp(bytes);
-  const digest = unhex(root);
+  const digest = otsDigest(root);
   let upgraded = 0; const errors = [];
   for (const a of attestationsOf(node, digest)) {
     if (a.tag !== TAG.PENDING) continue;
@@ -162,16 +171,18 @@ async function upgrade(root, proofBase64, options = {}) {
   return { proof, upgraded, bitcoin: hasBitcoin(root, proof), errors };
 }
 function hasBitcoin(root, proofBase64) {
-  try { const [node] = parseTimestamp(Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64'))); return attestationsOf(node, unhex(root)).some((a) => a.tag === TAG.BITCOIN); } catch { return false; }
+  try { const [node] = parseTimestamp(Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64'))); return attestationsOf(node, otsDigest(root)).some((a) => a.tag === TAG.BITCOIN); } catch { return false; }
 }
 const status = (root, proofBase64) => (proofBase64 ? (hasBitcoin(root, proofBase64) ? 'bitcoin-verifiable' : 'submitted') : 'failed');
 function bitcoinHeights(root, proofBase64) {
-  try { const [node] = parseTimestamp(Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64'))); return attestationsOf(node, unhex(root)).filter((a) => a.tag === TAG.BITCOIN).map((a) => bitcoinHeight(a.payload)); } catch { return []; }
+  try { const [node] = parseTimestamp(Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64'))); return attestationsOf(node, otsDigest(root)).filter((a) => a.tag === TAG.BITCOIN).map((a) => bitcoinHeight(a.payload)); } catch { return []; }
 }
-/** A complete detached .ots file: magic ‖ version(1) ‖ keccak256 op ‖ digest ‖ timestamp. Verify with the OpenTimestamps client. */
+/**
+ * A complete detached .ots file: magic ‖ version(1) ‖ sha256 op ‖ sha256(root) ‖ timestamp. The "file" it timestamps
+ * is the 32 root bytes: `ots verify -f root.bin bundle.ots` with the official client (or `-d <sha256(root) hex>`).
+ */
 function otsFile(root, proofBase64) {
-  if (!E.isBytes32(root)) throw new TypeError('ots: root');
-  return Core.concatBytes(MAGIC, varint(1), Uint8Array.of(OP.KECCAK256), unhex(root), Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64')));
+  return Core.concatBytes(MAGIC, varint(1), Uint8Array.of(OP.SHA256), otsDigest(root), Uint8Array.from(Buffer.from(String(proofBase64 || ''), 'base64')));
 }
 /** Test/verifier helper: a synthetic pending-attestation timestamp for `uri`. */
 function pendingTimestamp(uri, prefix) {
@@ -186,4 +197,4 @@ function bitcoinTimestamp(height, prefix) {
   return serializeTimestamp(prefix ? { attestations: [], ops: [{ op: OP.PREPEND, arg: prefix, child: { attestations: [], ops: [{ op: OP.SHA256, arg: null, child: leaf }] } }] } : leaf);
 }
 
-module.exports = { DEFAULT_CALENDARS, TAG, OP, MAGIC, varint, readVarint, varbytes, parseTimestamp, serializeTimestamp, attestationsOf, applyOp, submit, upgrade, status, hasBitcoin, bitcoinHeights, otsFile, pendingTimestamp, bitcoinTimestamp };
+module.exports = { DEFAULT_CALENDARS, TAG, OP, MAGIC, varint, readVarint, varbytes, parseTimestamp, serializeTimestamp, attestationsOf, applyOp, submit, upgrade, status, hasBitcoin, bitcoinHeights, otsFile, otsDigest, pendingTimestamp, bitcoinTimestamp };

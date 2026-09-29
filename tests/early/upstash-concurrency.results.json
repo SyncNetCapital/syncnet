@@ -1,0 +1,73 @@
+{
+  "at": "2026-09-29T10:43:05.709Z",
+  "target": "redis:127.0.0.1:26379",
+  "passed": 13,
+  "failed": 0,
+  "results": [
+    {
+      "name": "store is the production Upstash adapter (durable)",
+      "ok": true,
+      "detail": "upstash"
+    },
+    {
+      "name": "1a same signed signal × 10: exactly one creates, the rest idempotent/replay",
+      "ok": true,
+      "detail": "{\"201:ok\":1,\"409:replay\":9}"
+    },
+    {
+      "name": "1b 10 concurrent renewals with fresh nonces: still ONE record for (channel, fan); losers answer conflict",
+      "ok": true,
+      "detail": "{\"200:ok\":1,\"409:conflict\":9}"
+    },
+    {
+      "name": "2 12 concurrent first-manifest activations: exactly one ACTIVE creator, one manifest, losers 409",
+      "ok": true,
+      "detail": "{\"201:ok\":1,\"409:conflict\":11}"
+    },
+    {
+      "name": "3a 20 concurrent drafts for one tuple: every draft may be issued (drafts are unsigned)",
+      "ok": true,
+      "detail": "{\"201:ok\":20}"
+    },
+    {
+      "name": "3b storing them concurrently: exactly ONE intent becomes OPEN for the tuple; the rest 409 intent_open",
+      "ok": true,
+      "detail": "{\"409:intent_open\":19,\"201:ok\":1}"
+    },
+    {
+      "name": "4 20 concurrent verifies: exactly one creates the receipt, others idempotent/conflict, one receipt id, log claimed once",
+      "ok": true,
+      "detail": "{\"200:idempotent\":19,\"200:CONFIRMED\":1}"
+    },
+    {
+      "name": "5a two transfers → AMBIGUOUS",
+      "ok": true,
+      "detail": "{\"ok\":false,\"status\":\"AMBIGUOUS\",\"needsFinalize\":true,\"candidates\":[{\"txHash\":\"0x870de603185032324f32c9d7ccf784c123134a456b5729e8b8922cf91df4a1df\",\"logIndex\":0,\"blockNumber\":\"1003\",\"blockTimestamp\":1790678587,\"state\":\"in-window\",\"safe\":true,\"finalized\":false},{\"txHash\":\"0x9fa9919b6adad38d00a0b2dde70b08860c807114c15833fbdb7becff44d336ea\",\"logIndex\":0,\"blockNumber\":\"1004\",\"blockTimestamp\":1790678587"
+    },
+    {
+      "name": "5b 20 concurrent finalisations naming both candidates: exactly one receipt, exactly one transfer bound, no double-bind",
+      "ok": true,
+      "detail": "{\"200:idempotent\":19,\"200:CONFIRMED\":1} bound=1"
+    },
+    {
+      "name": "6 concurrent rotations to two different wallets: exactly one ROTATION_PENDING, one pending manifest",
+      "ok": true,
+      "detail": "{\"409:replay\":1,\"409:conflict\":2,\"201:ok\":1}"
+    },
+    {
+      "name": "7 ten concurrent cancels (wallet + session): exactly one takes effect, creator ACTIVE, manifest CANCELLED once",
+      "ok": true,
+      "detail": "{\"409:conflict\":9,\"200:ok\":1}"
+    },
+    {
+      "name": "8 one signed session request replayed × 10: exactly one token, the rest 409 replay",
+      "ok": true,
+      "detail": "{\"200:ok\":1,\"409:replay\":9}"
+    },
+    {
+      "name": "9 50 concurrent set-if-absent cas on one key: exactly one true",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

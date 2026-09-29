@@ -225,7 +225,7 @@
     $('eRDownload').hidden = false; $('eRDetails').hidden = false;
     $('eRJson').textContent = JSON.stringify({ receiptId: d.receiptId, mode: d.mode, status: d.status, chain: d.fact, earlyDate: d.context.earlyDate, audienceThen: d.context.audienceThen, attestations: d.attestations.map((a) => ({ type: a.type, keyId: a.keyId, bundleDate: a.bundleDate, anchored: Boolean(a.inclusion) })), ordering: d.ordering.note }, null, 2);
     S.receipt = d;
-    if (d.status === 'FINALIZED') { $('eRCardBtn').hidden = false; const mine = await api({ view: 'receipt', receiptId: d.receiptId }); void mine; }
+    if (d.status === 'FINALIZED') $('eRCardBtn').hidden = false;
     return d;
   }
   async function verifyLoop(intentId, hint, maxRounds) {

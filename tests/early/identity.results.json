@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-29T07:15:29.750Z",
+  "at": "2026-09-29T10:43:03.449Z",
   "passed": 46,
   "failed": 0,
   "results": [
@@ -141,7 +141,7 @@
     {
       "name": "B16 the OAuth-issued session activates the creator (end-to-end identity)",
       "ok": true,
-      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt3.example/UC_x5XG1OV2P6uZZ5FSM9Ttw.jpg\",\"handle\":\"@alice\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1790666129,\"currentManifest\":{\"manifestHash\":\"0xf0e3d8d8be387cd1d88b8"
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt3.example/UC_x5XG1OV2P6uZZ5FSM9Ttw.jpg\",\"handle\":\"@alice\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1790678583,\"currentManifest\":{\"manifestHash\":\"0x2e840094c4968aa0bc288"
     },
     {
       "name": "B17 /api/early resolve view uses the client and caches",

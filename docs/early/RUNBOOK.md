@@ -70,10 +70,21 @@ optional: SYNCNET_EARLY_WRITES_DISABLED=true (kill writes), SYNCNET_EARLY_ANCHOR
 Consequences: CONFIRMED ≈ 13 min after the transfer, FINALIZED ≈ 20 min; the default chunk (50,000 blocks) sweeps a
 2 h window in 2 calls.
 
+## 5b. Independent validation record (29 Sep 2026, final hardening pass)
+
+| What | How | Result |
+|---|---|---|
+| Custom RLP / EIP-155 anchor signing (`netlify/lib/early-tx.js`) | `tests/early/anchor-crosscheck.mjs` against **ethers v6.17.0**: the EIP-155 vector, 300 random anchor transactions compared byte for byte, ethers decoding our raw bytes, our decoder on ethers bytes | 10/10. The first run found a real bug (`r`/`s` zero-padded instead of minimal RLP integers, ≈1 in 128 signatures); fixed, re-verified. |
+| OpenTimestamps artifact (`netlify/lib/early-ots.js`) | a real root submitted to a.pool / b.pool / alice calendars, `.ots` written by our code, checked with the **reference client opentimestamps-client 0.7.2** (`ots info`, `ots verify -f root.bin`, `ots verify -d`, `ots upgrade`) | Parses; all calendars answer "Pending confirmation in Bitcoin blockchain". The first run found a wrong header magic and an `ots info` incompatibility with a keccak file digest; the message is now `sha256(root)`, fixed, re-verified. |
+| Real Redis semantics (production Upstash adapter incl. the `cas` Lua script) | `tests/early/upstash-concurrency.test.mjs` against Redis 8.0.5 (WSL) through a REST bridge: duplicate nonces, simultaneous intent creation, simultaneous matching, duplicate finalisation, Count me in duplicates, manifest version race, rotation cancel race, session replay, 50-way cas | 13/13. **Still owed: the same suite against the preview-only Upstash database** (`UPSTASH_REDIS_REST_URL/TOKEN` + `EARLY_TEST_UPSTASH_CONFIRM=preview`). |
+| Robinhood Chain RPC capabilities | `tests/live/early-rpc-capability.mjs` | chain 0x1237; ≈0.10 s/block; `safe` ≈12.5 min, `finalized` ≈19 min; `eth_getLogs` result-capped (10k), exact filter fine over 200k blocks. |
+
 ## 6. Daily operations
 
 - `node netlify/ops/early-metrics.mjs --days 30` — pilot metrics (aggregates only).
 - `node netlify/ops/early-ops.mjs bundle <date>` — inspect a bundle; `ots-file <date> out.ots` — export the proof.
+  To check it with the official client: write the bundle root's 32 bytes to `root.bin`, then `ots verify -f root.bin out.ots`
+  ("Pending confirmation in Bitcoin blockchain" until upgraded), `ots upgrade out.ots` later. The stamped message is `sha256(root)`.
 - `node netlify/ops/early-ops.mjs card-suspend <shareId> --actor <you>` — hide a public card (moderation); it never
   touches receipts.
 - Watch function logs for `public-feature-closed`, `anchor-failed`, `bundle-root-mismatch`, `youtube-unavailable`.
