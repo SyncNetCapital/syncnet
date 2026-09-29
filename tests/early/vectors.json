@@ -1,0 +1,14 @@
+{
+  "supportIntentDigest": "0x9fce2d6cc3a5c38d9d758386b22a59afaca442f8604be771ba3a949d23daf2b1",
+  "creatorManifestDigest": "0xedd69e3b9cd0c577b094baf96056aa1130e767b0b42a11baca35e723d1c65011",
+  "countMeInDigest": "0x70e1bef82b7df6cad6b1c25b29b9cfe6cdb75e10616089f15ce4902ba534b76b",
+  "finalizeDigest": "0x36343b3410b23fb7f774679e3894f2efcd3c074efc63785514b82349f8d78ec0",
+  "hashJsonSample": "0x4fcf72b17f17c576aa536a00863b124b0a7fedd4fa5a34ea8849c5245a6cef79",
+  "acceptedAssetsHash": "0xdf0fbcabdea57394b008d9485aa3a21f21384675d57ea3579103620d50afd021",
+  "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+  "merkleRoot3": "0x5b9d2bc9d88de2b185b7d3672d3a2678fee42fe6864b27856edd9a606137ca13",
+  "emptyRoot": "0x25693c1e624d15fba76fd33ee8a08375aa2d84afb72173b5dca1dc7627b0fb56",
+  "leaf1": "0x35263fd6ea15b27f9af10ea426457154eeaa4fdd6e3dc22e6c33fb7b17d41881",
+  "attestationId": "0x30d0fb05a56fcf5e66a622f1d630b3604989e50c6a5aec87add00b430cf4d5dd",
+  "receiptId": "0x626eef70d2d0c914c9953da0cf69c80d62404b085e7946267f88d7d31754e41e"
+}
