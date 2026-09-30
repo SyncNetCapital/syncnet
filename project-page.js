@@ -61,7 +61,7 @@
     } else { warn.hidden = true; warn.textContent = ''; }
     const acts = [];
     // On an impostor, trading is still possible but is labelled by contract, never by the protected ticker alone.
-    if (P.tradeUrl) acts.push(`<a class="sn-btn" href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">${imp ? `Trade contract ${esc(short(P.token))} on PAR ↗` : 'Trade on PAR ↗'}</a>`);
+    if (P.tradeUrl) acts.push(`<a class="sn-btn" href="${esc(P.tradeUrl)}" target="_blank" rel="noreferrer">${imp ? `Open chart for contract ${esc(short(P.token))} on PAR ↗` : 'OPEN CHART ON PAR ↗'}</a>`);
     acts.push(`<a href="https://robinhoodchain.blockscout.com/address/${esc(P.token)}" target="_blank" rel="noreferrer">View on explorer ↗</a>`);
     $('pjActions').innerHTML = acts.join('');
     // The token's own on-chain description (PAR metadata), clearly attributed. Never shown for a ticker impostor, whose
