@@ -1,6 +1,20 @@
 {
   "schema": "syncnet.early.keys.v1",
   "note": "PUBLIC key registry for SYNC Proof / EARLY. Only key ids, addresses and validity windows may appear here. Private keys live ONLY in environment secrets (SYNCNET_EARLY_ATTESTATION_KEY, SYNCNET_EARLY_ANCHOR_KEY). The server refuses to start attestations unless the address derived from the environment key matches an entry below. Any 32-byte hex value in this file is rejected by lib/syncnet-early.js parseKeyRegistry.",
-  "attestation": [],
-  "anchor": []
+  "attestation": [
+    {
+      "keyId": "early-att-preview-k1",
+      "address": "0x9a711dd51c7351d0bc5fd63765cc94f57a2dff7f",
+      "validFrom": "2026-09-30T00:00:00Z",
+      "validUntil": null,
+      "status": "active"
+    }
+  ],
+  "anchor": [
+    {
+      "address": "0x8b5edecc048baaebe676a91e5a175c1679ccb04a",
+      "validFrom": "2026-09-30T00:00:00Z",
+      "validUntil": null
+    }
+  ]
 }
