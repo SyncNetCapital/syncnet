@@ -36,3 +36,4 @@
 /project/* /token.html 200
 /token/* /token.html 200
 /for-sale /index.html 200
+/stats /stats.html 200

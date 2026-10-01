@@ -43,3 +43,7 @@ no log scans anywhere in the payment path.
    never manually entered.
 
 Until all six exist, NET stays visible only as verified **relationships** (markets, fee-flow assets), never as a volume.
+
+## Addendum (SyncNet Economics, /stats)
+
+The table above is about *project-wide* NET attribution and still holds. /stats and the Explore strip show something narrower: cumulative NET and USDG paid to **$SYNC holders** by $SYNC's own PAR holder vault, as reported by PAR's public indexer (/distributions?token=<SYNC>; assets matched by address). It is labelled as indexed, not as a direct chain read, and it makes no claim about SyncNet routing, other projects, or NET volume. SYNC burned is read on-chain (initial supply minus 	otalSupply()). 24 h figures are shown only when the indexer's recent rounds provably cover 24 h.

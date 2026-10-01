@@ -1,6 +1,6 @@
 from pathlib import Path
 root=Path(__file__).resolve().parents[1]
-active=['index.html','build.html','network.html','sync.html','marketplace.html','labs.html','token.html','registry.html']
+active=['index.html','build.html','network.html','sync.html','marketplace.html','labs.html','token.html','registry.html','stats.html']
 for name in active:
     text=(root/name).read_text(encoding='utf-8')
     assert 'IGLOO' not in text
