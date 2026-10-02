@@ -127,7 +127,7 @@
     const letter = (r.symbol || r.name || '·').charAt(0);
     const label = `${name}${r.symbol ? ' ($' + r.symbol + ')' : ''}, ${UI.LABEL[syncState]}${impostor ? ', not the canonical $' + canon.symbol : ''}${r.listing ? ', for sale' : ''}`;
     return `<li><a class="sn-row" href="/project/${esc(r.token)}" aria-label="${esc(label)}">
-<span class="sn-proj">${UI.logoHtml(r.logo, letter)}<span class="sn-m-main"><span class="sn-proj-name">${esc(name)}</span>${r.symbol ? `<span class="sn-proj-ticker">$${esc(r.symbol)}</span>` : ''}${r.origin ? `<span class="sn-proj-origin sn-d-col">${esc(r.origin)}</span>` : ''}
+<span class="sn-proj" data-ph-seed="${esc(r.token)}" data-ph-letter="${esc(letter)}">${UI.logoHtml(r.logo, letter)}<span class="sn-m-main"><span class="sn-proj-name">${esc(name)}</span>${r.symbol ? `<span class="sn-proj-ticker">$${esc(r.symbol)}</span>` : ''}${r.origin ? `<span class="sn-proj-origin sn-d-col">${esc(r.origin)}</span>` : ''}
 <span class="sn-m-only">${UI.stateHtml(syncState)}</span>${mobileFacts ? `<span class="sn-m-only sn-small sn-dim">${mobileFacts}</span>` : ''}</span></span>
 <span class="sn-d-col">${UI.stateHtml(syncState)}</span>
 <span class="sn-cell sn-d-col">${market || '<span class="sn-muted">—</span>'}</span>
@@ -186,6 +186,16 @@
       if (rows.length === 1) location.href = '/project/' + rows[0].token;
       else { const first = $('exploreList').querySelector('a'); if (first) first.focus(); }
     });
+    // https-only PAR logos have no gateway chain: on load failure swap in the deterministic placeholder (seeded by the
+    // contract), once. Scoped to the Explore list only; ipfs:// images keep SyncNetIpfs' own Pinata → ipfs.io → dweb.link chain.
+    $('exploreList').addEventListener('error', (e) => {
+      const img = e.target;
+      if (!img || img.tagName !== 'IMG' || !img.dataset || img.dataset.ipfs != null || img.dataset.phDone || !window.SyncNetIpfs) return;
+      const box = img.closest && img.closest('.sn-proj[data-ph-seed]');
+      if (!box) return;
+      img.dataset.phDone = '1';
+      img.src = window.SyncNetIpfs.placeholder(box.dataset.phSeed, box.dataset.phLetter);
+    }, true);
     $('exploreMore').addEventListener('click', () => { state.shown += PAGE; render(); });
     if (initial) input.value = initial;
     if (params.get('find')) input.focus(); // from My Projects: "+ Find another project"

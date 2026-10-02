@@ -30,6 +30,7 @@ const LAUNCHES = [
   mk(D, 'BAD', { logo: 'javascript:alert(1)', logoUrl: 'http://insecure.example/x.png' }),                              // unsafe schemes
   mk(E, 'HTTPS', { logoUrl: 'https://cdn.example/e.png' }),                                                              // https only (no ipfs form)
   mk(F, 'TRAV', { logo: '/assets/../secret.png' }),                                                                      // path traversal
+  mk(hex(0x66), 'ASSET', { logo: '/assets/syncnet-logo-thumb.webp', logoUrl: '/assets/syncnet-logo-thumb.webp' }),                  // PAR must not borrow a local SyncNet asset
   mk(SYNC, 'SYNC', { logo: 'ipfs://' + CID_SYNC_PAR }),                                                                  // PAR logo that the profile must beat
 ];
 const PROFILES = { projects: [{ token: SYNC, symbol: 'SYNC', name: 'SyncNet', profile: { name: 'SYNC', image: '/assets/syncnet-logo-thumb.webp' }, registry: { status: 'network', label: 'SYNCNET NETWORK ASSET', canonical: true } }] };
@@ -76,8 +77,11 @@ check('profile.image beats the PAR launch logo for the same contract', t.logoFor
 // ---- invalid / hostile values ----
 check('javascript: / http: logo values are rejected', t.logoFor(D) === '', t.logoFor(D));
 check('/assets/ path traversal rejected', t.logoFor(F) === '');
+check('PAR launch media can NOT supply /assets/… (no borrowing a SyncNet asset)', t.logoFor(hex(0x66)) === '', t.logoFor(hex(0x66)));
 {
   const x = await boot({ launches: [mk(H, 'X', { logo: 'data:image/svg+xml,<svg onload=alert(1)>' }), mk(hex(0x88), 'Y', { logo: 'ipfs://not a cid' }), mk(hex(0x89), 'Z', { logo: 'https://' + 'a'.repeat(600) })], profiles: { projects: [] } });
+  const reg = await boot({ launches: [mk(H, 'R')], profiles: { projects: [{ token: H, symbol: 'R', profile: { image: '/assets/syncat-thumb.webp' } }, { token: hex(0x88), symbol: 'T', profile: { image: '/assets/../secret.png' } }, { token: hex(0x89), symbol: 'U', profile: { image: 'javascript:alert(1)' } }] } });
+  check('Registry /assets/ image still accepted; traversal and unsafe schemes in a profile rejected', reg.t.logoFor(H) === '/assets/syncat-thumb.webp' && reg.t.logoFor(hex(0x88)) === '' && reg.t.logoFor(hex(0x89)) === '');
   check('data:, malformed ipfs:// and over-long values rejected', [H, hex(0x88), hex(0x89)].every((a) => x.t.logoFor(a) === ''));
 }
 
@@ -108,6 +112,8 @@ check('card with unsafe logo schemes falls back to the placeholder', isPlacehold
 check('same-symbol cards carry different placeholders / images', imgSrcs(cardOf(A))[0] !== imgSrcs(cardOf(B))[0]);
 check('https-only logo renders as-is (CSP already allows https:)', imgSrcs(cardOf(E))[0] === 'https://cdn.example/e.png');
 check('card still renders (name, MAP link) when its image is invalid', /MAP<\/a>/.test(cardOf(F)) && isPlaceholder(imgSrcs(cardOf(F))[0] || ''));
+
+check('Recent Connections card for a PAR /assets/ logo shows the placeholder, not the asset', isPlaceholder(imgSrcs(cardOf(hex(0x66)))[0] || '') && !cardOf(hex(0x66)).includes('/assets/'));
 
 // ---- Registry preview ----
 check('Registry preview shows the profile image for its exact contract', /src="\/assets\/syncnet-logo-thumb\.webp"/.test(registry()), registry().slice(0, 300));

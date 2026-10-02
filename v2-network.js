@@ -38,10 +38,11 @@ let recentPromise=null,profilesPromise=null,tokenListPromise=null;
 // Values stay as stored (ipfs://… / /assets/… / https://…) and are rendered by window.SyncNetIpfs (gateway fallback chain).
 const profileLogos=new Map(),launchLogos=new Map();
 let logoReady=null;
-const mediaOk=v=>{
+// `local` (trusted /assets/… files) is allowed ONLY for Registry profile images: a PAR launch can never borrow a SyncNet asset.
+const mediaOk=(v,local)=>{
   const s=String(v??'').trim();
   if(!s||s.length>512) return '';
-  if(s.startsWith('/assets/')) return /^\/assets\/[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s)&&!s.includes('..')?s:'';
+  if(s.startsWith('/')) return local&&/^\/assets\/[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s)&&!s.includes('..')?s:'';
   const Ipfs=window.SyncNetIpfs;
   return Ipfs&&Ipfs.display(s)?s:''; // ipfs://CID (validated) or https:// only; every other scheme renders nothing
 };
@@ -148,7 +149,7 @@ async function profiles(){
   profilesPromise=fetch('/syncnet-projects.json',{cache:'no-store'}).then(r=>r.ok?r.json():{projects:[]}).then(j=>{
     const map=new Map();
     profileLogos.clear();
-    for(const p of (j?.projects||[])) if(valid(p?.token)){map.set(p.token.toLowerCase(),p);const m=mediaOk(p?.profile?.image);if(m)profileLogos.set(p.token.toLowerCase(),m)}
+    for(const p of (j?.projects||[])) if(valid(p?.token)){map.set(p.token.toLowerCase(),p);const m=mediaOk(p?.profile?.image,true);if(m)profileLogos.set(p.token.toLowerCase(),m)}
     return map;
   }).catch(()=>new Map());
   return profilesPromise;

@@ -36,7 +36,8 @@ const REGISTRY = { projects: [{ token: T.reg, symbol: 'REG', name: 'Reg', profil
 
 const calls = [];
 const els = new Map();
-const el = (id) => { if (!els.has(id)) els.set(id, { id, innerHTML: '', textContent: '', hidden: false, value: '', addEventListener() {}, focus() {}, setAttribute() {}, querySelector: () => null }); return els.get(id); };
+const listeners = [];
+const el = (id) => { if (!els.has(id)) els.set(id, { id, innerHTML: '', textContent: '', hidden: false, value: '', addEventListener(type, fn, cap) { listeners.push({ id, type, fn, cap }); }, focus() {}, setAttribute() {}, querySelector: () => null }); return els.get(id); };
 const doc = { getElementById: el, addEventListener() {}, querySelectorAll: () => [], readyState: 'complete' };
 const ok = (json) => ({ ok: true, json: async () => json });
 const fetchStub = async (url) => {
@@ -73,6 +74,30 @@ check('PAR cannot borrow a same-origin /assets/ brand image', isLetter(T.spoof),
 check('Registry profile.image still overrides PAR media', srcOf(T.reg) === '/assets/syncat-thumb.webp', logoOf(T.reg));
 check('malformed ipfs:// logo falls through to a valid https logoUrl', srcOf(T.badCid) === 'https://ipfs.io/ipfs/' + CID1, logoOf(T.badCid));
 check('no per-row requests: only the 3 page-level loads + batch enrichment', !calls.some((u) => /rpc\.|readTokenMetadata|eth_call|ipfs|\/launches\/0x/.test(u)) && calls.filter((u) => u.includes('/api/par-launches-all')).length === 1, calls.join(' | '));
+
+// ---- https image failure -> deterministic placeholder (Explore rows only) ----
+const errHandlers = listeners.filter((l) => l.type === 'error');
+check('exactly one error listener, on #exploreList only, capture phase (no document/window-level hook)', errHandlers.length === 1 && errHandlers[0].id === 'exploreList' && errHandlers[0].cap === true, JSON.stringify(errHandlers.map((l) => [l.id, l.cap])));
+check('row carries the exact contract + initial as placeholder seed', rowOf(T.https).includes(`data-ph-seed="${T.https}"`) && rowOf(T.https).includes('data-ph-letter="H"'));
+const fire = errHandlers[0].fn;
+const callsBeforeErrors = calls.length;
+const mkImg = (src, box, extra = {}) => ({ tagName: 'IMG', src, dataset: { ...extra }, closest: (sel) => (sel === '.sn-proj[data-ph-seed]' ? box : null) });
+const httpsImg = mkImg(srcOf(T.https), { dataset: { phSeed: T.https, phLetter: 'H' } });
+fire({ target: httpsImg });
+check('https-only logo that fails -> deterministic placeholder seeded by the contract, with the token initial', httpsImg.src === Ipfs.placeholder(T.https, 'H') && httpsImg.src.startsWith('data:image/svg+xml,'), httpsImg.src);
+check('placeholder differs per contract (same initial)', Ipfs.placeholder(T.https, 'H') !== Ipfs.placeholder(T.badCid, 'H'));
+const once = httpsImg.src; fire({ target: httpsImg });
+check('handled once (no loop)', httpsImg.src === once && httpsImg.dataset.phDone === '1');
+const stray = mkImg('https://other.example/x.png', null);
+fire({ target: stray });
+check('unrelated image (not inside an Explore project row) is ignored', stray.src === 'https://other.example/x.png' && !stray.dataset.phDone);
+const notImg = { tagName: 'DIV', dataset: {}, closest: () => ({ dataset: { phSeed: 'x', phLetter: 'x' } }) };
+fire({ target: notImg });
+check('non-IMG targets are ignored', notImg.src === undefined);
+const ipfsImg = mkImg(srcOf(T.both), { dataset: { phSeed: T.both, phLetter: 'D' } }, { ipfs: CID1, ipfsGw: '0' });
+fire({ target: ipfsImg });
+check('ipfs:// images are left to SyncNetIpfs (Pinata → ipfs.io → dweb.link → placeholder); Explore never touches them', ipfsImg.src === srcOf(T.both) && !ipfsImg.dataset.phDone && /data-ipfs="/.test(logoOf(T.both)) && Ipfs.GATEWAYS.join(',') === 'https://gateway.pinata.cloud/ipfs/,https://ipfs.io/ipfs/,https://dweb.link/ipfs/');
+check('failure handling made no network request', calls.length === callsBeforeErrors, `${calls.length} vs ${callsBeforeErrors}`);
 
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
