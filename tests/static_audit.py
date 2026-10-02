@@ -427,5 +427,13 @@ assert "return platform === PLATFORM ? externalId : platform + ':' + externalId;
 assert _efn.count('platformEnabled(')>=6 and 'function identityFrom(' in _efn and "'Unsupported platform.'" in _efn, 'every platform-aware path must ask whether the platform is enabled'
 for _name,_t in [('early-platforms.js',_eplat),('early-session.js',_esess)]:
     assert not _re3.search(r"['`](mp:|site:|eco:|reg:|pons2:|pump:)", _t) and 'eth_sendTransaction' not in _t and 'eth_sendRawTransaction' not in _t, 'foreign key / send in '+_name
-assert 'tests/early/platform.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8') and 'tests/early/x.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8'), 'the platform and X suites must be part of run-all'
+# 13. X UI (phase 5): added to the existing pages by JS ONLY when the server's config enables X; no HTML/CSS added
+assert "if (xOn()) platformTabs();" in _epage and "if (xOauth()) addXLink();" in _ecreator, 'X UI must be created only when the server config enables X'
+assert "S.cfg.platforms.includes('x')" in _epage and "S.cfg.platforms.includes('x')" in _ecreator and "platformServices.x" in _epage and "platformServices.x" in _ecreator, 'the client must read the gate from the server config'
+assert "(a && a.kind === 'followers' ? E.audienceLine(a) :" in _epage, 'follower context must be worded by the shared helper ("Followers on X then")'
+assert 'Audience then' not in _re3.sub(r"[^\n]*\bkind === 'followers'[^\n]*", '', _nocom(_epage)).replace("'Audience then: unavailable'", '').replace("'Audience then: hidden'", '').replace("'Audience then: ' + a.display", ''), 'the generic audience label must not be used for X'
+assert _epage.count("/^\\/labs\\/early\\/c\\/(UC[A-Za-z0-9_-]{22})$/")==1 and "E.isExternalId(m[1], m[2])" in _epage, 'legacy route kept; canonical routes validate the id shape for the platform'
+assert not _re3.search(r"<style|createElement\('style'\)|stylesheet", _epage+_ecreator), 'no styles may be added by the X UI'
+_runall=(root/'tests/run-all.mjs').read_text(encoding='utf-8')
+assert all(s in _runall for s in ['tests/early/platform.test.mjs','tests/early/x.test.mjs','tests/e2e/early-ui-x.mjs']), 'the platform, X and X UI suites must be part of run-all'
 print('SyncNet Labs · EARLY static audit: PASS')

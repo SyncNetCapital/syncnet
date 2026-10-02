@@ -422,7 +422,7 @@ async function runScenario() {
   check('H01 the X client, X OAuth function and their single route exist (the function answers closed unless X is explicitly enabled)', exists('netlify/lib/early-x.js') && exists('netlify/functions/early-x-auth.js') && /\/api\/early-x-auth/.test(text('netlify.toml')) && /\/api\/early-x-auth /.test(text('_redirects')));
   const code = ['lib/syncnet-early.js', 'netlify/functions/early.js', 'netlify/functions/early-snapshot.js', 'netlify/functions/early-youtube-auth.js', 'netlify/lib/early-session.js'].map(text).join('\n');
   check('H02 X env var names, X API hosts and X OAuth endpoints appear only in the X modules, config and platform registry - not in the shared server code or the protocol lib', !/SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|x\.com\/i\/oauth2|twitter\.com|oauth2\/token/.test(code));
-  check('H03 the browser pages are untouched by the platform work (no X UI, routes, copy)', !/\bX creator|\bon X\b|x\.com|twitter/i.test(text('labs-early.js') + text('labs-early-creator.js') + text('labs-early.html') + text('labs-early-creator.html')));
+  check('H03 the HTML pages carry no X markup or copy (the X UI is created by script only when the server enables it; tests/e2e/early-ui-x.mjs)', !/\bX\b (creator|account|username)|Continue with X|ePlatform|cLinkX|x\.com|twitter/i.test(text('labs-early.html') + text('labs-early-creator.html')));
 }
 
 fs.writeFileSync(path.join(ROOT, 'tests/early/platform.results.json'), JSON.stringify({ at: new Date().toISOString(), passed: results.length - failures, failed: failures, results }, null, 2));

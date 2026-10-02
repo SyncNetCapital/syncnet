@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-02T09:56:22.380Z",
+  "at": "2026-10-02T10:39:47.880Z",
   "passed": 102,
   "failed": 0,
   "results": [
@@ -166,17 +166,17 @@
     {
       "name": "D01 creator-link platform=x returns the X start URL and scope users.read; the state is bound to platform x",
       "ok": true,
-      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-x-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508~x.1790935581.86c71bf36dfcf4c2d0e30963bf5c5f5f.f945041aa94559c58848b4a8d6b8abe90d4d2922fa6fef0b5627aadf2c4ebb8c\",\"ttlSeconds\":600,\"scope\":\"users.read\"}"
+      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-x-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508~x.1790938187.04f45d66ca180a8b619bf7678b48b41c.7338ed075db446b6f9b4ab44a4878c2790f5e895fc1f51380c6c8e823dd0c76c\",\"ttlSeconds\":600,\"scope\":\"users.read\"}"
     },
     {
       "name": "D02 start -> 302 to x.com authorize with PKCE S256 whose challenge derives from THIS state (verifier never leaves the server), exact redirect URI, users.read only",
       "ok": true,
-      "detail": "https://x.com/i/oauth2/authorize?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fdeploy-preview-9.example.test%2Fapi%2Fearly-x-auth&scope=users.read&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508%7Ex.1790935581.86c71bf36dfcf4c2d0e30963bf5c5f5f.f945041aa94559c58848b4a8d6b8abe90d4d2922fa6fef0b5627aadf2c4ebb8c&code_challenge=LqYERTh0SQJUVTs8W0wP8OR1yA3zNq3DMUr2"
+      "detail": "https://x.com/i/oauth2/authorize?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fdeploy-preview-9.example.test%2Fapi%2Fearly-x-auth&scope=users.read&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508%7Ex.1790938187.04f45d66ca180a8b619bf7678b48b41c.7338ed075db446b6f9b4ab44a4878c2790f5e895fc1f51380c6c8e823dd0c76c&code_challenge=N3OFazvThrDeOxk_9oBswwXnw2IEwN3vanw1"
     },
     {
       "name": "D03 callback -> 302 to the FIXED creator page with a session fragment; a browser-supplied code_verifier / redirect_uri / redirect / next / returnTo is ignored (X verified the SERVER-derived verifier and the configured redirect)",
       "ok": true,
-      "detail": "/labs/early/creator#s=e1.creator.x_9007199254740993~0x1563915e194d8cfba1943570603f7606a3115508.1790942181.69de56bde4a4feac.881ce5ba26f710587ad702a54ee7bd3f8fd4c9f1780e9974e27efd063230e7df"
+      "detail": "/labs/early/creator#s=e1.creator.x_9007199254740993~0x1563915e194d8cfba1943570603f7606a3115508.1790944787.249507e64692b81a.cf855a4b48c897750994ea583d142a89a1714f70420b2d1667558238246c58ca"
     },
     {
       "name": "D04 the creator session is bound to (x, numeric externalId as an exact string, wallet) from the AUTHENTICATED /2/users/me; subject spelling x_<id>~<wallet>",
@@ -331,7 +331,7 @@
     {
       "name": "F01 an X creator activates through the real OAuth link: manifest (platform x, channelId = numeric id string) accepted, creator record + public view carry platform x / externalId; no legacy channelId on the public view",
       "ok": true,
-      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x95bb36ca9431eab43c63c791627af94e5713e5482aca510aa3fe29998a56d0cc\",\"platform\":\"x\",\"externalId\":\"9007199254740993\",\"display\":{\"title\":\"Alice (X)\",\"avatarUrl\":\"https://pbs.twimg.com/profile_images/9007199254740993/a_normal.jpg\",\"handle\":\"@alice_x\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1791022041,\"currentManifest\":{\"manifestHash\":\"0x39aabd9fa6"
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x95bb36ca9431eab43c63c791627af94e5713e5482aca510aa3fe29998a56d0cc\",\"platform\":\"x\",\"externalId\":\"9007199254740993\",\"display\":{\"title\":\"Alice (X)\",\"avatarUrl\":\"https://pbs.twimg.com/profile_images/9007199254740993/a_normal.jpg\",\"handle\":\"@alice_x\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1791024647,\"currentManifest\":{\"manifestHash\":\"0x30bff41e94"
     },
     {
       "name": "F02 the creator-identity attestation names platform x and the numeric id as `externalId`, method x-oauth2-pkce users.read; no username / handle in it",
@@ -504,7 +504,7 @@
       "detail": ""
     },
     {
-      "name": "H04 no X UI, route or copy was added to the browser pages in this phase",
+      "name": "H04 the HTML pages contain no X markup or copy at all (X UI is created by script only when the server enables X; see tests/e2e/early-ui-x.mjs); the scripts never name the OAuth function or an X host",
       "ok": true,
       "detail": ""
     },

@@ -1,0 +1,362 @@
+{
+  "at": "2026-10-02T10:40:31.551Z",
+  "passed": 71,
+  "failed": 0,
+  "results": [
+    {
+      "name": "O01 flag OFF: landing page is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O02 flag OFF: landing after a YouTube lookup is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O03 flag OFF: creator setup (wallet connected) is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O04 flag OFF: creator page (legacy URL) is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O05 flag OFF: receipt page is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O06 flag OFF: public card page is DOM-identical to the golden captured from the pre-phase-5 code",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O07 flag OFF: no JS errors while rendering the frozen pages",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O08 flag OFF: the platform selector does not exist anywhere (no #ePlatform, no .sn-filters, no \"X\" option); label and placeholder are the original YouTube ones",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O09 flag OFF: creator setup offers only \"Continue with YouTube\" (no X button, no X note, step 2 is \"YouTube\")",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O10 flag OFF: /labs/early/c/<UC…> (legacy) and /labs/early/c/youtube/<UC…> render the identical creator page, equal to the golden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O11 flag OFF: /c/x/<id> fails closed: \"Not on EARLY\", no support panel, no creator data (the server answers 400 Unsupported platform)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "O12 flag OFF: every X server entry point is closed even when called directly (resolver 400, creator view 400, creator-link 400, OAuth function → #e=closed); no X API request was made",
+      "ok": true,
+      "detail": "400,400,400"
+    },
+    {
+      "name": "O13 flag OFF: the public config lists only YouTube (this is what the pages read)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N01 flag ON: YouTube landing DOM equals the golden once the single added element (#ePlatform tabs) is removed - nothing else on the landing page changed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N02 flag ON: after a YouTube lookup the landing DOM still equals the golden minus the tabs (YouTube input, result markup, copy and resolver behave exactly as before)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N03 flag ON: creator setup DOM equals the golden once the X button and its note are removed (YouTube button, copy and order untouched)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N04 flag ON: the YouTube creator page, receipt page and public card are byte-identical to the golden (X never touches them)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N05 flag ON: the X button reuses existing classes (\"sn-btn primary\", the same as the YouTube button), sits right after the YouTube note, YouTube text unchanged",
+      "ok": true,
+      "detail": "{\"text\":\"Continue with X\",\"cls\":\"sn-btn primary\",\"prev\":\"sn-small sn-muted\",\"next\":\"sn-small sn-muted\",\"ytText\":\"Continue with YouTube\"}"
+    },
+    {
+      "name": "N06 flag ON: no JS errors on the frozen pages",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N07 flag ON: the landing offers \"YouTube | X\" as the existing tab control (.sn-filters, aria-pressed); YouTube is the default; original label and placeholder",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N08 flag ON + YouTube selected: the lookup is the original request (legacy `yt` parameter, creator view by `channelId`) and links to the legacy URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N09 selecting X: aria-pressed moves, the label/placeholder become the X ones, the previous result and input are cleared",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N09b switching back to YouTube restores the original label, placeholder and pressed state (and clears the input)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N09c ... and a YouTube lookup after the round trip is again the original request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N10 X lookup: @username, username, x.com/… and twitter.com/… all resolve through platform=x; the result shows the CURRENT display name and @username, never the numeric id",
+      "ok": true,
+      "detail": "[[\"@alice_x\",\"Alice (X)\",\"@alice_x\"],[\"alice_x\",\"Alice (X)\",\"@alice_x\"],[\"x.com/alice_x\",\"Alice (X)\",\"@alice_x\"],[\"twitter.com/alice_x\",\"Alice (X)\",\"@alice_x\"],[\"https://twitter.com/Alice_X\",\"Alice (X)\",\"@alice_x\"]]"
+    },
+    {
+      "name": "N11 a reserved X path is refused with a clear message and no result",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N12 an unknown X account shows the not-found message (X wording), no result",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N13 X account not on EARLY: the same Count me in offer and copy as YouTube",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N14 Count me in (X) = connect + ONE free signature, no transaction; the signed struct is platform \"x\" with the immutable numeric id in the v1 channelId field - never the username",
+      "ok": true,
+      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790937614,\"expiry\":1806489614,\"nonce\":\"0xe70caf94911a0e47a649129a15e7a8a85e3e200667c3f9658c1a9cbe4386a9eb\"}"
+    },
+    {
+      "name": "N15 the signal is stored under the x:<id> ref and the creator is still not public",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N16 no JS errors on the landing with X on",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N17 before a wallet is connected neither platform button is shown (same rule as YouTube)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N18 once connected both \"Continue with YouTube\" and \"Continue with X\" are offered",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: users.read ONLY, PKCE S256, exact redirect URI, X-bound wallet state",
+      "ok": true,
+      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790938203.d3225c300b8a87bcb6803e7152bf0bbb.5d1b6f819839e852cdc2e133ac46667018cb7ae3343cf5f6f62c249f7090f184&code_challenge=tOFH9d7DYmUVh8YOskycBJGABceQUb1SYmpAq3618uQ&code_challenge_method=S256"
+    },
+    {
+      "name": "N20 back on the creator page: session in the fragment is cleared, the manifest step shows the X display name and @username (not the numeric id), step 2 is named \"X\"",
+      "ok": true,
+      "detail": "AAlice (X)@alice_x · wallet 0xd3e4…55d6"
+    },
+    {
+      "name": "N21 the manifest step copy is the same sentence with X words (\"Identity is your X account id; your username and name can change freely\")",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N22 signing the manifest: the receiving wallet signs the v1 CreatorManifest with platform \"x\" and channelId = the exact numeric id (above 2^53, as a string)",
+      "ok": true,
+      "detail": "{\"schema\":\"syncnet.early.creator-manifest.v1\",\"creatorId\":\"0x95bb36ca9431eab43c63c791627af94e5713e5482aca510aa3fe29998a56d0cc\",\"platform\":\"x\",\"channelId\":\"9007199254740993\",\"chainId\":4663,\"receivingWallet\":\"0xd3e442496eb66a4748912ec4a3b7a111d0b855d6\",\"acceptedAssetsHash\":\"0xcb000c61fac1f5b9b4fb1e4db3f1ef12f8d3687b8d707082b2c88df3ad8b9552\",\"manifestVersion\":1,\"previousManifestHash\":\"0x0000000000000"
+    },
+    {
+      "name": "N23 dashboard: live, X display name + @username, the page link is the canonical /labs/early/c/x/<id>, receiving wallet shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N24 wallet-change panel uses X wording for the fresh-verification note (same sentence otherwise)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N25 no JS errors in the X creator flow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N26 server state: creator record is platform x with the numeric id; the OAuth access token was never stored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N27 the X creator page is the SAME layout: identical set of element ids as the YouTube creator page (no section added or removed)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "N28 only platform data/words differ: \"EARLY · X creator\", display name, @username, \"verified for this account\"; the numeric id is not the headline; assets and minimum shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N29 avatar from X is shown (display metadata only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N30 sign what you mean: ONE typed signature; the SupportIntent names creatorId = keccak(x|numeric id), the creator wallet, USDG, the exact amount, PRIVATE - the immutable id, not a username",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N31 direct payment unchanged: ONE eth_sendTransaction, a standard transfer to the token contract, value 0, 68-byte calldata to the creator wallet; the flow had exactly two prompts (sign, send)",
+      "ok": true,
+      "detail": "{\"from\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":\"0x1237\",\"to\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"data\":\"0xa9059cbb000000000000000000000000d3e442496eb66a4748912ec4a3b7a111d0b855d6000000000000000000000000000000000000000000000000000000000016e360\",\"value\":\"0x0\"}"
+    },
+    {
+      "name": "N32 receipt: X creator name on the card and \"Followers on X then: ~12K\" (never \"Audience then\")",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N33 receipt page keeps its structure; the share note names the followers context for X; no wallet / amount / transaction on the card",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N34 making the card is the same opt-in (one session signature); no JS errors",
+      "ok": true,
+      "detail": "connect,sign"
+    },
+    {
+      "name": "N35 public X card: EARLY / I WAS THERE WHEN / name / \"Followers on X then: ~12K\" / SYNC Proof verified; the audience note speaks of X followers",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N36 privacy defaults unchanged on the X card: no wallet, amount, tx hash, intent id, numeric id or username; the same \"Not shown\" sentence; attestations listed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P01 card API payload: wallet, amount and transaction are null and nothing is revealed - identical defaults for the X card and the YouTube card; no username or supporter data in the payload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N37 no follower snapshot for that day → \"Followers on X then: unavailable\"; the snapshot note is hidden and the list does not claim a snapshot attestation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N38 no JS errors on the public X card",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N39 My EARLY: the X signal is listed as \"X account <id>\" (we hold no profile for it) and the YouTube-style layout is unchanged; receipts list the X receipt",
+      "ok": true,
+      "detail": "X account 18446744073709551615active"
+    },
+    {
+      "name": "N40 X creator already on EARLY: the lookup shows \"On EARLY · Support directly →\" linking to /labs/early/c/x/<numeric id>; the username is only displayed, the id is not shown as text; no Count me in offer",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "N41 following that link opens the X creator page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R01 /c/<UC…> (legacy, permanent), /c/youtube/<UC…> and /c/x/<numeric id> each render their creator page",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R02 invalid platform/id combinations fail closed: no creator page, no creator API request is made (the page falls back to the landing)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "R03 the X route asks the server by (platform, numeric id) - never by username",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "R04 no JS errors across the routes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G01 stale client + server gate: with X switched off the lookup is refused by the SERVER (no result, no X API request) even though the page still shows the X tab",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G02 flag removed: creator-link(x), the X creator view and even a validly signed X creator session are all refused by the server",
+      "ok": true,
+      "detail": "400,400,401"
+    },
+    {
+      "name": "G03 flag removed: the X creator page degrades to the standard \"Not on EARLY\" (no support panel) - the YouTube creator page is unaffected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G04 flag removed: the YouTube creator page still renders",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G05 credentials alone never show X: ENV_OFF holds all four X values yet the landing has no tabs (O08) and the config lists only YouTube (O13)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px: X tabs, X creator page and creator setup with both buttons have no horizontal overflow; the new tap targets are ≥ 40 px; no JS errors",
+      "ok": true,
+      "detail": "0,0,0,0,0,"
+    },
+    {
+      "name": "390px: X tabs, X creator page and creator setup with both buttons have no horizontal overflow; the new tap targets are ≥ 40 px; no JS errors",
+      "ok": true,
+      "detail": "0,0,0,0,0,"
+    },
+    {
+      "name": "V01 phase 5 changes NO html and NO stylesheet: labs-early.html, labs-early-creator.html, ui.css and v2.css are byte-identical to a8568ea (re-pin deliberately if a later phase changes them)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V02 every CSS class used by the X additions already exists in the shared stylesheets (no new visual language): sn-filters, sn-btn, primary, sn-small, sn-muted",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V03 the only inline style added is the tab strip margin (the same inline-margin pattern the page already uses); no new <style>, no new stylesheet link",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

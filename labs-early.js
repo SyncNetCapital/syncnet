@@ -2,6 +2,8 @@
  * EARLY (SYNC Proof) — fan surfaces, client-routed by path under /labs/early (docs/sync-proof-early-spec.md §15, §16):
  *   /labs/early                    landing: Count me in + creator setup link
  *   /labs/early/c/<channelId>      creator page + the support flow (connect → sign what you mean → send → verified)
+ *   /labs/early/c/<platform>/<id>  the canonical form: youtube/<UC…> (same page as the legacy URL above, kept permanently)
+ *                                  and x/<numeric user id> (only when the server's config enables X)
  *   /labs/early/receipt?intent=…   the private receipt (resumes from the server; recovery by tx hash; card)
  *   /labs/early/mine               private list (fan session = one free signature, off the happy path)
  *   /labs/early/v/<shareId>        public verification page of a card
@@ -20,7 +22,9 @@
     set(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage may be blocked */ } },
   };
   const session = { get() { try { return sessionStorage.getItem('syncnet_early_fan_session') || ''; } catch { return ''; } }, set(v) { try { if (v) sessionStorage.setItem('syncnet_early_fan_session', v); else sessionStorage.removeItem('syncnet_early_fan_session'); } catch { /* blocked */ } } };
-  const S = { cfg: null, creator: null, intent: null, polling: 0, busy: false, route: null };
+  const S = { cfg: null, creator: null, intent: null, polling: 0, busy: false, route: null, platform: 'youtube' };
+  // X is offered ONLY when the server's own config says it is enabled (the server enforces the gate on every request regardless)
+  const xOn = () => Boolean(S.cfg && Array.isArray(S.cfg.platforms) && S.cfg.platforms.includes('x') && S.cfg.platformServices && S.cfg.platformServices.x && S.cfg.platformServices.x.resolver);
   const status = (m, tone, id) => { const el = $(id || 'eStatus'); if (!el) return; el.textContent = m || ''; if (tone) el.dataset.tone = tone; else delete el.dataset.tone; };
   const flow = (m, tone) => status(m, tone, 'eFlowStatus');
 
@@ -31,7 +35,8 @@
   const nonce = () => { const b = new Uint8Array(32); crypto.getRandomValues(b); return '0x' + Array.from(b, (x) => x.toString(16).padStart(2, '0')).join(''); };
   const nowSec = () => Math.floor(Date.now() / 1000);
   const fmtDate = (d) => { try { return new Date(d + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' }); } catch { return d; } };
-  const audienceText = (a) => !a || a.state === 'unavailable' ? 'Audience then: unavailable' : a.state === 'hidden' ? 'Audience then: hidden' : 'Audience then: ' + a.display;
+  // follower context (X) is always named as such ("Followers on X then: …"); every other case keeps the original wording
+  const audienceText = (a) => (a && a.kind === 'followers' ? E.audienceLine(a) : !a || a.state === 'unavailable' ? 'Audience then: unavailable' : a.state === 'hidden' ? 'Audience then: hidden' : 'Audience then: ' + a.display);
   const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // ---------------------------------------------------------------- routing
@@ -39,7 +44,9 @@
     const p = location.pathname.replace(/\/+$/, '');
     const q = new URLSearchParams(location.search);
     let m;
-    if ((m = /^\/labs\/early\/c\/(UC[A-Za-z0-9_-]{22})$/.exec(p))) return { name: 'creator', channelId: m[1] };
+    if ((m = /^\/labs\/early\/c\/(UC[A-Za-z0-9_-]{22})$/.exec(p))) return { name: 'creator', platform: 'youtube', externalId: m[1] };
+    // canonical /c/<platform>/<id>: the id must be that platform's immutable id shape, otherwise the route is not a creator page
+    if ((m = /^\/labs\/early\/c\/([a-z]{1,16})\/([^/]+)$/.exec(p)) && (m[1] === 'youtube' || m[1] === 'x') && E.isExternalId(m[1], m[2])) return { name: 'creator', platform: m[1], externalId: m[2] };
     if (p === '/labs/early/receipt') return { name: 'receipt', intent: lc(q.get('intent') || '') };
     if (p === '/labs/early/mine') return { name: 'mine' };
     if ((m = /^\/labs\/early\/v\/(0x[0-9a-f]{64})$/i.exec(p))) return { name: 'card', shareId: lc(m[1]) };
@@ -52,7 +59,7 @@
     const cfg = await api({ view: 'config' }).catch(() => null);
     S.cfg = cfg && cfg.body ? cfg.body : null;
     if (!S.cfg || !S.cfg.enabled) { $('eGate').hidden = false; return; }
-    if (S.route.name === 'creator') return creatorPage(S.route.channelId);
+    if (S.route.name === 'creator') return creatorPage(S.route);
     if (S.route.name === 'receipt') return receiptPage(S.route.intent);
     if (S.route.name === 'mine') return minePage();
     if (S.route.name === 'card') return cardPage(S.route.shareId);
@@ -64,21 +71,39 @@
     show('eLanding');
     $('eCmiFind').addEventListener('click', findCreator);
     $('eCmiInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); findCreator(); } });
+    if (xOn()) platformTabs();
+  }
+  /** YouTube | X, rendered only when the server enables X; the existing .sn-filters tabs (aria-pressed), YouTube pressed by default. */
+  function platformTabs() {
+    const label = document.querySelector('label[for="eCmiInput"]'), input = $('eCmiInput');
+    const original = { label: label.textContent, placeholder: input.placeholder };
+    const words = { youtube: original, x: { label: 'X username or profile link', placeholder: 'x.com/username' } };
+    label.insertAdjacentHTML('beforebegin', '<div class="sn-filters" id="ePlatform" role="group" aria-label="Platform" style="margin:14px 0 0"><button type="button" data-platform="youtube" aria-pressed="true">YouTube</button><button type="button" data-platform="x" aria-pressed="false">X</button></div>');
+    $('ePlatform').addEventListener('click', (e) => {
+      const b = e.target.closest('button[data-platform]');
+      if (!b || b.dataset.platform === S.platform) return;
+      S.platform = b.dataset.platform;
+      for (const t of $('ePlatform').querySelectorAll('button')) t.setAttribute('aria-pressed', String(t.dataset.platform === S.platform));
+      label.textContent = words[S.platform].label; input.placeholder = words[S.platform].placeholder; input.value = '';
+      $('eCmiResult').hidden = true; $('eCmiResult').innerHTML = ''; status('');
+    });
   }
   async function findCreator() {
     const v = $('eCmiInput').value.trim();
     if (!v) return;
-    status('Looking up the channel…');
-    const r = await api({ view: 'resolve', yt: v });
-    if (!r.ok) { status(errText(r, 'That channel could not be found.'), 'bad'); return; }
+    const x = S.platform === 'x' && xOn();
+    status(x ? 'Looking up the account…' : 'Looking up the channel…');
+    const r = await api(x ? { view: 'resolve', platform: 'x', q: v } : { view: 'resolve', yt: v });
+    if (!r.ok) { status(errText(r, x ? 'That account could not be found.' : 'That channel could not be found.'), 'bad'); return; }
     status('');
     const ch = r.body;
-    const c = await api({ view: 'creator', channelId: ch.channelId });
+    const c = await api(x ? { view: 'creator', platform: 'x', externalId: ch.externalId } : { view: 'creator', channelId: ch.channelId });
     const on = c.ok && c.body.onEarly;
     const box = $('eCmiResult');
     box.hidden = false;
-    box.innerHTML = `<div class="early-head small">${UI.logoHtml('', ch.title)}<div><strong>${esc(ch.title)}</strong><br><span class="sn-small sn-muted">${esc(ch.handle || ch.channelId)}</span></div></div>` +
-      (on ? `<p><a class="sn-btn primary" href="/labs/early/c/${esc(ch.channelId)}">On EARLY · Support directly →</a></p>`
+    // X: the person-facing line is the current @username (display metadata); the immutable numeric id only builds the link
+    box.innerHTML = `<div class="early-head small">${UI.logoHtml('', ch.title)}<div><strong>${esc(ch.title)}</strong><br><span class="sn-small sn-muted">${esc(x ? ch.handle || 'X account' : ch.handle || ch.channelId)}</span></div></div>` +
+      (on ? `<p><a class="sn-btn primary" href="/labs/early/c/${x ? 'x/' + esc(ch.externalId) : esc(ch.channelId)}">On EARLY · Support directly →</a></p>`
         : `<p class="sn-dim sn-small">Not on EARLY yet. Leave a private signal: free, no amount, nothing reserved. It never counts as support.</p><p><button class="sn-btn primary" type="button" id="eCmiSign">Count me in</button></p><p class="sn-status sn-small" id="eCmiStatus" role="status"></p>`);
     if (!on) $('eCmiSign').addEventListener('click', () => countMeIn(ch));
   }
@@ -88,10 +113,11 @@
       if (!W.state().connected) { st('Connect your wallet…'); await W.connect(); }
       const fan = W.state().account;
       if (!fan) return;
-      const m = { schema: E.SCHEMA.countMeIn, platform: 'youtube', channelId: ch.channelId, fan, issuedAt: nowSec(), expiry: nowSec() + E.CONST.CMI_TTL_S, nonce: nonce() };
+      const x = ch.platform === 'x';
+      const m = { schema: E.SCHEMA.countMeIn, platform: x ? 'x' : 'youtube', channelId: x ? ch.externalId : ch.channelId, fan, issuedAt: nowSec(), expiry: nowSec() + E.CONST.CMI_TTL_S, nonce: nonce() };
       st('Sign the free signal in your wallet…');
       const signature = await W.signTyped(E.typedData('CountMeIn', m));
-      const r = await post({ action: 'count-me-in', channelId: m.channelId, fan, issuedAt: m.issuedAt, expiry: m.expiry, nonce: m.nonce, signature });
+      const r = await post(x ? { action: 'count-me-in', platform: 'x', externalId: m.channelId, fan, issuedAt: m.issuedAt, expiry: m.expiry, nonce: m.nonce, signature } : { action: 'count-me-in', channelId: m.channelId, fan, issuedAt: m.issuedAt, expiry: m.expiry, nonce: m.nonce, signature });
       if (!r.ok) throw new Error(errText(r, 'The signal was not recorded.'));
       st('Counted in. Private, free and non-binding. You will see it under My EARLY.', 'ok');
       $('eCmiSign').disabled = true;
@@ -100,13 +126,16 @@
 
   // ---------------------------------------------------------------- creator page + support flow
   const KEY = (cid) => 'syncnet_early_intent_' + cid;
-  async function creatorPage(channelId) {
+  async function creatorPage(rt) {
     show('eCreator');
-    const r = await api({ view: 'creator', channelId });
-    if (!r.ok || !r.body.onEarly) { $('eTitle').textContent = 'Not on EARLY'; $('eSupportPanel').hidden = true; $('eHandle').textContent = 'This channel has not joined EARLY. You can leave a private Count me in signal from the EARLY page.'; return; }
+    const x = rt.platform === 'x';
+    // YouTube (legacy and /youtube/ routes) asks exactly as before; X asks by (platform, immutable numeric id)
+    const r = await api(x ? { view: 'creator', platform: 'x', externalId: rt.externalId } : { view: 'creator', channelId: rt.externalId });
+    if (!r.ok || !r.body.onEarly) { $('eTitle').textContent = 'Not on EARLY'; $('eSupportPanel').hidden = true; $('eHandle').textContent = (x ? 'This account' : 'This channel') + ' has not joined EARLY. You can leave a private Count me in signal from the EARLY page.'; return; }
     const c = S.creator = r.body;
     $('eTitle').textContent = c.display.title || 'Creator';
-    $('eHandle').textContent = c.display.handle || c.channelId;
+    $('eHandle').textContent = c.display.handle || (x ? 'X account' : c.channelId);
+    if (x) { document.querySelector('#eCreator .early-head .sn-label').textContent = 'EARLY · X creator'; $('eWallet').nextElementSibling.textContent = 'verified for this account by SyncNet'; }
     if (c.display.avatarUrl) $('eAvatar').innerHTML = `<img src="${esc(c.display.avatarUrl)}" alt="">`; else $('eAvatar').textContent = (c.display.title || '·').charAt(0).toUpperCase();
     const m = c.currentManifest;
     $('eWallet').textContent = m ? short(m.receivingWallet) : '—';
@@ -221,6 +250,7 @@
     $('eRName').textContent = (d.context.creatorTitleThen || 'Creator').toUpperCase();
     $('eRDate').textContent = 'Supported ' + fmtDate(d.context.earlyDate);
     $('eRAudience').textContent = audienceText(d.context.audienceThen);
+    if (d.context.audienceThen && d.context.audienceThen.kind === 'followers') $('eRShare').querySelector('.sn-small').textContent = 'The card shows the creator, the date and the followers on X then. Your wallet, the amount and the transaction stay hidden.';
     $('eRVerified').textContent = d.status === 'FINALIZED' ? 'SYNC Proof verified' : 'SYNC Proof · finalizing';
     $('eRDownload').hidden = false; $('eRDetails').hidden = false;
     $('eRJson').textContent = JSON.stringify({ receiptId: d.receiptId, mode: d.mode, status: d.status, chain: d.fact, earlyDate: d.context.earlyDate, audienceThen: d.context.audienceThen, attestations: d.attestations.map((a) => ({ type: a.type, keyId: a.keyId, bundleDate: a.bundleDate, anchored: Boolean(a.inclusion) })), ordering: d.ordering.note }, null, 2);
@@ -304,7 +334,8 @@
       const b = r.body;
       $('eMineLists').hidden = false; $('eMineSignIn').hidden = true;
       $('eMineReceipts').innerHTML = b.receipts.length ? b.receipts.map((x) => `<li class="you-row"><span class="sn-m-main"><strong>${esc(x.creatorTitleThen || 'Creator')}</strong><span class="sn-small sn-muted">Supported ${esc(fmtDate(x.earlyDate))} · ${esc(x.status.toLowerCase())}</span></span><span class="you-action"><a href="/labs/early/receipt?intent=${esc(x.intentId)}">Receipt →</a></span></li>`).join('') : '<li class="sn-empty">No receipts yet.</li>';
-      $('eMineSignals').innerHTML = b.signals.length ? b.signals.map((x) => `<li class="you-row"><span class="sn-m-main"><strong>${esc(x.channelId)}</strong><span class="sn-small sn-muted">${esc(x.status.toLowerCase())}${x.creatorOnEarly ? ' · now on EARLY' : ''}</span></span><span class="you-action">${x.creatorOnEarly ? `<a href="/labs/early/c/${esc(x.channelId)}">Support →</a>` : ''}</span></li>`).join('') : '<li class="sn-empty">No signals.</li>';
+      // a signal for an X account is listed as "X account <id>" (we hold no profile data for an account that has not joined) and links to the canonical x/<id> page
+      $('eMineSignals').innerHTML = b.signals.length ? b.signals.map((x) => { const isX = x.platform === 'x'; return `<li class="you-row"><span class="sn-m-main"><strong>${esc(isX ? 'X account ' + x.externalId : x.channelId)}</strong><span class="sn-small sn-muted">${esc(x.status.toLowerCase())}${x.creatorOnEarly ? ' · now on EARLY' : ''}</span></span><span class="you-action">${x.creatorOnEarly ? `<a href="/labs/early/c/${isX ? 'x/' + esc(x.externalId) : esc(x.channelId)}">Support →</a>` : ''}</span></li>`; }).join('') : '<li class="sn-empty">No signals.</li>';
       $('eMineIntents').innerHTML = b.intents.filter((x) => x.status !== 'CONSUMED').length ? b.intents.filter((x) => x.status !== 'CONSUMED').map((x) => `<li class="you-row"><span class="sn-m-main"><strong>${esc(x.status)}</strong><span class="sn-small sn-muted">${esc(short(x.intentId))}</span></span><span class="you-action"><a href="/labs/early/receipt?intent=${esc(x.intentId)}">Open →</a></span></li>`).join('') : '<li class="sn-empty">No open intents.</li>';
     } catch (e) { status(rejected(e) ? 'You did not sign.' : e.message, 'bad'); }
   }
@@ -323,6 +354,7 @@
     $('eCNot').textContent = v.notShown.length ? 'Not shown: ' + v.notShown.join('; ') + '.' : '';
     // the snapshot explanation applies only when a snapshot exists (approximate or hidden), never when it is unavailable
     $('eCAudNote').hidden = !(c.audienceThen && (c.audienceThen.state === 'approximate' || c.audienceThen.state === 'hidden'));
+    if (c.audienceThen && c.audienceThen.kind === 'followers') $('eCAudNote').textContent = 'Follower count is an approximate, dated snapshot from X recorded by SyncNet. It never changes afterwards.';
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

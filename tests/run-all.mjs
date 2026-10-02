@@ -51,6 +51,7 @@ const SUITES = [
   ['EARLY · platform identity (pinned YouTube vectors, platform helpers, sessions, closed-platform gate, legacy-state replay)', 'node', ['tests/early/platform.test.mjs'], /(\d+)\/(\d+) early platform checks passed/],
   ['EARLY · X platform (OAuth PKCE, resolver, follower snapshots, spend guard, feature gate)', 'node', ['tests/early/x.test.mjs'], /(\d+)\/(\d+) early X checks passed/],
   ['EARLY · UI + mobile (two prompts, resume, receipt, card; 320–430 px)', 'node', ['tests/e2e/early-ui.mjs'], /(\d+)\/(\d+) early UI checks passed/],
+  ['EARLY · UI · X (flag off = frozen YouTube DOM, flag on, routes, privacy, gate, no CSS/HTML change)', 'node', ['tests/e2e/early-ui-x.mjs'], /(\d+)\/(\d+) early X UI checks passed/],
 ];
 const out = [];
 for (const [name, cmd, args, re] of SUITES) {
