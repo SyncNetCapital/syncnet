@@ -108,7 +108,7 @@ const PINNED = {
   check('B17 X follower context is always labelled as X context, never as the generic "Audience then"', yl({ state: 'approximate', kind: 'followers', display: '~12.4K' }) === 'Followers on X then: ~12.4K' && yl({ state: 'approximate', kind: 'followers', display: E.formatAudience(1234) }) === 'Followers on X then: ~1.2K' && yl({ state: 'hidden', kind: 'followers' }) === 'Followers on X then: hidden' && yl({ state: 'unavailable', kind: 'followers' }) === 'Followers on X then: unavailable' && ['approximate', 'hidden', 'unavailable'].every((s) => !/Audience then/.test(yl({ state: s, kind: 'followers', display: '~1' }))));
   check('B18 formatAudience is unchanged (pre-platform rounding: one decimal below 10K, whole units above)', E.formatAudience(12400) === '~12K' && E.formatAudience(9999) === '~9.9K' && E.formatAudience(999) === '~999' && E.formatAudience(1234) === '~1.2K' && E.formatAudience(15000) === '~15K' && E.formatAudience(2400000) === '~2.4M' && E.formatAudience(24000000) === '~24M');
   const withAdapter = Platforms.adapterOf('youtube');
-  check('B19 adapters: only YouTube is registered; adapterOf refuses everything else (incl. prototype names)', Platforms.adapterOf('x') === null && Platforms.adapterOf('constructor') === null && Platforms.adapterOf('__proto__') === null && Platforms.adapterOf(undefined) === null && withAdapter && withAdapter.platform === 'youtube' && same(Object.keys(Platforms.ADAPTERS), ['youtube']));
+  check('B19 adapters: YouTube and X are registered; adapterOf refuses everything else (incl. prototype names)', Platforms.adapterOf('x') && Platforms.adapterOf('x').platform === 'x' && Platforms.adapterOf('tiktok') === null && Platforms.adapterOf('constructor') === null && Platforms.adapterOf('__proto__') === null && Platforms.adapterOf(undefined) === null && withAdapter && withAdapter.platform === 'youtube' && same(Object.keys(Platforms.ADAPTERS), ['youtube', 'x']) && Object.isFrozen(Platforms.ADAPTERS));
   check('B20 idFields: YouTube keeps `channelId` in attestation subjects/claims; other platforms use `externalId`', same(Platforms.idFields('youtube', CH), { channelId: CH }) && same(Platforms.idFields('x', X_ID), { externalId: X_ID }));
   // the exact YouTube claim shapes (an attestation id hashes its claims: these are part of the stored/anchored protocol)
   const link = { title: ' Alice ', subscriberCount: 1234, hiddenSubscriberCount: false, at: 1790000000 };
@@ -194,10 +194,10 @@ const PINNED = {
 {
   resetStore(); resetPc();
   const cfg = earlyConfig({ env: ENV, store, now: () => clock.now(), keysFile: TEST_KEYS_FILE });
-  check('D01 config: only YouTube is enabled; platformEnabled is true for youtube and false for x / unknown / prototype names', same(Object.keys(cfg.platforms), ['youtube']) && platformEnabled(cfg, 'youtube') && !platformEnabled(cfg, 'x') && !platformEnabled(cfg, 'tiktok') && !platformEnabled(cfg, 'constructor') && !platformEnabled(cfg, '__proto__') && !platformEnabled(cfg, undefined) && Object.isFrozen(cfg.platforms));
-  const everything = { ...ENV, SYNCNET_EARLY_X_ENABLED: 'true', SYNCNET_X_ENABLED: 'true', SYNCNET_EARLY_PLATFORMS: 'youtube,x', SYNCNET_X_CLIENT_ID: 'id', SYNCNET_X_CLIENT_SECRET: 'secret', SYNCNET_X_BEARER_TOKEN: 'b', SYNCNET_EARLY_X_OAUTH_REDIRECT: 'https://example.test/api/early-x-auth' };
+  check('D01 config (no X settings): only YouTube is enabled; X is described but disabled; platformEnabled is true for youtube and false for x / unknown / prototype names', same(Object.keys(cfg.platforms), ['youtube', 'x']) && cfg.platforms.youtube.enabled === true && cfg.platforms.x.enabled === false && platformEnabled(cfg, 'youtube') && !platformEnabled(cfg, 'x') && !platformEnabled(cfg, 'tiktok') && !platformEnabled(cfg, 'constructor') && !platformEnabled(cfg, '__proto__') && !platformEnabled(cfg, undefined) && Object.isFrozen(cfg.platforms));
+  const everything = { ...ENV, SYNCNET_X_ENABLED: 'true', SYNCNET_EARLY_PLATFORMS: 'youtube,x', SYNCNET_X_CLIENT_ID: 'id', SYNCNET_X_CLIENT_SECRET: 'secret', SYNCNET_X_BEARER_TOKEN: 'b', SYNCNET_EARLY_X_OAUTH_REDIRECT: 'https://example.test/api/early-x-auth' };
   const cfg2 = earlyConfig({ env: everything, store, now: () => clock.now(), keysFile: TEST_KEYS_FILE });
-  check('D02 no environment variable can enable another platform in this build', same(Object.keys(cfg2.platforms), ['youtube']) && !platformEnabled(cfg2, 'x'));
+  check('D02 X credentials + redirect + generic "enable" style variables WITHOUT the explicit SYNCNET_EARLY_X_ENABLED flag never enable X (full matrix in x.test.mjs)', same(Object.keys(cfg2.platforms), ['youtube', 'x']) && !platformEnabled(cfg2, 'x') && cfg2.x.requested === false);
   check('D03 config view lists exactly the enabled platforms', same((await get('config')).j.platforms, ['youtube']));
 
   const xId = X_ID, xCreatorId = E.creatorIdOf(xId, 'x'), before = domainKeys();
@@ -419,9 +419,9 @@ async function runScenario() {
 {
   const exists = (p) => fs.existsSync(path.join(ROOT, p));
   const text = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
-  check('H01 no X client, X OAuth function or X route exists in this build', !exists('netlify/lib/early-x.js') && !exists('netlify/functions/early-x-auth.js') && !/early-x/.test(text('netlify.toml')) && !/early-x/.test(text('_redirects')));
-  const code = ['lib/syncnet-early.js', 'netlify/functions/early.js', 'netlify/functions/early-snapshot.js', 'netlify/functions/early-youtube-auth.js', 'netlify/lib/early-config.js', 'netlify/lib/early-session.js', 'netlify/lib/early-platforms.js'].map(text).join('\n');
-  check('H02 no X env var, X API host or X OAuth endpoint appears in the server/protocol code', !/SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|x\.com\/i\/oauth2|twitter\.com|oauth2\/token/.test(code));
+  check('H01 the X client, X OAuth function and their single route exist (the function answers closed unless X is explicitly enabled)', exists('netlify/lib/early-x.js') && exists('netlify/functions/early-x-auth.js') && /\/api\/early-x-auth/.test(text('netlify.toml')) && /\/api\/early-x-auth /.test(text('_redirects')));
+  const code = ['lib/syncnet-early.js', 'netlify/functions/early.js', 'netlify/functions/early-snapshot.js', 'netlify/functions/early-youtube-auth.js', 'netlify/lib/early-session.js'].map(text).join('\n');
+  check('H02 X env var names, X API hosts and X OAuth endpoints appear only in the X modules, config and platform registry - not in the shared server code or the protocol lib', !/SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|x\.com\/i\/oauth2|twitter\.com|oauth2\/token/.test(code));
   check('H03 the browser pages are untouched by the platform work (no X UI, routes, copy)', !/\bX creator|\bon X\b|x\.com|twitter/i.test(text('labs-early.js') + text('labs-early-creator.js') + text('labs-early.html') + text('labs-early-creator.html')));
 }
 

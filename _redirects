@@ -32,6 +32,7 @@
 /api/project-home /.netlify/functions/project-home 200
 /api/early /.netlify/functions/early 200
 /api/early-youtube-auth /.netlify/functions/early-youtube-auth 200
+/api/early-x-auth /.netlify/functions/early-x-auth 200
 /labs/early/creator /labs-early-creator.html 200
 /labs/early /labs-early.html 200
 /labs/early/* /labs-early.html 200

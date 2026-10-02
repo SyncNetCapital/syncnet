@@ -251,6 +251,12 @@
   force = true
 
 [[redirects]]
+  from = "/api/early-x-auth"
+  to = "/.netlify/functions/early-x-auth"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/labs/early/creator"
   to = "/labs-early-creator.html"
   status = 200

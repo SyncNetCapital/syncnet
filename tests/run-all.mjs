@@ -49,6 +49,7 @@ const SUITES = [
   ['EARLY · identity/context (YouTube client, OAuth function, daily snapshots)', 'node', ['tests/early/identity.test.mjs'], /(\d+)\/(\d+) early identity checks passed/],
   ['EARLY · anchoring (RLP/EIP-155, anchor tx, OpenTimestamps, bundle job, verifier)', 'node', ['tests/early/anchor.test.mjs'], /(\d+)\/(\d+) early anchor checks passed/],
   ['EARLY · platform identity (pinned YouTube vectors, platform helpers, sessions, closed-platform gate, legacy-state replay)', 'node', ['tests/early/platform.test.mjs'], /(\d+)\/(\d+) early platform checks passed/],
+  ['EARLY · X platform (OAuth PKCE, resolver, follower snapshots, spend guard, feature gate)', 'node', ['tests/early/x.test.mjs'], /(\d+)\/(\d+) early X checks passed/],
   ['EARLY · UI + mobile (two prompts, resume, receipt, card; 320–430 px)', 'node', ['tests/e2e/early-ui.mjs'], /(\d+)\/(\d+) early UI checks passed/],
 ];
 const out = [];

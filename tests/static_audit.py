@@ -393,16 +393,39 @@ assert 'never receives or holds' in _ehtml.lower() or 'never receives or holds f
 # 11. OpenTimestamps wording and the daily bundle: only attestation leaves (no intent/receipt commitments)
 _eots=(root/'netlify/lib/early-ots.js').read_text(encoding='utf-8')
 assert 'Bitcoin-verifiable later' in _eots and "'submitted'" in _eots and 'commitment:intent' not in _el and 'commitment:receipt' not in _el
-# 12. platform identity (phases 1-3): identity = (platform, immutable external id); YouTube is the ONLY enabled platform
+# 12. platform identity: identity = (platform, immutable external id); YouTube is always on, X ONLY behind an explicit flag
 _eplat=(root/'netlify/lib/early-platforms.js').read_text(encoding='utf-8'); _esess=(root/'netlify/lib/early-session.js').read_text(encoding='utf-8')
-assert "const PLATFORMS_ENABLED = Object.freeze({ youtube: Object.freeze({ enabled: true }) });" in _ecfg, 'the enabled-platform list must stay a hard-coded constant (no env var may enable a platform)'
-assert "const ADAPTERS = Object.freeze({ youtube });" in _eplat, 'only the YouTube adapter is registered in this build'
-assert not (root/'netlify/lib/early-x.js').exists() and not (root/'netlify/functions/early-x-auth.js').exists(), 'no second-platform client / OAuth function in this build'
-assert not _re3.search(r"SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|twitter\.com", _el+_efn+_eauth+_esnap+_ecfg+_eplat+_esess+_epage+_ecreator+_ehtml+toml+red), 'no second-platform env var, host or route in this build'
+_ex=(root/'netlify/lib/early-x.js').read_text(encoding='utf-8'); _exauth=(root/'netlify/functions/early-x-auth.js').read_text(encoding='utf-8')
+_nocom=lambda s: _re3.sub(r"/\*[\s\S]*?\*/|(?<![:'\"])//[^\n]*", '', s)  # code only: comments may discuss what is NOT requested
+assert "const ADAPTERS = Object.freeze({ youtube, x });" in _eplat, 'exactly the YouTube and X adapters are registered'
+# X is closed unless the explicit flag AND every prerequisite is present; credentials alone never enable it
+assert "enabled: x.requested && x.configured" in _ecfg and "requested: truthy(env.SYNCNET_EARLY_X_ENABLED)" in _ecfg and "youtube: Object.freeze({ enabled: true," in _ecfg, 'X must be enabled only by SYNCNET_EARLY_X_ENABLED plus complete configuration'
+for _v in ['SYNCNET_X_CLIENT_ID','SYNCNET_X_CLIENT_SECRET','SYNCNET_X_BEARER_TOKEN','SYNCNET_EARLY_X_OAUTH_REDIRECT']: assert _v in _ecfg, 'X prerequisite not enforced: '+_v
+assert r"/^https:\/\/[^\s/?#]+\/api\/early-x-auth$/" in _ecfg, 'the X redirect must be an exact https callback'
+assert "!platformEnabled(cfg, PLATFORM)" in _exauth and "return fail('closed')" in _exauth, 'the X OAuth function must fail closed unless X is enabled'
+# X env names / hosts live ONLY in config, the adapter registry, the X client and the X OAuth function
+_shared=_el+_efn+_eauth+_esnap+_esess+_epage+_ecreator+_ehtml+toml+red
+assert not _re3.search(r"SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|twitter\.com|x\.com/i/oauth2", _re3.sub(r"[^\n]*early-x-auth[^\n]*", '', _shared)), 'X credentials / hosts leaked into shared code or the browser pages'
+assert 'SYNCNET_X_' not in _efn and 'SYNCNET_X_' not in _esnap and 'SYNCNET_X_' not in _esess and 'SYNCNET_X_' not in _el
+# OAuth posture (code only, comments excluded): minimum scope, PKCE S256, confidential Basic auth, nothing persisted or logged
+_exc=_nocom(_ex); _exac=_nocom(_exauth)
+assert "const OAUTH_SCOPE = 'users.read';" in _exc and 'offline.access' not in _exc and 'tweet.read' not in _exc and 'offline.access' not in _exac and 'tweet.read' not in _exac, 'X must request users.read only'
+assert "code_challenge_method: 'S256'" in _exc and "'plain'" not in _exc and 'S256' in _exc, 'PKCE must be S256'
+assert "createHmac('sha256', secret)" in _exc and 'syncnet-early-x-pkce|v1|' in _exc and "query(event, 'code_verifier')" not in _exac and "query(event, 'redirect" not in _exac, 'the PKCE verifier is server-derived; the browser supplies neither verifier nor redirect'
+assert "authorization: 'Basic ' + basic" in _exc and 'client_secret' not in _exc.replace('clientSecret','') and "redirect: 'error'" in _exc and 'setTimeout' in _exc, 'confidential Basic auth, no body secret, no redirects, hard timeout'
+assert _exauth.count("location") >= 1 and "const RETURN = '/labs/early/creator';" in _exauth and "redirect(RETURN + " in _exauth and "redirect(x.authUrl(" in _exauth, 'redirect targets are fixed (creator page) or the X authorize URL built by the adapter'
+assert "K.state(st.sid), null" in _exauth and "st.platform !== PLATFORM" in _exauth and 'deriveVerifier(secret, state)' in _exauth, 'single-use platform-bound state and server-derived verifier'
+assert not _re3.search(r"store\.(set|cas)\([^;]*(token|verifier|secret|bearer|code)\b", _re3.sub(r"K\.state\(st\.sid\)|'early:oauth-state[^']*'", '', _exac), _re3.I), 'no token / verifier / secret / code may be written to the store'
+assert 'console.' not in _ex and 'console.' not in _exauth, 'no console logging in the X modules'
+for _name,_t in [('early-x.js',_ex),('early-x-auth.js',_exauth)]:
+    assert not _re3.search(r"['`](mp:|site:|eco:|reg:|pons2:|pump:)", _t) and 'eth_sendTransaction' not in _t and 'eth_sendRawTransaction' not in _t and not _re3.search(r"json\(\s*5\d\d\s*,\s*\{\s*error:\s*String\(", _t), 'foreign key / send / raw error text in '+_name
+assert 'X_BUDGET' in _ecfg and "'early-x-api-day'" in _efn and "'early-x-api-day'" in _exauth and "'early-x-api-day'" in _esnap and "'early-x-api-hour'" in _efn, 'the X spend guard must cover the resolver, OAuth and the snapshot job'
+for _r in ['/api/early-x-auth /.netlify/functions/early-x-auth 200']: assert _r in red, 'redirect missing: '+_r
+assert 'from = "/api/early-x-auth"' in toml and 'to = "/.netlify/functions/early-x-auth"' in toml
 assert "{ name: 'channelId', type: 'string' }" in _el and "name: 'externalId'" not in _el, 'the signed v1 field stays `channelId`; `externalId` is API/UI naming only'
 assert "return platform === PLATFORM ? externalId : platform + ':' + externalId;" in _el and "'syncnet.early.creator.v1|' + platform + '|' + externalId" in _el and "const PLATFORM = 'youtube';" in _el
 assert _efn.count('platformEnabled(')>=6 and 'function identityFrom(' in _efn and "'Unsupported platform.'" in _efn, 'every platform-aware path must ask whether the platform is enabled'
 for _name,_t in [('early-platforms.js',_eplat),('early-session.js',_esess)]:
     assert not _re3.search(r"['`](mp:|site:|eco:|reg:|pons2:|pump:)", _t) and 'eth_sendTransaction' not in _t and 'eth_sendRawTransaction' not in _t, 'foreign key / send in '+_name
-assert 'tests/early/platform.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8'), 'the platform suite must be part of run-all'
+assert 'tests/early/platform.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8') and 'tests/early/x.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8'), 'the platform and X suites must be part of run-all'
 print('SyncNet Labs · EARLY static audit: PASS')

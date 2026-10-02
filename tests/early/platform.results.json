@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-02T09:10:10.925Z",
+  "at": "2026-10-02T09:56:21.496Z",
   "passed": 102,
   "failed": 0,
   "results": [
@@ -134,7 +134,7 @@
       "detail": ""
     },
     {
-      "name": "B19 adapters: only YouTube is registered; adapterOf refuses everything else (incl. prototype names)",
+      "name": "B19 adapters: YouTube and X are registered; adapterOf refuses everything else (incl. prototype names)",
       "ok": true,
       "detail": ""
     },
@@ -216,7 +216,7 @@
     {
       "name": "C11 creator-link (legacy body, no platform) still returns the YouTube start URL and scope; the state is a YouTube state",
       "ok": true,
-      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-youtube-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790932810.59080597b18765fdb3e39d1d7fadb45b.029f34e0649288f9ae6c84dd6bcefe68824f3566479e240533cef04d2ff70493\",\"ttlSeconds\":600,\"scope\":\"https://www.googleapis.com/auth/youtube.readonly\"}"
+      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-youtube-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790935581.5d53e3836b2742e9ccdec8c994a0fb18.f266e3f6281dbcac2c9ca10c0cbb8f0a85a1dde1d812e2a926c753c22601383b\",\"ttlSeconds\":600,\"scope\":\"https://www.googleapis.com/auth/youtube.readonly\"}"
     },
     {
       "name": "C12 creator-link with explicit platform=youtube is the same",
@@ -226,12 +226,12 @@
     {
       "name": "C13 OAuth start redirects to Google with the youtube.readonly scope",
       "ok": true,
-      "detail": "https://accounts.google.com/o/oauth2/v2/auth?client_id=test-client&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-youtube-auth&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&access_type=online&include_granted_scopes=false&prompt=select_account&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790932810.59080597b18765fdb3e39d1d7fadb45b.029f34e064"
+      "detail": "https://accounts.google.com/o/oauth2/v2/auth?client_id=test-client&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-youtube-auth&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&access_type=online&include_granted_scopes=false&prompt=select_account&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790935581.5d53e3836b2742e9ccdec8c994a0fb18.f266e3f628"
     },
     {
       "name": "C14 the callback issues a legacy-spelled YouTube creator session (<channelId>~<wallet>) bound to the channel from channels.mine",
       "ok": true,
-      "detail": "/labs/early/creator#s=e1.creator.UC_x5XG1OV2P6uZZ5FSM9Ttw~0x1563915e194d8cfba1943570603f7606a3115508.1790939410.708795085923bd08.6fc10793266ab74e5a480c80d97b8fe2a3c502a574c5f3858cdeb30bcd5834c9"
+      "detail": "/labs/early/creator#s=e1.creator.UC_x5XG1OV2P6uZZ5FSM9Ttw~0x1563915e194d8cfba1943570603f7606a3115508.1790942181.0eef77f956f9406f.de8df61133245c4573036b5006dcd402f40f36b858d1a7822d195c199fa593f9"
     },
     {
       "name": "C15 the link record keeps `channelId` (v1 name of the external id) and records `platform: youtube`; no token is stored",
@@ -244,12 +244,12 @@
       "detail": "/labs/early/creator#e=state /labs/early/creator#e=state"
     },
     {
-      "name": "D01 config: only YouTube is enabled; platformEnabled is true for youtube and false for x / unknown / prototype names",
+      "name": "D01 config (no X settings): only YouTube is enabled; X is described but disabled; platformEnabled is true for youtube and false for x / unknown / prototype names",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "D02 no environment variable can enable another platform in this build",
+      "name": "D02 X credentials + redirect + generic \"enable\" style variables WITHOUT the explicit SYNCNET_EARLY_X_ENABLED flag never enable X (full matrix in x.test.mjs)",
       "ok": true,
       "detail": ""
     },
@@ -321,7 +321,7 @@
     {
       "name": "D16 conflicting spellings are refused; agreeing ones are accepted (a repeat signal is a renewal)",
       "ok": true,
-      "detail": "{\"error\":\"externalId and channelId differ.\",\"code\":\"invalid_request\"}{\"ok\":true,\"signal\":{\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-02T09:10:10.000Z\",\"renewedAt\":[\"2026-10-02T09:10:10.000Z\"],\"expiry\":1806484210,\"creatorOnEarly\":false,\"creatorId\":null},\"note\":\"Free, private and non-binding. It reserves "
+      "detail": "{\"error\":\"externalId and channelId differ.\",\"code\":\"invalid_request\"}{\"ok\":true,\"signal\":{\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-02T09:56:21.000Z\",\"renewedAt\":[\"2026-10-02T09:56:21.000Z\"],\"expiry\":1806486981,\"creatorOnEarly\":false,\"creatorId\":null},\"note\":\"Free, private and non-binding. It reserves "
     },
     {
       "name": "D17 non-string / wrong-shape ids are refused with the legacy message",
@@ -436,12 +436,12 @@
     {
       "name": "F17 snapshot job: the legacy creator gets today's snapshot under the bare-id key with the legacy claim shape; display metadata refreshes",
       "ok": true,
-      "detail": "{\"ok\":true,\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false}}"
+      "detail": "{\"ok\":true,\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":true,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0}}}}"
     },
     {
       "name": "F18 snapshot job: a creator of a platform with no adapter is skipped - never sent to the YouTube client, never recorded, not a failure",
       "ok": true,
-      "detail": "{\"seenIds\":[\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"],\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false}}"
+      "detail": "{\"seenIds\":[\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"],\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":true,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0}}}}"
     },
     {
       "name": "F19 the legacy enrolment snapshot of the join day is untouched (earlier day, bare-id key)",
@@ -499,12 +499,12 @@
       "detail": ""
     },
     {
-      "name": "H01 no X client, X OAuth function or X route exists in this build",
+      "name": "H01 the X client, X OAuth function and their single route exist (the function answers closed unless X is explicitly enabled)",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "H02 no X env var, X API host or X OAuth endpoint appears in the server/protocol code",
+      "name": "H02 X env var names, X API hosts and X OAuth endpoints appear only in the X modules, config and platform registry - not in the shared server code or the protocol lib",
       "ok": true,
       "detail": ""
     },

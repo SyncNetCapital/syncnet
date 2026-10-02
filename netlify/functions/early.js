@@ -66,6 +66,7 @@ const K = {
   metric: (name, d) => `early:metrics:v1:${name}:${d}`,
   visit: (s, ipHash, hour) => `early:visit:v1:${s}:${ipHash}:${hour}`,
   resolve: (h) => `early:yt:resolve:v1:${h}`,
+  xResolve: (h) => `early:x:resolve:v1:${h}`,
   snap: (ref, d) => `early:snap:v1:${ref}:${d}`,
   snapDays: (ref) => `early:snap-days:v1:${ref}`,
   pendingFinal: 'early:pending-final:v1', // zset: CONFIRMED receipts awaiting finality (score = block number)
@@ -149,7 +150,7 @@ async function handler(event = {}, deps = {}) {
   const rpc = deps.rpc || serverRpc({ retries: 2 });
   const ip = clientIp(event);
   const cfg = earlyConfig({ env, store, now, assetsFile: deps.assetsFile, keysFile: deps.keysFile });
-  const ctx = { store, rpc, env, now, cfg, ip, ipHash: hashId(ip), random: deps.random || ((n) => crypto.randomBytes(n)), youtube: deps.youtube || null, signer: cfg.attestation.configured ? makeSigner(env, cfg) : null, event, internal: deps.internal === true };
+  const ctx = { store, rpc, env, now, cfg, ip, ipHash: hashId(ip), random: deps.random || ((n) => crypto.randomBytes(n)), youtube: deps.youtube || null, x: deps.x || null, fetch: deps.fetch, xBudget: deps.xBudget || cfg.xBudget, signer: cfg.attestation.configured ? makeSigner(env, cfg) : null, event, internal: deps.internal === true };
   const denied = (rl) => (rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter));
 
   if (method === 'GET') {
@@ -205,6 +206,7 @@ function configView(cfg) {
     rotationCooldownSeconds: C.ROTATION_COOLDOWN_S, attestations: cfg.attestation.configured, anchoring: cfg.anchorEnabled, oauth: cfg.oauth.configured, resolver: cfg.youtube.configured,
     matchingRule: E.SCHEMA.matching, receiptSchema: E.SCHEMA.receipt, keys: '/api/early?view=keys',
     platforms: Object.keys(cfg.platforms).filter((p) => platformEnabled(cfg, p)),
+    platformServices: Object.fromEntries(Object.keys(cfg.platforms).filter((p) => platformEnabled(cfg, p)).map((p) => [p, { oauth: cfg.platforms[p].oauth, resolver: cfg.platforms[p].resolver }])),
     product: 'EARLY · I WAS THERE WHEN.', model: 'Money moves directly from the fan wallet to the creator wallet. SyncNet never receives, holds, routes or refunds funds and takes no fee.',
   };
 }
@@ -333,15 +335,44 @@ async function readView(view, ctx) {
   return bad('Unknown view.');
 }
 
+/**
+ * X: a username / profile link / id -> the IMMUTABLE numeric id (a string) plus current display metadata. The username is
+ * never signed or stored as identity; the answer is cached for an hour per normalised input, and every cache MISS is one
+ * metered API request that must pass the global hourly/daily budget (fail closed, never a guess).
+ */
+async function resolveX(ctx, input) {
+  const { store, now } = ctx;
+  if (!input || input.length > 200) return bad('Provide an X username, profile link or user id.');
+  const client = ctx.x || Platforms.clientFor('x', ctx.env, ctx.fetch);
+  if (!client) return publicError(503, 'resolver_unavailable', 'The X resolver is not configured on this deployment.');
+  const p = client.parseInput(input);
+  if (!p) return bad('That is not an X username or profile link.');
+  const key = K.xResolve(crypto.createHash('sha256').update(p.kind === 'id' ? 'i:' + p.value : 'u:' + p.value.toLowerCase(), 'utf8').digest('hex'));
+  const cached = (await getJson(store, key)).value;
+  if (cached) return json(200, { enabled: true, ...cached, platform: 'x', cached: true });
+  const b = ctx.xBudget;
+  const g = await limitAll(store, [{ bucket: 'early-x-api-hour', id: 'resolve', limit: b.resolvePerHour, windowSeconds: 3600, now }, { bucket: 'early-x-api-day', id: 'resolve', limit: b.resolvePerDay, windowSeconds: 86400, now }]);
+  if (!g.allowed) return g.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(g.retryAfter);
+  let u;
+  try { u = await client.resolve(input); } catch (err) { logError(FN, 'resolve-failed', err, { platform: 'x' }); return publicError(503, 'resolver_unavailable', 'X could not be reached right now.'); }
+  if (!u || !E.isExternalId('x', u.externalId)) return publicError(404, 'not_found', 'No X account was found for that input.');
+  const out = { externalId: u.externalId, title: E.clean(u.title, 80), handle: E.clean(u.handle, 40), avatarUrl: /^https:\/\/[^\s"'<>]{1,300}$/.test(String(u.avatarUrl || '')) ? u.avatarUrl : '' };
+  await store.set(key, JSON.stringify(out), { ttlSeconds: 3600 });
+  return json(200, { enabled: true, ...out, platform: 'x', cached: false });
+}
 async function resolveView(ctx) {
-  const { store, youtube, ip, now } = ctx;
+  const { store, ip, now } = ctx;
   const rl = await limitAll(store, [{ bucket: 'early-resolve', id: ip, limit: 20, windowSeconds: 60, now }, { bucket: 'early-resolve-d', id: ip, limit: 200, windowSeconds: 86400, now }]);
   if (!rl.allowed) return rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter);
   // `yt` is the legacy parameter (YouTube); `q` + `platform` is the platform-neutral spelling. Only enabled platforms resolve.
   const platform = query(ctx.event, 'platform') || E.PLATFORM;
-  if (!platformEnabled(ctx.cfg, platform) || platform !== E.PLATFORM) return bad('Unsupported platform.');
+  if (!platformEnabled(ctx.cfg, platform)) return bad('Unsupported platform.');
   const input = String(query(ctx.event, 'q') || query(ctx.event, 'yt') || '').trim();
+  if (platform === 'x') return resolveX(ctx, input);
+  if (platform !== E.PLATFORM) return bad('Unsupported platform.');
   if (!input || input.length > 200) return bad('Provide a YouTube channel URL, handle or channel id.');
+  // the client is built from the environment unless one was injected (tests): the resolver works when its key is configured
+  const youtube = ctx.youtube || Platforms.clientFor('youtube', ctx.env, ctx.fetch);
   if (!youtube) return publicError(503, 'resolver_unavailable', 'The YouTube resolver is not configured on this deployment.');
   const key = K.resolve(crypto.createHash('sha256').update(input.toLowerCase(), 'utf8').digest('hex'));
   const cached = (await getJson(store, key)).value;
@@ -373,7 +404,8 @@ async function receiptContext(ctx, r) {
   // The audience is a dated, approximate CONTEXT value whose meaning (subscribers / followers) comes from the snapshot's own
   // claims; when there is no readable snapshot, the creator's platform still says what would have been counted.
   const aud = snap ? E.audienceOf(snap.claims) : null;
-  const audience = !aud ? { state: 'unavailable', kind: (E.PLATFORMS[platform] || E.PLATFORMS[E.PLATFORM]).audienceKind } : aud.hidden || aud.count == null ? { state: 'hidden', kind: aud.kind } : { state: 'approximate', kind: aud.kind, value: aud.count, display: E.formatAudience(aud.count), asOf: snap.claims.fetchedAt };
+  const unavailableKind = (E.PLATFORMS[platform] || E.PLATFORMS[E.PLATFORM]).audienceKind;
+  const audience = !aud ? { state: 'unavailable', kind: unavailableKind } : aud.hidden ? { state: 'hidden', kind: aud.kind } : aud.count == null ? { state: 'unavailable', kind: aud.kind } : { state: 'approximate', kind: aud.kind, value: aud.count, display: E.formatAudience(aud.count), asOf: snap.claims.fetchedAt };
   const titleThen = snap && snap.claims.title ? snap.claims.title : identity && identity.claims.title ? identity.claims.title : (m && m.display && m.display.title) || '';
   return { manifest: m, context: { earlyDate, creatorTitleThen: titleThen, audienceThen: audience }, attestations: [identity, manifestAtt, snapAtt].filter(Boolean) };
 }
@@ -801,8 +833,8 @@ async function creatorLink(b, ctx) {
   if (!E.isAddr(wallet) || !E.isBytes32(nonce) || !skewOk(b.issuedAt, now)) return bad('Invalid wallet, nonce or issuedAt.');
   const struct = { schema: E.SCHEMA.creatorLink, wallet, issuedAt: Number(b.issuedAt), nonce };
   if (!(await verifySig(rpc, wallet, 'CreatorLinkRequest', struct, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify.');
-  // OAuth configuration is per platform; the only configured provider in this build is YouTube's (cfg.oauth).
-  if (!(platform === E.PLATFORM && cfg.oauth.configured) || !cfg.sessions.configured) return publicError(503, 'oauth_unavailable', 'Creator onboarding is not open on this deployment.');
+  // OAuth configuration is per platform (cfg.platforms[p].oauth); X additionally needs its explicit enable flag (platformEnabled)
+  if (!cfg.platforms[platform].oauth || !cfg.sessions.configured) return publicError(503, 'oauth_unavailable', 'Creator onboarding is not open on this deployment.');
   const ok = await store.cas({ expect: [[K.nonce(wallet, nonce), null]], set: [[K.nonce(wallet, nonce), '1', NONCE_TTL]] });
   if (!ok) return publicError(409, 'replay', 'This nonce was already used.');
   const state = Session.issue({ scope: 'state', wallet, platform, now, env });
@@ -825,7 +857,7 @@ async function creatorManifest(b, ctx) {
   if (!signer) return publicError(503, 'attestation_unavailable', ATT_DOWN);
   // The manifest must name exactly the (platform, immutable id) the OAuth session proved; nothing else is ever accepted.
   const idn = identityFrom(cfg, b);
-  if (idn.error || idn.platform !== s.platform || idn.externalId !== s.externalId) return publicError(403, 'channel_mismatch', 'The manifest must name the ' + ad.label + ' channel you signed in with.');
+  if (idn.error || idn.platform !== s.platform || idn.externalId !== s.externalId) return publicError(403, 'channel_mismatch', 'The manifest must name the ' + ad.noun + ' you signed in with.');
   const creatorId = idn.creatorId;
   if (lc(b.creatorId) !== creatorId) return bad('creatorId must be derived from the channel id.');
   const wallet = lc(b.receivingWallet), nonce = lc(b.nonce), prev = lc(b.previousManifestHash);
@@ -919,8 +951,9 @@ async function enrolmentSnapshot(ctx, identity, link, t, bd) {
   const ref = E.refOf(idn.platform, idn.externalId);
   try {
     if (await store.get(K.snap(ref, d))) return;
-    const { subject, claims } = ad.enrolmentSnapshot(idn.externalId, link, d);
-    const rec = Attest.build(signer, { type: 'audience-snapshot', subject, claims, issuedAt: t, bundleDate: bd });
+    const snapRec = ad.enrolmentSnapshot(idn.externalId, link, d);
+    if (!snapRec) return; // the platform returned no audience figure: that day stays "unavailable", never a guess
+    const rec = Attest.build(signer, { type: 'audience-snapshot', subject: snapRec.subject, claims: snapRec.claims, issuedAt: t, bundleDate: bd });
     const w = Attest.writesFor(rec);
     await store.cas({ expect: [[K.snap(ref, d), null]], set: [[K.snap(ref, d), JSON.stringify(rec)], ...w.set], sadd: [[K.snapDays(ref), d], ...w.sadd] });
   } catch (err) { logError(FN, 'enrolment-snapshot-failed', err, { channel: hashId(ref) }); }

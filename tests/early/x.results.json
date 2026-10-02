@@ -1,0 +1,517 @@
+{
+  "at": "2026-10-02T09:56:22.380Z",
+  "passed": 102,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A01 accepted forms: @name, name, x.com / twitter.com URLs (incl. www, mobile, trailing path/query), numeric id, /i/user/<id>, intent/user?user_id=",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "A02 rejected: reserved product paths, other hosts / look-alikes, credentials, ports, other schemes, malformed names, empty / oversize / non-strings",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "A03 \"@123\" is a USERNAME (all-digit names exist) while a bare \"123\" is an id; a URL path of digits is a username; digit strings that are not valid ids (\"0\", leading zero) can only be usernames",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A04 ids stay strings (no Number() anywhere): a 20-digit id parses exactly",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A05 userOf: id must be a STRING of the id shape; numbers (already lossy), leading zeros, blanks are refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A06 userOf display metadata is sanitised: non-https avatar dropped, bad username blanked, non-integer / negative / string follower counts become null",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 RFC 7636 Appendix B vector: S256 challenge of the sample verifier",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 derived verifier: 43 unreserved chars (RFC 7636), deterministic per state, different per state, different per secret, never the state or its hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B03 deriveVerifier refuses a weak secret or empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 authorize URL: x.com/i/oauth2/authorize, code flow, exact client id + redirect URI, PKCE S256 with the derived challenge, our state, and NOTHING else",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B05 the ONLY scope requested is users.read: no tweet.read, no offline.access",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 authUrl refuses a missing / malformed challenge (never \"plain\", never absent) and an unconfigured client",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C01 token exchange: POST api.x.com/2/oauth2/token, form-encoded, confidential-client Basic auth, code + grant_type + EXACT redirect_uri + code_verifier",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 the client secret travels ONLY in the Basic header (never in the body, query or URL)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 GET api.x.com/2/users/me with the USER token as Bearer, asking for id,name,username,profile_image_url,public_metrics,protected",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 an id above 2^53 survives as an exact STRING end to end (not rounded, not a number)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 a wrong PKCE verifier is rejected by X (the code is bound to the challenge) -> fixed code \"denied\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 a different redirect URI is rejected by X (exact match) -> \"denied\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 a grant without users.read is refused (\"scope\"); extra scopes do not widen what we request or keep",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 a refresh_token (never requested) is ignored: only the access token string is returned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 an authorization code is single-use at X; reuse -> \"denied\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 bad client credentials -> \"denied\"; missing config / malformed code / malformed verifier are refused before any request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 /users/me: numeric ids, bad ids, missing / odd \"data\", non-JSON, errors-only -> XError \"malformed\" (never an identity)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "C12 /users/me with no token or a rejected token fails closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 resolve: username / URL / id -> the immutable numeric id as a string + current display metadata; app-only Bearer; username lookup path /2/users/by/username/<name>",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C14 resolve: unknown account (errors, no data) -> null; unparseable / reserved input -> null with NO request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C15 resolve: an answer for a DIFFERENT username / id than asked is malformed (fail closed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C16 usersById: ids filtered / de-duplicated before the request, capped at 100, Map keyed by exact string id, public_metrics requested; unknown ids are simply absent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C17 usersById sends at most 100 ids per request",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C18 usersById: malformed members are dropped, ids we did not ask for are dropped, \"data\" that is not a list or an answer with neither data nor errors -> malformed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C19 429 -> rate_limited (with Retry-After), 5xx -> unavailable, a hung request is aborted by the hard timeout -> unavailable; nothing retried",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C20 no app-only bearer configured -> not_configured (no request made)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D01 creator-link platform=x returns the X start URL and scope users.read; the state is bound to platform x",
+      "ok": true,
+      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-x-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508~x.1790935581.86c71bf36dfcf4c2d0e30963bf5c5f5f.f945041aa94559c58848b4a8d6b8abe90d4d2922fa6fef0b5627aadf2c4ebb8c\",\"ttlSeconds\":600,\"scope\":\"users.read\"}"
+    },
+    {
+      "name": "D02 start -> 302 to x.com authorize with PKCE S256 whose challenge derives from THIS state (verifier never leaves the server), exact redirect URI, users.read only",
+      "ok": true,
+      "detail": "https://x.com/i/oauth2/authorize?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fdeploy-preview-9.example.test%2Fapi%2Fearly-x-auth&scope=users.read&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508%7Ex.1790935581.86c71bf36dfcf4c2d0e30963bf5c5f5f.f945041aa94559c58848b4a8d6b8abe90d4d2922fa6fef0b5627aadf2c4ebb8c&code_challenge=LqYERTh0SQJUVTs8W0wP8OR1yA3zNq3DMUr2"
+    },
+    {
+      "name": "D03 callback -> 302 to the FIXED creator page with a session fragment; a browser-supplied code_verifier / redirect_uri / redirect / next / returnTo is ignored (X verified the SERVER-derived verifier and the configured redirect)",
+      "ok": true,
+      "detail": "/labs/early/creator#s=e1.creator.x_9007199254740993~0x1563915e194d8cfba1943570603f7606a3115508.1790942181.69de56bde4a4feac.881ce5ba26f710587ad702a54ee7bd3f8fd4c9f1780e9974e27efd063230e7df"
+    },
+    {
+      "name": "D04 the creator session is bound to (x, numeric externalId as an exact string, wallet) from the AUTHENTICATED /2/users/me; subject spelling x_<id>~<wallet>",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D05 link record: platform x, channelId (v1 name of the external id) = the numeric id string, wallet, display metadata, follower count read at that moment, scope users.read; NO username as identity field",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D06 NOTHING secret is persisted, logged or returned: no access token, client secret, bearer, authorization code or PKCE verifier appears in the store, the logs or any response body",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D07 exactly one token exchange and one /users/me per login; the discarded token is never reused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D08 the state is SINGLE USE: replaying the same callback -> #e=state and no provider call",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D09 the consumed state nonce is recorded (atomic single-use marker)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D10 a YouTube-bound state is refused by the X function (start and callback): #e=state, no provider call",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D11 and an X-bound state is refused by the YouTube function",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D12 a tampered state is refused (start and callback)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D13 an expired state (10 min TTL preserved) is refused and X is not called",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D14 missing code/state -> #e=state; provider error=access_denied -> #e=denied; neither calls X",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D15 provider failures and malformed answers fail closed with FIXED codes (no detail leaks); no session is issued",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "D16 every outcome above redirected only to the fixed creator page (no open redirect)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D17 logs across the whole OAuth section never contain a token, the secret, the bearer, a code or a verifier (only hashed ids and fixed codes)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D18 per-IP limits are preserved on the X function (5 / minute)",
+      "ok": true,
+      "detail": "302,302,302,302,302,429,429"
+    },
+    {
+      "name": "D19 global daily budget: the (N+1)th login in a day is refused BEFORE any API call and WITHOUT consuming its single-use state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E01 @username -> immutable numeric id (string) + current display metadata; username is NOT part of the identity fields",
+      "ok": true,
+      "detail": "{\"enabled\":true,\"externalId\":\"9007199254740993\",\"title\":\"Alice (X)\",\"handle\":\"@alice_x\",\"avatarUrl\":\"https://pbs.twimg.com/profile_images/9007199254740993/a_normal.jpg\",\"platform\":\"x\",\"cached\":false}"
+    },
+    {
+      "name": "E02 username / x.com URL / twitter.com URL / numeric id all resolve to the same immutable id",
+      "ok": true,
+      "detail": "200,200,200,200"
+    },
+    {
+      "name": "E03 cache: the same account (any spelling of the username) is served from cache with no new API call; the id spelling is cached separately",
+      "ok": true,
+      "detail": "1 new calls"
+    },
+    {
+      "name": "E04 cache entries are keyed by a hash of the normalised input and hold {externalId, title, handle, avatarUrl} for 1 h only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E05 reserved / non-user paths and junk input -> 400, and X is NOT called",
+      "ok": true,
+      "detail": "400,400,400,400,400,400,400,400"
+    },
+    {
+      "name": "E06 unknown account -> 404 (a miss is not cached, never invented)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E07 the platform parameter decides: platform=x never reaches the YouTube resolver",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E08 malformed / mismatched API answers fail closed -> 503, nothing cached, no identity returned",
+      "ok": true,
+      "detail": "503,503,503,503,503"
+    },
+    {
+      "name": "E09 X outage / X rate limit -> 503 \"could not be reached\", nothing cached",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E10 per-IP limits are preserved (20 / minute): the 21st request from one IP is 429",
+      "ok": true,
+      "detail": "200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,200,429,429"
+    },
+    {
+      "name": "E11 spend guard (hourly): once the allowance of API requests is used, a NEW lookup is refused with 429 BEFORE any X request, while cached answers keep working",
+      "ok": true,
+      "detail": "200,200,429,429"
+    },
+    {
+      "name": "E12 spend guard (daily): the daily allowance holds across the hour windows and resets with the UTC day",
+      "ok": true,
+      "detail": "200,200,200,429,429 200"
+    },
+    {
+      "name": "E13 the shipped defaults are conservative request counts (not currency), and the guard is shared with OAuth / snapshots through one daily bucket family",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E14 X resolver is CLOSED without the flag (400, no API call); the YouTube resolver builds its client from the environment and works (legacy `yt` and platform=youtube&q), with and without X enabled",
+      "ok": true,
+      "detail": "400,200,200{\"enabled\":true,\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"title\":\"Alice\",\"avatarUrl\":\"https://yt3.example/a.jpg\",\"handle\":\"@alice\",\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"cached\":false}"
+    },
+    {
+      "name": "F01 an X creator activates through the real OAuth link: manifest (platform x, channelId = numeric id string) accepted, creator record + public view carry platform x / externalId; no legacy channelId on the public view",
+      "ok": true,
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x95bb36ca9431eab43c63c791627af94e5713e5482aca510aa3fe29998a56d0cc\",\"platform\":\"x\",\"externalId\":\"9007199254740993\",\"display\":{\"title\":\"Alice (X)\",\"avatarUrl\":\"https://pbs.twimg.com/profile_images/9007199254740993/a_normal.jpg\",\"handle\":\"@alice_x\"},\"status\":\"ACTIVE\",\"paused\":false,\"joinedAt\":1791022041,\"currentManifest\":{\"manifestHash\":\"0x39aabd9fa6"
+    },
+    {
+      "name": "F02 the creator-identity attestation names platform x and the numeric id as `externalId`, method x-oauth2-pkce users.read; no username / handle in it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F03 join-day snapshot (from the OAuth link): kind followers, platform x, numeric externalId, follower count, time, source - and NO handleThen / handle / title / avatar / channelId / subscriberCount",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F04 a YouTube creator activates in the same deployment, unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F05 daily job: ONE batch call to GET /2/users, an X snapshot with the dated follower count; YouTube snapshotted by its own adapter in the same run; per-platform report",
+      "ok": true,
+      "detail": "{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":2,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":false,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0},\"x\":{\"snapshots\":1,\"failures\":0}}}"
+    },
+    {
+      "name": "F06 first success of the UTC day wins: a later run (and a changed count) never replaces it and does not even call X again",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F07 no backfill: only the join day and the days the job actually ran exist (the skipped days between are absent)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F08 an X receipt is a normal v1 receipt: FINALIZED, creator manifest typed data platform x + channelId = numeric id string, and the EXISTING independent verifier returns RECEIPT VERIFIED (no receipt v2)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "F09 the receipt context uses the transfer day's snapshot as dated FOLLOWER context; the line reads \"Followers on X then: ~12K\" - never the generic \"Audience then\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F10 the receipt carries the identity + manifest + audience-snapshot attestations; the snapshot attestation is the follower one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F11 the public card: platform x identity in separate fields (no legacy creatorChannelId), follower context kind, still private by default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F12 X outage: no X snapshot is recorded, the failure is counted for X only, and the YouTube creator in the SAME run is still snapshotted",
+      "ok": true,
+      "detail": "{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":1,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":false,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0},\"x\":{\"snapshots\":0,\"failures\":1}}}"
+    },
+    {
+      "name": "F13 a receipt for a day with no X snapshot reads \"Followers on X then: unavailable\" (kind kept, nothing guessed) and still verifies",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F14 the outage is retried within the day and the first X success of that day is then THE snapshot (receipts of that day read it)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F15 a user returned WITHOUT a follower count records nothing (no guess) and is a counted failure; the other user in the batch is still recorded; the 20-digit id is exact",
+      "ok": true,
+      "detail": "{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":1,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":false,\"byPlatform\":{\"x\":{\"snapshots\":1,\"failures\":1}}}"
+    },
+    {
+      "name": "F16 an API answer with numeric ids is malformed: nothing recorded, counted as failure, the job still completes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F17 spend guard in the job: failing hourly retries stop calling X once the daily request allowance is used (2 attempts, then none), and the run reports budgetExhausted",
+      "ok": true,
+      "detail": "[[1,false],[1,false],[0,true],[0,true]]"
+    },
+    {
+      "name": "F18 the allowance resets with the UTC day and the job resumes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F19 with the flag absent or false the job makes NO X request, records nothing for X and does not count X creators as failures (skipped)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G01 credentials + redirect present but the flag ABSENT -> X is closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G02 flag false / empty / 0 / 1 / yes / \"true \" variants: only a (case-insensitive, trimmed) \"true\" opens X",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G03 flag true + the complete configuration -> X is enabled, with OAuth and the resolver available; YouTube unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G04 flag true but ANY ONE required value missing (client id, client secret, bearer, redirect) -> X is closed, and the cause names only the variable, never a value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G05 the redirect must be an https URL ending exactly in /api/early-x-auth (no http, query, fragment, trailing slash, other path)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G06 the YouTube configuration is independent of X: YouTube enabled/oauth/resolver identical with X absent, closed or open",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G07 EARLY itself closed (no SYNCNET_EARLY_ENABLED) keeps everything closed regardless of the X flag",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G08 with X closed (flag absent / false / a credential missing) EVERY X entry point fails closed: creator-link, resolver, creator view, Count me in, OAuth start + callback, X creator sessions, config; no X request, nothing stored",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "G09 YouTube is unaffected in every X configuration: Count me in, creator-link (YouTube start URL) and creator views behave identically with X absent, closed, half-configured and open",
+      "ok": true,
+      "detail": "true,true,true,true,true"
+    },
+    {
+      "name": "G10 config view with X open lists x with oauth+resolver availability and exposes no credential, secret, client id or redirect",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G11 the EARLY kill switches close the X OAuth function too (writes disabled / EARLY disabled)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G12 without a strong session secret the X OAuth function answers unavailable (no PKCE can be derived)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G13 non-GET methods are refused; only the two documented GET shapes exist",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H01 the X modules never log token / secret / code / verifier / bearer / authorization / state values (only fixed error codes, hashed ids and counters), and never use console.*",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "H02 the OAuth function stores only the link record (no token field) and never writes the client secret, bearer or verifier to the store",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H03 X credentials / env names / hosts appear only in the config, adapter, platform-registry and X OAuth modules - not in the shared server code or the protocol lib",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H04 no X UI, route or copy was added to the browser pages in this phase",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H05 the protocol and the verifier are untouched by X: domain, types, schema strings, matching rule",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

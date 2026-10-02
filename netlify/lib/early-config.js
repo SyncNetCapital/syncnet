@@ -21,10 +21,17 @@ const KEYS_FILE = require('../../syncnet-early-keys.json');
 const { log } = require('./log');
 const Session = require('./early-session');
 
-// Which identity platforms this build ACCEPTS. The protocol registry (lib/syncnet-early.js PLATFORMS) may describe more
-// platforms than a deployment serves: only YouTube is enabled here, unconditionally, and nothing in this file lets an
-// environment variable enable another one. Every request path asks `cfg.platforms[p].enabled` before using a platform.
-const PLATFORMS_ENABLED = Object.freeze({ youtube: Object.freeze({ enabled: true }) });
+// Which identity platforms this deployment ACCEPTS (cfg.platforms[p].enabled; every request path asks before using one).
+// YouTube is always accepted. X is accepted ONLY when SYNCNET_EARLY_X_ENABLED is exactly "true" AND every X prerequisite is
+// present: credentials alone never open it, and a missing prerequisite closes it again.
+//   SYNCNET_EARLY_X_ENABLED=true            the explicit switch (absent / anything else = X is closed)
+//   SYNCNET_X_CLIENT_ID / SYNCNET_X_CLIENT_SECRET    X OAuth 2.0 confidential web app (creator sign-in)
+//   SYNCNET_X_BEARER_TOKEN                  X API app-only token (resolver + daily follower snapshots)
+//   SYNCNET_EARLY_X_OAUTH_REDIRECT          exact https callback, ending in /api/early-x-auth
+// Spend guard: X is a metered API. These caps count API REQUESTS (never currency) per UTC day, so a bug or an abuse
+// cannot burn the account's allowance; a denied request fails closed and is retried later.
+const X_BUDGET = Object.freeze({ resolvePerDay: 300, resolvePerHour: 60, oauthPerDay: 200, snapshotRequestsPerDay: 48 });
+const X_REDIRECT = /^https:\/\/[^\s/?#]+\/api\/early-x-auth$/;
 const truthy = (v) => String(v == null ? '' : v).trim().toLowerCase() === 'true';
 const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 let warned = '';
@@ -41,7 +48,8 @@ const validNow = (k, nowMs) => k && Date.parse(k.validFrom) <= nowMs && (k.valid
  *   enabled, writesEnabled, anchorEnabled, durable, reasons,
  *   assets: Map, assetsJson, registry, chainId,
  *   attestation: {configured, keyId, address}, anchor: {configured, address},
- *   oauth: {configured, clientId, redirect}, youtube: {configured}, platforms: {youtube:{enabled:true}}, sessions: {configured}, getLogsChunk }
+ *   oauth: {configured, clientId, redirect}, youtube: {configured}, x: {requested, configured, missing[names], redirect},
+ *   platforms: {youtube:{enabled,oauth,resolver}, x:{enabled,oauth,resolver}}, xBudget, sessions: {configured}, getLogsChunk }
  */
 function earlyConfig(options = {}) {
   const env = options.env || process.env;
@@ -82,6 +90,16 @@ function earlyConfig(options = {}) {
   if (!oauth.configured) reasons.push('Google OAuth not configured (client id/secret, https redirect ending in /api/early-youtube-auth)');
   const youtube = { configured: Boolean(String(env.SYNCNET_YOUTUBE_API_KEY || '').trim()) };
   if (!youtube.configured) reasons.push('SYNCNET_YOUTUBE_API_KEY missing');
+  // X: names only are ever reported (never values)
+  const has = (k) => Boolean(String(env[k] == null ? '' : env[k]).trim());
+  const xRedirect = String(env.SYNCNET_EARLY_X_OAUTH_REDIRECT || '').trim();
+  const xMissing = ['SYNCNET_X_CLIENT_ID', 'SYNCNET_X_CLIENT_SECRET', 'SYNCNET_X_BEARER_TOKEN'].filter((k) => !has(k)).concat(X_REDIRECT.test(xRedirect) ? [] : ['SYNCNET_EARLY_X_OAUTH_REDIRECT (https, ending in /api/early-x-auth)']);
+  const x = { requested: truthy(env.SYNCNET_EARLY_X_ENABLED), configured: xMissing.length === 0, missing: xMissing, redirect: X_REDIRECT.test(xRedirect) ? xRedirect : null };
+  if (requested && x.requested && !x.configured) reasons.push('X requested but not configured: ' + xMissing.join(', '));
+  const platforms = Object.freeze({
+    youtube: Object.freeze({ enabled: true, oauth: oauth.configured, resolver: youtube.configured }),
+    x: Object.freeze({ enabled: x.requested && x.configured, oauth: x.configured, resolver: x.configured }),
+  });
   // Measured on the public Robinhood Chain RPC on 29 Sep 2026 (tests/live/early-rpc-capability.mjs): eth_getLogs is
   // capped by RESULT count (10,000 logs), not by block range; the exact three-topic EARLY filter succeeds across
   // 200,000 blocks in one call. At ≈0.1 s/block a 2 h window is ≈71,000 blocks: 50,000-block chunks = 2 calls.
@@ -92,7 +110,7 @@ function earlyConfig(options = {}) {
     const key = reasons.join('|');
     if (key && key !== warned) { warned = key; log('early', 'public-feature-closed', { problems: reasons }); }
   }
-  return { enabled, writesEnabled, anchorEnabled, durable, reasons, assets, assetsJson, registry, chainId: E.CHAIN_ID, attestation, anchor, oauth, youtube, platforms: PLATFORMS_ENABLED, sessions, getLogsChunk };
+  return { enabled, writesEnabled, anchorEnabled, durable, reasons, assets, assetsJson, registry, chainId: E.CHAIN_ID, attestation, anchor, oauth, youtube, x, platforms, xBudget: X_BUDGET, sessions, getLogsChunk };
 }
 /** True when this build accepts identities of `platform` (a registered platform AND enabled above). */
 const platformEnabled = (cfg, platform) => E.isPlatform(platform) && Boolean(cfg && cfg.platforms && Object.prototype.hasOwnProperty.call(cfg.platforms, platform) && cfg.platforms[platform].enabled === true);
@@ -114,4 +132,4 @@ function anchorSigner(env, cfg) {
   return Object.freeze({ address: c.anchor.address, sign: (digest) => Core._internal.secp256k1.sign(digest, key) });
 }
 
-module.exports = { earlyConfig, signer, anchorSigner, keyAddress, truthy, platformEnabled, PLATFORMS_ENABLED };
+module.exports = { earlyConfig, signer, anchorSigner, keyAddress, truthy, platformEnabled, X_BUDGET };

@@ -24,7 +24,8 @@ external id is named `channelId` (it is part of the v1 type hash and never chang
 `keccak256("syncnet.early.creator.v1|youtube|" + channelId)` is byte-identical to every `creatorId` issued so far. The
 registry in `lib/syncnet-early.js` (`PLATFORMS`) is the single definition of an id's shape and of what the platform's audience
 context counts; a verifier never needs it to check a receipt, because the receipt carries `platform` and `channelId` inside
-the signed manifest and `creatorId` inside the signed intent. **In this deployment only `youtube` is enabled.**
+the signed manifest and `creatorId` inside the signed intent. A deployment decides which platforms it accepts: `youtube`
+always; `x` only when explicitly enabled (see §7a).
 `acceptedAssetsHash = keccak256(canonicalJson([{token, minAmount}…]))` with tokens sorted ascending.
 
 ## 2. Canonical JSON
@@ -91,3 +92,20 @@ day). It is never replaced and never backfilled. A receipt's `context.audienceTh
 `approximate` (YouTube's rounded public count), `hidden`, or `unavailable`, plus `kind` (`subscribers` for YouTube: what the
 snapshot counted; a platform whose audience is followers is always labelled as that platform's followers, never as a generic
 audience). It is dated, approximate context; it is never part of payment validity.
+
+### 7a. X (platform `x`)
+
+Identity is the immutable **numeric X user id, carried as a string** (`^[1-9][0-9]{0,19}$`; ids exceed 2^53 and are never
+parsed as numbers), proved by an authenticated `GET /2/users/me` after OAuth 2.0 Authorization Code with PKCE (S256) with the
+single scope `users.read` (no `offline.access`; the access token is used once and discarded). The `@username`, display name
+and avatar are mutable display metadata, never identity: the handle and avatar appear in no attestation or signature; the display
+name is recorded once, as a dated `title` label, in the `creator-identity` attestation (as for YouTube). The manifest reuses the v1
+`CreatorManifest` with `platform = "x"` and the numeric id in the signed `channelId` field; receipts are ordinary v1
+receipts and verify with the same verifier. The `creator-identity` attestation uses `method = "x-oauth2-pkce users.read GET /2/users/me"`
+and names the id as `externalId` (subject and claims).
+
+`audience-snapshot` for X (same type, same first-success-of-the-UTC-day rule, never backfilled):
+`claims = {platform:"x", externalId, dateUTC, audienceKind:"followers", followerCount, fetchedAt, source}`, `subject = {externalId}`.
+It deliberately holds no name, handle or avatar. `source` is `x-api-v2 users public_metrics.followers_count` (daily read) or
+`... users/me ... (oauth link, enrolment)` (join day). A day without a follower figure has no snapshot, and the receipt reads
+`unavailable`. `context.audienceThen` for X has `kind: "followers"` and is presented as `Followers on X then: ~12K`.
