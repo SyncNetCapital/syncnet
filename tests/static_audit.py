@@ -436,6 +436,14 @@ assert "(a && a.kind === 'followers' ? E.audienceLine(a) :" in _epage, 'follower
 assert 'Audience then' not in _re3.sub(r"[^\n]*\bkind === 'followers'[^\n]*", '', _nocom(_epage)).replace("'Audience then: unavailable'", '').replace("'Audience then: hidden'", '').replace("'Audience then: ' + a.display", ''), 'the generic audience label must not be used for X'
 assert _epage.count("/^\\/labs\\/early\\/c\\/(UC[A-Za-z0-9_-]{22})$/")==1 and "E.isExternalId(m[1], m[2])" in _epage, 'legacy route kept; canonical routes validate the id shape for the platform'
 assert not _re3.search(r"<style|createElement\('style'\)|stylesheet", _epage+_ecreator), 'no styles may be added by the X UI'
+# 14. launch polish: EARLY in the primary navigation (created by sn-ui.js ONLY when the server reports EARLY enabled; no page/css edits)
+_snui=(root/'sn-ui.js').read_text(encoding='utf-8')
+assert "j && j.early === true" in _snui and "if (on) addEarlyNav(); else removeEarlyNav();" in _snui, 'the EARLY nav item must follow the server flag'
+assert "a.href = '/labs/early'" in _snui and "create.after(a)" in _snui and "tab.after(a)" in _snui, 'EARLY goes after Create in both bars (before My Projects / You)'
+assert "p === '/labs/early' || p.startsWith('/labs/early/') ? 'early'" in _snui and "gridTemplateColumns = 'repeat(4,1fr)'" in _snui
+assert not [_f.name for _f in root.glob('*.html') if 'data-nav="early"' in _f.read_text(encoding='utf-8')], 'no page may carry static EARLY nav markup'
+assert "xs.lede" in _epage and "'Are you an X creator?'" in _epage and "'EARLY · X creator'" in _epage and _epage.index("'EARLY · X creator'") < _epage.index("const r = await api(x ? { view: 'creator', platform: 'x'"), 'an X route is an X page before the lookup returns'
+assert "belongs to your X account" in _ecreator and "ledeForX" in _ecreator
 _runall=(root/'tests/run-all.mjs').read_text(encoding='utf-8')
 assert all(s in _runall for s in ['tests/early/platform.test.mjs','tests/early/x.test.mjs','tests/e2e/early-ui-x.mjs']), 'the platform, X and X UI suites must be part of run-all'
 print('SyncNet Labs · EARLY static audit: PASS')

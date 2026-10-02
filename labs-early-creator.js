@@ -60,6 +60,12 @@
     ytNote.insertAdjacentHTML('afterend', '<p><button class="sn-btn primary" type="button" id="cLinkX" hidden>Continue with X</button></p><p class="sn-small sn-muted">Continuing signs a free message with your wallet, then opens X to confirm which account you control (read-only access, nothing is posted).</p>');
     S.xBtn = $('cLinkX'); S.xBtn.addEventListener('click', () => link('x'));
   }
+  /** The intro sentence for an X creator session ("…belongs to your X account…"); YouTube sessions never touch it. */
+  const LEDE = { el: null, yt: '' };
+  function ledeForX() {
+    if (!LEDE.el) { LEDE.el = document.querySelector('main .sn-lede'); LEDE.yt = LEDE.el ? LEDE.el.textContent : ''; }
+    if (LEDE.el && LEDE.yt.includes('belongs to your YouTube channel')) LEDE.el.textContent = LEDE.yt.replace('belongs to your YouTube channel', 'belongs to your X account');
+  }
   const stepName = (name) => { const li = $('cSteps').querySelector('[data-step="youtube"]'); if (li && li.lastChild) li.lastChild.textContent = ' ' + name; };
   async function link(platform) {
     if (S.busy) return; S.busy = true;
@@ -100,7 +106,7 @@
     const me = S.me;
     if (isX(me)) {
       // X: the person-facing line is the current @username (display metadata); the immutable numeric id is never the headline
-      stepName('X');
+      stepName('X'); ledeForX();
       $('cYou').innerHTML = `${UI.logoHtml('', me.display ? me.display.title : 'C')}<div><strong>${esc(me.display && me.display.title ? me.display.title : 'X account')}</strong><br><span class="sn-small sn-muted">${esc(me.display && me.display.handle ? me.display.handle : 'X account')} · wallet ${esc(short(me.linkWallet))}</span></div>`;
       document.querySelector('#cManifest > p.sn-dim').textContent = 'What fans can send you. Minimums are yours to choose. Identity is your X account id; your username and name can change freely.';
     } else $('cYou').innerHTML = `${UI.logoHtml('', me.display ? me.display.title : 'C')}<div><strong>${esc(me.display ? me.display.title : me.channelId)}</strong><br><span class="sn-small sn-muted">${esc(me.channelId)} · wallet ${esc(short(me.linkWallet))}</span></div>`;
@@ -137,8 +143,8 @@
   function dashboard() {
     show('cDash'); steps('live', ['wallet', 'youtube', 'manifest']);
     const c = S.me.creator, d = S.me.display || c.display, x = isX(c);
-    if (x) stepName('X');
-    $('dTitle').textContent = d.title || (x ? 'X account' : c.channelId); $('dHandle').textContent = d.handle || (x ? 'X account' : c.channelId);
+    if (x) { stepName('X'); ledeForX(); }
+    $('dTitle').textContent = d.title || (x ? 'X account' : c.channelId); $('dHandle').textContent = d.handle || (x ? '' : c.channelId);
     if (d.avatarUrl) $('dAvatar').innerHTML = `<img src="${esc(d.avatarUrl)}" alt="">`; else $('dAvatar').textContent = (d.title || '·').charAt(0).toUpperCase();
     const page = x ? '/labs/early/c/x/' + c.externalId : '/labs/early/c/' + c.channelId;
     $('dPage').href = page; $('dPage').textContent = location.origin + page;

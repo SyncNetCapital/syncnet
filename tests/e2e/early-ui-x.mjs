@@ -7,22 +7,27 @@
 //   R. routes    : legacy /c/<UC…>, /c/youtube/<UC…>, /c/x/<id>; invalid platform/id combinations fail closed
 //   P. privacy   : defaults and wording unchanged;  G. gate: the server decides (a stale/tampered client cannot bypass it)
 //   V. visual    : no HTML/CSS file changed (pinned hashes); every class the X UI uses already exists in the stylesheets
+//   NAV. the primary navigation: EARLY appears (desktop top nav + mobile tab bar) only when the server reports EARLY enabled;
+//        header / tab bar / footer are DOM-identical to the golden once the inserted EARLY item is removed
+//   COPY. platform-aware wording: YouTube text unchanged; X selected / X route / X session change only the platform words
 // Run: node tests/e2e/early-ui-x.mjs     (PLAYWRIGHT_MODULE=… if playwright is not resolvable)
 // Golden mode (run from a checkout of the PRE-phase-5 code):  WRITE_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
+// Chrome golden (run from a checkout of the pre-nav code):     WRITE_CHROME_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
-import { ROOT, Core, E, ASSETS, lc, rnd32, W, sign, signDigest, TEST_KEYS_FILE, ENV, USDG, CH, clock, pc, resetPc, pay, makeFinal, rpc, MAP, makeStore, resetStore, creatorSession, Session } from '../early/fixtures.mjs';
+import { ROOT, Core, E, ASSETS, lc, rnd32, W, sign, signDigest, TEST_KEYS_FILE, ENV, USDG, CH, CH2, clock, pc, resetPc, pay, makeFinal, rpc, MAP, makeStore, resetStore, creatorSession, Session } from '../early/fixtures.mjs';
 const { chromium } = await import('playwright').catch(() => import(process.env.PLAYWRIGHT_MODULE || '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs'));
 
 const require = createRequire(import.meta.url);
-const WRITE_GOLDEN = process.env.WRITE_GOLDEN || '';
+const WRITE_GOLDEN = process.env.WRITE_GOLDEN || '', WRITE_CHROME = process.env.WRITE_CHROME_GOLDEN || '';
 const early = require(path.join(ROOT, 'netlify/functions/early.js'));
+const configFn = require(path.join(ROOT, 'netlify/functions/config.js'));
 const ytAuth = require(path.join(ROOT, 'netlify/functions/early-youtube-auth.js'));
 const xAuth = fs.existsSync(path.join(ROOT, 'netlify/functions/early-x-auth.js')) ? require(path.join(ROOT, 'netlify/functions/early-x-auth.js')) : null;
-const PORT = WRITE_GOLDEN ? 8951 : 8946, BASE = 'http://localhost:' + PORT;
+const PORT = WRITE_GOLDEN ? 8951 : WRITE_CHROME ? 8952 : 8946, BASE = 'http://localhost:' + PORT;
 const results = []; let failures = 0;
 function check(name, cond, detail = '') { results.push({ name, ok: Boolean(cond), detail: String(detail).slice(0, 400) }); if (!cond) { failures++; console.log('FAIL', name, '::', String(detail).slice(0, 300)); } else console.log('ok  ', name); }
 console.log = ((orig) => (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) return; orig(...a); })(console.log);
@@ -31,7 +36,7 @@ console.log = ((orig) => (...a) => { if (typeof a[0] === 'string' && a[0].starts
 const XSECRET = 'x-client-secret-TEST-0123456789abcdef', XBEARER = 'x-app-bearer-TEST-0123456789abcdef', XCLIENT = 'x-client-id-TEST-abc', XREDIRECT = 'https://example.test/api/early-x-auth';
 const ENV_OFF = { ...ENV, SYNCNET_X_CLIENT_ID: XCLIENT, SYNCNET_X_CLIENT_SECRET: XSECRET, SYNCNET_X_BEARER_TOKEN: XBEARER, SYNCNET_EARLY_X_OAUTH_REDIRECT: XREDIRECT };
 const ENV_ON = { ...ENV_OFF, SYNCNET_EARLY_X_ENABLED: 'true' };
-const CUR = { env: ENV_OFF };
+const CUR = { env: ENV_OFF, configFail: false };
 const BIG = '9007199254740993', BIG2 = '18446744073709551615'; // ids above 2^53 stay exact strings end to end
 
 // ---------------------------------------------------------------- fake YouTube (as in tests/e2e/early-ui.mjs)
@@ -84,7 +89,8 @@ const srv = http.createServer((req, res) => {
   if (p === '/api/early') return run(early);
   if (p === '/api/early-youtube-auth') return run(ytAuth);
   if (p === '/api/early-x-auth' && xAuth) return run(xAuth);
-  if (p === '/api/config') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ early: true, chainId: 4663 })); }
+  // the REAL /api/config function: `early` is whatever this deployment's environment says (CUR.env)
+  if (p === '/api/config') { if (CUR.configFail) { res.writeHead(503, { 'content-type': 'application/json' }); return res.end('{}'); } return run(configFn); }
   if (p === '/__google') { res.writeHead(200, { 'content-type': 'text/html' }); return res.end(`<!doctype html><title>Google (fake)</title><a id="allow" href="/api/early-youtube-auth?code=code-alice-0123456789&state=${encodeURIComponent(u.searchParams.get('state') || '')}">Allow</a>`); }
   if (p === '/labs/early/creator') p = '/labs-early-creator.html';
   else if (p === '/labs/early' || p.startsWith('/labs/early/')) p = '/labs-early.html';
@@ -197,7 +203,29 @@ async function captureYouTubePages(ids, strip = {}) {
   return { out, errs };
 }
 
+// ---------------------------------------------------------------- page chrome: the header, the mobile tab bar and the footer, as markup
+// (aria-current is page state, and the inline grid style is only ever set by the EARLY tab; both are normalised away)
+const CHROME_PAGES = ['/labs/early', '/labs/early/creator', '/labs.html', '/build.html'];
+const chromeOf = (page, keepEarly) => page.evaluate((keepEarly) => {
+  const strip = (el) => { const c = el.cloneNode(true); if (!keepEarly) { c.querySelectorAll('[data-nav="early"]').forEach((e) => e.remove()); c.removeAttribute('style'); } c.querySelectorAll('[aria-current]').forEach((e) => e.removeAttribute('aria-current')); return c.outerHTML; };
+  return { header: strip(document.querySelector('header.sn-top')), tabbar: strip(document.querySelector('nav.sn-tabbar')), footer: strip(document.querySelector('footer.sn-foot')) };
+}, keepEarly);
+async function captureChrome(keepEarly) {
+  const out = {};
+  const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const page = await c.newPage(); // no wallet: the header shows "Connect"
+  for (const p of CHROME_PAGES) { await page.goto(BASE + p); await page.waitForSelector('footer.sn-foot'); await settle(page); out[p] = await chromeOf(page, keepEarly); }
+  await c.close();
+  return out;
+}
+
 try {
+  if (WRITE_CHROME) {
+    CUR.env = ENV_OFF;
+    fs.mkdirSync(path.dirname(WRITE_CHROME), { recursive: true });
+    fs.writeFileSync(WRITE_CHROME, JSON.stringify({ schema: 'syncnet.early.ui-chrome-golden.v1', generatedBy: process.env.GOLDEN_FROM || 'pre-nav', pages: await captureChrome(true) }, null, 1));
+    console.log('wrote chrome golden for ' + CHROME_PAGES.length + ' pages to ' + WRITE_CHROME);
+    await browser.close(); srv.close(); process.exit(0);
+  }
   // ================================================================================================ setup: one YouTube creator with a finalized receipt and a card
   CUR.env = ENV_OFF;
   const manifestHash = await activateYouTubeCreator();
@@ -456,6 +484,165 @@ try {
     check('G05 credentials alone never show X: ENV_OFF holds all four X values yet the landing has no tabs (O08) and the config lists only YouTube (O13)', ENV_OFF.SYNCNET_X_CLIENT_ID && ENV_OFF.SYNCNET_X_CLIENT_SECRET && ENV_OFF.SYNCNET_X_BEARER_TOKEN && ENV_OFF.SYNCNET_EARLY_X_OAUTH_REDIRECT && !ENV_OFF.SYNCNET_EARLY_X_ENABLED);
     await c.close();
   }
+  // ================================================================================================ NAV. EARLY in the primary navigation
+  {
+    const CHROME = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests/e2e/golden/early-chrome.v1.json'), 'utf8')).pages;
+    const shownItems = (page, sel) => page.$$eval(sel, (as) => as.filter((a) => getComputedStyle(a).display !== 'none').map((a) => ({ text: a.textContent.trim(), shown: a.innerText.trim(), href: a.getAttribute('href'), nav: a.dataset.nav })));
+    const gotoNav = async (page, p, wantEarly) => { await page.goto(BASE + p); await page.waitForSelector('footer.sn-foot'); if (wantEarly) await page.waitForSelector('.sn-tabbar [data-nav="early"]', { state: 'attached', timeout: 8000 }).catch(() => {}); else await settle(page); };
+    const sameJ = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    // ---- EARLY enabled on the server
+    CUR.env = ENV_ON; CUR.configFail = false;
+    const c1 = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const p1 = await c1.newPage();
+    const desk = {}, chromeOn = {}, order = {};
+    for (const p of CHROME_PAGES) { API_LOG.length = 0; await gotoNav(p1, p, true); desk[p] = await shownItems(p1, '.sn-nav a'); chromeOn[p] = await chromeOf(p1, false); order[p] = await p1.evaluate(() => ({ nav: [...document.querySelectorAll('.sn-nav a')].map((a) => a.dataset.nav), tab: [...document.querySelectorAll('.sn-tabbar a')].map((a) => a.dataset.nav), early: document.querySelectorAll('[data-nav="early"]').length, cfgCalls: 0 })); order[p].cfgCalls = API_LOG.filter((l) => l === 'GET /api/config').length; }
+    check('NAV01 desktop top nav, EARLY enabled: Explore · Create · EARLY (My Projects appears once a wallet is connected), on the EARLY pages and on other product pages; EARLY links to /labs/early', CHROME_PAGES.every((p) => sameJ(desk[p].map((a) => a.text), ['Explore', 'Create', 'Early']) && sameJ(desk[p].map((a) => a.shown), ['EXPLORE', 'CREATE', 'EARLY']) && desk[p][2].href === '/labs/early'), JSON.stringify(desk));
+    check('NAV02 DOM order is exactly explore, create, early, you in the top nav AND in the mobile tab bar; exactly one EARLY item per bar (two in total)', CHROME_PAGES.every((p) => sameJ(order[p].nav, ['explore', 'create', 'early', 'you']) && sameJ(order[p].tab, ['explore', 'create', 'early', 'you']) && order[p].early === 2), JSON.stringify(order));
+    check('NAV03 header, tab bar and footer are DOM-identical to the golden once the inserted EARLY item is removed (the three existing items, their order, hrefs, labels, icons, classes and the footer incl. Labs are untouched)', CHROME_PAGES.every((p) => chromeOn[p].header === CHROME[p].header && chromeOn[p].tabbar === CHROME[p].tabbar && chromeOn[p].footer === CHROME[p].footer), CHROME_PAGES.filter((p) => ['header', 'tabbar', 'footer'].some((k) => chromeOn[p][k] !== CHROME[p][k])).join());
+    check('NAV04 the footer still links Labs (and every other footer link)', CHROME_PAGES.every((p) => /<a href="\/labs\.html">Labs<\/a>/.test(chromeOn[p].footer)));
+    // (/build.html's own builder script also reads /api/config, so it is expected to make one more)
+    check('NAV05 the nav makes exactly ONE /api/config request per page load (no polling): 1 on the EARLY pages and Labs, 1 + the builder\'s own on /build.html', CHROME_PAGES.every((p) => order[p].cfgCalls === (p === '/build.html' ? 2 : 1)), CHROME_PAGES.map((p) => order[p].cfgCalls).join());
+    const mk = await p1.evaluate(() => { const a = document.querySelector('.sn-nav [data-nav="early"]'), t = document.querySelector('.sn-tabbar [data-nav="early"]'); return { deskClass: a.className, deskAttrs: [...a.attributes].map((x) => x.name).sort().join(), tabClass: t.className, tabKids: [...t.children].map((x) => x.tagName).join(), tabAttrs: [...t.attributes].map((x) => x.name).sort().join(), refTabKids: [...document.querySelector('.sn-tabbar [data-nav="create"]').children].map((x) => x.tagName).join(), refAttrs: [...document.querySelector('.sn-nav [data-nav="create"]').attributes].map((x) => x.name).filter((n) => n !== 'aria-current').sort().join(), svg: t.querySelector('svg').getAttribute('viewBox') + '|' + t.querySelector('svg').getAttribute('aria-hidden') }; });
+    check('NAV06 the added items use no new class and mirror the existing items\' structure (desktop: <a href data-nav>; mobile: <a href data-nav><svg viewBox 24 aria-hidden/>label)', mk.deskClass === '' && mk.deskAttrs === mk.refAttrs && mk.tabClass === '' && mk.tabKids === 'svg' && mk.refTabKids === 'svg' && mk.svg === '0 0 24 24|true', JSON.stringify(mk));
+    // current-page marking
+    const cur = {};
+    for (const p of ['/labs/early', '/labs/early/c/x/' + BIG, '/labs/early/receipt', '/build.html', '/labs.html']) { await gotoNav(p1, p, true); cur[p] = await p1.evaluate(() => ({ nav: [...document.querySelectorAll('.sn-nav [aria-current="page"]')].map((a) => a.dataset.nav), tab: [...document.querySelectorAll('.sn-tabbar [aria-current="page"]')].map((a) => a.dataset.nav) })); }
+    check('NAV07 current-page marking: every /labs/early/… page marks EARLY (and only EARLY) in both bars; Create still marks /build.html; Labs marks nothing', ['/labs/early', '/labs/early/c/x/' + BIG, '/labs/early/receipt'].every((p) => sameJ(cur[p].nav, ['early']) && sameJ(cur[p].tab, ['early'])) && sameJ(cur['/build.html'].nav, ['create']) && sameJ(cur['/build.html'].tab, ['create']) && cur['/labs.html'].nav.length === 0 && cur['/labs.html'].tab.length === 0, JSON.stringify(cur));
+    await c1.close();
+    // connected wallet: My Projects joins, after EARLY
+    {
+      const c = await newCtx({ account: W.fan }); const pg = await c.newPage();
+      await gotoNav(pg, '/labs/early', true); await pg.click('[data-wallet]'); await pg.waitForSelector('.sn-nav .sn-you:not([hidden])');
+      const items = await shownItems(pg, '.sn-nav a');
+      check('NAV08 wallet connected: EXPLORE · CREATE · EARLY · MY PROJECTS, in that order', sameJ(items.map((a) => a.shown), ['EXPLORE', 'CREATE', 'EARLY', 'MY PROJECTS']), JSON.stringify(items.map((a) => a.shown)));
+      await c.close();
+    }
+    // mobile tab bar
+    const mobile = {};
+    for (const w of [320, 360, 390, 430]) {
+      const c = await browser.newContext({ viewport: { width: w, height: 760 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }); const pg = await c.newPage();
+      await gotoNav(pg, '/labs/early', true);
+      mobile[w] = await pg.evaluate(() => { const bar = document.querySelector('.sn-tabbar'); const tabs = [...bar.querySelectorAll('a')]; return { labels: tabs.map((a) => a.textContent.trim()), hrefs: tabs.map((a) => a.getAttribute('href')), svgs: tabs.map((a) => a.querySelectorAll('svg').length), cols: getComputedStyle(bar).gridTemplateColumns.split(' ').length, rects: tabs.map((a) => { const r = a.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.width), Math.round(r.height)]; }), clipped: tabs.filter((a) => a.scrollWidth > a.clientWidth + 1).length, ov: document.documentElement.scrollWidth - innerWidth, cur: tabs.filter((a) => a.getAttribute('aria-current') === 'page').map((a) => a.dataset.nav), deskNav: getComputedStyle(document.querySelector('.sn-nav')).display, bottom: Math.round(bar.getBoundingClientRect().bottom), vh: innerHeight }; });
+      await c.close();
+    }
+    check('NAV09 mobile tab bar (320/360/390/430 px): Explore · Create · Early · You with icons, hrefs /, /build.html, /labs/early, /you.html; four equal columns filling the bar; nothing clipped; no horizontal overflow; the bar stays pinned to the bottom; desktop nav stays hidden', [320, 360, 390, 430].every((w) => { const m = mobile[w]; return sameJ(m.labels, ['Explore', 'Create', 'Early', 'You']) && sameJ(m.hrefs, ['/', '/build.html', '/labs/early', '/you.html']) && sameJ(m.svgs, [1, 1, 1, 1]) && m.cols === 4 && m.rects.every((r, i) => Math.abs(r[1] - w / 4) <= 1 && r[2] === m.rects[0][2] && (i === 0 || r[0] > m.rects[i - 1][0])) && m.rects[3][0] + m.rects[3][1] >= w - 1 && m.clipped === 0 && m.ov <= 1 && sameJ(m.cur, ['early']) && m.deskNav === 'none' && m.bottom === m.vh; }), JSON.stringify(mobile));
+    // ---- EARLY NOT enabled on the server: the navigation is exactly what it was before
+    CUR.env = { ...ENV_OFF, SYNCNET_EARLY_ENABLED: 'false' };
+    {
+      const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const pg = await c.newPage(); const off = {};
+      for (const p of CHROME_PAGES) { await gotoNav(pg, p, false); off[p] = { chrome: await chromeOf(pg, true), items: (await shownItems(pg, '.sn-nav a')).map((a) => a.text), tabs: await pg.$$eval('.sn-tabbar a', (as) => as.map((a) => a.textContent.trim())), early: await pg.locator('[data-nav="early"]').count(), style: await pg.getAttribute('.sn-tabbar', 'style') }; }
+      const cfg = await (await fetch(BASE + '/api/config')).json();
+      check('NAV10 EARLY not enabled on the server: /api/config says early:false and the nav is DOM-identical to the golden WITHOUT removing anything - Explore · Create (3 tabs on mobile), no EARLY item, no inline style', cfg.early === false && CHROME_PAGES.every((p) => off[p].early === 0 && off[p].chrome.header === CHROME[p].header && off[p].chrome.tabbar === CHROME[p].tabbar && off[p].chrome.footer === CHROME[p].footer && sameJ(off[p].items, ['Explore', 'Create']) && sameJ(off[p].tabs, ['Explore', 'Create', 'You']) && off[p].style === null), JSON.stringify(off).slice(0, 300));
+      // cached "on" from an earlier page, but the server now says off: the item is removed again
+      await pg.goto(BASE + '/labs/early'); await pg.evaluate(() => sessionStorage.setItem('syncnet_early_nav', '1'));
+      await pg.goto(BASE + '/labs/early'); await pg.waitForFunction(() => sessionStorage.getItem('syncnet_early_nav') === '0', null, { timeout: 8000 }); await settle(pg);
+      check('NAV11 a stale cached "on" is corrected by the server answer: the EARLY items are removed and the tab bar is restored', (await pg.locator('[data-nav="early"]').count()) === 0 && (await pg.getAttribute('.sn-tabbar', 'style')) === null);
+      await c.close();
+      // EARLY off + wallet-less mobile
+      const cm = await browser.newContext({ viewport: { width: 390, height: 760 }, isMobile: true, hasTouch: true }); const pm = await cm.newPage();
+      await gotoNav(pm, '/labs/early', false);
+      check('NAV12 EARLY not enabled, phone: the tab bar is the original three tabs', sameJ(await pm.$$eval('.sn-tabbar a', (as) => as.map((a) => a.textContent.trim())), ['Explore', 'Create', 'You']));
+      await cm.close();
+    }
+    // ---- config unavailable: no EARLY item, no error, nav as before
+    CUR.env = ENV_ON; CUR.configFail = true;
+    {
+      const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); const pg = await c.newPage(); const errs = errsOf(pg);
+      await gotoNav(pg, '/labs/early', false); await settle(pg);
+      check('NAV13 /api/config unavailable (503): no EARLY item appears, nothing breaks (no script error)', (await pg.locator('[data-nav="early"]').count()) === 0 && (await chromeOf(pg, true)).header === CHROME['/labs/early'].header && errs.filter((e) => !/503|Failed to load resource/.test(e)).length === 0, errs.join(' | '));
+      await c.close();
+    }
+    CUR.configFail = false;
+    // ---- a stale cached "off" is corrected when the server turns EARLY on (and the first paint uses the cached "on")
+    CUR.env = ENV_ON;
+    {
+      const c = await browser.newContext({ viewport: { width: 1280, height: 900 } }); await c.addInitScript(() => { try { sessionStorage.setItem('syncnet_early_nav', '0'); } catch { /* */ } });
+      const pg = await c.newPage(); await gotoNav(pg, '/labs/early', true);
+      check('NAV14 a stale cached "off" is corrected by the server answer: EARLY appears', (await pg.locator('.sn-nav [data-nav="early"]').count()) === 1 && (await pg.evaluate(() => sessionStorage.getItem('syncnet_early_nav'))) === '1');
+      await c.close();
+    }
+  }
+
+  // ================================================================================================ COPY. platform-aware wording
+  {
+    CUR.env = ENV_ON; CUR.configFail = false;
+    const SQ = '’';
+    const LEDE_YT = 'I was there when. Support a YouTube creator directly from your wallet. Money goes straight to the creator' + SQ + 's verified wallet. SyncNet only proves that it happened, privately, and lets you make an EARLY card later if you want to.';
+    const LEDE_X = LEDE_YT.replace('Support a YouTube creator directly', 'Support an X creator directly');
+    const JOIN_YT = ['Are you a YouTube creator?', 'Verify your channel with YouTube, connect the wallet that receives support, and your creator page goes live. Fans pay you directly.'];
+    const JOIN_X = ['Are you an X creator?', 'Verify your account with X, connect the wallet that receives support, and your creator page goes live. Fans pay you directly.'];
+    const textNodes = (page, sel) => page.evaluate((sel) => { const out = []; const w = document.createTreeWalker(document.querySelector(sel), NodeFilter.SHOW_TEXT); while (w.nextNode()) { const t = w.currentNode.textContent.replace(/\s+/g, ' ').trim(); if (t) out.push(t); } return out; }, sel);
+    const visibleText = (page) => page.evaluate(() => document.body.innerText);
+    const doubled = (t) => /\bX X\b|\bYouTube YouTube\b/i.test(t);
+    const landing = await newCtx({ account: W.fan }); const lp = await landing.newPage(); const lerrs = errsOf(lp);
+    await lp.goto(BASE + '/labs/early'); await lp.waitForSelector('#ePlatform'); await settle(lp);
+    const ytHtml = await mainHtml(lp), ytNodes = await textNodes(lp, '#eLanding');
+    const joinOf = async () => lp.evaluate(() => { const p = document.querySelectorAll('#eLanding .early-two .sn-panel')[1]; return [p.querySelector('.sn-label').textContent, p.querySelector('.sn-dim').textContent, p.querySelector('.sn-label').innerText]; });
+    const ytJoin = await joinOf();
+    check('COPY01 YouTube selected (the default): the intro, the Join card and the lookup label are the original YouTube sentences, character for character', (await lp.textContent('#eLanding .sn-lede')) === LEDE_YT && ytJoin[0] === JOIN_YT[0] && ytJoin[1] === JOIN_YT[1] && ytJoin[2] === 'ARE YOU A YOUTUBE CREATOR?' && (await lp.textContent('label[for="eCmiInput"]')) === 'YouTube channel link or @handle', ytJoin.join('|'));
+    await lp.click('#ePlatform button[data-platform="x"]'); await settle(lp);
+    const xNodes = await textNodes(lp, '#eLanding'), xJoin = await joinOf();
+    check('COPY02 X selected: "Support an X creator directly from your wallet." and "ARE YOU AN X CREATOR?" with the Join card sentence worded for X', (await lp.textContent('#eLanding .sn-lede')) === LEDE_X && xJoin[0] === JOIN_X[0] && xJoin[1] === JOIN_X[1] && xJoin[2] === 'ARE YOU AN X CREATOR?' && /Support an X creator directly from your wallet\./.test(LEDE_X), xJoin.join('|'));
+    const changed = ytNodes.map((t, i) => [t, xNodes[i]]).filter(([a, b]) => a !== b).map(([a]) => a);
+    check('COPY03 selecting X changes ONLY the platform-specific wording: exactly the intro sentence, the Join card heading, the Join card sentence and the lookup label - every other text on the page is identical', ytNodes.length === xNodes.length && changed.length === 4 && changed.includes(LEDE_YT.replace('I was there when. ', '')) && changed.includes(JOIN_YT[0]) && changed.includes(JOIN_YT[1]) && changed.includes('YouTube channel link or @handle'), JSON.stringify(changed));
+    check('COPY04 no doubled platform word anywhere on the X-selected landing ("X X", "YouTube YouTube")', !doubled(await visibleText(lp)));
+    await lp.click('#ePlatform button[data-platform="youtube"]'); await settle(lp);
+    check('COPY05 switching back to YouTube restores the page EXACTLY (DOM-identical to the initial YouTube state, all text nodes equal)', (await mainHtml(lp)) === ytHtml && JSON.stringify(await textNodes(lp, '#eLanding')) === JSON.stringify(ytNodes));
+    await lp.click('#ePlatform button[data-platform="x"]'); await lp.click('#ePlatform button[data-platform="x"]'); await lp.click('#ePlatform button[data-platform="youtube"]'); await lp.click('#ePlatform button[data-platform="x"]'); await settle(lp);
+    check('COPY06 repeated toggling is idempotent: the X wording is applied from explicit strings (never by replacing words in the current text), so it never compounds', (await lp.textContent('#eLanding .sn-lede')) === LEDE_X && !doubled(await visibleText(lp)) && (await lp.textContent('#eLanding .sn-lede')).match(/\bX\b/g).length === 1);
+    check('COPY07 no script errors while toggling', lerrs.length === 0, lerrs.join(' | '));
+    await landing.close();
+
+    // ---- creator route labels
+    const rc = await newCtx(); const rp = await rc.newPage(); const label = () => rp.evaluate(() => { const l = document.querySelector('#eCreator .early-head .sn-label'); return [l.textContent, l.innerText]; });
+    const route = async (p) => { await rp.goto(BASE + p); await rp.waitForSelector('#eCreator:not([hidden])'); await rp.waitForFunction(() => document.getElementById('eTitle').textContent !== '…'); await settle(rp); return { label: await label(), title: await rp.textContent('#eTitle'), note: await rp.textContent('#eHandle'), wallet: await rp.evaluate(() => document.getElementById('eWallet').nextElementSibling.textContent), text: await visibleText(rp) }; };
+    const xr = await route('/labs/early/c/x/424242'), xr2 = await route('/labs/early/c/x/' + BIG), yr = await route('/labs/early/c/UCaaaaaaaaaaaaaaaaaaaaaa'), yr2 = await route('/labs/early/c/youtube/UCaaaaaaaaaaaaaaaaaaaaaa'), yr3 = await route('/labs/early/c/' + CH);
+    check('COPY08 an X route says "EARLY · X CREATOR" (never YouTube) - for an X creator that is not on EARLY, with the note and wallet caption in X words', xr.label[0] === 'EARLY · X creator' && xr.label[1] === 'EARLY · X CREATOR' && xr.title === 'Not on EARLY' && /^This account has not joined EARLY/.test(xr.note) && xr.wallet === 'verified for this account by SyncNet' && !/YouTube|channel/i.test(xr.text.replace(/Count me in signal from the EARLY page/, '')), JSON.stringify([xr.label, xr.note, xr.wallet]));
+    check('COPY09 ... and for an X creator that IS on EARLY', xr2.label[1] === 'EARLY · X CREATOR' && xr2.title === 'Alice (X)' && !/YouTube|channel/i.test(xr2.text), xr2.label.join('|'));
+    check('COPY10 a YouTube route still says "EARLY · YouTube creator" with the original note and caption - legacy and canonical routes alike', [yr, yr2, yr3].every((r) => r.label[0] === 'EARLY · YouTube creator' && r.label[1] === 'EARLY · YOUTUBE CREATOR') && yr.note === 'This channel has not joined EARLY. You can leave a private Count me in signal from the EARLY page.' && yr2.note === yr.note && yr.wallet === 'verified for this channel by SyncNet' && yr3.wallet === 'verified for this channel by SyncNet' && yr3.title === 'Alice', JSON.stringify([yr.label, yr.note, yr.wallet]));
+    check('COPY11 no doubled platform word on any creator page', [xr, xr2, yr, yr2, yr3].every((r) => !doubled(r.text)));
+    CUR.env = ENV_OFF; // X closed on the server: an X route is still an X page (route-based), and fails closed
+    const xoff = await route('/labs/early/c/x/424242');
+    check('COPY12 X OFF + an X route: still "EARLY · X CREATOR" / "Not on EARLY" (fails closed, no YouTube wording)', xoff.label[1] === 'EARLY · X CREATOR' && xoff.title === 'Not on EARLY' && !/YouTube/i.test(xoff.text));
+    CUR.env = ENV_ON;
+    await rc.close();
+
+    // ---- creator onboarding: intro sentence by session platform, error copy by platform
+    const LEDE_SETUP_YT = 'Fans pay your wallet directly. SyncNet verifies that the wallet belongs to your YouTube channel and gives each supporter a private proof that they were there.';
+    const LEDE_SETUP_X = LEDE_SETUP_YT.replace('belongs to your YouTube channel', 'belongs to your X account');
+    const withSession = async (token, fn, linked) => { const c = await newCtx({ account: W.creator }); await c.addInitScript(({ token, linked }) => { try { if (token) sessionStorage.setItem('syncnet_early_creator_session', token); if (linked) sessionStorage.setItem('syncnet_early_link_platform', linked); } catch { /* */ } }, { token, linked }); const pg = await c.newPage(); const errs = errsOf(pg); try { return await fn(pg, errs); } finally { await c.close(); } };
+    const lede = (pg) => pg.textContent('main .sn-lede');
+    const setupDefault = await withSession('', async (pg) => { await pg.goto(BASE + '/labs/early/creator'); await pg.waitForSelector('#cWallet:not([hidden])'); await settle(pg); return { lede: await lede(pg), text: await visibleText(pg) }; });
+    check('COPY13 creator setup, no session (the default): the intro is the original YouTube sentence, character for character, and the page names YouTube as before', setupDefault.lede === LEDE_SETUP_YT && /YouTube/.test(setupDefault.text));
+    // an X creator session at the manifest step (a link record exists, no creator yet) and on the dashboard (Alice X is live)
+    const mkLink = (sid, rec) => MAP.set('early:oauth:v1:' + sid, { type: 'string', value: JSON.stringify({ ...rec, at: nowSec() }), expiresAt: clock.now() + 900000 });
+    const xTok = Session.issue({ scope: 'creator', wallet: W.creator, platform: 'x', externalId: BIG2, now: () => clock.now(), env: ENV_ON });
+    mkLink(xTok.split('.')[4], { platform: 'x', wallet: W.creator, channelId: BIG2, title: 'Carol', avatarUrl: '', handle: '@carol_99', followerCount: 5, scope: 'tweet.read users.read' });
+    const xManifest = await withSession(xTok, async (pg, errs) => { await pg.goto(BASE + '/labs/early/creator'); await pg.waitForSelector('#cManifest:not([hidden])'); await settle(pg); return { lede: await lede(pg), text: await visibleText(pg), step: await pg.textContent('#cSteps li:nth-child(2)'), errs }; });
+    check('COPY14 X creator session, manifest step: the intro says "…belongs to your X account…" (only that phrase differs), step 2 is "X", and no visible text mentions YouTube or a channel', xManifest.lede === LEDE_SETUP_X && /X/.test(xManifest.step) && !/YouTube/.test(xManifest.step) && !/YouTube|channel/i.test(xManifest.text) && !doubled(xManifest.text) && xManifest.errs.length === 0, xManifest.lede);
+    const xTok2 = Session.issue({ scope: 'creator', wallet: W.creator2, platform: 'x', externalId: BIG, now: () => clock.now(), env: ENV_ON });
+    mkLink(xTok2.split('.')[4], { platform: 'x', wallet: W.creator2, channelId: BIG, title: 'Alice (X)', avatarUrl: '', handle: '@alice_x', followerCount: 12400, scope: 'tweet.read users.read' });
+    const xDash = await withSession(xTok2, async (pg) => { await pg.goto(BASE + '/labs/early/creator'); await pg.waitForSelector('#cDash:not([hidden])'); await settle(pg); return { lede: await lede(pg), text: await visibleText(pg) }; });
+    check('COPY15 X creator session, dashboard: the same X intro; no visible YouTube / channel wording; no doubled word', xDash.lede === LEDE_SETUP_X && !/YouTube|channel/i.test(xDash.text) && !doubled(xDash.text));
+    const ytTok = creatorSession(store, { channelId: CH2, wallet: W.creator, title: 'Bob', subscriberCount: 20 });
+    const ytManifest = await withSession(ytTok, async (pg) => { await pg.goto(BASE + '/labs/early/creator'); await pg.waitForSelector('#cManifest:not([hidden])'); await settle(pg); return { lede: await lede(pg), step: await pg.textContent('#cSteps li:nth-child(2)'), you: await pg.textContent('#cYou'), identity: await pg.textContent('#cManifest > p.sn-dim') }; });
+    check('COPY16 YouTube creator session, manifest step: the intro, step name, identity line and sentence are the original YouTube ones', ytManifest.lede === LEDE_SETUP_YT && /YouTube/.test(ytManifest.step) && ytManifest.you.includes(CH2) && ytManifest.identity === 'What fans can send you. Minimums are yours to choose. Identity is your channel id; your handle and name can change freely.', JSON.stringify(ytManifest));
+    // error copy: exact strings, never doubled
+    const errCopy = async (code, linked) => withSession('', async (pg) => { await pg.goto(BASE + '/labs/early/creator#e=' + code); await pg.waitForFunction(() => document.getElementById('cStatus').textContent !== ''); return pg.textContent('#cStatus'); }, linked);
+    const X_ERR = { denied: 'X access was not granted. Nothing was changed.', no_account: 'That X account could not be read. Try again.', state: 'The sign-in link expired or was reused. Start again.', unavailable: 'X sign-in is not available right now. Try again later.', closed: 'Creator onboarding is not open on this deployment.' };
+    const YT_ERR = { denied: 'YouTube access was not granted. Nothing was changed.', no_channel: 'That Google account has no YouTube channel. Sign in with the account that owns your channel.', state: 'The sign-in link expired or was reused. Start again.', unavailable: 'YouTube sign-in is not available right now. Try again later.', closed: 'Creator onboarding is not open on this deployment.' };
+    const gotX = {}, gotYt = {}, gotNone = {};
+    for (const code of Object.keys(X_ERR)) gotX[code] = await errCopy(code, 'x');
+    for (const code of Object.keys(YT_ERR)) { gotYt[code] = await errCopy(code, 'youtube'); gotNone[code] = await errCopy(code, ''); }
+    check('COPY17 after an X sign-in attempt every error message is exactly the X one - "X access was not granted. Nothing was changed." - and none is doubled ("X X access…")', Object.entries(X_ERR).every(([k, v]) => gotX[k] === v) && Object.values(gotX).every((t) => !doubled(t) && !/^X X/.test(t)), JSON.stringify(gotX));
+    check('COPY18 after a YouTube attempt (or with no recorded attempt) the error messages are exactly the original YouTube ones', Object.entries(YT_ERR).every(([k, v]) => gotYt[k] === v && gotNone[k] === v), JSON.stringify([gotYt, gotNone]).slice(0, 300));
+    // the rest of the X journey carries no YouTube wording and no doubled words
+    const rcx = await newCtx({ account: W.fan }); const px = await rcx.newPage();
+    const pages = {};
+    for (const [k, p] of [['creator', xPage], ['receipt', '/labs/early/receipt?intent=' + xIntent], ['card', xShare.replace(BASE, '')]]) { await px.goto(BASE + p); await settle(px); await px.waitForTimeout(1200); pages[k] = await visibleText(px); }
+    check('COPY19 X creator page, receipt and public card: no YouTube wording, no doubled platform word; the audience line is "Followers on X then: ~12K"', Object.values(pages).every((t) => !/YouTube|channel/i.test(t) && !doubled(t)) && /Followers on X then: ~12K/.test(pages.receipt) && /FOLLOWERS ON X THEN|Followers on X then: ~12K/i.test(pages.card) && !/Audience then/.test(pages.receipt + pages.card), Object.entries(pages).map(([k, t]) => k + ':' + t.slice(0, 60)).join(' | '));
+    await rcx.close();
+  }
+
   // ---- phone sweep for the X additions
   for (const width of [320, 390]) {
     const c = await browser.newContext({ viewport: { width, height: 760 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }); await wireWallet(c);
@@ -478,6 +665,9 @@ try {
     // git blob ids of the files at the pre-phase-5 commit a8568ea: phase 5 changes NO html and NO css
     const FROZEN = { 'labs-early.html': 'f31f23418bf7e55ded2ceaac14f2b36491c875a2', 'labs-early-creator.html': 'e7cca95a2e3e7612af35622f99d99872068d33b2', 'ui.css': '354af0e8d3ad523929117d973ef07f8e0ac6c70e', 'v2.css': '893b839b7443ce46132613aa705a1b20cddc1547' };
     check('V01 phase 5 changes NO html and NO stylesheet: labs-early.html, labs-early-creator.html, ui.css and v2.css are byte-identical to a8568ea (re-pin deliberately if a later phase changes them)', Object.entries(FROZEN).every(([f, h]) => gitBlob(f) === h), Object.entries(FROZEN).filter(([f, h]) => gitBlob(f) !== h).map(([f]) => f).join());
+    // the launch polish adds EARLY to the nav from sn-ui.js: NONE of the 16 pages that carry the nav (and no stylesheet) changed
+    const NAV_PAGES = { '404.html': '7caada1c8b54b1f6d65f48af8d3c273ce5d41471', 'build.html': '022585be8d8daf7f457b980f5fb24a2a867b421e', 'economy.html': 'f25ee5bd7fbd8d6dd2135d9a92e92af444788914', 'home-editor.html': 'e0224699307bbc2389dfc8b6d4dfdebc9764f4c0', 'index.html': 'b5458b2668e4b36fe76215b2283b91fd247ee817', 'kit.html': 'e50333bcec25f91dfd3ad59104885b00049b6bbe', 'labs.html': 'e109e42d6a9f31910938eb957d80ce0ca4e0b07a', 'labs-early.html': 'f31f23418bf7e55ded2ceaac14f2b36491c875a2', 'labs-early-creator.html': 'e7cca95a2e3e7612af35622f99d99872068d33b2', 'launches.html': 'f4eb1ce40da6fe45c1dfc5f5f9172a34ca4e1d92', 'marketplace.html': '21a941f2ddd804816480424093d7037ebe3403c4', 'network.html': '90925d34eebcb729fb7d64df6e9a6866cef3dcc3', 'registry.html': '310992a8e88a1cb733bb7157d8877fd238929d95', 'sync.html': '1a7e04a2a9c565049004667bc45653bbd9dfa3d1', 'token.html': '9cd65ccab90778a4b56ca12def65e39dd04013bf', 'you.html': '266fe1c985c6f9fc9bd736979ca428938378d61a' };
+    check('V04 the launch polish edits NO page and NO stylesheet: all 16 pages that carry the primary nav, ui.css and v2.css are byte-identical to af1954d (the EARLY nav item is created by sn-ui.js)', Object.entries(NAV_PAGES).every(([f, h]) => gitBlob(f) === h) && gitBlob('ui.css') === FROZEN['ui.css'] && gitBlob('v2.css') === FROZEN['v2.css'], Object.entries(NAV_PAGES).filter(([f, h]) => gitBlob(f) !== h).map(([f]) => f).join());
     const css = fs.readFileSync(path.join(ROOT, 'ui.css'), 'utf8') + fs.readFileSync(path.join(ROOT, 'v2.css'), 'utf8');
     const defined = (cls) => new RegExp('\\.' + cls.replace(/[-]/g, '\\-') + '(?![A-Za-z0-9_-])').test(css);
     const js = fs.readFileSync(path.join(ROOT, 'labs-early.js'), 'utf8') + fs.readFileSync(path.join(ROOT, 'labs-early-creator.js'), 'utf8');

@@ -78,13 +78,20 @@
     const label = document.querySelector('label[for="eCmiInput"]'), input = $('eCmiInput');
     const original = { label: label.textContent, placeholder: input.placeholder };
     const words = { youtube: original, x: { label: 'X username or profile link', placeholder: 'x.com/username' } };
+    // the only other platform words on this page: "a YouTube creator" in the intro and the "Join EARLY" card. The YouTube text is
+    // captured from the page itself (so it is restored exactly); the X text is explicit - never a blind YouTube→X replace.
+    const lede = document.querySelector('#eLanding .sn-lede').lastChild, joinPanel = document.querySelectorAll('#eLanding .early-two .sn-panel')[1];
+    const joinLabel = joinPanel.querySelector('.sn-label'), joinText = joinPanel.querySelector('.sn-dim');
+    const yt = { lede: lede.textContent, joinLabel: joinLabel.textContent, joinText: joinText.textContent };
+    const xs = { lede: yt.lede.replace('Support a YouTube creator directly', 'Support an X creator directly'), joinLabel: 'Are you an X creator?', joinText: 'Verify your account with X, connect the wallet that receives support, and your creator page goes live. Fans pay you directly.' };
+    const copy = (p) => { const t = p === 'x' && xs.lede !== yt.lede ? xs : yt; lede.textContent = t.lede; joinLabel.textContent = t.joinLabel; joinText.textContent = t.joinText; };
     label.insertAdjacentHTML('beforebegin', '<div class="sn-filters" id="ePlatform" role="group" aria-label="Platform" style="margin:14px 0 0"><button type="button" data-platform="youtube" aria-pressed="true">YouTube</button><button type="button" data-platform="x" aria-pressed="false">X</button></div>');
     $('ePlatform').addEventListener('click', (e) => {
       const b = e.target.closest('button[data-platform]');
       if (!b || b.dataset.platform === S.platform) return;
       S.platform = b.dataset.platform;
       for (const t of $('ePlatform').querySelectorAll('button')) t.setAttribute('aria-pressed', String(t.dataset.platform === S.platform));
-      label.textContent = words[S.platform].label; input.placeholder = words[S.platform].placeholder; input.value = '';
+      label.textContent = words[S.platform].label; input.placeholder = words[S.platform].placeholder; input.value = ''; copy(S.platform);
       $('eCmiResult').hidden = true; $('eCmiResult').innerHTML = ''; status('');
     });
   }
@@ -129,13 +136,14 @@
   async function creatorPage(rt) {
     show('eCreator');
     const x = rt.platform === 'x';
+    // an X route is an X creator page from the first paint, whether or not the creator turns out to be on EARLY
+    if (x) { document.querySelector('#eCreator .early-head .sn-label').textContent = 'EARLY · X creator'; $('eWallet').nextElementSibling.textContent = 'verified for this account by SyncNet'; }
     // YouTube (legacy and /youtube/ routes) asks exactly as before; X asks by (platform, immutable numeric id)
     const r = await api(x ? { view: 'creator', platform: 'x', externalId: rt.externalId } : { view: 'creator', channelId: rt.externalId });
     if (!r.ok || !r.body.onEarly) { $('eTitle').textContent = 'Not on EARLY'; $('eSupportPanel').hidden = true; $('eHandle').textContent = (x ? 'This account' : 'This channel') + ' has not joined EARLY. You can leave a private Count me in signal from the EARLY page.'; return; }
     const c = S.creator = r.body;
     $('eTitle').textContent = c.display.title || 'Creator';
     $('eHandle').textContent = c.display.handle || (x ? 'X account' : c.channelId);
-    if (x) { document.querySelector('#eCreator .early-head .sn-label').textContent = 'EARLY · X creator'; $('eWallet').nextElementSibling.textContent = 'verified for this account by SyncNet'; }
     if (c.display.avatarUrl) $('eAvatar').innerHTML = `<img src="${esc(c.display.avatarUrl)}" alt="">`; else $('eAvatar').textContent = (c.display.title || '·').charAt(0).toUpperCase();
     const m = c.currentManifest;
     $('eWallet').textContent = m ? short(m.receivingWallet) : '—';
