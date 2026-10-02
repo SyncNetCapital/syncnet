@@ -176,7 +176,7 @@ function compactMarket(m) {
 }
 
 // The subset of a PAR launch row read by explore.js, you.js, builder-v2.js, v2-network.js, v2-token.js and
-// economy-v2.js (lib/syncnet-economy.js), under each field's primary name. Absent or malformed fields are left
+// economy-v2.js (lib/syncnet-economy.js), under each field's primary name (`logo` is kept alongside `logoUrl`). Absent or malformed fields are left
 // out, never invented; a row without a top-level `markets` list keeps its single top-level market.
 function compactLaunch(row) {
   const out = {};
@@ -188,6 +188,10 @@ function compactLaunch(row) {
   if (symbol) out.symbol = symbol;
   const logoUrl = whole(MAX_LOGO, row.logoUrl, row.logo);
   if (logoUrl) out.logoUrl = logoUrl;
+  // PAR's original `logo` (normally ipfs://CID) is kept beside the gateway URL so the client's canonical
+  // Pinata -> ipfs.io -> dweb.link fallback chain can run. Omitted when identical, to keep the payload small.
+  const logo = whole(MAX_LOGO, row.logo);
+  if (logo && logo !== logoUrl) out.logo = logo;
   const created = [row.createdAt, row.created_at].find((v) => v !== undefined && v !== null && v !== '');
   if (typeof created === 'number' && Number.isFinite(created)) out.createdAt = created;
   else if (typeof created === 'string' && created.length <= MAX_DATE) out.createdAt = created;

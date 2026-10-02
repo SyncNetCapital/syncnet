@@ -16,6 +16,7 @@ const SUITES = [
   ['server Passport authority (no fee-recipient takeover)', 'node', ['tests/server/passport-authority.test.mjs'], /(\d+)\/(\d+) passport authority checks passed/],
   ['server Marketplace × Pons V2 (origins)', 'node', ['tests/server/marketplace-pons.test.mjs'], /(\d+)\/(\d+) marketplace Pons checks passed/],
   ['SyncNet Economics unit (burn math, distribution parsing, 24h coverage, failure states, page wiring)', 'node', ['tests/unit/economics.test.mjs'], /(\d+) passed, (\d+) failed/],
+  ['Network token media (exact-address logoFor, profile priority, ipfs:// kept, placeholders, no extra requests)', 'node', ['tests/unit/network-media.test.mjs'], /(\d+) passed, (\d+) failed/],
   ['Economies unit (EIP-712 domain, fold, derived membership)', 'node', ['tests/unit/economy.test.mjs'], /(\d+) passed, (\d+) failed/],
   ['server Economies /api/economies (V0)', 'node', ['tests/server/economies.test.mjs'], /(\d+)\/(\d+) economies server checks passed/],
   ['PONS V2 discovery unit (decode, adaptive scan, reorg, sorted sets)', 'node', ['tests/unit/pons-discovery.test.mjs'], /(\d+)\/(\d+) pons discovery checks passed/],

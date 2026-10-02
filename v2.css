@@ -767,3 +767,5 @@ body.is-rehearsal .site-nav{border-bottom-color:#d6a54a}
 .mp-past{margin-top:18px;width:100%}
 .mp-claim-facts .passport-row strong.ok{color:var(--cyan,#37f0e2)}
 @media(max-width:480px){.mp-offer-row{align-items:flex-start;flex-direction:column;gap:6px}}
+/* Token avatars on Network rows: sit inside the existing label line, so no row or card grows. */
+.tok-av{display:inline-block;width:18px;height:18px;border-radius:5px;overflow:hidden;vertical-align:-4px;margin-right:6px;border:1px solid #222;background:#000;flex:none}.tok-av.lg{width:22px;height:22px;vertical-align:-5px;border-radius:6px}.tok-av img{display:block;width:100%;height:100%;object-fit:cover}
