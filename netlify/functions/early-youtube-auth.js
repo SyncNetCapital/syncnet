@@ -46,7 +46,7 @@ async function handler(event = {}, deps = {}) {
   const start = query(event, 'start');
   if (start) {
     const st = Session.verify(start, { scope: 'state', now, env });
-    if (!st) return fail('state');
+    if (!st || st.platform !== E.PLATFORM) return fail('state'); // a state issued for another platform is not ours to redeem
     try { return redirect(yt.authUrl(start)); } catch (err) { logError(FN, 'auth-url', err, {}); return fail('unavailable'); }
   }
 
@@ -54,7 +54,7 @@ async function handler(event = {}, deps = {}) {
   if (query(event, 'error')) { log(FN, 'consent-denied', { ip: hashId(ip) }); return fail('denied'); }
   if (!code || !state) return fail('state');
   const st = Session.verify(state, { scope: 'state', now, env });
-  if (!st) return fail('state');
+  if (!st || st.platform !== E.PLATFORM) return fail('state');
   // single use: the state nonce (sid) is consumed atomically before any token is exchanged
   let consumed = false;
   try { consumed = await store.cas({ expect: [[K.state(st.sid), null]], set: [[K.state(st.sid), '1', Session.TTL.state + 120]] }); } catch (err) { logError(FN, 'store-unavailable', err, {}); return fail('unavailable'); }
@@ -68,10 +68,11 @@ async function handler(event = {}, deps = {}) {
     return fail(err && (err.code === 'denied' || err.code === 'scope') ? 'denied' : 'unavailable');
   }
   if (!channel || !E.isChannelId(channel.channelId)) return fail('no_channel');
-  const session = Session.issue({ scope: 'creator', wallet: st.wallet, channelId: channel.channelId, now, env });
+  const session = Session.issue({ scope: 'creator', wallet: st.wallet, platform: E.PLATFORM, externalId: channel.channelId, now, env });
   if (!session) return fail('unavailable');
   const sid = session.split('.')[4];
-  const link = { wallet: st.wallet, channelId: channel.channelId, title: E.clean(channel.title, 80), avatarUrl: channel.avatarUrl || '', handle: E.clean(channel.handle, 40), subscriberCount: channel.subscriberCount, hiddenSubscriberCount: Boolean(channel.hidden), at: Math.floor(now() / 1000), scope: yt.OAUTH_SCOPE };
+  // `channelId` keeps its v1 name for the external id (the signed manifest field is called the same); `platform` is new
+  const link = { platform: E.PLATFORM, wallet: st.wallet, channelId: channel.channelId, title: E.clean(channel.title, 80), avatarUrl: channel.avatarUrl || '', handle: E.clean(channel.handle, 40), subscriberCount: channel.subscriberCount, hiddenSubscriberCount: Boolean(channel.hidden), at: Math.floor(now() / 1000), scope: yt.OAUTH_SCOPE };
   try { await store.set(K.link(sid), JSON.stringify(link), { ttlSeconds: E.CONST.OAUTH_LINK_TTL_S }); } catch (err) { logError(FN, 'store-unavailable', err, {}); return fail('unavailable'); }
   log(FN, 'linked', { channel: hashId(channel.channelId), wallet: hashId(st.wallet) });
   return redirect(RETURN + '#s=' + encodeURIComponent(session));

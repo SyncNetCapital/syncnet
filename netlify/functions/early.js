@@ -11,7 +11,7 @@
  *  - money moves only fan wallet → creator wallet (a standard ERC-20 transfer the client sends itself); this function
  *    never holds, routes, fees, swaps or refunds anything and never sends a transaction;
  *  - every write is an EIP-712 signature in the "SyncNet SYNC Proof" domain (ECDSA, then EIP-1271), or a session that
- *    was itself issued from such a signature / from the YouTube OAuth callback;
+ *    was itself issued from such a signature / from a platform's OAuth callback (YouTube is the only platform enabled);
  *  - the client never supplies receiver, token identity, chain, window or creatorId for an intent: the server drafts
  *    the exact typed data, the fan signs it, the server persists it, and only then is the transfer enabled;
  *  - a receipt is created ONLY by the public matching rule (netlify/lib/early-match.js): exactly one in-window
@@ -33,19 +33,22 @@ const { serverRpc } = require('../lib/chain-rpc');
 const { readJsonBody, query, method: methodOf, header } = require('../lib/body');
 const { verifyDigest } = require('../lib/sig-verify');
 const PhChain = require('../lib/project-home-chain');
-const { earlyConfig, signer: makeSigner } = require('../lib/early-config');
+const { earlyConfig, signer: makeSigner, platformEnabled } = require('../lib/early-config');
+const Platforms = require('../lib/early-platforms');
 const Session = require('../lib/early-session');
 const Attest = require('../lib/early-attest');
 const Match = require('../lib/early-match');
 
 const FN = 'early';
+// Identity-keyed keys (cmi*, snap*) take a REF (E.refOf): YouTube's ref is the bare channel id, so every key written before
+// platforms existed keeps its exact name; other platforms are `<platform>:<externalId>`.
 const K = {
   creator: (cid) => `early:creator:v1:${cid}`,
   creators: 'early:creators:v1',
   manifest: (h) => `early:manifest:v1:${h}`,
   manifestsOf: (cid) => `early:manifests:v1:${cid}`,
-  cmi: (ch, fan) => `early:cmi:v1:${ch}:${fan}`,
-  cmiSet: (ch) => `early:cmi-set:v1:${ch}`,
+  cmi: (ref, fan) => `early:cmi:v1:${ref}:${fan}`,
+  cmiSet: (ref) => `early:cmi-set:v1:${ref}`,
   cmiOf: (fan) => `early:cmi-of:v1:${fan}`,
   draft: (id) => `early:draft:v1:${id}`,
   intent: (id) => `early:intent:v1:${id}`,
@@ -63,8 +66,8 @@ const K = {
   metric: (name, d) => `early:metrics:v1:${name}:${d}`,
   visit: (s, ipHash, hour) => `early:visit:v1:${s}:${ipHash}:${hour}`,
   resolve: (h) => `early:yt:resolve:v1:${h}`,
-  snap: (ch, d) => `early:snap:v1:${ch}:${d}`,
-  snapDays: (ch) => `early:snap-days:v1:${ch}`,
+  snap: (ref, d) => `early:snap:v1:${ref}:${d}`,
+  snapDays: (ref) => `early:snap-days:v1:${ref}`,
   pendingFinal: 'early:pending-final:v1', // zset: CONFIRMED receipts awaiting finality (score = block number)
   ...Attest.K,
 };
@@ -103,20 +106,39 @@ const skewOk = (issuedAt, now) => E.isUnix(issuedAt) && Math.abs(Number(issuedAt
 async function bump(store, name, now) { try { await store.incrWindow(K.metric(name, E.utcDate(nowSec(now))), METRIC_TTL); } catch (err) { logError(FN, 'metric-failed', err, { name }); } }
 const random32 = (random) => '0x' + Buffer.from(random(32)).toString('hex');
 
+// ---------------------------------------------------------------- identity (platform + immutable external id)
+/** How an identity appears in public JSON: always {platform, externalId}; YouTube keeps its legacy `channelId` too. */
+const identityOut = (platform, externalId) => ({ platform, externalId, ...(platform === E.PLATFORM ? { channelId: externalId } : {}) });
+/**
+ * The identity a request names -> {platform, externalId, ref, creatorId} | {error}. `platform` defaults to YouTube and must
+ * be ENABLED on this deployment; `externalId` is the immutable id; `channelId` is its legacy spelling and is accepted for
+ * YouTube only (if both are sent they must agree). The id is validated against the named platform's shape only.
+ */
+function identityFrom(cfg, src) {
+  const given = (v) => v !== undefined && v !== null && v !== '';
+  const platform = given(src.platform) ? src.platform : E.PLATFORM;
+  if (!platformEnabled(cfg, platform)) return { error: 'Unsupported platform.' };
+  if (given(src.channelId) && platform !== E.PLATFORM) return { error: 'channelId is the YouTube spelling; send externalId.' };
+  if (given(src.externalId) && given(src.channelId) && src.externalId !== src.channelId) return { error: 'externalId and channelId differ.' };
+  const externalId = given(src.externalId) ? src.externalId : given(src.channelId) ? src.channelId : '';
+  if (!E.isExternalId(platform, externalId)) return { error: platform === E.PLATFORM ? 'Invalid channel id.' : 'Invalid external id.' };
+  return { platform, externalId, ref: E.refOf(platform, externalId), creatorId: E.creatorIdOf(externalId, platform) };
+}
+
 // ---------------------------------------------------------------- public shapes (never supporter data)
-const publicManifest = (m) => m && { manifestHash: m.manifestHash, creatorId: m.creatorId, channelId: m.channelId, manifestVersion: m.struct.manifestVersion, receivingWallet: m.struct.receivingWallet, acceptedAssets: m.acceptedAssets, previousManifestHash: m.struct.previousManifestHash, status: m.status, effectiveAt: m.effectiveAt, supersededAt: m.supersededAt, supersededBy: m.supersededBy, typedData: E.typedData('CreatorManifest', m.struct), signature: m.signature, attestations: m.attestationIds || [] };
+const publicManifest = (m) => m && { manifestHash: m.manifestHash, creatorId: m.creatorId, ...identityOut(m.struct.platform || E.PLATFORM, m.channelId), manifestVersion: m.struct.manifestVersion, receivingWallet: m.struct.receivingWallet, acceptedAssets: m.acceptedAssets, previousManifestHash: m.struct.previousManifestHash, status: m.status, effectiveAt: m.effectiveAt, supersededAt: m.supersededAt, supersededBy: m.supersededBy, typedData: E.typedData('CreatorManifest', m.struct), signature: m.signature, attestations: m.attestationIds || [] };
 function publicCreator(c, m) {
   if (!c) return { onEarly: false };
   const rot = c.status === 'ROTATION_PENDING' && c.rotation ? { pending: true, effectiveAt: c.rotation.effectiveAt, since: c.rotation.startedAt } : null;
   return {
-    onEarly: true, creatorId: c.creatorId, channelId: c.channelId, platform: E.PLATFORM, display: c.display,
+    onEarly: true, creatorId: c.creatorId, ...identityOut(c.platform || E.PLATFORM, c.channelId), display: c.display,
     status: c.paused ? 'PAUSED' : c.status, paused: Boolean(c.paused), joinedAt: c.joinedAt,
     currentManifest: m ? { manifestHash: m.manifestHash, manifestVersion: m.struct.manifestVersion, receivingWallet: m.struct.receivingWallet, acceptedAssets: m.acceptedAssets, effectiveAt: m.effectiveAt } : null,
     rotation: rot, acceptsSupport: !c.paused && c.status !== 'VERIFYING' && Boolean(m && m.status === 'ACTIVE'),
   };
 }
 const publicIntent = (i) => i && { intentId: i.intentId, status: i.status, typedData: E.typedData('SupportIntent', i.struct), signature: i.signature, digest: i.digest, createdBlock: i.createdBlock, storedAt: i.storedAt, observed: i.observed || null, candidates: i.candidates || null, receiptId: i.receiptId || null, closedAt: i.closedAt || null, closeReason: i.closeReason || null, tx: { to: i.struct.token, data: E.transferCalldata(i.struct.receiver, i.struct.amount), value: '0x0' } };
-const publicSignal = (s, creator) => s && { channelId: s.struct.channelId, status: s.status === 'ACTIVE' && Number(s.struct.expiry) * 1000 <= Date.now() ? 'EXPIRED' : s.status === 'ACTIVE' && creator && creator.joinedAt ? 'FROZEN' : s.status, createdAt: s.createdAt, renewedAt: s.renewedAt || [], expiry: s.struct.expiry, creatorOnEarly: Boolean(creator), creatorId: creator ? creator.creatorId : null };
+const publicSignal = (s, creator) => s && { ...identityOut(s.struct.platform || E.PLATFORM, s.struct.channelId), status: s.status === 'ACTIVE' && Number(s.struct.expiry) * 1000 <= Date.now() ? 'EXPIRED' : s.status === 'ACTIVE' && creator && creator.joinedAt ? 'FROZEN' : s.status, createdAt: s.createdAt, renewedAt: s.renewedAt || [], expiry: s.struct.expiry, creatorOnEarly: Boolean(creator), creatorId: creator ? creator.creatorId : null };
 
 // =====================================================================================================================
 async function handler(event = {}, deps = {}) {
@@ -182,12 +204,17 @@ function configView(cfg) {
     assets: cfg.assets ? [...cfg.assets.values()] : [], intentWindowSeconds: C.INTENT_WINDOW_S, recoveryGraceSeconds: C.RECOVERY_GRACE_S,
     rotationCooldownSeconds: C.ROTATION_COOLDOWN_S, attestations: cfg.attestation.configured, anchoring: cfg.anchorEnabled, oauth: cfg.oauth.configured, resolver: cfg.youtube.configured,
     matchingRule: E.SCHEMA.matching, receiptSchema: E.SCHEMA.receipt, keys: '/api/early?view=keys',
+    platforms: Object.keys(cfg.platforms).filter((p) => platformEnabled(cfg, p)),
     product: 'EARLY · I WAS THERE WHEN.', model: 'Money moves directly from the fan wallet to the creator wallet. SyncNet never receives, holds, routes or refunds funds and takes no fee.',
   };
 }
 
 // ---------------------------------------------------------------- sessions (header x-syncnet-early-session)
-const sessionOf = (ctx, scope) => Session.verify(header(ctx.event, 'x-syncnet-early-session'), { scope, now: ctx.now, env: ctx.env });
+const sessionOf = (ctx, scope) => {
+  const s = Session.verify(header(ctx.event, 'x-syncnet-early-session'), { scope, now: ctx.now, env: ctx.env });
+  // a creator session of a platform this deployment does not serve is no session (defence in depth: none can be issued)
+  return s && (scope !== 'creator' || platformEnabled(ctx.cfg, s.platform)) ? s : null;
+};
 
 // ---------------------------------------------------------------- creator helpers
 async function loadCreator(store, creatorId) { return getJson(store, K.creator(creatorId)); }
@@ -200,8 +227,11 @@ async function maybeCompleteRotation(ctx, cr) {
   if (!signer) { log(FN, 'rotation-blocked-no-signer', { creatorId: c.creatorId }); return c; }
   const oldM = await loadManifest(store, c.currentManifestHash), newM = await loadManifest(store, c.pendingManifestHash);
   if (!oldM.value || !newM.value || newM.value.status !== 'PENDING') return c;
+  const platform = c.platform || E.PLATFORM, ad = Platforms.adapterOf(platform);
+  if (!ad) { log(FN, 'rotation-blocked-no-adapter', { creatorId: c.creatorId }); return c; }
+  const idf = Platforms.idFields(platform, c.channelId);
   const t = nowSec(now), at = Number(c.rotation.effectiveAt), bd = await Attest.bundleDateFor(store, t);
-  const attId = Attest.build(signer, { type: 'creator-identity', subject: { creatorId: c.creatorId, channelId: c.channelId }, claims: { platform: E.PLATFORM, channelId: c.channelId, receivingWallet: newM.value.struct.receivingWallet, manifestHash: newM.value.manifestHash, manifestVersion: newM.value.struct.manifestVersion, verifiedAt: c.rotation.startedAt, method: 'google-oauth2 youtube.readonly channels.mine' }, issuedAt: t, bundleDate: bd });
+  const attId = Attest.build(signer, { type: 'creator-identity', subject: { creatorId: c.creatorId, ...idf }, claims: { platform, ...idf, receivingWallet: newM.value.struct.receivingWallet, manifestHash: newM.value.manifestHash, manifestVersion: newM.value.struct.manifestVersion, verifiedAt: c.rotation.startedAt, method: ad.identityMethod }, issuedAt: t, bundleDate: bd });
   const attNew = Attest.build(signer, { type: 'creator-manifest', subject: { creatorId: c.creatorId, manifestHash: newM.value.manifestHash }, claims: { manifestVersion: newM.value.struct.manifestVersion, previousManifestHash: newM.value.struct.previousManifestHash, status: 'ACTIVE', effectiveAt: at, supersededAt: null, at: t }, issuedAt: t, bundleDate: bd });
   const attOld = Attest.build(signer, { type: 'creator-manifest', subject: { creatorId: c.creatorId, manifestHash: oldM.value.manifestHash }, claims: { manifestVersion: oldM.value.struct.manifestVersion, previousManifestHash: oldM.value.struct.previousManifestHash, status: 'SUPERSEDED', effectiveAt: oldM.value.effectiveAt, supersededAt: at, supersededBy: newM.value.manifestHash, at: t }, issuedAt: t, bundleDate: bd });
   const next = { ...c, status: 'ACTIVE', currentManifestHash: newM.value.manifestHash, pendingManifestHash: null, rotation: { ...c.rotation, completedAt: t }, rotations: [...(c.rotations || []), { from: oldM.value.manifestHash, to: newM.value.manifestHash, at }] };
@@ -216,8 +246,8 @@ async function maybeCompleteRotation(ctx, cr) {
   if (ok) { log(FN, 'rotation-completed', { creatorId: c.creatorId, version: newM.value.struct.manifestVersion }); return next; }
   return (await loadCreator(store, c.creatorId)).value;
 }
-async function creatorByChannel(ctx, channelId) {
-  const cr = await loadCreator(ctx.store, E.creatorIdOf(channelId));
+async function creatorByIdentity(ctx, platform, externalId) {
+  const cr = await loadCreator(ctx.store, E.creatorIdOf(externalId, platform));
   return maybeCompleteRotation(ctx, cr);
 }
 
@@ -226,12 +256,13 @@ async function readView(view, ctx) {
   const { store, cfg, now } = ctx;
   if (view === 'keys') return json(200, { enabled: true, registry: cfg.registry, note: 'Public key ids and addresses only. Attestations are valid only when their bundle root is anchored; see docs/early/PROTOCOL.md.' });
   if (view === 'creator') {
-    let channelId = query(ctx.event, 'channelId');
     const cid = lc(query(ctx.event, 'creatorId'));
-    if (!channelId && E.isBytes32(cid)) { const c = (await loadCreator(store, cid)).value; channelId = c ? c.channelId : ''; if (!channelId) return json(200, { onEarly: false }); }
-    if (!E.isChannelId(channelId)) return bad('Invalid channel id.');
-    const c = await creatorByChannel(ctx, channelId);
-    if (!c) return json(200, { onEarly: false }); // identical for unknown and unclaimed channels; no signal reads on this path
+    let src = { platform: query(ctx.event, 'platform'), externalId: query(ctx.event, 'externalId'), channelId: query(ctx.event, 'channelId') };
+    if (!src.externalId && !src.channelId && E.isBytes32(cid)) { const c0 = (await loadCreator(store, cid)).value; if (!c0 || !c0.channelId) return json(200, { onEarly: false }); src = { platform: c0.platform || E.PLATFORM, externalId: c0.channelId }; }
+    const idn = identityFrom(cfg, src);
+    if (idn.error) return bad(idn.error);
+    const c = await creatorByIdentity(ctx, idn.platform, idn.externalId);
+    if (!c) return json(200, { onEarly: false }); // identical for unknown and unclaimed identities; no signal reads on this path
     const m = (await loadManifest(store, c.currentManifestHash)).value;
     return json(200, publicCreator(c, m));
   }
@@ -272,7 +303,12 @@ async function readView(view, ctx) {
     const intents = [], receipts = [], signals = [];
     for (const id of (await store.smembers(K.intentsOf(w))).slice(0, 200)) { const i = (await getJson(store, K.intent(id))).value; if (i) intents.push(publicIntent(i)); }
     for (const id of (await store.smembers(K.receiptsOf(w))).slice(0, 200)) { const r = (await getJson(store, K.receipt(id))).value; if (r) receipts.push(await receiptSummary(ctx, r)); }
-    for (const ch of (await store.smembers(K.cmiOf(w))).slice(0, 200)) { const sg = (await getJson(store, K.cmi(ch, w))).value; if (sg) signals.push(publicSignal(sg, (await loadCreator(store, E.creatorIdOf(ch))).value)); }
+    for (const ref of (await store.smembers(K.cmiOf(w))).slice(0, 200)) {
+      const idn = E.parseRef(ref);
+      if (!idn || !platformEnabled(cfg, idn.platform)) continue;
+      const sg = (await getJson(store, K.cmi(ref, w))).value;
+      if (sg) signals.push(publicSignal(sg, (await loadCreator(store, E.creatorIdOf(idn.externalId, idn.platform))).value));
+    }
     return json(200, { enabled: true, wallet: w, intents, receipts, signals });
   }
   if (view === 'card') return cardView(ctx);
@@ -286,13 +322,13 @@ async function readView(view, ctx) {
   if (view === 'me') {
     const s = sessionOf(ctx, 'creator');
     if (!s) return publicError(401, 'session', 'A creator session is required.');
-    const c = await creatorByChannel(ctx, s.channelId);
+    const c = await creatorByIdentity(ctx, s.platform, s.externalId);
     const link = (await getJson(store, K.oauth(s.sid))).value;
     const manifests = [];
     if (c) for (const h of (await store.smembers(K.manifestsOf(c.creatorId))).slice(0, 50)) { const m = (await loadManifest(store, h)).value; if (m) manifests.push(publicManifest(m)); }
     manifests.sort((a, b2) => a.manifestVersion - b2.manifestVersion);
-    const signalsNow = c ? null : await countSignals(store, s.channelId, nowSec(now));
-    return json(200, { enabled: true, channelId: s.channelId, linkWallet: s.wallet, linkFresh: Boolean(link), display: link ? { title: link.title, avatarUrl: link.avatarUrl, handle: link.handle } : c ? c.display : null, creator: c ? { ...publicCreator(c, manifests.find((m) => m.manifestHash === c.currentManifestHash) && (await loadManifest(store, c.currentManifestHash)).value), signalsWaitingAtJoin: c.signalsWaitingAtJoin, rotation: c.rotation || null, oauthSeen: c.oauthSeen || [] } : null, signalsWaiting: signalsNow, manifests, signalsNote: 'Signed interest signals are counted as records, not as people.' });
+    const signalsNow = c ? null : await countSignals(store, E.refOf(s.platform, s.externalId), nowSec(now));
+    return json(200, { enabled: true, ...identityOut(s.platform, s.externalId), linkWallet: s.wallet, linkFresh: Boolean(link), display: link ? { title: link.title, avatarUrl: link.avatarUrl, handle: link.handle } : c ? c.display : null, creator: c ? { ...publicCreator(c, manifests.find((m) => m.manifestHash === c.currentManifestHash) && (await loadManifest(store, c.currentManifestHash)).value), signalsWaitingAtJoin: c.signalsWaitingAtJoin, rotation: c.rotation || null, oauthSeen: c.oauthSeen || [] } : null, signalsWaiting: signalsNow, manifests, signalsNote: 'Signed interest signals are counted as records, not as people.' });
   }
   return bad('Unknown view.');
 }
@@ -301,18 +337,21 @@ async function resolveView(ctx) {
   const { store, youtube, ip, now } = ctx;
   const rl = await limitAll(store, [{ bucket: 'early-resolve', id: ip, limit: 20, windowSeconds: 60, now }, { bucket: 'early-resolve-d', id: ip, limit: 200, windowSeconds: 86400, now }]);
   if (!rl.allowed) return rl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(rl.retryAfter);
-  const input = String(query(ctx.event, 'yt') || '').trim();
+  // `yt` is the legacy parameter (YouTube); `q` + `platform` is the platform-neutral spelling. Only enabled platforms resolve.
+  const platform = query(ctx.event, 'platform') || E.PLATFORM;
+  if (!platformEnabled(ctx.cfg, platform) || platform !== E.PLATFORM) return bad('Unsupported platform.');
+  const input = String(query(ctx.event, 'q') || query(ctx.event, 'yt') || '').trim();
   if (!input || input.length > 200) return bad('Provide a YouTube channel URL, handle or channel id.');
   if (!youtube) return publicError(503, 'resolver_unavailable', 'The YouTube resolver is not configured on this deployment.');
   const key = K.resolve(crypto.createHash('sha256').update(input.toLowerCase(), 'utf8').digest('hex'));
   const cached = (await getJson(store, key)).value;
-  if (cached) return json(200, { enabled: true, ...cached, cached: true });
+  if (cached) return json(200, { enabled: true, ...cached, platform, externalId: cached.channelId, cached: true });
   let ch;
   try { ch = await youtube.resolve(input); } catch (err) { logError(FN, 'resolve-failed', err, {}); return publicError(503, 'resolver_unavailable', 'YouTube could not be reached right now.'); }
   if (!ch || !E.isChannelId(ch.channelId)) return publicError(404, 'not_found', 'No YouTube channel was found for that input.');
   const out = { channelId: ch.channelId, title: E.clean(ch.title, 80), avatarUrl: /^https:\/\/[^\s"'<>]{1,300}$/.test(String(ch.avatarUrl || '')) ? ch.avatarUrl : '', handle: E.clean(ch.handle, 40) };
   await store.set(key, JSON.stringify(out), { ttlSeconds: 3600 });
-  return json(200, { enabled: true, ...out, cached: false });
+  return json(200, { enabled: true, ...out, platform, externalId: out.channelId, cached: false });
 }
 
 // ---------------------------------------------------------------- receipts (documents assembled at read time)
@@ -325,12 +364,16 @@ async function receiptContext(ctx, r) {
   const { store } = ctx;
   const m = (await loadManifest(store, r.manifestHash)).value;
   const earlyDate = E.utcDate(r.fact.blockTimestamp);
-  const snap = m ? (await getJson(store, K.snap(m.channelId, earlyDate))).value : null;
+  const platform = (m && m.struct.platform) || E.PLATFORM;
+  const snap = m && E.isExternalId(platform, m.channelId) ? (await getJson(store, K.snap(E.refOf(platform, m.channelId), earlyDate))).value : null;
   const identity = m ? await attestationWithProof(store, m.identityAttestationId) : null;
   let manifestAtt = null;
   if (m) for (const id of m.attestationIds || []) { const a = await Attest.read(store, id); if (a && a.claims.status === 'ACTIVE') manifestAtt = { ...a, inclusion: await Attest.inclusion(store, a) }; }
   const snapAtt = snap ? { ...snap, inclusion: await Attest.inclusion(store, snap) } : null;
-  const audience = !snap ? { state: 'unavailable' } : snap.claims.hiddenSubscriberCount || snap.claims.subscriberCount == null ? { state: 'hidden' } : { state: 'approximate', value: snap.claims.subscriberCount, display: E.formatAudience(snap.claims.subscriberCount), asOf: snap.claims.fetchedAt };
+  // The audience is a dated, approximate CONTEXT value whose meaning (subscribers / followers) comes from the snapshot's own
+  // claims; when there is no readable snapshot, the creator's platform still says what would have been counted.
+  const aud = snap ? E.audienceOf(snap.claims) : null;
+  const audience = !aud ? { state: 'unavailable', kind: (E.PLATFORMS[platform] || E.PLATFORMS[E.PLATFORM]).audienceKind } : aud.hidden || aud.count == null ? { state: 'hidden', kind: aud.kind } : { state: 'approximate', kind: aud.kind, value: aud.count, display: E.formatAudience(aud.count), asOf: snap.claims.fetchedAt };
   const titleThen = snap && snap.claims.title ? snap.claims.title : identity && identity.claims.title ? identity.claims.title : (m && m.display && m.display.title) || '';
   return { manifest: m, context: { earlyDate, creatorTitleThen: titleThen, audienceThen: audience }, attestations: [identity, manifestAtt, snapAtt].filter(Boolean) };
 }
@@ -356,54 +399,58 @@ async function receiptSummary(ctx, r) {
 }
 
 // ---------------------------------------------------------------- Count me in (private, free, non-binding)
-async function countSignals(store, channelId, t) {
-  const fans = (await store.smembers(K.cmiSet(channelId))).slice(0, MAX_SIGNALS_COUNTED);
+async function countSignals(store, ref, t) {
+  const fans = (await store.smembers(K.cmiSet(ref))).slice(0, MAX_SIGNALS_COUNTED);
   let n = 0;
-  for (const f of fans) { const s = (await getJson(store, K.cmi(channelId, f))).value; if (s && s.status === 'ACTIVE' && Number(s.struct.expiry) > t) n++; }
+  for (const f of fans) { const s = (await getJson(store, K.cmi(ref, f))).value; if (s && s.status === 'ACTIVE' && Number(s.struct.expiry) > t) n++; }
   return n;
 }
 async function countMeIn(b, ctx) {
-  const { store, rpc, now } = ctx;
-  const extra = onlyFields(b, ['action', 'channelId', 'fan', 'issuedAt', 'expiry', 'nonce', 'signature']);
+  const { store, rpc, now, cfg } = ctx;
+  const extra = onlyFields(b, ['action', 'platform', 'externalId', 'channelId', 'fan', 'issuedAt', 'expiry', 'nonce', 'signature']);
   if (extra) return extra;
-  if (!E.isChannelId(b.channelId)) return bad('Invalid channel id.');
+  const idn = identityFrom(cfg, b);
+  if (idn.error) return bad(idn.error);
   const fan = lc(b.fan), nonce = lc(b.nonce);
   if (!E.isAddr(fan) || !E.isBytes32(nonce)) return bad('Invalid wallet or nonce.');
   if (!skewOk(b.issuedAt, now)) return bad('issuedAt must be within ' + C.MAX_SKEW_S + ' seconds of the current time. Check your device clock and sign again.');
   const issuedAt = Number(b.issuedAt);
   if (Number(b.expiry) !== issuedAt + C.CMI_TTL_S) return bad('expiry must be issuedAt + ' + C.CMI_TTL_S + ' seconds.');
-  const struct = { schema: E.SCHEMA.countMeIn, platform: E.PLATFORM, channelId: b.channelId, fan, issuedAt, expiry: issuedAt + C.CMI_TTL_S, nonce };
+  const struct = { schema: E.SCHEMA.countMeIn, platform: idn.platform, channelId: idn.externalId, fan, issuedAt, expiry: issuedAt + C.CMI_TTL_S, nonce };
   if (!(await verifySig(rpc, fan, 'CountMeIn', struct, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for this signal.');
-  const cur = await getJson(store, K.cmi(b.channelId, fan));
-  if (cur.value && cur.value.nonce === nonce) return json(200, { ok: true, idempotent: true, signal: publicSignal(cur.value, (await loadCreator(store, E.creatorIdOf(b.channelId))).value) });
-  const wl = await limitAll(store, [{ bucket: 'early-cmi-w', id: fan, limit: 20, windowSeconds: 86400, now }, { bucket: 'early-cmi-ch', id: b.channelId, limit: 500, windowSeconds: 86400, now }]);
+  const cur = await getJson(store, K.cmi(idn.ref, fan));
+  if (cur.value && cur.value.nonce === nonce) return json(200, { ok: true, idempotent: true, signal: publicSignal(cur.value, (await loadCreator(store, idn.creatorId)).value) });
+  const wl = await limitAll(store, [{ bucket: 'early-cmi-w', id: fan, limit: 20, windowSeconds: 86400, now }, { bucket: 'early-cmi-ch', id: idn.ref, limit: 500, windowSeconds: 86400, now }]);
   if (!wl.allowed) return wl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(wl.retryAfter);
   const at = iso(now());
   const rec = cur.value && cur.value.status === 'ACTIVE'
     ? { ...cur.value, struct, signature: b.signature, nonce, renewedAt: [...(cur.value.renewedAt || []), at].slice(-10) }
     : { schema: E.SCHEMA.countMeIn, struct, signature: b.signature, nonce, status: 'ACTIVE', createdAt: at, renewedAt: [] };
-  const ok = await store.cas({ expect: [[K.cmi(b.channelId, fan), cur.raw], [K.nonce(fan, nonce), null]], set: [[K.cmi(b.channelId, fan), JSON.stringify(rec), C.CMI_TTL_S + 86400], [K.nonce(fan, nonce), '1', NONCE_TTL]], sadd: [[K.cmiSet(b.channelId), fan], [K.cmiOf(fan), b.channelId]] });
+  const ok = await store.cas({ expect: [[K.cmi(idn.ref, fan), cur.raw], [K.nonce(fan, nonce), null]], set: [[K.cmi(idn.ref, fan), JSON.stringify(rec), C.CMI_TTL_S + 86400], [K.nonce(fan, nonce), '1', NONCE_TTL]], sadd: [[K.cmiSet(idn.ref), fan], [K.cmiOf(fan), idn.ref]] });
   if (!ok) return (await store.get(K.nonce(fan, nonce))) ? publicError(409, 'replay', 'This nonce was already used.') : publicError(409, 'conflict', 'The signal changed while it was being recorded. Try again.');
   await bump(store, cur.value ? 'count_me_in_renewed' : 'count_me_in_signals', now);
-  log(FN, 'count-me-in', { channel: hashId(b.channelId), fan: hashId(fan), renewed: Boolean(cur.value) });
-  return json(cur.value ? 200 : 201, { ok: true, signal: publicSignal(rec, (await loadCreator(store, E.creatorIdOf(b.channelId))).value), note: 'Free, private and non-binding. It reserves nothing and confers no EARLY status.' });
+  log(FN, 'count-me-in', { channel: hashId(idn.ref), fan: hashId(fan), renewed: Boolean(cur.value) });
+  return json(cur.value ? 200 : 201, { ok: true, signal: publicSignal(rec, (await loadCreator(store, idn.creatorId)).value), note: 'Free, private and non-binding. It reserves nothing and confers no EARLY status.' });
 }
 async function countMeInWithdraw(b, ctx) {
-  const { store, rpc, now } = ctx;
-  const extra = onlyFields(b, ['action', 'channelId', 'fan', 'issuedAt', 'nonce', 'signature']);
+  const { store, rpc, now, cfg } = ctx;
+  const extra = onlyFields(b, ['action', 'platform', 'externalId', 'channelId', 'fan', 'issuedAt', 'nonce', 'signature']);
   if (extra) return extra;
-  if (!E.isChannelId(b.channelId)) return bad('Invalid channel id.');
+  const idn = identityFrom(cfg, b);
+  if (idn.error) return bad(idn.error);
+  // CountMeInWithdraw (v1) signs only the id, not the platform: the signed id must be unambiguously of the named platform.
+  if (E.platformOfId(idn.externalId) !== idn.platform) return bad('Invalid channel id.');
   const fan = lc(b.fan), nonce = lc(b.nonce);
   if (!E.isAddr(fan) || !E.isBytes32(nonce) || !skewOk(b.issuedAt, now)) return bad('Invalid wallet, nonce or issuedAt.');
-  const struct = { schema: E.SCHEMA.countMeInWithdraw, channelId: b.channelId, fan, issuedAt: Number(b.issuedAt), nonce };
+  const struct = { schema: E.SCHEMA.countMeInWithdraw, channelId: idn.externalId, fan, issuedAt: Number(b.issuedAt), nonce };
   if (!(await verifySig(rpc, fan, 'CountMeInWithdraw', struct, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify.');
-  const cur = await getJson(store, K.cmi(b.channelId, fan));
+  const cur = await getJson(store, K.cmi(idn.ref, fan));
   if (!cur.value) return publicError(404, 'not_found', 'No signal to withdraw.');
   if (cur.value.status === 'WITHDRAWN') return json(200, { ok: true, idempotent: true });
   const wl = await limit(store, { bucket: 'early-cmi-w', id: fan, limit: 20, windowSeconds: 86400, now });
   if (!wl.allowed) return wl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(wl.retryAfter);
   const rec = { ...cur.value, status: 'WITHDRAWN', withdrawnAt: iso(now()), withdraw: { struct, signature: b.signature } };
-  const ok = await store.cas({ expect: [[K.cmi(b.channelId, fan), cur.raw], [K.nonce(fan, nonce), null]], set: [[K.cmi(b.channelId, fan), JSON.stringify(rec), CMI_WITHDRAWN_TTL], [K.nonce(fan, nonce), '1', NONCE_TTL]] });
+  const ok = await store.cas({ expect: [[K.cmi(idn.ref, fan), cur.raw], [K.nonce(fan, nonce), null]], set: [[K.cmi(idn.ref, fan), JSON.stringify(rec), CMI_WITHDRAWN_TTL], [K.nonce(fan, nonce), '1', NONCE_TTL]] });
   if (!ok) return publicError(409, 'conflict', 'The signal changed. Try again.');
   await bump(store, 'count_me_in_withdrawn', now);
   return json(200, { ok: true, signal: publicSignal(rec, null) });
@@ -727,7 +774,7 @@ async function cardView(ctx) {
   const revealed = Array.isArray(card.revealed) ? card.revealed : [];
   return json(200, {
     enabled: true, shareId, card: {
-      headline: 'EARLY', line: 'I WAS THERE WHEN.', creator: context.creatorTitleThen, creatorChannelId: m ? m.channelId : null, creatorId: r.creatorId,
+      headline: 'EARLY', line: 'I WAS THERE WHEN.', creator: context.creatorTitleThen, creatorChannelId: m && (m.struct.platform || E.PLATFORM) === E.PLATFORM ? m.channelId : null, creatorPlatform: m ? m.struct.platform || E.PLATFORM : null, creatorExternalId: m ? m.channelId : null, creatorId: r.creatorId,
       supportedOn: context.earlyDate, audienceThen: context.audienceThen, verified: 'SYNC Proof verified',
       revealed, wallet: revealed.includes('transaction') ? r.fact.transfer.from : null, amount: revealed.includes('transaction') ? { token: r.fact.transfer.token, value: r.fact.transfer.value } : null,
       transaction: revealed.includes('transaction') ? { chainId: E.CHAIN_ID, txHash: r.fact.txHash, logIndex: r.fact.logIndex } : null,
@@ -745,32 +792,41 @@ async function cardView(ctx) {
 // ---------------------------------------------------------------- creator: link (OAuth start), manifest, pause, rotation
 async function creatorLink(b, ctx) {
   const { store, rpc, cfg, now, env } = ctx;
-  const extra = onlyFields(b, ['action', 'wallet', 'issuedAt', 'nonce', 'signature']);
+  const extra = onlyFields(b, ['action', 'platform', 'wallet', 'issuedAt', 'nonce', 'signature']);
   if (extra) return extra;
+  const platform = b.platform === undefined || b.platform === '' ? E.PLATFORM : b.platform;
+  const ad = platformEnabled(cfg, platform) ? Platforms.adapterOf(platform) : null;
+  if (!ad) return bad('Unsupported platform.');
   const wallet = lc(b.wallet), nonce = lc(b.nonce);
   if (!E.isAddr(wallet) || !E.isBytes32(nonce) || !skewOk(b.issuedAt, now)) return bad('Invalid wallet, nonce or issuedAt.');
   const struct = { schema: E.SCHEMA.creatorLink, wallet, issuedAt: Number(b.issuedAt), nonce };
   if (!(await verifySig(rpc, wallet, 'CreatorLinkRequest', struct, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify.');
-  if (!cfg.oauth.configured || !cfg.sessions.configured) return publicError(503, 'oauth_unavailable', 'Creator onboarding is not open on this deployment.');
+  // OAuth configuration is per platform; the only configured provider in this build is YouTube's (cfg.oauth).
+  if (!(platform === E.PLATFORM && cfg.oauth.configured) || !cfg.sessions.configured) return publicError(503, 'oauth_unavailable', 'Creator onboarding is not open on this deployment.');
   const ok = await store.cas({ expect: [[K.nonce(wallet, nonce), null]], set: [[K.nonce(wallet, nonce), '1', NONCE_TTL]] });
   if (!ok) return publicError(409, 'replay', 'This nonce was already used.');
-  const state = Session.issue({ scope: 'state', wallet, now, env });
+  const state = Session.issue({ scope: 'state', wallet, platform, now, env });
   if (!state) return publicError(503, 'unavailable', UNAVAILABLE);
-  return json(200, { ok: true, startUrl: '/api/early-youtube-auth?start=' + encodeURIComponent(state), ttlSeconds: Session.TTL.state, scope: 'https://www.googleapis.com/auth/youtube.readonly' });
+  return json(200, { ok: true, startUrl: ad.authStart + '?start=' + encodeURIComponent(state), ttlSeconds: Session.TTL.state, scope: ad.oauthScope });
 }
 async function freshLink(store, s) {
   const link = (await getJson(store, K.oauth(s.sid)));
-  return link.value && link.value.channelId === s.channelId && lc(link.value.wallet) === s.wallet ? link : { raw: null, value: null };
+  // link records written before platforms existed carry no `platform`: they are YouTube's
+  return link.value && (link.value.platform || E.PLATFORM) === s.platform && link.value.channelId === s.externalId && lc(link.value.wallet) === s.wallet ? link : { raw: null, value: null };
 }
 async function creatorManifest(b, ctx) {
   const { store, rpc, cfg, now, signer } = ctx;
-  const extra = onlyFields(b, ['action', 'creatorId', 'channelId', 'receivingWallet', 'acceptedAssets', 'acceptedAssetsHash', 'manifestVersion', 'previousManifestHash', 'issuedAt', 'nonce', 'signature']);
+  const extra = onlyFields(b, ['action', 'creatorId', 'platform', 'externalId', 'channelId', 'receivingWallet', 'acceptedAssets', 'acceptedAssetsHash', 'manifestVersion', 'previousManifestHash', 'issuedAt', 'nonce', 'signature']);
   if (extra) return extra;
   const s = sessionOf(ctx, 'creator');
-  if (!s) return publicError(401, 'session', 'A creator session (YouTube sign-in) is required.');
+  if (!s) return publicError(401, 'session', 'A creator session (sign in as the creator) is required.');
+  const ad = Platforms.adapterOf(s.platform);
+  if (!ad) return publicError(503, 'unavailable', UNAVAILABLE);
   if (!signer) return publicError(503, 'attestation_unavailable', ATT_DOWN);
-  if (!E.isChannelId(b.channelId) || b.channelId !== s.channelId) return publicError(403, 'channel_mismatch', 'The manifest must name the YouTube channel you signed in with.');
-  const creatorId = E.creatorIdOf(b.channelId);
+  // The manifest must name exactly the (platform, immutable id) the OAuth session proved; nothing else is ever accepted.
+  const idn = identityFrom(cfg, b);
+  if (idn.error || idn.platform !== s.platform || idn.externalId !== s.externalId) return publicError(403, 'channel_mismatch', 'The manifest must name the ' + ad.label + ' channel you signed in with.');
+  const creatorId = idn.creatorId;
   if (lc(b.creatorId) !== creatorId) return bad('creatorId must be derived from the channel id.');
   const wallet = lc(b.receivingWallet), nonce = lc(b.nonce), prev = lc(b.previousManifestHash);
   if (!E.isAddr(wallet) || !E.isBytes32(nonce) || !E.isBytes32(prev) || !skewOk(b.issuedAt, now)) return bad('Invalid wallet, nonce, previous hash or issuedAt.');
@@ -779,11 +835,11 @@ async function creatorManifest(b, ctx) {
   const na = E.normalizeAcceptedAssets(b.acceptedAssets, cfg.assets);
   if (!na.ok) return publicError(400, 'asset_not_allowed', 'Accepted assets: ' + na.error + '.');
   if (lc(b.acceptedAssetsHash) !== na.hash) return bad('acceptedAssetsHash does not match the accepted assets list.');
-  const struct = { schema: E.SCHEMA.manifest, creatorId, platform: E.PLATFORM, channelId: b.channelId, chainId: E.CHAIN_ID, receivingWallet: wallet, acceptedAssetsHash: na.hash, manifestVersion: version, previousManifestHash: prev, issuedAt: Number(b.issuedAt), nonce };
+  const struct = { schema: E.SCHEMA.manifest, creatorId, platform: idn.platform, channelId: idn.externalId, chainId: E.CHAIN_ID, receivingWallet: wallet, acceptedAssetsHash: na.hash, manifestVersion: version, previousManifestHash: prev, issuedAt: Number(b.issuedAt), nonce };
   if (!(await verifySig(rpc, wallet, 'CreatorManifest', struct, b.signature))) return publicError(401, 'bad_signature', 'The signature does not verify for the receiving wallet.');
   const link = await freshLink(store, s);
-  if (!link.value) return publicError(403, 'reverify', 'Fresh YouTube verification is required (sign in with YouTube again).');
-  const wl = await limit(store, { bucket: 'early-creator-w', id: b.channelId, limit: 20, windowSeconds: 86400, now });
+  if (!link.value) return publicError(403, 'reverify', 'Fresh ' + ad.label + ' verification is required (sign in with ' + ad.label + ' again).');
+  const wl = await limit(store, { bucket: 'early-creator-w', id: idn.ref, limit: 20, windowSeconds: 86400, now });
   if (!wl.allowed) return wl.reason === 'store-unavailable' ? publicError(503, 'unavailable', UNAVAILABLE) : tooManyRequests(wl.retryAfter);
   const manifestHash = E.digest('CreatorManifest', struct);
   const t = nowSec(now), at = iso(now()), bd = await Attest.bundleDateFor(store, t);
@@ -791,17 +847,18 @@ async function creatorManifest(b, ctx) {
   const c = await maybeCompleteRotation(ctx, cr);
   const cr2 = c === cr.value ? cr : await loadCreator(store, creatorId);
   if (await getJson(store, K.manifest(manifestHash)).then((x) => x.value)) return publicError(409, 'duplicate', 'This exact manifest already exists.');
-  const display = { title: E.clean(link.value.title, 80), avatarUrl: link.value.avatarUrl || '', handle: E.clean(link.value.handle, 40) };
+  const display = ad.displayFromLink(link.value);
+  const idf = Platforms.idFields(idn.platform, idn.externalId);
   const oauthSeen = [...new Set([...(c ? c.oauthSeen || [] : []), Number(link.value.at)])].slice(-30);
   const consumedLink = JSON.stringify({ ...link.value, consumedBy: manifestHash });
 
   if (!c) {
     if (version !== 1 || prev !== E.ZERO32) return bad('The first manifest must be version 1 with a zero previous hash.');
-    const signals = await countSignals(store, b.channelId, t);
-    const attId = Attest.build(signer, { type: 'creator-identity', subject: { creatorId, channelId: b.channelId }, claims: { platform: E.PLATFORM, channelId: b.channelId, receivingWallet: wallet, manifestHash, manifestVersion: 1, verifiedAt: Number(link.value.at), method: 'google-oauth2 youtube.readonly channels.mine', title: display.title }, issuedAt: t, bundleDate: bd });
+    const signals = await countSignals(store, idn.ref, t);
+    const attId = Attest.build(signer, { type: 'creator-identity', subject: { creatorId, ...idf }, claims: { platform: idn.platform, ...idf, receivingWallet: wallet, manifestHash, manifestVersion: 1, verifiedAt: Number(link.value.at), method: ad.identityMethod, title: display.title }, issuedAt: t, bundleDate: bd });
     const attM = Attest.build(signer, { type: 'creator-manifest', subject: { creatorId, manifestHash }, claims: { manifestVersion: 1, previousManifestHash: E.ZERO32, status: 'ACTIVE', effectiveAt: t, supersededAt: null, at: t }, issuedAt: t, bundleDate: bd });
-    const manifest = { schema: E.SCHEMA.manifest, struct, acceptedAssets: na.assets, signature: b.signature, signer: wallet, manifestHash, creatorId, channelId: b.channelId, status: 'ACTIVE', effectiveAt: t, supersededAt: null, supersededBy: null, identityAttestationId: attId.id, attestationIds: [attM.id], createdAt: at };
-    const creator = { schema: 'syncnet.early.creator.v1', creatorId, channelId: b.channelId, platform: E.PLATFORM, status: 'ACTIVE', paused: false, currentManifestHash: manifestHash, pendingManifestHash: null, display, displayUpdatedAt: at, joinedAt: t, signalsWaitingAtJoin: signals, rotation: null, rotations: [], oauthSeen, createdAt: at };
+    const manifest = { schema: E.SCHEMA.manifest, struct, acceptedAssets: na.assets, signature: b.signature, signer: wallet, manifestHash, creatorId, channelId: idn.externalId, status: 'ACTIVE', effectiveAt: t, supersededAt: null, supersededBy: null, identityAttestationId: attId.id, attestationIds: [attM.id], createdAt: at };
+    const creator = { schema: 'syncnet.early.creator.v1', creatorId, channelId: idn.externalId, platform: idn.platform, status: 'ACTIVE', paused: false, currentManifestHash: manifestHash, pendingManifestHash: null, display, displayUpdatedAt: at, joinedAt: t, signalsWaitingAtJoin: signals, rotation: null, rotations: [], oauthSeen, createdAt: at };
     const w = [attId, attM].map(Attest.writesFor);
     const ok = await store.cas({
       expect: [[K.creator(creatorId), null], [K.manifest(manifestHash), null], [K.nonce(wallet, nonce), null], [K.oauth(s.sid), link.raw]],
@@ -809,7 +866,7 @@ async function creatorManifest(b, ctx) {
       sadd: [[K.manifestsOf(creatorId), manifestHash], [K.creators, creatorId], ...w.flatMap((x) => x.sadd)],
     });
     if (!ok) return (await store.get(K.nonce(wallet, nonce))) ? publicError(409, 'replay', 'This nonce was already used.') : publicError(409, 'conflict', 'This channel was claimed meanwhile. Reload.');
-    await enrolmentSnapshot(ctx, b.channelId, link.value, t, bd);
+    await enrolmentSnapshot(ctx, { platform: idn.platform, externalId: idn.externalId }, link.value, t, bd);
     await bump(store, 'creators_claimed', now);
     if (signals > 0) await bump(store, 'claims_with_signals_waiting', now);
     log(FN, 'creator-activated', { creatorId: creatorId.slice(0, 18), signals });
@@ -831,12 +888,12 @@ async function creatorManifest(b, ctx) {
     const earlier = oauthSeen.some((x) => x > since && Number(link.value.at) - x >= 86400); // strictly AFTER the lock
     if (!earlier) {
       if (!(c.oauthSeen || []).includes(Number(link.value.at))) await store.cas({ expect: [[K.creator(creatorId), cr2.raw]], set: [[K.creator(creatorId), JSON.stringify({ ...c, oauthSeen })]] }).catch(() => false);
-      return publicError(409, 'rotation_locked', 'The current wallet cancelled a change recently. This YouTube sign-in has been recorded: sign in with YouTube again at least 24 hours from now to change the wallet; the change then takes 48 hours.');
+      return publicError(409, 'rotation_locked', 'The current wallet cancelled a change recently. This ' + ad.label + ' sign-in has been recorded: sign in with ' + ad.label + ' again at least 24 hours from now to change the wallet; the change then takes 48 hours.');
     }
   }
   const effectiveAt = t + C.ROTATION_COOLDOWN_S;
   const attM = Attest.build(signer, { type: 'creator-manifest', subject: { creatorId, manifestHash }, claims: { manifestVersion: version, previousManifestHash: prev, status: 'PENDING', effectiveAt, supersededAt: null, at: t }, issuedAt: t, bundleDate: bd });
-  const manifest = { schema: E.SCHEMA.manifest, struct, acceptedAssets: na.assets, signature: b.signature, signer: wallet, manifestHash, creatorId, channelId: b.channelId, status: 'PENDING', effectiveAt, supersededAt: null, supersededBy: null, identityAttestationId: null, attestationIds: [attM.id], createdAt: at };
+  const manifest = { schema: E.SCHEMA.manifest, struct, acceptedAssets: na.assets, signature: b.signature, signer: wallet, manifestHash, creatorId, channelId: idn.externalId, status: 'PENDING', effectiveAt, supersededAt: null, supersededBy: null, identityAttestationId: null, attestationIds: [attM.id], createdAt: at };
   const creator = { ...c, status: 'ROTATION_PENDING', pendingManifestHash: manifestHash, display, displayUpdatedAt: at, oauthSeen, rotation: { ...(c.rotation || {}), startedAt: t, effectiveAt, newWallet: wallet, pendingManifestHash: manifestHash, cancelledBy: null, cancelledAt: null, completedAt: null } };
   const w = Attest.writesFor(attM);
   const ok = await store.cas({
@@ -849,16 +906,24 @@ async function creatorManifest(b, ctx) {
   log(FN, 'rotation-started', { creatorId: creatorId.slice(0, 18), version });
   return json(201, { ok: true, creator: publicCreator(creator, cur), pendingManifest: publicManifest(manifest), effectiveAt, warning: 'Your receiving wallet changes on ' + new Date(effectiveAt * 1000).toISOString() + '. Until then support goes to your current wallet. Your current wallet can cancel this change.' });
 }
-/** The join-day audience snapshot, from the OAuth link record (a YouTube value read at that moment), if none exists yet. */
-async function enrolmentSnapshot(ctx, channelId, link, t, bd) {
+/**
+ * The join-day audience snapshot, from the OAuth link record (a value the platform returned at that moment), if none
+ * exists yet. `identity` is {platform, externalId}; a bare string is the legacy spelling of a YouTube channel id.
+ */
+async function enrolmentSnapshot(ctx, identity, link, t, bd) {
   const { store, signer } = ctx;
+  const idn = typeof identity === 'string' ? { platform: E.PLATFORM, externalId: identity } : identity;
+  const ad = Platforms.adapterOf(idn.platform);
   const d = E.utcDate(t);
+  if (!ad || !E.isExternalId(idn.platform, idn.externalId)) return;
+  const ref = E.refOf(idn.platform, idn.externalId);
   try {
-    if (await store.get(K.snap(channelId, d))) return;
-    const rec = Attest.build(signer, { type: 'audience-snapshot', subject: { channelId }, claims: { channelId, dateUTC: d, title: E.clean(link.title, 80), subscriberCount: link.hiddenSubscriberCount || link.subscriberCount == null ? null : Number(link.subscriberCount), hiddenSubscriberCount: Boolean(link.hiddenSubscriberCount), fetchedAt: Number(link.at), source: 'youtube-data-api-v3 channels.list statistics (oauth link, enrolment)' }, issuedAt: t, bundleDate: bd });
+    if (await store.get(K.snap(ref, d))) return;
+    const { subject, claims } = ad.enrolmentSnapshot(idn.externalId, link, d);
+    const rec = Attest.build(signer, { type: 'audience-snapshot', subject, claims, issuedAt: t, bundleDate: bd });
     const w = Attest.writesFor(rec);
-    await store.cas({ expect: [[K.snap(channelId, d), null]], set: [[K.snap(channelId, d), JSON.stringify(rec)], ...w.set], sadd: [[K.snapDays(channelId), d], ...w.sadd] });
-  } catch (err) { logError(FN, 'enrolment-snapshot-failed', err, { channel: hashId(channelId) }); }
+    await store.cas({ expect: [[K.snap(ref, d), null]], set: [[K.snap(ref, d), JSON.stringify(rec)], ...w.set], sadd: [[K.snapDays(ref), d], ...w.sadd] });
+  } catch (err) { logError(FN, 'enrolment-snapshot-failed', err, { channel: hashId(ref) }); }
 }
 async function creatorPause(b, ctx, pause) {
   const { store, now } = ctx;
@@ -866,7 +931,7 @@ async function creatorPause(b, ctx, pause) {
   if (extra) return extra;
   const s = sessionOf(ctx, 'creator');
   if (!s) return publicError(401, 'session', 'A creator session is required.');
-  const cr = await loadCreator(store, E.creatorIdOf(s.channelId));
+  const cr = await loadCreator(store, E.creatorIdOf(s.externalId, s.platform));
   if (!cr.value) return publicError(404, 'not_found', 'This channel is not on EARLY yet.');
   if (Boolean(cr.value.paused) === pause) return json(200, { ok: true, idempotent: true, paused: pause });
   const ok = await store.cas({ expect: [[K.creator(cr.value.creatorId), cr.raw]], set: [[K.creator(cr.value.creatorId), JSON.stringify({ ...cr.value, paused: pause, pausedAt: pause ? iso(now()) : null })]] });
@@ -887,7 +952,7 @@ async function rotationCancel(b, ctx) {
   const t = nowSec(now), at = iso(now());
   let by = null, nonce = null, wallet = null;
   const s = sessionOf(ctx, 'creator');
-  if (s && s.channelId === c.channelId && b.signature === undefined) by = 'creator-session';
+  if (s && s.platform === (c.platform || E.PLATFORM) && s.externalId === c.channelId && b.signature === undefined) by = 'creator-session';
   else {
     nonce = lc(b.nonce);
     if (!E.isBytes32(nonce) || !skewOk(b.issuedAt, now)) return bad('Invalid nonce or issuedAt.');
@@ -896,7 +961,7 @@ async function rotationCancel(b, ctx) {
     if (!wallet) return publicError(503, 'unavailable', UNAVAILABLE);
     const struct = { schema: E.SCHEMA.rotationCancel, creatorId, pendingManifestHash: pending, issuedAt: Number(b.issuedAt), nonce };
     if (!(await verifySig(rpc, wallet, 'RotationCancel', struct, b.signature))) return publicError(401, 'bad_signature', 'Only the current receiving wallet (or a creator session) can cancel.');
-    if (c.rotation.lastCancelBy === wallet && t - Number(c.rotation.lastCancelAt || 0) < C.ROTATION_CANCEL_REPEAT_S) return publicError(409, 'cancel_repeat', 'This wallet already cancelled a change recently; it cannot cancel again for 30 days. The channel owner can still change the wallet after two YouTube sign-ins 24 hours apart.');
+    if (c.rotation.lastCancelBy === wallet && t - Number(c.rotation.lastCancelAt || 0) < C.ROTATION_CANCEL_REPEAT_S) return publicError(409, 'cancel_repeat', 'This wallet already cancelled a change recently; it cannot cancel again for 30 days. The channel owner can still change the wallet after two ' + ((Platforms.adapterOf(c.platform || E.PLATFORM) || Platforms.ADAPTERS.youtube).label) + ' sign-ins 24 hours apart.');
     by = 'current-wallet';
   }
   const pm = await loadManifest(store, pending);
@@ -914,4 +979,4 @@ async function rotationCancel(b, ctx) {
 
 exports.handler = (event) => handler(event);
 exports._handler = handler;
-exports._internals = { K, publicCreator, publicIntent, receiptDocument, countSignals, maybeCompleteRotation, enrolmentSnapshot, finalise };
+exports._internals = { K, publicCreator, publicIntent, receiptDocument, countSignals, maybeCompleteRotation, enrolmentSnapshot, finalise, identityFrom, identityOut, publicSignal, publicManifest };

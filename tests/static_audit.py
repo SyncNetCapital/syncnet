@@ -393,4 +393,16 @@ assert 'never receives or holds' in _ehtml.lower() or 'never receives or holds f
 # 11. OpenTimestamps wording and the daily bundle: only attestation leaves (no intent/receipt commitments)
 _eots=(root/'netlify/lib/early-ots.js').read_text(encoding='utf-8')
 assert 'Bitcoin-verifiable later' in _eots and "'submitted'" in _eots and 'commitment:intent' not in _el and 'commitment:receipt' not in _el
+# 12. platform identity (phases 1-3): identity = (platform, immutable external id); YouTube is the ONLY enabled platform
+_eplat=(root/'netlify/lib/early-platforms.js').read_text(encoding='utf-8'); _esess=(root/'netlify/lib/early-session.js').read_text(encoding='utf-8')
+assert "const PLATFORMS_ENABLED = Object.freeze({ youtube: Object.freeze({ enabled: true }) });" in _ecfg, 'the enabled-platform list must stay a hard-coded constant (no env var may enable a platform)'
+assert "const ADAPTERS = Object.freeze({ youtube });" in _eplat, 'only the YouTube adapter is registered in this build'
+assert not (root/'netlify/lib/early-x.js').exists() and not (root/'netlify/functions/early-x-auth.js').exists(), 'no second-platform client / OAuth function in this build'
+assert not _re3.search(r"SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|twitter\.com", _el+_efn+_eauth+_esnap+_ecfg+_eplat+_esess+_epage+_ecreator+_ehtml+toml+red), 'no second-platform env var, host or route in this build'
+assert "{ name: 'channelId', type: 'string' }" in _el and "name: 'externalId'" not in _el, 'the signed v1 field stays `channelId`; `externalId` is API/UI naming only'
+assert "return platform === PLATFORM ? externalId : platform + ':' + externalId;" in _el and "'syncnet.early.creator.v1|' + platform + '|' + externalId" in _el and "const PLATFORM = 'youtube';" in _el
+assert _efn.count('platformEnabled(')>=6 and 'function identityFrom(' in _efn and "'Unsupported platform.'" in _efn, 'every platform-aware path must ask whether the platform is enabled'
+for _name,_t in [('early-platforms.js',_eplat),('early-session.js',_esess)]:
+    assert not _re3.search(r"['`](mp:|site:|eco:|reg:|pons2:|pump:)", _t) and 'eth_sendTransaction' not in _t and 'eth_sendRawTransaction' not in _t, 'foreign key / send in '+_name
+assert 'tests/early/platform.test.mjs' in (root/'tests/run-all.mjs').read_text(encoding='utf-8'), 'the platform suite must be part of run-all'
 print('SyncNet Labs · EARLY static audit: PASS')

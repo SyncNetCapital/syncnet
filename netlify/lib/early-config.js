@@ -21,6 +21,10 @@ const KEYS_FILE = require('../../syncnet-early-keys.json');
 const { log } = require('./log');
 const Session = require('./early-session');
 
+// Which identity platforms this build ACCEPTS. The protocol registry (lib/syncnet-early.js PLATFORMS) may describe more
+// platforms than a deployment serves: only YouTube is enabled here, unconditionally, and nothing in this file lets an
+// environment variable enable another one. Every request path asks `cfg.platforms[p].enabled` before using a platform.
+const PLATFORMS_ENABLED = Object.freeze({ youtube: Object.freeze({ enabled: true }) });
 const truthy = (v) => String(v == null ? '' : v).trim().toLowerCase() === 'true';
 const HEX32 = /^0x[0-9a-fA-F]{64}$/;
 let warned = '';
@@ -37,7 +41,7 @@ const validNow = (k, nowMs) => k && Date.parse(k.validFrom) <= nowMs && (k.valid
  *   enabled, writesEnabled, anchorEnabled, durable, reasons,
  *   assets: Map, assetsJson, registry, chainId,
  *   attestation: {configured, keyId, address}, anchor: {configured, address},
- *   oauth: {configured, clientId, redirect}, youtube: {configured}, sessions: {configured}, getLogsChunk }
+ *   oauth: {configured, clientId, redirect}, youtube: {configured}, platforms: {youtube:{enabled:true}}, sessions: {configured}, getLogsChunk }
  */
 function earlyConfig(options = {}) {
   const env = options.env || process.env;
@@ -88,8 +92,10 @@ function earlyConfig(options = {}) {
     const key = reasons.join('|');
     if (key && key !== warned) { warned = key; log('early', 'public-feature-closed', { problems: reasons }); }
   }
-  return { enabled, writesEnabled, anchorEnabled, durable, reasons, assets, assetsJson, registry, chainId: E.CHAIN_ID, attestation, anchor, oauth, youtube, sessions, getLogsChunk };
+  return { enabled, writesEnabled, anchorEnabled, durable, reasons, assets, assetsJson, registry, chainId: E.CHAIN_ID, attestation, anchor, oauth, youtube, platforms: PLATFORMS_ENABLED, sessions, getLogsChunk };
 }
+/** True when this build accepts identities of `platform` (a registered platform AND enabled above). */
+const platformEnabled = (cfg, platform) => E.isPlatform(platform) && Boolean(cfg && cfg.platforms && Object.prototype.hasOwnProperty.call(cfg.platforms, platform) && cfg.platforms[platform].enabled === true);
 
 /** The attestation signer, or null. The private key stays inside the closure; only sign(digest) is exposed. */
 function signer(env, cfg) {
@@ -108,4 +114,4 @@ function anchorSigner(env, cfg) {
   return Object.freeze({ address: c.anchor.address, sign: (digest) => Core._internal.secp256k1.sign(digest, key) });
 }
 
-module.exports = { earlyConfig, signer, anchorSigner, keyAddress, truthy };
+module.exports = { earlyConfig, signer, anchorSigner, keyAddress, truthy, platformEnabled, PLATFORMS_ENABLED };

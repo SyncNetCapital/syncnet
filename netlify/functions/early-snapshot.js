@@ -19,6 +19,7 @@ const { serverRpc } = require('../lib/chain-rpc');
 const { earlyConfig, signer: makeSigner } = require('../lib/early-config');
 const Attest = require('../lib/early-attest');
 const { makeYouTube } = require('../lib/early-youtube');
+const Platforms = require('../lib/early-platforms');
 const early = require('./early');
 
 const FN = 'early-snapshot';
@@ -43,6 +44,8 @@ async function handler(event = {}, deps = {}) {
   const started = now();
   const deadline = started + (deps.budgetMs || BUDGET_MS);
   const report = { creators: 0, rotationsCompleted: 0, snapshots: 0, snapshotsSkipped: 0, snapshotFailures: 0, reconciled: 0, finalized: 0, invalidated: 0, timedOut: false, noSigner: !signer, noYouTube: !yt };
+  const clients = { ...(yt ? { youtube: yt } : {}) }; // platform -> its configured API client; only YouTube exists in this build
+  const refOfCreator = (c) => { const p = c.platform || E.PLATFORM; return E.isExternalId(p, c.channelId) ? E.refOf(p, c.channelId) : null; };
   const ctx = { store, rpc, env, now, cfg, signer, event: {} };
   try {
     const t = Math.floor(now() / 1000), today = E.utcDate(t);
@@ -55,14 +58,20 @@ async function handler(event = {}, deps = {}) {
       let c = null; try { c = cr ? JSON.parse(cr) : null; } catch { c = null; }
       if (!c) continue;
       if (c.status === 'ROTATION_PENDING' && signer) { const before = c.status; const after = await early._internals.maybeCompleteRotation(ctx, { raw: cr, value: c }); if (after && after.status !== before) report.rotationsCompleted++; }
-      if (!(await store.get(K.snap(c.channelId, today)))) need.push(c); else report.snapshotsSkipped++;
+      const ref = refOfCreator(c);
+      if (!ref) { report.snapshotFailures++; continue; }
+      if (!(await store.get(K.snap(ref, today)))) need.push(c); else report.snapshotsSkipped++;
     }
-    // 1. snapshots: batches of 50 ids; the first success of the day wins (cas expects the day's key absent)
-    if (signer && yt) {
-      for (let i = 0; i < need.length && now() <= deadline; i += 50) {
-        const batch = need.slice(i, i + 50);
+    // 1. snapshots, one platform at a time (its adapter's batch size); the first success of the day wins (cas expects the
+    //    day's key absent). A platform with no adapter or no configured client is skipped, never guessed.
+    for (const platform of [...new Set(need.map((c) => c.platform || E.PLATFORM))]) {
+      const group = need.filter((c) => (c.platform || E.PLATFORM) === platform);
+      const ad = Platforms.adapterOf(platform), client = clients[platform];
+      if (!signer || !ad || !client) { log(FN, 'snapshots-skipped', { platform, reason: !signer ? 'no attestation signer' : !ad ? 'no adapter' : platform + ' not configured', pending: group.length }); continue; }
+      for (let i = 0; i < group.length && now() <= deadline; i += ad.batchSize) {
+        const batch = group.slice(i, i + ad.batchSize);
         let found;
-        try { found = await yt.channelsById(batch.map((c) => c.channelId)); } catch (err) { logError(FN, 'youtube-unavailable', err, { batch: batch.length }); report.snapshotFailures += batch.length; continue; }
+        try { found = await ad.fetchMany(client, batch.map((c) => c.channelId)); } catch (err) { logError(FN, platform + '-unavailable', err, { batch: batch.length }); report.snapshotFailures += batch.length; continue; }
         const t2 = Math.floor(now() / 1000), day = E.utcDate(t2);
         if (day !== today) { report.timedOut = true; break; } // the UTC day ended during the run: never record it as today's
         const bd = await Attest.bundleDateFor(store, t2);
@@ -70,17 +79,19 @@ async function handler(event = {}, deps = {}) {
           const ch = found.get(c.channelId);
           if (!ch) { report.snapshotFailures++; continue; }
           try {
-            const rec = Attest.build(signer, { type: 'audience-snapshot', subject: { channelId: c.channelId }, claims: { channelId: c.channelId, dateUTC: today, title: E.clean(ch.title, 80), subscriberCount: ch.hidden ? null : ch.subscriberCount, hiddenSubscriberCount: Boolean(ch.hidden), fetchedAt: t2, source: 'youtube-data-api-v3 channels.list statistics' }, issuedAt: t2, bundleDate: bd });
+            const ref = refOfCreator(c);
+            const { subject, claims } = ad.dailySnapshot(c.channelId, ch, today, t2);
+            const rec = Attest.build(signer, { type: 'audience-snapshot', subject, claims, issuedAt: t2, bundleDate: bd });
             const w = Attest.writesFor(rec);
-            const ok = await store.cas({ expect: [[K.snap(c.channelId, today), null]], set: [[K.snap(c.channelId, today), JSON.stringify(rec)], ...w.set], sadd: [[K.snapDays(c.channelId), today], ...w.sadd] });
+            const ok = await store.cas({ expect: [[K.snap(ref, today), null]], set: [[K.snap(ref, today), JSON.stringify(rec)], ...w.set], sadd: [[K.snapDays(ref), today], ...w.sadd] });
             if (ok) report.snapshots++; else report.snapshotsSkipped++;
             // refresh mutable display metadata (never identity): title / avatar / handle
             const cr = await store.get(K.creator(c.creatorId));
-            if (cr) { const cur = JSON.parse(cr); const display = { title: E.clean(ch.title, 80), avatarUrl: ch.avatarUrl || cur.display.avatarUrl, handle: E.clean(ch.handle, 40) || cur.display.handle }; if (JSON.stringify(display) !== JSON.stringify(cur.display)) await store.cas({ expect: [[K.creator(c.creatorId), cr]], set: [[K.creator(c.creatorId), JSON.stringify({ ...cur, display, displayUpdatedAt: new Date(now()).toISOString() })]] }); }
+            if (cr) { const cur = JSON.parse(cr); const display = ad.refreshDisplay(ch, cur.display); if (JSON.stringify(display) !== JSON.stringify(cur.display)) await store.cas({ expect: [[K.creator(c.creatorId), cr]], set: [[K.creator(c.creatorId), JSON.stringify({ ...cur, display, displayUpdatedAt: new Date(now()).toISOString() })]] }); }
           } catch (err) { logError(FN, 'snapshot-failed', err, { channel: hashId(c.channelId) }); report.snapshotFailures++; }
         }
       }
-    } else if (need.length) log(FN, 'snapshots-skipped', { reason: !signer ? 'no attestation signer' : 'youtube not configured', pending: need.length });
+    }
     // 3. finality reconciliation of young receipts (pending-finality index: score = block number)
     let pending = [];
     try { pending = await store.zrevrangeByScore(K.pendingFinal, '+inf', '-inf', 200); } catch (err) { logError(FN, 'pending-index', err, {}); }

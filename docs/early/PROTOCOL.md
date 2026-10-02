@@ -16,7 +16,15 @@ EIP-712 domain: `{ name: "SyncNet SYNC Proof", version: "1", chainId: 4663 }` (n
 | `CountMeIn` / `CountMeInWithdraw` | the fan | private signals; never part of a receipt |
 | `RotationCancel`, `EarlySession`, `CreatorLinkRequest`, `CardReveal` | see the spec | operational |
 
-`manifestHash` = EIP-712 digest of `CreatorManifest`. `creatorId = keccak256("syncnet.early.creator.v1|youtube|" + channelId)`.
+`manifestHash` = EIP-712 digest of `CreatorManifest`. `creatorId = keccak256("syncnet.early.creator.v1|" + platform + "|" + externalId)`.
+
+**Creator identity is `(platform, immutable externalId)`**, never a handle, name or avatar. The signed field that carries the
+external id is named `channelId` (it is part of the v1 type hash and never changes); everywhere else it is called
+`externalId`. For `platform = "youtube"` the id is the immutable channel id (`^UC[A-Za-z0-9_-]{22}$`), and
+`keccak256("syncnet.early.creator.v1|youtube|" + channelId)` is byte-identical to every `creatorId` issued so far. The
+registry in `lib/syncnet-early.js` (`PLATFORMS`) is the single definition of an id's shape and of what the platform's audience
+context counts; a verifier never needs it to check a receipt, because the receipt carries `platform` and `channelId` inside
+the signed manifest and `creatorId` inside the signed intent. **In this deployment only `youtube` is enabled.**
 `acceptedAssetsHash = keccak256(canonicalJson([{token, minAmount}…]))` with tokens sorted ascending.
 
 ## 2. Canonical JSON
@@ -80,4 +88,6 @@ the Bitcoin attestation once it exists. Validated against opentimestamps-client 
 
 `S(D)` for a channel is the first successful YouTube Data API read on UTC day `D` (or the enrolment read on the join
 day). It is never replaced and never backfilled. A receipt's `context.audienceThen` is `S(utcDate(blockTimestamp))`:
-`approximate` (YouTube's rounded public count), `hidden`, or `unavailable`.
+`approximate` (YouTube's rounded public count), `hidden`, or `unavailable`, plus `kind` (`subscribers` for YouTube: what the
+snapshot counted; a platform whose audience is followers is always labelled as that platform's followers, never as a generic
+audience). It is dated, approximate context; it is never part of payment validity.
