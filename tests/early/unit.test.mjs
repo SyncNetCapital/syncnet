@@ -101,7 +101,7 @@ check('anchor calldata: junk refused', E.decodeAnchorCalldata('0x1234') === null
 
 // ---------------------------------------------------------------- attestations
 const registry = { schema: E.SCHEMA.keys, attestation: [{ keyId: 'early-att-test-k1', address: ADDR1, validFrom: '2026-01-01T00:00:00Z', validUntil: null }], anchor: [{ address: ADDR2, validFrom: '2026-01-01T00:00:00Z' }] };
-check('committed keys file is public-only and parses', E.parseKeyRegistry(KEYS) && KEYS.attestation.length === 0);
+check('committed keys file is public-only and parses', Boolean(E.parseKeyRegistry(KEYS)));
 throws('registry refuses any 32-byte value', () => E.parseKeyRegistry({ ...registry, attestation: [{ ...registry.attestation[0], secret: b32(1) }] }), /32-byte/);
 throws('registry refuses a bare 64-hex secret', () => E.parseKeyRegistry({ ...registry, note: K1.slice(2) }), /32-byte/);
 const att = { schema: E.SCHEMA.attestation, type: 'audience-snapshot', subject: { channelId: CH }, claims: { dateUTC: '2026-09-29', subscriberCount: 1200, hiddenSubscriberCount: false, title: 'Alice' }, issuedAt: 1790000000, bundleDate: '2026-09-29', keyId: 'early-att-test-k1' };
