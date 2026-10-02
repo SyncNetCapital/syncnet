@@ -207,6 +207,109 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   const okRoots = new Set(allBundles.filter((x) => x.leafCount > 0).map((x) => x.root));
   const invariants = (pc.sent || []).map((raw) => { const t = Tx.decodeSigned(raw); const c = E.decodeAnchorCalldata(t.data); return t.from === W.anchor && t.to === W.anchor && t.value === 0n && t.chainId === 4663n && Core.hexToBytes(t.data).length === 47 && c && okRoots.has(c.root) && c.root !== E.emptyRoot(c.date) && t.gasPrice <= Tx.MAX_GAS_PRICE_WEI && t.gasLimit <= Tx.MAX_GAS_LIMIT; });
   check('C15h every anchor tx ever sent in this suite is a self-transfer, value 0, exactly 47 bytes of anchor calldata, chain 4663, for a non-empty bundle root, within the gas caps', invariants.length >= 3 && invariants.every(Boolean), invariants.join(','));
+  // ---- BROADCAST REFUSAL: a synchronous, deterministic RPC refusal frees the attempt at once; anything ambiguous stays `sent` for the hour
+  {
+    const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
+    const sgn = { address: W.anchor, sign: (x) => Core._internal.secp256k1.sign(x, KEYS.anchor) };
+    const T0 = clock.now(), HOUR = 3600000;
+    let seq = 0;
+    const iso = async () => { // an isolated store holding one real-looking, non-empty, unanchored bundle
+      const s = createStore({ map: new Map(), now: () => clock.now() });
+      const date = '2031-03-' + String(10 + seq++).padStart(2, '0');
+      const leaf = E.leafHash('attestation', rnd32());
+      await s.set('early:bundle:v1:' + date, JSON.stringify({ schema: E.SCHEMA.bundle, date, leafType: E.LEAF_ATTESTATION, leaves: [leaf], leafCount: 1, root: E.merkleRoot([leaf], date), builtAt: new Date(T0).toISOString(), anchors: { robinhood: null, opentimestamps: null } }));
+      return { s, date, rec: async () => JSON.parse(await s.get('early:bundle:v1:' + date)).anchors.robinhood };
+    };
+    const calls = { lookups: 0 };
+    const refuse = (msg, extra = {}, lookup = () => null) => async (m, p) => {
+      if (m === 'eth_sendRawTransaction') throw Object.assign(new Error(msg), { name: 'RpcError', code: -32000 }, extra);
+      if (m === 'eth_getTransactionByHash') { calls.lookups++; return lookup(p); }
+      return rpc(m, p);
+    };
+    const go = (x, rp, t) => anchor._internals.anchorOnChain(x.s, rp, sgn, { date: x.date }, () => t).catch((e) => 'threw');
+    const BASEFEE = 'max fee per gas less than block base fee: maxFeePerGas 33082000, baseFee 33198000';
+    const sentN = () => (pc.sent || []).length;
+
+    // 1. the live incident: refusal -> broadcast-failed, audit fields kept, immediately retryable, retried once
+    const A = await iso(); const n0 = sentN(); const nonce0 = pc.nonce || 0;
+    const a1 = await go(A, refuse(BASEFEE), T0);
+    const fr = await A.rec();
+    check('C18 synchronous refusal ("max fee per gas less than block base fee") → state broadcast-failed (not sent); nothing reached the chain', a1 === 'broadcast-failed' && fr.status === 'broadcast-failed' && sentN() === n0 && (pc.nonce || 0) === nonce0, JSON.stringify(fr));
+    check('C18b the failed attempt keeps txHash, nonce, gas fields, sentAt, attempts and a sanitized error + failedAt', /^0x[0-9a-f]{64}$/.test(fr.txHash) && fr.nonce === String(nonce0) && fr.gasPrice === '150000000' && fr.quotedGasPrice === '100000000' && /^\d+$/.test(fr.gasLimit) && fr.sentAt === new Date(T0).toISOString() && fr.failedAt === new Date(T0).toISOString() && fr.attempts === 1 && /max fee per gas less than block base fee/.test(fr.broadcastError) && fr.broadcastError.length <= 200);
+    const a2 = await go(A, rpc, T0); // same instant: no one-hour wait
+    const fs2 = await A.rec();
+    check('C19 the next run retries IMMEDIATELY (same instant, no 1 h wait): exactly one new tx, status sent, attempts 2, same nonce reused (the refused tx never existed); with unchanged inputs it is the byte-identical tx, so even a wrongly-assumed refusal could never produce a second transfer', a2 === 'sent' && fs2.status === 'sent' && fs2.attempts === 2 && sentN() === n0 + 1 && fs2.nonce === String(nonce0) && fs2.txHash === fr.txHash, JSON.stringify(fs2));
+    const retryTx = Tx.decodeSigned(pc.sent[pc.sent.length - 1]);
+    check('C19b the retry is still the anchor transaction: self-transfer, value 0, 47-byte calldata, chain 4663, headroom price within the ceiling', retryTx.from === W.anchor && retryTx.to === W.anchor && retryTx.value === 0n && retryTx.chainId === 4663n && Core.hexToBytes(retryTx.data).length === 47 && retryTx.gasPrice === 150000000n && retryTx.gasPrice <= Tx.MAX_GAS_PRICE_WEI);
+
+    // 2. a successful broadcast stays `sent`, and is not re-sent while pending
+    const B = await iso(); const nB = sentN();
+    const noReceipt = async (m, p) => (m === 'eth_getTransactionReceipt' ? null : rpc(m, p));
+    const b1 = await go(B, noReceipt, T0);
+    const b2 = await go(B, noReceipt, T0 + 10 * 60000);
+    check('C20 successful broadcast → status sent (unchanged behaviour); a re-run while unconfirmed is "pending" and sends nothing', b1 === 'sent' && (await B.rec()).status === 'sent' && b2 === 'pending' && sentN() === nB + 1);
+
+    // 3. ambiguous failures: NEVER an immediate retry; the one-hour protection stays
+    const ambiguous = [
+      ['request timeout', refuse('RPC timeout', { transient: true, code: undefined })],
+      ['HTTP 503', refuse('RPC HTTP 503', { transient: true, code: undefined })],
+      ['"already known"', refuse('already known')],
+      ['"nonce too low"', refuse('nonce too low')],
+      ['"replacement transaction underpriced"', refuse('replacement transaction underpriced')],
+      ['unlisted message', refuse('something unexpected')],
+      ['refusal text but NOT a JSON-RPC error response (no code)', refuse(BASEFEE, { code: undefined })],
+      ['refusal text but the node already knows the tx', refuse(BASEFEE, {}, () => ({ hash: 'x' }))],
+      ['refusal text but the node lookup fails', refuse(BASEFEE, {}, () => { throw new Error('lookup down'); })],
+    ];
+    let allHeld = true, anySend = false; const detail = [];
+    for (const [label, rp] of ambiguous) {
+      const X = await iso(); const nx = sentN();
+      const f = await go(X, rp, T0);
+      const rec1 = await X.rec();
+      const again = await go(X, rpc, T0 + 59 * 60000); // 59 min later: still protected
+      const held = f === 'threw' && rec1.status === 'sent' && again === 'pending' && sentN() === nx;
+      const later = await go(X, rpc, T0 + HOUR + 60000); // after the hour: the old retry rule still applies, exactly once
+      const ok = held && later === 'sent' && sentN() === nx + 1;
+      if (!ok) { allHeld = false; detail.push(label + ':' + [f, rec1 && rec1.status, again, later, sentN() - nx].join('/')); }
+      if (sentN() > nx + 1) anySend = true;
+    }
+    check('C21 nine ambiguous failures (timeout, 503, already known, nonce too low, underpriced, unlisted text, no JSON-RPC code, node knows the tx, lookup fails) stay `sent`: not retried at once, not at 59 min, retried exactly once after the hour', allHeld && !anySend, detail.join(' | '));
+
+    // 4. old stuck `sent` records stay conservatively protected (e.g. the 2026-09-30 preview record) and are not "rescued" by the new code
+    const O = await iso();
+    await O.s.set('early:bundle:v1:' + O.date, JSON.stringify({ ...JSON.parse(await O.s.get('early:bundle:v1:' + O.date)), anchors: { robinhood: { status: 'sent', txHash: '0x' + '11'.repeat(32), from: W.anchor, nonce: '5', gasPrice: '33082000', gasLimit: '72000', sentAt: new Date(T0).toISOString(), attempts: 1 }, opentimestamps: null } }));
+    const lookupsBefore = calls.lookups, nO = sentN();
+    const o1 = await go(O, refuse(BASEFEE), T0 + 30 * 60000);
+    const o2 = await go(O, refuse(BASEFEE), T0 + HOUR - 1000);
+    check('C22 a pre-existing `sent` record is not retried early and not reclassified (no evidence lookup, no send) until the hour has passed', o1 === 'pending' && o2 === 'pending' && sentN() === nO && calls.lookups === lookupsBefore && (await O.rec()).status === 'sent');
+
+    // 5. no double-send path: concurrent attempts, repeated refusals, mixed outcomes
+    const C = await iso(); const nC = sentN();
+    const race = await Promise.all([go(C, rpc, T0), go(C, rpc, T0), go(C, rpc, T0)]);
+    check('C23 three concurrent attempts on one bundle: exactly one broadcast (write-ahead CAS), the others see a conflict/pending', sentN() === nC + 1 && race.filter((x) => x === 'sent').length === 1, race.join(','));
+    const D = await iso(); const nD = sentN();
+    const d1 = await go(D, refuse(BASEFEE), T0), d2 = await go(D, refuse(BASEFEE), T0), d3 = await go(D, rpc, T0), d4 = await go(D, noReceipt, T0 + 1000);
+    const drec = await D.rec();
+    check('C24 refused twice then accepted: only the accepted attempt reaches the chain, attempts counts all three, and the next run sees it as pending (no further send)', d1 === 'broadcast-failed' && d2 === 'broadcast-failed' && d3 === 'sent' && drec.attempts === 3 && sentN() === nD + 1 && (d4 === 'pending' || d4 === 'confirmed'));
+    const E2 = await iso(); const nE = sentN();
+    await go(E2, refuse(BASEFEE), T0);
+    const stale = JSON.parse(await E2.s.get('early:bundle:v1:' + E2.date));
+    const deadSigner = await Promise.all([go(E2, rpc, T0), go(E2, rpc, T0)]);
+    check('C25 a refused attempt can be retried by only one of two racing runs', sentN() === nE + 1 && deadSigner.filter((x) => x === 'sent').length === 1 && stale.anchors.robinhood.status === 'broadcast-failed');
+
+    // 6. job level: the whole handler retries a refused day on the very next run, no hour wait
+    const seeded5 = await seedLeaf();
+    clock.advance(86400); syncHead();
+    const day5 = E.utcDate(nowSec() - 86400);
+    const nJ = sentN();
+    const jobRefuse = parse(await anchor._handler({}, { store, env: ENV, rpc: refuse(BASEFEE), now: () => clock.now(), keysFile: TEST_KEYS_FILE, fetch: calFetch, calendars: ['https://a.example'] }));
+    const jr1 = JSON.parse(MAP.get('early:bundle:v1:' + day5).value).anchors.robinhood;
+    const jobRetry = await job();
+    const jr2 = JSON.parse(MAP.get('early:bundle:v1:' + day5).value).anchors.robinhood;
+    check('C26 job level: a refused broadcast is reported broadcast-failed, and the very next job run anchors it (one tx, status sent) without waiting an hour', day5 === seeded5 && jobRefuse.j.report.anchored[day5] === 'broadcast-failed' && jr1.status === 'broadcast-failed' && jobRetry.j.report.anchored[day5] === 'sent' && jr2.status === 'sent' && jr2.attempts === 2 && sentN() === nJ + 1, JSON.stringify([jobRefuse.j.report.anchored[day5], jr1.status, jobRetry.j.report.anchored[day5], jr2.status]));
+    const allTx = (pc.sent || []).map((raw) => Tx.decodeSigned(raw));
+    check('C27 whole section: every transaction ever sent (including all retries) is a self-transfer, value 0, 47-byte calldata, chain 4663, within the gas caps; no nonce/hash is broadcast twice for different attempts of one bundle', allTx.every((t) => t.from === W.anchor && t.to === W.anchor && t.value === 0n && t.chainId === 4663n && Core.hexToBytes(t.data).length === 47 && t.gasPrice <= Tx.MAX_GAS_PRICE_WEI && t.gasLimit <= Tx.MAX_GAS_LIMIT) && new Set(allTx.map((t) => t.hash)).size === allTx.length);
+  }
   const off = await job({ env: {} });
   check('C16 disabled deployment → skipped', off.j.skipped === 'disabled');
   MAP.set('early:anchor-lock:v1', { type: 'string', value: '1', expiresAt: clock.now() + 60000 });

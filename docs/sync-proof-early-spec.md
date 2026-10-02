@@ -527,6 +527,13 @@ bundle for a day therefore means "no attestations that day", and a bundle record
 **Gas price (same amendment):** the anchor transaction's gas price is `ceil(1.5 × max(eth_gasPrice, latest base fee))`
 (the quote can already be below the block base fee at broadcast); above the 5 gwei ceiling the attempt fails closed and
 is retried later; the ceiling is never raised.
+**Broadcast state machine:** the attempt is written as `sent` BEFORE `eth_sendRawTransaction` (write-ahead). If the call
+returns, it stays `sent` (one-hour wait, then the receipt decides). If the node answers with a JSON-RPC error naming a
+never-accepted reason (base-fee / intrinsic-gas / insufficient-funds / block-gas-limit) AND `eth_getTransactionByHash` and
+the receipt both return null, the exact attempt is atomically moved `sent → broadcast-failed` (txHash, nonce, gas fields,
+`sentAt` kept; `failedAt` and a sanitized `broadcastError` added) and the next run may retry at once. Timeouts, HTTP errors,
+"already known", "nonce too low", "replacement underpriced", unlisted messages and failed lookups never qualify: they stay
+`sent` for the full hour.
 
 Published: `GET ?view=bundle&date=D` → `{date, leafCount, leaves:[{type, payload}], root, anchors}`; anyone can
 recompute. Inclusion proof: `{leaf, leafIndex, siblings:[{hash, side:'L'|'R'}], root}`.

@@ -62,11 +62,21 @@ async function buildBundle(store, d, nowIso) {
   return { built: true, bundle };
 }
 
+// Node refusal reasons that prove the transaction was NOT accepted (fee / gas / balance validation). "nonce too low",
+// "already known", "replacement underpriced" and unknown messages are deliberately absent: they can mean ours exists.
+const NEVER_ACCEPTED = /max fee per gas less than block base fee|fee cap less than block base fee|intrinsic gas too low|insufficient funds for gas|exceeds block gas limit/i;
+const sanitizeRpcError = (err) => String((err && err.message) || 'rpc error').replace(/0x[0-9a-fA-F]{64,}/g, '0x…').replace(/[^\x20-\x7e]/g, ' ').slice(0, 200);
+async function refusedBeforeAcceptance(r, err, txHash) {
+  if (!err || err.name !== 'RpcError' || typeof err.code !== 'number' || err.transient) return false; // not a JSON-RPC error response
+  if (!NEVER_ACCEPTED.test(String(err.message || ''))) return false;
+  try { return (await r('eth_getTransactionByHash', [txHash])) === null && (await r('eth_getTransactionReceipt', [txHash])) === null; } catch { return false; }
+}
+
 async function anchorOnChain(store, rpc, signer, b, now) {
   const cur = await getJson(store, K.bundle(b.date));
   const bundle = cur.value;
   if (isEmptyBundle(bundle)) return 'empty'; // defence in depth: an empty bundle is never anchored
-  const r = PhChain.bounded(rpc, 8);
+  const r = PhChain.bounded(rpc, 10); // worst case: chain id, receipt, block, nonce, quote, head, estimate, send, 2 post-refusal lookups
   await PhChain.assertChain(r);
   const rh = bundle.anchors.robinhood;
   if (rh && rh.status === 'confirmed') return 'already';
@@ -98,7 +108,21 @@ async function anchorOnChain(store, rpc, signer, b, now) {
   // write-ahead: the attempt is recorded BEFORE the broadcast, so a crash can never lead to a second send
   const ok = await store.cas({ expect: [[K.bundle(b.date), cur.raw]], set: [[K.bundle(b.date), JSON.stringify(marked)]] });
   if (!ok) return 'conflict';
-  const sent = await r('eth_sendRawTransaction', [tx.raw]);
+  let sent;
+  try {
+    sent = await r('eth_sendRawTransaction', [tx.raw]);
+  } catch (err) {
+    // Only a DETERMINISTIC refusal frees the attempt: the node answered with a JSON-RPC error that names a known
+    // never-accepted reason AND it does not know the transaction. Anything else (timeout, 5xx, "already known",
+    // "nonce too low", an unlisted message, a failed lookup) may mean the tx was accepted: stays `sent` for the hour.
+    if (await refusedBeforeAcceptance(r, err, tx.hash)) {
+      const failed = { ...marked, anchors: { ...marked.anchors, robinhood: { ...marked.anchors.robinhood, status: 'broadcast-failed', failedAt: new Date(now()).toISOString(), broadcastError: sanitizeRpcError(err) } } };
+      await store.cas({ expect: [[K.bundle(b.date), JSON.stringify(marked)]], set: [[K.bundle(b.date), JSON.stringify(failed)]] });
+      log(FN, 'anchor-broadcast-refused', { date: b.date, tx: tx.hash, reason: sanitizeRpcError(err) });
+      return 'broadcast-failed';
+    }
+    throw err;
+  }
   if (E.lc(sent) !== E.lc(tx.hash)) log(FN, 'anchor-hash-mismatch', { date: b.date, expected: tx.hash, got: String(sent).slice(0, 70) });
   log(FN, 'anchor-sent', { date: b.date, tx: tx.hash, nonce: nonce.toString(), gasLimit: gasLimit.toString() });
   return 'sent';
