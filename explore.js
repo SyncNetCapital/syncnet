@@ -26,6 +26,10 @@
   const marketsOf = (x) => (Array.isArray(x && x.markets) && x.markets.length ? x.markets : x && (x.pairToken || x.quoteToken) ? [x] : []);
   const pairOf = (m) => lc((m && (m.pairToken || m.quoteToken || m.pairTokenAddress || m.quoteTokenAddress)) || '');
   const logoOk = (v) => { const s = String(v || '').trim(); return /^ipfs:\/\//.test(s) || s.startsWith('/assets/') ? s : ''; };
+  // PAR media: its own `logo` (ipfs://, which gets the gateway fallback chain) first, then its https `logoUrl`.
+  // Validated by the shared SyncNetIpfs path (valid CID or https only); a same-origin "/…" value is never trusted from PAR.
+  const parMedia = (v) => { const s = String(v || '').trim(); return s && !s.startsWith('/') && window.SyncNetIpfs && window.SyncNetIpfs.display(s) ? s : ''; };
+  const parLogo = (l) => parMedia(l.logo) || parMedia(l.logoUrl);
   const time = (v) => { const t = typeof v === 'number' ? (v < 1e12 ? v * 1000 : v) : Date.parse(v); return Number.isFinite(t) ? t : 0; };
   async function getJson(url) { const r = await fetch(url, { cache: 'no-store' }); if (!r.ok) throw new Error(String(r.status)); return r.json(); }
 
@@ -49,7 +53,7 @@
       if (!isAddr(t)) continue;
       const pairs = marketsOf(l).map(pairOf).filter(isAddr);
       for (const p of pairs) usedBy.set(p, (usedBy.get(p) || 0) + 1);
-      upsert(t, { name: disp(l.name || l.tokenName, 48), symbol: disp(l.symbol || l.tokenSymbol, 16).replace(/^\$/, '').toUpperCase(), origin: 'PAR', logo: logoOk(l.logoUrl || l.logo), createdAt: time(l.createdAt), markets: pairs });
+      upsert(t, { name: disp(l.name || l.tokenName, 48), symbol: disp(l.symbol || l.tokenSymbol, 16).replace(/^\$/, '').toUpperCase(), origin: 'PAR', logo: parLogo(l), createdAt: time(l.createdAt), markets: pairs });
     }
     for (const p of registry) {
       const t = lc(p.token);
