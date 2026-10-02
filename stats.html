@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#000"><title>SyncNet Economics — SyncNet</title><meta name="description" content="Live network economics from Robinhood Chain: SYNC burned, and NET and USDG distributed to SYNC holders."><link rel="stylesheet" href="/v2.css"><link rel="stylesheet" href="/ui.css"><link rel="icon" type="image/png" href="/assets/syncnet-favicon.png"></head><body class="sn-legacy sn-stats">
+<header class="sn-top"><div class="sn-wrap sn-top-inner"><a class="sn-brand" href="/" aria-label="SyncNet — Explore"><span class="nav-mark" aria-hidden="true">S</span><span>SyncNet</span></a><form class="sn-top-search" action="/" method="get" role="search"><input name="q" aria-label="Search projects by name, ticker or contract" placeholder="Search name, ticker or contract" autocomplete="off" spellcheck="false"><button type="submit" aria-label="Open">→</button></form><nav class="sn-nav" aria-label="Primary"><a href="/" data-nav="explore">Explore</a><a href="/build.html" data-nav="create">Create</a><a href="/you.html" data-nav="you" class="sn-you" hidden>My Projects</a></nav><button class="sn-wallet" type="button" data-wallet>Connect</button></div></header>
+<main id="main">
+<section class="page-head"><div class="wrap"><div class="eyebrow">Network</div><h1>SYNCNET <span class="cyan">ECONOMICS</span></h1><p>Live network economics from Robinhood Chain.</p></div></section>
+
+<section class="ec-section" aria-labelledby="ecPrimary"><div class="sn-wrap">
+<h2 class="sr-only" id="ecPrimary">Cumulative economics</h2>
+<p class="ec-status" id="econStatus" role="status" hidden></p>
+<div class="ec-primary" aria-busy="true">
+<div class="ec-stat"><span class="ec-label">SYNC burned</span><strong class="ec-num mono" data-econ="burned" data-state="loading">—</strong><small>Permanently removed from supply</small></div>
+<div class="ec-stat"><span class="ec-label">NET to holders</span><strong class="ec-num mono" data-econ="net" data-state="loading">—</strong><small>Cumulative, paid to $SYNC holders</small></div>
+<div class="ec-stat"><span class="ec-label">USDG to holders</span><strong class="ec-num mono" data-econ="usdg" data-state="loading">—</strong><small>Cumulative, paid to $SYNC holders</small></div>
+</div>
+<div class="ec-secondary" aria-busy="true" aria-label="Last 24 hours">
+<div class="ec-stat ec-stat-sm"><span class="ec-label">NET distributed · 24h</span><strong class="ec-num mono" data-econ="net24" data-state="loading">—</strong></div>
+<div class="ec-stat ec-stat-sm"><span class="ec-label">USDG distributed · 24h</span><strong class="ec-num mono" data-econ="usdg24" data-state="loading">—</strong></div>
+</div>
+</div></section>
+
+<section class="ec-section" aria-labelledby="ecRoutes"><div class="sn-wrap">
+<div class="eyebrow">How it works</div><h2 class="ec-h" id="ecRoutes">Two routes to holders. One burn.</h2>
+<div class="ec-routes">
+<article><h3>SYNC / NET</h3><p>Trading activity can generate NET that flows to SYNC holders.</p><p class="ec-aside"><a href="https://netnet.capital/" target="_blank" rel="noopener noreferrer">About NET ↗</a></p></article>
+<article><h3>SYNC / USDG</h3><p>Trading activity can generate USDG that flows to SYNC holders.</p></article>
+<article><h3>SYNC BURN</h3><p>Burned SYNC is permanently removed from supply.</p></article>
+</div>
+<p class="ec-note">SyncNet is independent and unaffiliated with NetNet Capital. Learn more about NET at <a href="https://netnet.capital/" target="_blank" rel="noopener noreferrer">NetNet Capital ↗</a>.</p>
+</div></section>
+
+<section class="ec-section" aria-labelledby="ecRecentH"><div class="sn-wrap">
+<div class="eyebrow">Recent activity</div><h2 class="ec-h" id="ecRecentH">Latest distributions</h2>
+<ul class="ec-recent" id="econRecent" aria-live="polite"><li class="ec-empty">Loading…</li></ul>
+<p class="ec-note">Burns are not listed individually: SYNC burned is read as a supply total, and SyncNet does not keep a per-burn event index.</p>
+</div></section>
+
+<section class="ec-section ec-prov" aria-label="Data sources"><div class="sn-wrap">
+<p><strong>Read from Robinhood Chain.</strong> SYNC burned is read live on-chain (1,000,000,000 initial supply minus current <span class="mono">totalSupply()</span>). NET and USDG distributions come from PAR's public indexer of holder-vault payouts, not a direct contract read. Figures are informational, may lag, and are not a yield or a guaranteed return.</p>
+<p class="ec-meta"><span id="econUpdated">Last updated —</span> <span id="econIndexAsOf"></span> <button class="sn-textbtn" type="button" id="econRetry">Refresh</button></p>
+<p class="ec-meta"><a href="/sync.html">About $SYNC</a> · <a href="/risk.html">Risk</a></p>
+</div></section>
+</main>
+<footer class="sn-foot"><div class="sn-wrap sn-foot-inner"><a href="/project/0x6368e007b9f0b941560ed1f3bceb20247f5eca37">$SYNC</a><a href="/network.html">Network</a><a href="/stats">Stats</a><a href="/for-sale">For sale</a><a href="/registry.html">Registry</a><a href="/labs.html">Labs</a><a href="/kit.html">Project Kit</a><a href="/launches.html">My launches</a><a href="/terms.html">Terms</a><a href="/risk.html">Risk</a><a href="/privacy.html">Privacy</a><p class="sn-foot-note">Independent software on Robinhood Chain. A connection between projects is not an affiliation. SyncNet never holds your keys.</p></div></footer><nav class="sn-tabbar" aria-label="Primary"><a href="/" data-nav="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>Explore</a><a href="/build.html" data-nav="create"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Create</a><a href="/you.html" data-nav="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1.2-3.6 3.8-5.4 7-5.4s5.8 1.8 7 5.4"/></svg>You</a></nav>
+<script src="/lib/syncnet-economics.js" defer></script><script src="/sn-wallet.js" defer></script><script src="/sn-ui.js" defer></script><script src="/economics-ui.js" defer></script>
+</body></html>

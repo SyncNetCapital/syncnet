@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-02T12:36:44.094Z",
+  "at": "2026-10-02T13:34:15.291Z",
   "passed": 105,
   "failed": 0,
   "results": [
@@ -146,7 +146,7 @@
     {
       "name": "N14 Count me in (X) = connect + ONE free signature, no transaction; the signed struct is platform \"x\" with the immutable numeric id in the v1 channelId field - never the username",
       "ok": true,
-      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790944570,\"expiry\":1806496570,\"nonce\":\"0x180e75f8d21071ae868dc7d156f1e709f2a2af73012fb3f49eb1984468ea23c8\"}"
+      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790948021,\"expiry\":1806500021,\"nonce\":\"0x242d8a2f41a3f302ee831a91c2ad5f978fef7c3e74bc40edf84177f7298ebea4\"}"
     },
     {
       "name": "N15 the signal is stored under the x:<id> ref and the creator is still not public",
@@ -171,7 +171,7 @@
     {
       "name": "N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: scopes EXACTLY \"tweet.read users.read\", PKCE S256, exact redirect URI, X-bound wallet state",
       "ok": true,
-      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=tweet.read+users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790945159.5ca0402f98ea938dda3fbec8b72ce4c3.274170bdf9982b2d120585967d1c67b2efee34aa95ccf129c3269550ce765ff5&code_challenge=KMbyb4inFAeTubcXlbTX8UpawkKgJ9HaQF8DiVbtYSc&code_challenge_method=S256"
+      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=tweet.read+users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790948609.df7b5a88d425ccbee0256fd4e69ab72b.c1017b8dc047f433366a129b20bfb88fd1801aa949fe303da7d804465d2f02d0&code_challenge=jqABcDEvulIW5pGH_MfiIt65lFISjxNVtxbhflW6Q7E&code_challenge_method=S256"
     },
     {
       "name": "N20 back on the creator page: session in the fragment is cleared, the manifest step shows the X display name and @username (not the numeric id), step 2 is named \"X\"",
@@ -509,12 +509,12 @@
       "detail": "0,0,0,0,0,"
     },
     {
-      "name": "V01 phase 5 changes NO html and NO stylesheet: labs-early.html, labs-early-creator.html, ui.css and v2.css are byte-identical to a8568ea (re-pin deliberately if a later phase changes them)",
+      "name": "V01 phase 5 changes NO html and NO stylesheet: labs-early.html and labs-early-creator.html are byte-identical to a8568ea; ui.css and v2.css to the main-sync pin (re-pin deliberately if a later phase changes them)",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "V04 the launch polish edits NO page and NO stylesheet: all 16 pages that carry the primary nav, ui.css and v2.css are byte-identical to af1954d (the EARLY nav item is created by sn-ui.js)",
+      "name": "V04 the launch polish edits NO page and NO stylesheet: all 16 pages that carry the primary nav, ui.css and v2.css are byte-identical to the main-sync pin: 14 of them are exactly the origin/main versions (the EARLY nav item is created by sn-ui.js)",
       "ok": true,
       "detail": ""
     },

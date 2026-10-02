@@ -16,6 +16,10 @@ const CHILD_BATCH=100;
 // arrive in server pages of PONS_PAGE. "Show all" reveals what is already loaded; "load more from PONS V2" fetches the
 // next server page. The two are never conflated, and nothing claims to be complete while the server has more.
 const PONS_PAGE=50;
+// Solana (Pump.fun V0): a pasted base58 mint is mapped directly, case preserved (lib/syncnet-assets.js), from
+// /api/pump-economy only — never through the EVM lookup, PAR, the Robinhood RPC or any metadata URL.
+const PUMP_PAGE=50;
+const Assets=window.SyncNetAssets||null;
 const CANONICAL=new Map([[SYNC.toLowerCase(),{rank:0,label:'SYNCNET NETWORK ASSET',symbol:'SYNC'}],[DEMO.toLowerCase(),{rank:1,label:'SYNCNET ORIGIN',symbol:'SYNCAT'}]]);
 let historyCoverage={mode:'unknown',count:0,indexed:0};
 const $=id=>document.getElementById(id);
@@ -29,6 +33,49 @@ const safeName=v=>{const x=cleanText(v);return x&&x.length<=96?x:''};
 const short=a=>valid(a)?`${a.slice(0,6)}…${a.slice(-4)}`:String(a||'');
 const caches={resolve:new Map(),meta:new Map()};
 let recentPromise=null,profilesPromise=null,tokenListPromise=null;
+// ---- Token media: ONE address-keyed path. Nothing here fetches; it only indexes data the page already loaded. ----
+// Priority for an exact lowercased contract: Registry profile.image, then the PAR launch logo. Never matched by symbol.
+// Values stay as stored (ipfs://… / /assets/… / https://…) and are rendered by window.SyncNetIpfs (gateway fallback chain).
+const profileLogos=new Map(),launchLogos=new Map();
+let logoReady=null;
+// `local` (trusted /assets/… files) is allowed ONLY for Registry profile images: a PAR launch can never borrow a SyncNet asset.
+const mediaOk=(v,local)=>{
+  const s=String(v??'').trim();
+  if(!s||s.length>512) return '';
+  if(s.startsWith('/')) return local&&/^\/assets\/[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s)&&!s.includes('..')?s:'';
+  const Ipfs=window.SyncNetIpfs;
+  return Ipfs&&Ipfs.display(s)?s:''; // ipfs://CID (validated) or https:// only; every other scheme renders nothing
+};
+// PAR's own `logo` (ipfs://) first: it alone carries the gateway fallback chain. `logoUrl` is its https gateway form.
+const launchMedia=d=>mediaOk(d?.logo)||mediaOk(d?.logoUrl);
+function indexLaunchLogos(list){
+  launchLogos.clear();
+  for(const d of list||[]){const a=tokenAddr(d),m=launchMedia(d);if(valid(a)&&m)launchLogos.set(a.toLowerCase(),m)}
+}
+function logoFor(address){
+  if(!valid(address)) return '';
+  const k=address.toLowerCase();
+  return profileLogos.get(k)||launchLogos.get(k)||'';
+}
+function ensureLogoIndex(){ // the same cached history/profile promises every renderer already shares: no extra requests
+  return logoReady||(logoReady=Promise.all([profiles(),fetchRecent()]).then(()=>{},()=>{}));
+}
+const avatarImg=(logo,address,letter)=>{
+  const Ipfs=window.SyncNetIpfs,l=String(letter||'').trim().charAt(0).toUpperCase()||'\u25c6';
+  return (Ipfs&&logo&&Ipfs.imgHtml(logo,{letter:l}))||`<img src="${esc(Ipfs?Ipfs.placeholder(address,l):'')}" alt="">`;
+};
+// Small inline avatar for text rows (sits inside the existing label line; no row grows).
+const avatar=(meta,big)=>{
+  const l=(meta.symbol&&meta.symbol!=='TOKEN'?meta.symbol:meta.name||'T').charAt(0);
+  return `<span class="tok-av${big?' lg':''}" data-ph-seed="${esc(meta.address||'')}" data-ph-letter="${esc(l)}">${avatarImg(meta.logo,meta.address,l)}</span>`;
+};
+// Non-IPFS (https) images have no gateway chain: on error they fall back to the deterministic placeholder, once.
+document.addEventListener('error',e=>{
+  const img=e.target;
+  if(!img||img.tagName!=='IMG'||img.dataset.ipfs!=null||img.dataset.phDone) return;
+  const box=img.closest&&img.closest('[data-ph-seed]');if(!box||!window.SyncNetIpfs) return;
+  img.dataset.phDone='1';img.src=window.SyncNetIpfs.placeholder(box.dataset.phSeed,box.dataset.phLetter);
+},true);
 let currentRoot=DEMO;
 // ---- Map UX: pressing MAP must always produce a visible consequence. ----
 let mapSeq=0,searchSeq=0;
@@ -101,7 +148,8 @@ async function profiles(){
   if(profilesPromise) return profilesPromise;
   profilesPromise=fetch('/syncnet-projects.json',{cache:'no-store'}).then(r=>r.ok?r.json():{projects:[]}).then(j=>{
     const map=new Map();
-    for(const p of (j?.projects||[])) if(valid(p?.token)) map.set(p.token.toLowerCase(),p);
+    profileLogos.clear();
+    for(const p of (j?.projects||[])) if(valid(p?.token)){map.set(p.token.toLowerCase(),p);const m=mediaOk(p?.profile?.image,true);if(m)profileLogos.set(p.token.toLowerCase(),m)}
     return map;
   }).catch(()=>new Map());
   return profilesPromise;
@@ -155,6 +203,7 @@ async function chainMeta(address){
 async function metaFor(address,launch,hintSymbol=''){
   const a=address||tokenAddr(launch);
   const profileMap=await profiles();
+  await ensureLogoIndex();
   const profile=valid(a)?profileMap.get(a.toLowerCase()):null;
   let base=null;
   if(launch){
@@ -163,7 +212,7 @@ async function metaFor(address,launch,hintSymbol=''){
   if(!base||base.symbol==='TOKEN') base=valid(a)?await chainMeta(a):{address:a,name:hintSymbol||'Token',symbol:hintSymbol||'TOKEN'};
   if(hintSymbol && (!base.symbol||base.symbol==='TOKEN')) base.symbol=hintSymbol;
   if(profile?.profile?.name) base.name=profile.profile.name;
-  return {...base,profile:profile||null,isLaunch:Boolean(launch)};
+  return {...base,profile:profile||null,isLaunch:Boolean(launch),logo:logoFor(a)};
 }
 async function fetchRecent(){
   if(recentPromise) return recentPromise;
@@ -192,7 +241,7 @@ async function fetchRecent(){
     const list=rows(body).slice(0,FALLBACK_LIMIT);
     historyCoverage={mode:'fallback',count:list.length,indexed:list.length};
     return list;
-  })().catch(e=>{recentPromise=null;historyCoverage={mode:'unavailable',count:0,indexed:0};throw e;});
+  })().then(list=>{indexLaunchLogos(list);return list}).catch(e=>{recentPromise=null;historyCoverage={mode:'unavailable',count:0,indexed:0};throw e;});
   return recentPromise;
 }
 async function mapLimit(items,limit,fn){
@@ -263,7 +312,7 @@ function provenanceMarkup(meta){
 }
 function node(meta,kind=''){
   const label=meta.symbol&&meta.symbol!=='TOKEN'?`$${meta.symbol}`:(meta.name||short(meta.address));
-  return `<a class="topology-node ${kind}" href="/network.html?token=${encodeURIComponent(meta.address)}"><strong>${esc(label)}</strong><span>${esc(short(meta.address))}</span>${provenanceMarkup(meta)}</a>`;
+  return `<a class="topology-node ${kind}" href="/network.html?token=${encodeURIComponent(meta.address)}"><strong>${avatar(meta)}${esc(label)}</strong><span>${esc(short(meta.address))}</span>${provenanceMarkup(meta)}</a>`;
 }
 /** One PONS V2 page for `root`: {enabled:false} | {enabled:true,error:true} | {enabled:true,total,items,nextCursor}. */
 async function ponsPage(root,cursor){
@@ -285,12 +334,12 @@ async function ponsCenterOf(address){
 function ponsMeta(item,profileMap){
   const a=String(item.token).toLowerCase(),profile=profileMap.get(a)||null;
   const symbol=safeSymbol(item.symbol)||'TOKEN',name=safeName(item.name)||(symbol!=='TOKEN'?symbol:'');
-  return {address:a,name:profile?.profile?.name||name||short(a),symbol,profile,isLaunch:true,pons:item};
+  return {address:a,name:profile?.profile?.name||name||short(a),symbol,profile,isLaunch:true,pons:item,logo:logoFor(a)};
 }
 function branchCard(x){
   const via=x.via?.symbol&&x.via.symbol!=='TOKEN'?`$${x.via.symbol}`:short(x.via?.address);
   const label=x.symbol&&x.symbol!=='TOKEN'?`$${x.symbol}`:(x.name||short(x.address));
-  return `<a class="branch-chip" href="/network.html?token=${encodeURIComponent(x.address)}"><strong>${esc(label)}</strong><span>shares ${esc(via)} · ${esc(provenance(x).label)}</span></a>`;
+  return `<a class="branch-chip" href="/network.html?token=${encodeURIComponent(x.address)}"><strong>${avatar(x)}${esc(label)}</strong><span>shares ${esc(via)} · ${esc(provenance(x).label)}</span></a>`;
 }
 // Pure: how many child cards to show after one more reveal step, and the copy for the controls.
 // `server` = {remaining, total} when the PONS V2 source still has unloaded pages: local reveal then says LOADED and a
@@ -308,8 +357,8 @@ function childView(total,shown,server){
     countNote:pend?` (showing ${s} of ${total} loaded)`:total<=CHILD_INITIAL?'':(s>=total?` (all ${total} shown)`:` (showing ${s} of ${total})`)
   };
 }
-function childMoreMarkup(v){
-  const server=v.server?`<button class="btn" type="button" data-child-server aria-controls="topologyChildren">LOAD MORE FROM PONS V2 · ${v.server.loaded} OF ${v.server.total} LOADED</button>`:'';
+function childMoreMarkup(v,source='PONS V2'){
+  const server=v.server?`<button class="btn" type="button" data-child-server aria-controls="topologyChildren">LOAD MORE FROM ${esc(source)} · ${v.server.loaded} OF ${v.server.total} LOADED</button>`:'';
   if(v.total<=CHILD_INITIAL) return server;
   const more=v.moreLabel?`<button class="btn" type="button" data-child-more aria-controls="topologyChildren">${esc(v.moreLabel)}</button>`:'';
   const less=v.canCollapse?`<button class="btn" type="button" data-child-collapse aria-controls="topologyChildren">SHOW FIRST ${CHILD_INITIAL}</button>`:'';
@@ -339,8 +388,8 @@ async function loadTopology(address,opts={}){
   if($('searchStatus')){$('searchStatus').className='asset-status';$('searchStatus').textContent='Mapping live connections…';}
   if($('topologyGraph')) $('topologyGraph').innerHTML='<div class="network-empty">Reading live PAR connections…</div>';
   if($('sameBranch')) $('sameBranch').innerHTML='';
-  if($('buildAround')) $('buildAround').href=`/build.html?with=${encodeURIComponent(address)}`;
-  if($('openProjectPage')) $('openProjectPage').href=`/project/${encodeURIComponent(address)}`;
+  if($('buildAround')){$('buildAround').hidden=false;$('buildAround').href=`/build.html?with=${encodeURIComponent(address)}`;}
+  if($('openProjectPage')){$('openProjectPage').hidden=false;$('openProjectPage').href=`/project/${encodeURIComponent(address)}`;}
   if($('openEconomy')) $('openEconomy').href=`/economy.html?root=${encodeURIComponent(String(address).toLowerCase())}`;
   if($('topologyTitle')) $('topologyTitle').innerHTML='MAPPING<br><span class="cyan">CONNECTIONS…</span>';
   if($('topologyMeta')) $('topologyMeta').textContent=`Reading PAR markets for ${short(address)}…`;
@@ -449,7 +498,7 @@ async function loadTopology(address,opts={}){
         <div class="topology-label">${isPonsCenter?'THIS TOKEN WAS LAUNCHED AGAINST':'THIS TOKEN IS CONNECTED TO'}</div>
         <div class="topology-row">${top}</div>
         <div class="topology-line"><span>${isPonsCenter?'LAUNCHED AGAINST · PONS V2':'MARKET'}</span></div>
-        <a class="topology-root" href="/project/${esc(address)}"><strong>${esc(rootLabel)}</strong><span>${esc(short(address))}</span>${provenanceMarkup(rootMeta)}</a>
+        <a class="topology-root" href="/project/${esc(address)}"><strong>${avatar(rootMeta,true)}${esc(rootLabel)}</strong><span>${esc(short(address))}</span>${provenanceMarkup(rootMeta)}</a>
         <div class="topology-line"><span>${withPons?'MARKET · PONS V2 LAUNCH PAIR':'MARKET'}</span></div>
         <div class="topology-label">${withPons?'PROJECTS USING THIS TOKEN AS A MARKET OR PONS V2 LAUNCH PAIR':'PROJECTS USING THIS TOKEN AS A MARKET'}</div>
         <div class="topology-row" id="topologyChildren">${bottom}</div>
@@ -512,6 +561,111 @@ async function loadTopology(address,opts={}){
     if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
   }
 }
+/** One Pump.fun page for a Solana mint: {enabled:false} | {enabled:true,error:true,status} | {enabled:true,total,items,nextCursor,…}. */
+async function pumpPage(mint,cursor){
+  try{
+    const r=await fetch(`/api/pump-economy?root=${encodeURIComponent(mint)}&limit=${PUMP_PAGE}${cursor?'&cursor='+encodeURIComponent(cursor):''}`,{cache:'no-store'});
+    const j=await r.json().catch(()=>({}));
+    if(j&&j.enabled===false) return {enabled:false};
+    if(!r.ok||!Array.isArray(j.items)) return {enabled:true,error:true,status:r.status};
+    return {enabled:true,total:Number(j.total)||0,items:j.items.filter(i=>typeof i?.mint==='string'&&Assets.isSolanaMint(i.mint)),nextCursor:typeof j.nextCursor==='string'&&j.nextCursor?j.nextCursor:null,
+      historyComplete:j.historyComplete===true,historyFromSlot:Number.isFinite(j.historyFromSlot)?j.historyFromSlot:null,stale:j.stale===true};
+  }catch{return {enabled:true,error:true,status:0}}
+}
+const shortMint=m=>String(m||'').length>12?`${m.slice(0,4)}…${m.slice(-4)}`:String(m||'');
+// Pump children are not linked: V0 has no child → root lookup, so a child mint cannot be mapped on its own yet.
+function pumpNode(it){
+  return `<span class="topology-node child" data-mint="${esc(it.mint)}" title="${esc(it.mint)}"><strong>${esc(shortMint(it.mint))}</strong><span>SOLANA${Number.isFinite(it.launchSlot)?' · slot '+esc(it.launchSlot.toLocaleString()):''}</span><em class="node-status auto">PUMP.FUN INDEXED</em></span>`;
+}
+async function loadSolanaTopology(mint,opts={}){
+  const reveal_=opts.reveal!==false;
+  const seq=++mapSeq;
+  currentRoot=mint;
+  const label=shortMint(mint);
+  if($('tokenSearch')) $('tokenSearch').value=mint;
+  if($('searchStatus')){$('searchStatus').className='asset-status';$('searchStatus').textContent='Mapping indexed Pump.fun launches…';}
+  if($('topologyGraph')) $('topologyGraph').innerHTML='<div class="network-empty">Reading indexed Pump.fun launches…</div>';
+  if($('sameBranch')) $('sameBranch').innerHTML='';
+  // Builder and Project Page are Robinhood Chain features: hidden for a Solana asset, restored by the next EVM map.
+  if($('buildAround')) $('buildAround').hidden=true;
+  if($('openProjectPage')) $('openProjectPage').hidden=true;
+  if($('openEconomy')) $('openEconomy').href=`/economy.html?root=${encodeURIComponent(mint)}`;
+  if($('topologyTitle')) $('topologyTitle').innerHTML='MAPPING<br><span class="cyan">CONNECTIONS…</span>';
+  if($('topologyMeta')) $('topologyMeta').textContent=`Reading Pump.fun launches for ${label}…`;
+  const section=showTopologySection();
+  if(section) section.setAttribute('aria-busy','true');
+  if(reveal_&&section) reveal(section,'start');
+
+  const pg=await pumpPage(mint,null);
+  if(seq!==mapSeq) return;
+  if(section) section.setAttribute('aria-busy','false');
+  if($('topologyTitle')) $('topologyTitle').innerHTML=`${esc(label)}<br><span class="cyan">IN CONTEXT.</span>`;
+  if($('profileState')){$('profileState').className='profile-state auto';$('profileState').innerHTML='<strong>INDEXED FROM SOLANA</strong> · Pump.fun launch records only, matched by mint address (exact case). No name, logo, Project Passport, verification, endorsement or affiliation is inferred.';}
+  const u=new URL(location.href);u.searchParams.set('token',mint);history.replaceState(null,'',u);
+  const V0='Indexed from Solana · Pump.fun non-SOL quote launches. Native-SOL Pump.fun launches are not included in this V0 index.';
+  if(!pg.enabled||pg.error){
+    const why=!pg.enabled?'Pump.fun discovery is not enabled on this deployment.':pg.status===400?'Pump.fun discovery cannot serve this mint.':'Pump.fun discovery is temporarily unavailable.';
+    if($('topologyMeta')) $('topologyMeta').textContent=`SOLANA · ${why}`;
+    if($('topologyGraph')) $('topologyGraph').innerHTML=`<div class="network-empty">${esc(why)} No relationship has been inferred.</div>`;
+    if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent=why;}
+    if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
+    return;
+  }
+  const st={total:pg.total,next:pg.nextCursor,loading:false,error:false,stale:pg.stale,historyComplete:pg.historyComplete,historyFromSlot:pg.historyFromSlot};
+  const kids=[],seen=new Set();
+  // Dedupe by the exact, case-sensitive mint; the root itself is never its own child.
+  const add=items=>{let n=0;for(const it of items||[]){if(it.mint===mint||seen.has(it.mint))continue;seen.add(it.mint);kids.push({mint:it.mint,launchSlot:it.launchSlot});n++}return n};
+  add(pg.items);
+  const serverState=()=>st.next?{remaining:Math.max(1,st.total-kids.length),loaded:kids.length,total:st.total}:null;
+  const coverage=()=>`${st.historyComplete?`Historical V0 coverage is complete${st.historyFromSlot!=null?' from slot '+st.historyFromSlot.toLocaleString():''}.`:'Historical coverage is still being indexed.'}${st.stale?' Index data may be stale; newer launches may be missing.':''} ${V0}`;
+  const metaText=v=>`SOLANA · ${st.total.toLocaleString()} PUMP.FUN CONNECTION${st.total===1?'':'S'}${v.countNote}. ${coverage()}${st.error?' Pump.fun discovery is temporarily unavailable; try again.':''}`;
+  let childState=childView(kids.length,Math.min(kids.length,CHILD_INITIAL),serverState());
+  if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
+  const bottom=kids.length?kids.slice(0,childState.shown).map(pumpNode).join(''):'<div class="topology-empty">No Pump.fun launch against this mint was found in the indexed non-SOL quote history.</div>';
+  if($('topologyGraph')) $('topologyGraph').innerHTML=`
+      <div class="topology-tree">
+        <div class="topology-label">THIS SOLANA ASSET</div>
+        <div class="topology-row"><div class="topology-empty">SyncNet does not read this Solana asset’s own markets in V0. The Pump.fun launches below were launched against it.</div></div>
+        <span class="topology-root" title="${esc(mint)}"><strong>${esc(label)}</strong><span>SOLANA ASSET</span></span>
+        <div class="topology-line"><span>MARKET · PUMP.FUN LAUNCH PAIR</span></div>
+        <div class="topology-label">PUMP.FUN LAUNCHES USING THIS TOKEN AS THEIR QUOTE ASSET</div>
+        <div class="topology-row" id="topologyChildren">${bottom}</div>
+        <div class="topology-more" id="topologyChildMore">${childMoreMarkup(childState,'PUMP.FUN')}</div>
+      </div>`;
+  // Same contract as the PONS path: local reveal re-slices what is loaded; only LOAD MORE FROM PUMP.FUN fetches.
+  const moreHost=$('topologyChildMore'),childHost=$('topologyChildren');
+  if(moreHost&&childHost){
+    const showChildren=(n,focusSel)=>{
+      const prev=childState.shown;
+      childState=childView(kids.length,n,serverState());
+      if(childState.shown>prev) childHost.insertAdjacentHTML('beforeend',kids.slice(prev,childState.shown).map(pumpNode).join(''));
+      else childHost.innerHTML=kids.slice(0,childState.shown).map(pumpNode).join('');
+      moreHost.innerHTML=childMoreMarkup(childState,'PUMP.FUN');
+      if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);
+      const f=moreHost.querySelector(focusSel)||moreHost.querySelector('button');
+      if(f) f.focus({preventScroll:true});
+    };
+    moreHost.addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;
+      if(b.hasAttribute('data-child-more')) showChildren(childState.nextShown,'[data-child-more]');
+      else if(b.hasAttribute('data-child-server')){
+        if(st.loading||!st.next) return;
+        st.loading=true;b.disabled=true;b.textContent='LOADING FROM PUMP.FUN…';
+        pumpPage(mint,st.next).then(p=>{
+          st.loading=false;
+          if(seq!==mapSeq) return;
+          if(!p.enabled||p.error){st.error=true;b.disabled=false;b.textContent='PUMP.FUN UNAVAILABLE · RETRY';if($('topologyMeta')) $('topologyMeta').textContent=metaText(childState);return}
+          st.error=false;st.total=p.total;st.next=p.nextCursor;st.stale=p.stale;st.historyComplete=p.historyComplete;st.historyFromSlot=p.historyFromSlot;
+          const added=add(p.items);
+          showChildren(childState.shown+added,'[data-child-server]');
+        });
+      }
+      else if(b.hasAttribute('data-child-collapse')){showChildren(CHILD_INITIAL,'[data-child-more]');reveal(childHost,'nearest');}
+    });
+  }
+  if($('searchStatus')){$('searchStatus').className='asset-status pass';$('searchStatus').textContent=`${label} (Solana) mapped below. Launch connection ≠ affiliation.`;}
+  if(reveal_&&focusIsNearSearch()) focusQuietly($('topologyTitle'));
+}
 async function searchTokens(raw){
   const seq=++searchSeq;
   setMapBusy(true);
@@ -528,6 +682,21 @@ async function searchTokensInner(raw,seq){
     return;
   }
   if(valid(q)){ await loadTopology(q); return; }
+  // Solana: a canonical base58 pubkey is mapped directly and exactly as typed (never lowercased, never looked up by name).
+  if(Assets&&Assets.isSolanaPubkey(q)){
+    if(Assets.isNativeSol(q)){
+      if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='Native SOL is not a token mint. Pump.fun launches against native SOL are not included in this V0 index.';}
+      flashStatus();
+      return;
+    }
+    await loadSolanaTopology(q); return;
+  }
+  // Mint-shaped but not a canonical 32-byte key (e.g. a mis-cased or truncated mint): say so, never substitute.
+  if(Assets&&q.length>=32&&q.length<=44&&Assets.base58Decode(q)){
+    if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='That is not a valid Solana mint. Solana mints are case-sensitive: paste the exact base58 address.';}
+    flashStatus();
+    return;
+  }
   const normalized=cleanText(q).replace(/^\$/,'').toLowerCase();
   if(normalized.length>64){
     if($('searchStatus')){$('searchStatus').className='asset-status fail';$('searchStatus').textContent='Search terms are limited to 64 characters. Paste a contract address for an exact lookup.';}
@@ -561,7 +730,7 @@ async function searchTokensInner(raw,seq){
       if(!(exact||prefix||contains))return;
       seen.add(address.toLowerCase());
       const canonical=CANONICAL.get(address.toLowerCase())||(profile?.registry?.canonical?{rank:2,label:profile.registry.label||'RECORDED CANONICAL ASSET'}:null);
-      candidates.push({address,name:cleanNm||cleanSym||'Token',symbol:cleanSym||'TOKEN',profile,launch,source,score:exact?0:prefix?1:2,canonical,usage:usage.get(address.toLowerCase())||0});
+      candidates.push({address,name:cleanNm||cleanSym||'Token',symbol:cleanSym||'TOKEN',logo:logoFor(address),profile,launch,source,score:exact?0:prefix?1:2,canonical,usage:usage.get(address.toLowerCase())||0});
     };
 
     // 1) Recorded SyncNet projects: strongest human-readable source.
@@ -605,7 +774,7 @@ async function searchTokensInner(raw,seq){
     if(exacts.length===1&&!ambiguousExact){ await loadTopology(exacts[0].address); return; }
     if($('searchStatus')){$('searchStatus').className='asset-status pass';$('searchStatus').textContent=`${list.length} possible match${list.length===1?'':'es'} found. Choose one to map.`;}
     if(host){
-      host.innerHTML=list.map(x=>{const pv=provenance({profile:x.profile,address:x.address,symbol:x.symbol,isLaunch:Boolean(x.launch)});const label=x.symbol&&x.symbol!=='TOKEN'?`$${x.symbol}`:x.name;const status=x.canonical?.label||pv.label;const cls=x.canonical?'network':pv.cls;const use=x.usage?` · used by ${x.usage} market${x.usage===1?'':'s'}`:'';const sc=symbolCounts.get(String(x.symbol||'').toUpperCase())||0;const collision=sc>1?` · ${sc} tokens share this ticker`:'';return `<button class="search-match" type="button" data-map-address="${esc(x.address)}"><strong>${esc(label)}</strong><span>${esc(x.name)} · ${esc(short(x.address))}${esc(use)}${esc(collision)}</span><em class="node-status ${cls}">${esc(status)}</em></button>`}).join('');
+      host.innerHTML=list.map(x=>{const pv=provenance({profile:x.profile,address:x.address,symbol:x.symbol,isLaunch:Boolean(x.launch)});const label=x.symbol&&x.symbol!=='TOKEN'?`$${x.symbol}`:x.name;const status=x.canonical?.label||pv.label;const cls=x.canonical?'network':pv.cls;const use=x.usage?` · used by ${x.usage} market${x.usage===1?'':'s'}`:'';const sc=symbolCounts.get(String(x.symbol||'').toUpperCase())||0;const collision=sc>1?` · ${sc} tokens share this ticker`:'';return `<button class="search-match" type="button" data-map-address="${esc(x.address)}"><strong>${avatar(x)}${esc(label)}</strong><span>${esc(x.name)} · ${esc(short(x.address))}${esc(use)}${esc(collision)}</span><em class="node-status ${cls}">${esc(status)}</em></button>`}).join('');
       host.querySelectorAll('[data-map-address]').forEach(b=>b.addEventListener('click',()=>{host.innerHTML='';loadTopology(b.dataset.mapAddress)}));
       // Ambiguous: take the user to the chooser, not to a map SyncNet cannot pick authoritatively.
       host.setAttribute('aria-label','Possible matches — choose one to map');
@@ -619,8 +788,9 @@ async function searchTokensInner(raw,seq){
 }
 // Images: window.SyncNetIpfs is the one canonical renderer (Pinata → ipfs.io → dweb.link → placeholder).
 function card(d){
-  const token=tokenAddr(d),sym=tokenSym(d),name=safeName(d.name||d.tokenName)||sym||'Token',logoHtml=window.SyncNetIpfs.imgHtml(d.logoUrl||d.logo,{letter:(sym||'S').charAt(0)}),ms=markets(d);
-  return `<article class="network-card"><div class="network-card-top"><div class="network-card-logo">${logoHtml||'SYNC'}</div><div><h3>${esc(name)}</h3><div class="ticker">$${esc(sym)}</div></div></div><div class="chip-row">${ms.map(m=>`<span class="chip">${esc(sym)} / ${esc(pairSym(m)||'TOKEN')}</span>`).join('')}</div><p>Observable market connection on PAR. No affiliation is implied.</p><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(token)}">MAP</a><a class="btn" href="/build.html?with=${esc(token)}">CREATE WITH IT</a></div></article>`;
+  const token=tokenAddr(d),sym=tokenSym(d),name=safeName(d.name||d.tokenName)||sym||'Token',letter=(sym||'S').charAt(0),ms=markets(d);
+  const logoHtml=avatarImg(logoFor(token)||launchMedia(d),token,letter);
+  return `<article class="network-card"><div class="network-card-top"><div class="network-card-logo" data-ph-seed="${esc(token)}" data-ph-letter="${esc(letter)}">${logoHtml}</div><div><h3>${esc(name)}</h3><div class="ticker">$${esc(sym)}</div></div></div><div class="chip-row">${ms.map(m=>`<span class="chip">${esc(sym)} / ${esc(pairSym(m)||'TOKEN')}</span>`).join('')}</div><p>Observable market connection on PAR. No affiliation is implied.</p><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(token)}">MAP</a><a class="btn" href="/build.html?with=${esc(token)}">CREATE WITH IT</a></div></article>`;
 }
 async function loadRecentSync(){
   const grid=$('networkGrid');if(!grid)return;
@@ -655,7 +825,7 @@ async function loadRegistryPreview(){
     if(!items.length){grid.innerHTML='<div class="network-empty">No recorded SyncNet projects yet.</div>';return;}
     const cards=await mapLimit(items.slice(0,6),4,async p=>{
       const d=await resolve(p.token),m=await metaFor(p.token,d),pv=provenance(m),sym=m.symbol&&m.symbol!=='TOKEN'?`$${m.symbol}`:(m.name||short(m.address));
-      return `<article class="registry-mini"><div><span class="registry-status ${pv.cls}">${esc(pv.label)}</span><h3>${esc(sym)}</h3><p>${esc(short(p.token))}</p></div><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(p.token)}">MAP</a><a class="btn" href="/project/${esc(p.token)}">PROJECT</a></div></article>`;
+      return `<article class="registry-mini"><div><span class="registry-status ${pv.cls}">${esc(pv.label)}</span><h3>${avatar(m,true)}${esc(sym)}</h3><p>${esc(short(p.token))}</p></div><div class="network-actions"><a class="btn primary" href="/network.html?token=${esc(p.token)}">MAP</a><a class="btn" href="/project/${esc(p.token)}">PROJECT</a></div></article>`;
     });
     grid.innerHTML=cards.filter(Boolean).join('');
   }catch{grid.innerHTML='<div class="network-empty">Registry preview is temporarily unavailable.</div>'}
@@ -675,7 +845,7 @@ function openExternal(url){
 }
 $('mapToken')?.addEventListener('click',()=>searchTokens($('tokenSearch').value.trim()));
 $('tokenSearch')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(!$('mapToken').disabled)$('mapToken').click();}});
-$('refreshNetwork')?.addEventListener('click',()=>{recentPromise=null;loadRecentSync();});
+$('refreshNetwork')?.addEventListener('click',()=>{recentPromise=null;logoReady=null;loadRecentSync();});
 $('openTrends')?.addEventListener('click',()=>{
   const q=attentionQuery();if(!q)return;
   const geo=$('attentionGeo').value,time=$('attentionTime').value;
@@ -696,6 +866,7 @@ const initial=new URLSearchParams(location.search).get('token');
 if($('topologyGraph')){
   // Arriving with ?token= (e.g. from a MAP link) is an explicit map request: show the result.
   if(valid(initial)) loadTopology(initial,{reveal:true});
+  else if(Assets&&Assets.isSolanaMint(String(initial||''))) loadSolanaTopology(initial,{reveal:true});
   else if(document.body.dataset.topologyDemo!=='false') loadTopology(DEMO,{reveal:false});
 }
 loadRecentSync();
