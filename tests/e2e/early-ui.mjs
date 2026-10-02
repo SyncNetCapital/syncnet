@@ -193,6 +193,24 @@ try {
     check('V02 public card shows no wallet, amount, tx hash or intent id', !body.includes(W.fan) && !body.includes('1500000') && !body.includes('1.5 USDG') && !body.includes(intentId));
     check('V03 public card says what is not shown', /Not shown: .*transaction/.test(body));
     check('V04 no overflow, no JS errors', (await overflow(page)) <= 1 && errs.length === 0, errs.join(' | '));
+    // snapshot present: the list names all three attestations and the snapshot explanation is shown
+    const listWith = await page.textContent('#eCList');
+    check('V05 snapshot attestation present → "What this verifies" lists identity, manifest AND audience snapshot attestations; the snapshot explanation is shown', /creator identity attestation/.test(listWith) && /creator manifest attestation/.test(listWith) && /audience snapshot attestation/.test(listWith) && (await page.$eval('#eCAudNote', (e) => e.hidden)) === false && /approximate, dated snapshot/.test(await page.textContent('#eCAudNote')));
+    // snapshot absent for the transfer's day: the same page must not claim one
+    const shareId = shareUrl.split('/').pop();
+    const apiCard = await (await fetch(BASE + '/api/early?view=card&shareId=' + shareId)).json();
+    const snapKey = 'early:snap:v1:' + CH + ':' + apiCard.card.supportedOn;
+    const snapSaved = MAP.get(snapKey);
+    MAP.delete(snapKey);
+    try {
+      await page.reload();
+      await page.waitForFunction(() => document.getElementById('eCName').textContent === 'ALICE', null, { timeout: 15000 });
+      const bodyNo = await page.textContent('body');
+      const listNo = await page.textContent('#eCList');
+      check('V06 no snapshot attestation → card says "Audience then: unavailable" and does NOT list an audience snapshot attestation', /Audience then: unavailable/.test(bodyNo) && !/audience snapshot attestation/.test(listNo) && /creator identity attestation/.test(listNo) && /creator manifest attestation/.test(listNo));
+      check('V07 no snapshot attestation → the "approximate, dated snapshot … never changes afterwards" sentence is hidden (not in the visible text)', (await page.$eval('#eCAudNote', (e) => e.hidden)) === true && !/never changes afterwards/.test(await page.evaluate(() => document.body.innerText)));
+      check('V08 no snapshot attestation → wallet, amount, transaction and intent id still absent from the page', !bodyNo.includes(W.fan) && !bodyNo.includes('1500000') && !bodyNo.includes(intentId) && /Not shown: .*transaction/.test(bodyNo));
+    } finally { MAP.set(snapKey, snapSaved); }
     await c.close();
   }
   // ============================================================================================ 5. ambiguous path: two identical transfers → one conditional signature

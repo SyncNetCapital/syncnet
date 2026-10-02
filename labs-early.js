@@ -321,6 +321,8 @@
     $('eCWhat').textContent = v.what;
     $('eCList').innerHTML = v.independentlyVerifiable.map((x) => `<li>${esc(x)}</li>`).join('');
     $('eCNot').textContent = v.notShown.length ? 'Not shown: ' + v.notShown.join('; ') + '.' : '';
+    // the snapshot explanation applies only when a snapshot exists (approximate or hidden), never when it is unavailable
+    $('eCAudNote').hidden = !(c.audienceThen && (c.audienceThen.state === 'approximate' || c.audienceThen.state === 'hidden'));
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();

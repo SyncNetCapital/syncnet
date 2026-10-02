@@ -12,6 +12,7 @@ const require = createRequire(import.meta.url);
 for (const n of ['https', 'http', 'net', 'tls']) { const m = require(n); for (const f of ['request', 'get', 'connect', 'createConnection']) if (typeof m[f] === 'function') m[f] = () => { throw new Error('real network access in tests'); }; }
 console.log = ((orig) => (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) return; orig(...a); })(console.log);
 const early = require(path.join(ROOT, 'netlify/functions/early.js'));
+const { earlyConfig, signer: makeSigner } = require(path.join(ROOT, 'netlify/lib/early-config.js'));
 const results = []; let failures = 0;
 function check(name, cond, detail = '') { results.push({ name, ok: Boolean(cond), detail: String(detail).slice(0, 400) }); if (!cond) { failures++; process.stdout.write('FAIL ' + name + ' :: ' + String(detail).slice(0, 400) + '\n'); } }
 
@@ -315,6 +316,22 @@ let M1; // manifest v1 hash for CH
   check('F06 public card: creator, date, audience, "SYNC Proof verified"; NO wallet, amount or tx hash', view.card.headline === 'EARLY' && view.card.line === 'I WAS THERE WHEN.' && view.card.creator === 'Alice' && view.card.verified === 'SYNC Proof verified' && view.card.wallet === null && view.card.amount === null && view.card.transaction === null && !text.includes(W.fan) && !text.includes('5000000') && !text.includes(I5.intentId));
   check('F07 public card states what is and is not independently verifiable', view.verification.notShown.some((x) => /transaction/.test(x)) && view.verification.independentlyVerifiable.includes('creator identity attestation'));
   check('F08 public card carries attestations that verify against the registry', view.verification.attestations.length >= 2 && view.verification.attestations.every((a) => E.verifyAttestation(a, TEST_KEYS_FILE).ok));
+  // The card claims only attestations that exist for THIS receipt (no false "audience snapshot attestation" claim).
+  const hasType = (v, t) => v.verification.attestations.some((a) => a.type === t);
+  // In this suite the clock has advanced past the join day, so the transfer's UTC day has NO audience snapshot: the
+  // exact scenario of the reported bug.
+  check('F08a NO snapshot attestation → audienceThen "unavailable" and the card does NOT claim an audience snapshot attestation', view.card.audienceThen.state === 'unavailable' && !hasType(view, 'audience-snapshot') && !view.verification.independentlyVerifiable.includes('audience snapshot attestation'));
+  check('F08b NO snapshot attestation → the claims that remain are exactly the attestations returned (identity + manifest), each verifiable', view.verification.independentlyVerifiable.join('|') === 'creator identity attestation|creator manifest attestation' && view.verification.attestations.length === 2 && view.verification.attestations.every((a) => E.verifyAttestation(a, TEST_KEYS_FILE).ok));
+  check('F08c NO snapshot attestation → wallet, amount, transaction and revealed fields stay hidden by default (privacy unchanged)', view.card.wallet === null && view.card.amount === null && view.card.transaction === null && view.card.revealed.length === 0 && view.verification.notShown.length === 3 && !text.includes(W.fan) && !text.includes('5000000') && !text.includes(I5.intentId));
+  // Now create a REAL audience-snapshot attestation for the transfer's day (same code path as enrolment/the daily job).
+  const dayT = Math.floor(Date.parse(view.card.supportedOn + 'T12:00:00Z') / 1000);
+  const snapKey = 'early:snap:v1:' + CH + ':' + view.card.supportedOn;
+  const cfgNow = earlyConfig({ env: ENV, store, now: () => clock.now(), keysFile: TEST_KEYS_FILE });
+  await early._internals.enrolmentSnapshot({ store, signer: makeSigner(ENV, cfgNow) }, CH, { title: 'Alice', subscriberCount: 1234, hiddenSubscriberCount: false, at: dayT }, dayT, view.card.supportedOn);
+  const withSnap = (await get('card', { shareId: c1.j.shareId })).j;
+  MAP.delete(snapKey); // leave the fixtures as they were for the checks below
+  check('F08d snapshot attestation present → the hidden card DOES claim identity, manifest and audience snapshot attestations, and each really exists', MAP.size > 0 && withSnap.card.audienceThen.state === 'approximate' && hasType(withSnap, 'creator-identity') && hasType(withSnap, 'creator-manifest') && hasType(withSnap, 'audience-snapshot') && withSnap.verification.independentlyVerifiable.join('|') === 'creator identity attestation|creator manifest attestation|audience snapshot attestation' && withSnap.verification.attestations.every((a) => E.verifyAttestation(a, TEST_KEYS_FILE).ok), JSON.stringify(withSnap.verification.independentlyVerifiable));
+  check('F08e snapshot attestation present → wallet, amount and transaction still hidden by default', withSnap.card.wallet === null && withSnap.card.amount === null && withSnap.card.transaction === null && withSnap.verification.notShown.length === 3);
   const notFinal = await post({ action: 'card-create', receiptId: (await get('receipt', { intent: globalThis.__I1.intentId })).j.receipt.receiptId }, { session: s.j.session });
   check('F09 no card for a CONFIRMED (not yet FINALIZED) receipt', notFinal.s === 409 && notFinal.j.code === 'not_final');
   const ev = await post({ action: 'card-event', shareId: c1.j.shareId, event: 'link_copied' }, { session: s.j.session });

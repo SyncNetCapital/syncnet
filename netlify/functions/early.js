@@ -734,7 +734,8 @@ async function cardView(ctx) {
     },
     verification: {
       what: 'SyncNet holds a fan-signed support intent and matched it to exactly one successful on-chain transfer to this creator’s verified wallet on this date, under the public rule ' + E.SCHEMA.matching + '.',
-      independentlyVerifiable: revealed.includes('transaction') ? ['transfer', 'fan signature', 'creator manifest', 'attestations'] : ['creator identity attestation', 'creator manifest attestation', 'audience snapshot attestation'],
+      // Hidden card: claim only the attestations that actually exist for this receipt (an audience snapshot may be missing).
+      independentlyVerifiable: revealed.includes('transaction') ? ['transfer', 'fan signature', 'creator manifest', 'attestations'] : [['creator-identity', 'creator identity attestation'], ['creator-manifest', 'creator manifest attestation'], ['audience-snapshot', 'audience snapshot attestation']].filter(([type]) => attestations.some((a) => a.type === type)).map(([, label]) => label),
       notShown: revealed.includes('transaction') ? [] : ['supporter wallet', 'amount', 'transaction (hidden by the holder; without it the transfer itself cannot be independently checked)'],
       attestations, receiptSchema: E.SCHEMA.receipt, keys: '/api/early?view=keys',
     },
