@@ -519,8 +519,14 @@ leaf = keccak256( 0x00 ‖ utf8(leafType) ‖ 0x00 ‖ payload )
 ```
 Only one leaf type exists in v1. (Intent commitments were considered and removed, §10.3.)
 Leaves are sorted ascending as 32-byte integers, de-duplicated. Internal node = `keccak256(0x01 ‖ left ‖ right)`;
-an odd level duplicates its last node. Root of a single leaf = that leaf. Empty day: root = `keccak256(0x02 ‖ D)` and
-is still anchored (so "no attestations that day" is itself anchored).
+an odd level duplicates its last node. Root of a single leaf = that leaf. **Empty day (amended 3 Oct 2026, canary
+finding):** a day with no attestation leaves is not built, not anchored and not submitted to OpenTimestamps; no record is
+persisted for it (it creates no on-chain transaction and no calendar request). `keccak256(0x02 ‖ D)` remains defined only
+as the date-specific constant `emptyRoot(D)`; an earlier version anchored empty days and that is withdrawn. Absence of a
+bundle for a day therefore means "no attestations that day", and a bundle record with zero leaves is ignored by the job.
+**Gas price (same amendment):** the anchor transaction's gas price is `ceil(1.5 × max(eth_gasPrice, latest base fee))`
+(the quote can already be below the block base fee at broadcast); above the 5 gwei ceiling the attempt fails closed and
+is retried later; the ceiling is never raised.
 
 Published: `GET ?view=bundle&date=D` → `{date, leafCount, leaves:[{type, payload}], root, anchors}`; anyone can
 recompute. Inclusion proof: `{leaf, leafIndex, siblings:[{hash, side:'L'|'R'}], root}`.

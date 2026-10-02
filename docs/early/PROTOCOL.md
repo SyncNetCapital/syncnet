@@ -65,8 +65,9 @@ an anchored bundle.
 ## 6. Bundles and anchors
 
 Per UTC day `D`: `leaf = keccak256(0x00 ‖ utf8("attestation") ‖ 0x00 ‖ attestationId)`; leaves sorted ascending as
-256-bit integers, de-duplicated; node = `keccak256(0x01 ‖ left ‖ right)`, odd levels duplicate the last node; empty day
-root = `keccak256(0x02 ‖ utf8(D))`. Public: `/api/early?view=bundle&date=D` → leaves, root, anchors.
+256-bit integers, de-duplicated; node = `keccak256(0x01 ‖ left ‖ right)`, odd levels duplicate the last node. A day with
+no leaves has **no bundle**: nothing is persisted, anchored or submitted to OpenTimestamps for it (so "no bundle for D" =
+"no attestations on D"). Public: `/api/early?view=bundle&date=D` → leaves, root, anchors (or `built:false`).
 
 Robinhood anchor: a transaction from the registry anchor address to **itself**, value 0, `data = "SYNC" ‖ 0x01 ‖ root ‖ utf8(D)`
 (47 bytes). Anchor time = its block timestamp. OpenTimestamps: the message stamped is `sha256(root bytes)` (the

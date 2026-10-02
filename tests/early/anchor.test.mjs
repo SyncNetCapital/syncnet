@@ -49,6 +49,19 @@ resetStore(); resetPc();
   throws('A10 anchor tx refuses a bad root / date', () => Tx.anchorTransaction({ signer: anchorKey, chainId: 4663, nonce: 0, gasPrice: 1n, gasLimit: 60000n, root: '0x12', date: '2026-09-29' }));
   check('A11 the anchor code path has no way to name another destination or a value', !('to' in a.fields && a.fields.to !== a.fields.from) && a.fields.value === '0' && !/value:\s*BigInt\(value\)/.test('') && Tx.anchorTransaction.length === 1);
   check('A12 verifyAnchorTx accepts the mined shape and rejects another sender', Tx.verifyAnchorTx({ from: W.anchor, to: W.anchor, value: '0x0', input: a.fields.data }, W.anchor).ok && !Tx.verifyAnchorTx({ from: W.attacker, to: W.anchor, value: '0x0', input: a.fields.data }, W.anchor).ok && !Tx.verifyAnchorTx({ from: W.anchor, to: W.anchor, value: '0x1', input: a.fields.data }, W.anchor).ok);
+  // ---- gas-price headroom (the live incident: quote 33,082,000 < base fee 33,198,000 → "max fee per gas less than block base fee")
+  check('A13 the ceiling is still exactly 5 gwei', Tx.MAX_GAS_PRICE_WEI === 5000000000n);
+  check('A14 headroom: ceil(quote × 1.5); the incident quote becomes comfortably above the incident base fee', Tx.anchorGasPrice(33082000n) === 49623000n && Tx.anchorGasPrice(33082000n) > 33198000n && Tx.anchorGasPrice(100000000n) === 150000000n && Tx.anchorGasPrice(3n) === 5n && Tx.anchorGasPrice(1n) === 2n);
+  check('A15 the latest base fee is used when it is higher than the quote (headroom applies to the larger value)', Tx.anchorGasPrice(33082000n, 33198000n) === 49797000n && Tx.anchorGasPrice(33198000n, 33082000n) === 49797000n && Tx.anchorGasPrice(100n, 0n) === 150n && Tx.anchorGasPrice(100n, null) === 150n);
+  check('A16 exactly at the ceiling is allowed (base 3,333,333,333 → 5,000,000,000)', Tx.anchorGasPrice(3333333333n) === Tx.MAX_GAS_PRICE_WEI);
+  throws('A17 one wei over the ceiling after headroom fails closed (base 3,333,333,334 → 5,000,000,001), never clamped', () => Tx.anchorGasPrice(3333333334n), /above the ceiling/);
+  throws('A18 a quote above the ceiling fails closed', () => Tx.anchorGasPrice(Tx.MAX_GAS_PRICE_WEI + 1n), /above the ceiling/);
+  throws('A19 a base fee above the ceiling fails closed even when the quote is low', () => Tx.anchorGasPrice(1000n, Tx.MAX_GAS_PRICE_WEI), /above the ceiling/);
+  throws('A20 zero / missing price is refused', () => Tx.anchorGasPrice(0n, 0n), /no usable gas price/);
+  throws('A21 anchorTransaction independently keeps refusing a price above the ceiling (headroom helper cannot bypass it)', () => Tx.anchorTransaction({ signer: anchorKey, chainId: 4663, nonce: 0, gasPrice: Tx.anchorGasPrice(3333333333n) + 1n, gasLimit: 60000n, root, date: '2026-09-29' }), /ceiling/);
+  const headroomTx = Tx.anchorTransaction({ signer: anchorKey, chainId: 4663, nonce: 1, gasPrice: Tx.anchorGasPrice(33082000n, 33198000n), gasLimit: 60000n, root, date: '2026-09-29' });
+  const hd = Tx.decodeSigned(headroomTx.raw);
+  check('A22 the headroom price still yields exactly the anchor transaction (self-transfer, value 0, exact calldata, chain 4663)', hd.gasPrice === 49797000n && hd.from === W.anchor && hd.to === W.anchor && hd.value === 0n && hd.chainId === 4663n && hd.data === E.anchorCalldata(root, '2026-09-29') && Core.hexToBytes(hd.data).length === 47);
 }
 
 // ============================================================================================ B. OpenTimestamps
@@ -97,12 +110,21 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   const M1 = E.digest('CreatorManifest', m);
   const today = E.utcDate(nowSec());
   check('C01 seed: creator active, 3 leaves queued for today', act.s === 201 && (await store.smembers('early:bundle-queue:v1:' + today)).length === 3);
+  const calBefore0 = CAL.calls.length, sentBefore0 = (pc.sent || []).length;
   const r0 = await job();
-  check('C02 today is never built; the look-back builds earlier (empty) days with date-specific empty roots', !r0.j.report.built.includes(today) && !MAP.has('early:bundle:v1:' + today) && r0.j.report.built.length >= 1 && JSON.parse(MAP.get('early:bundle:v1:' + E.utcDate(nowSec() - 3 * 86400)).value).root === E.emptyRoot(E.utcDate(nowSec() - 3 * 86400)));
-  clock.advance(86400 + 1500); syncHead(); // 00:25 UTC next day
+  check('C02 EMPTY DAYS: the 30-day look-back persists NO bundle at all (no record, no index entry), sends NO anchor tx and makes NO OpenTimestamps request; today is never built', r0.j.report.built.length === 0 && !MAP.has('early:bundle:v1:' + today) && ![...MAP.keys()].some((k) => k.startsWith('early:bundle:v1:')) && !MAP.has('early:bundles:v1') && (pc.sent || []).length === sentBefore0 && CAL.calls.length === calBefore0 && Object.keys(r0.j.report.anchored).length === 0 && Object.keys(r0.j.report.ots).length === 0, JSON.stringify(r0.j.report));
+  const noop = await anchor._internals.buildBundle(store, '2020-01-01', new Date().toISOString());
+  check('C02b buildBundle on a day with zero queued leaves is a clear no-op: {built:false, empty:true}, nothing persisted', noop.built === false && noop.empty === true && !MAP.has('early:bundle:v1:2020-01-01') && !(await store.smembers('early:bundles:v1')).includes('2020-01-01'));
+  // (isolated store: this must not leave a real bundle in the shared state the rest of the section reasons about)
+  const side = require(path.join(ROOT, 'netlify/lib/store.js')).createStore({ map: new Map(), now: () => clock.now() });
+  const first = await anchor._internals.buildBundle(side, '2020-01-02', new Date().toISOString());
+  await side.sadd('early:bundle-queue:v1:2020-01-02', E.leafHash('attestation', rnd32()));
+  const late = await anchor._internals.buildBundle(side, '2020-01-02', new Date().toISOString());
+  check('C02c a leaf queued for a day that was empty on an earlier run is built normally on the next run (nothing was frozen empty)', first.empty === true && late.built === true && late.bundle.leafCount === 1);
+  clock.advance(86400 + 1500); syncHead(); // next day
   const r1 = await job();
   const b = JSON.parse(MAP.get('early:bundle:v1:' + today).value);
-  check('C03 yesterday built: sorted de-duplicated leaves, root reproducible', r1.j.report.built.includes(today) && b.leafCount === 3 && E.merkleRoot(E.sortLeaves(b.leaves), today) === b.root && b.leaves.every((l, i) => i === 0 || BigInt(b.leaves[i - 1]) < BigInt(l)));
+  check('C03 the one day WITH leaves is built (and only that one): sorted de-duplicated leaves, root reproducible', r1.j.report.built.length === 1 && r1.j.report.built.includes(today) && b.leafCount === 3 && E.merkleRoot(E.sortLeaves(b.leaves), today) === b.root && b.leaves.every((l, i) => i === 0 || BigInt(b.leaves[i - 1]) < BigInt(l)));
   check('C04 anchor tx sent once, write-ahead recorded before broadcast, self-transfer with the root', r1.j.report.anchored[today] === 'sent' && b.anchors.robinhood.status === 'sent' && pc.sent.length >= 1 && (() => { const d = Tx.decodeSigned(pc.sent[pc.sent.length - 1]); return d.from === W.anchor && d.to === W.anchor && d.value === 0n && E.decodeAnchorCalldata(d.data).root === b.root; })());
   check('C05 OTS submitted with honest wording', b.anchors.opentimestamps.status === 'submitted' && /Bitcoin-verifiable later/.test(b.anchors.opentimestamps.note) && !/anchored in Bitcoin/i.test(JSON.stringify(b)));
   const sentBefore = pc.sent.length;
@@ -110,7 +132,7 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   const b2 = JSON.parse(MAP.get('early:bundle:v1:' + today).value);
   check('C06 next run: the mined receipt confirms the anchor; nothing is re-sent', r2.j.report.anchored[today] === 'confirmed' && b2.anchors.robinhood.status === 'confirmed' && /^\d+$/.test(b2.anchors.robinhood.blockNumber) && pc.sent.length === sentBefore);
   // a straggler attestation for the built day moves to the next unbuilt day
-  const { signer } = require(path.join(ROOT, 'netlify/lib/early-config.js'));
+  const { signer, earlyConfig } = require(path.join(ROOT, 'netlify/lib/early-config.js'));
   const Attest = require(path.join(ROOT, 'netlify/lib/early-attest.js'));
   const bd = await Attest.bundleDateFor(store, nowSec() - 86400 - 1000);
   check('C07 bundleDate rule: an attestation issued "yesterday" after yesterday was built goes to the next unbuilt day', bd === E.utcDate(nowSec()));
@@ -127,17 +149,64 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   CAL.upgrades.set(pend.commitment.slice(2), Ots.bitcoinTimestamp(910000));
   const r3 = await job();
   check('C11 OTS upgrade → bitcoin-verifiable with the height recorded', r3.j.report.upgraded[today] === 'bitcoin-verifiable' && JSON.parse(MAP.get('early:bundle:v1:' + today).value).anchors.opentimestamps.bitcoinHeights.includes(910000));
+  // a real attestation leaf for the CURRENT day (the day the next section anchors); days without leaves are never anchored
+  const attSigner = signer(ENV, earlyConfig({ env: ENV, store, now: () => clock.now(), keysFile: TEST_KEYS_FILE }));
+  const seedLeaf = async () => { const d = await Attest.bundleDateFor(store, nowSec()); await Attest.issue(store, attSigner, { type: 'audience-snapshot', subject: { channelId: CH }, claims: { channelId: CH, dateUTC: d, subscriberCount: 1, hiddenSubscriberCount: false, title: 'seed', fetchedAt: nowSec(), source: 'test' }, issuedAt: nowSec(), bundleDate: d }); return d; };
+  const seeded2 = await seedLeaf();
   // kill switches
   clock.advance(86400); syncHead();
   const r4 = await job({ env: { ...ENV, SYNCNET_EARLY_ANCHOR_DISABLED: 'true' } });
   const day2 = E.utcDate(nowSec() - 86400);
+  check('C11b the seeded day is the day that was built (a day WITH a leaf)', day2 === seeded2 && JSON.parse(MAP.get('early:bundle:v1:' + day2).value).leafCount === 1);
   check('C12 SYNCNET_EARLY_ANCHOR_DISABLED: bundles still build and OTS still submits, no chain tx', r4.j.report.anchorDisabled === true && r4.j.report.built.includes(day2) && !(day2 in r4.j.report.anchored) && JSON.parse(MAP.get('early:bundle:v1:' + day2).value).anchors.robinhood === null);
   const r5 = await job({ env: { ...ENV, SYNCNET_EARLY_ANCHOR_KEY: '' } });
   check('C13 no anchor key → anchoring off (fail closed), everything else proceeds', r5.j.report.anchorDisabled === true);
   const priceSpike = await (async () => { const orig = pc.gasPrice; const r = await (async () => { const rp = async (m, p) => (m === 'eth_gasPrice' ? '0x' + (Tx.MAX_GAS_PRICE_WEI + 1n).toString(16) : rpc(m, p)); return parse(await anchor._handler({}, { store, env: ENV, rpc: rp, now: () => clock.now(), keysFile: TEST_KEYS_FILE, fetch: calFetch, calendars: ['https://a.example'] })); })(); return r; })();
   check('C14 gas price above the ceiling → anchor attempt refused (error recorded), retried later, never sent', priceSpike.j.report.anchored[day2] === 'error' && JSON.parse(MAP.get('early:bundle:v1:' + day2).value).anchors.robinhood === null);
+  const sentBeforeCeiling = (pc.sent || []).length;
+  const nearCeiling = parse(await anchor._handler({}, { store, env: ENV, rpc: async (m, p) => (m === 'eth_gasPrice' ? '0x' + (4000000000n).toString(16) : rpc(m, p)), now: () => clock.now(), keysFile: TEST_KEYS_FILE, fetch: calFetch, calendars: ['https://a.example'] }));
+  check('C14b a quote UNDER the ceiling whose headroom price would be over it (4 gwei → 6 gwei) fails closed: error, no record written, nothing sent, ceiling not raised', nearCeiling.j.report.anchored[day2] === 'error' && JSON.parse(MAP.get('early:bundle:v1:' + day2).value).anchors.robinhood === null && (pc.sent || []).length === sentBeforeCeiling);
   const r6 = await job();
   check('C15 next hour at a normal price: anchored', r6.j.report.anchored[day2] === 'sent');
+  const normalTx = Tx.decodeSigned(pc.sent[pc.sent.length - 1]);
+  const rec2 = JSON.parse(MAP.get('early:bundle:v1:' + day2).value).anchors.robinhood;
+  check('C15b headroom applied: the broadcast gas price is ceil(1.5 × the 100,000,000 wei quote) = 150,000,000 and the record shows quote and price', normalTx.gasPrice === 150000000n && rec2.gasPrice === '150000000' && rec2.quotedGasPrice === '100000000', String(normalTx.gasPrice));
+  // ---- the live incident, reproduced: quote 33,082,000 wei but the latest block's base fee is already 33,198,000, plus legacy EMPTY bundle records
+  const seeded3 = await seedLeaf();
+  clock.advance(86400); syncHead();
+  const emptyDates = [];
+  for (let i = 1; i <= 35; i++) emptyDates.push(E.utcDate(nowSec() + i * 86400)); // newer than every real bundle: they would fill the newest-30 window
+  emptyDates.push(E.utcDate(nowSec() - 9 * 86400)); // and one inside the look-back
+  for (const d of emptyDates) {
+    await store.set('early:bundle:v1:' + d, JSON.stringify({ schema: E.SCHEMA.bundle, date: d, leafType: 'attestation', leaves: [], leafCount: 0, root: E.emptyRoot(d), builtAt: new Date(clock.now()).toISOString(), anchors: { robinhood: null, opentimestamps: null } }));
+    await store.sadd('early:bundles:v1', d);
+  }
+  const incidentRpc = async (m, p) => {
+    if (m === 'eth_gasPrice') return '0x' + (33082000n).toString(16);
+    if (m === 'eth_getBlockByNumber' && p[0] === 'latest') return { ...(await rpc(m, p)), baseFeePerGas: '0x' + (33198000n).toString(16) };
+    return rpc(m, p);
+  };
+  const sentBeforeIncident = (pc.sent || []).length;
+  const rI = parse(await anchor._handler({}, { store, env: ENV, rpc: incidentRpc, now: () => clock.now(), keysFile: TEST_KEYS_FILE, fetch: calFetch, calendars: ['https://a.example'] }));
+  const day3 = E.utcDate(nowSec() - 86400);
+  check('C15c a real bundle is not crowded out by 36 legacy empty bundle records: day with a leaf is anchored and submitted', day3 === seeded3 && rI.j.report.anchored[day3] === 'sent' && rI.j.report.ots[day3] === 'submitted', JSON.stringify(rI.j.report));
+  const incidentTx = Tx.decodeSigned(pc.sent[pc.sent.length - 1]);
+  check('C15d incident: with quote 33,082,000 < base fee 33,198,000 the broadcast price is ceil(1.5 × 33,198,000) = 49,797,000 (> base fee), under the 5 gwei ceiling', (pc.sent.length === sentBeforeIncident + 1) && incidentTx.gasPrice === 49797000n && incidentTx.gasPrice > 33198000n && incidentTx.gasPrice <= Tx.MAX_GAS_PRICE_WEI);
+  check('C15e pre-existing empty bundles are skipped: counted, never anchored / submitted / upgraded, records untouched', rI.j.report.skippedEmpty === 36 && emptyDates.every((d) => !(d in rI.j.report.anchored) && !(d in rI.j.report.ots) && !(d in rI.j.report.upgraded)) && emptyDates.every((d) => { const x = JSON.parse(MAP.get('early:bundle:v1:' + d).value); return x.anchors.robinhood === null && x.anchors.opentimestamps === null; }));
+  const realDates = new Set([today, day2, day3]);
+  check('C15f only days with leaves appear in the job report (anchored / ots / upgraded)', [...Object.keys(rI.j.report.anchored), ...Object.keys(rI.j.report.ots), ...Object.keys(rI.j.report.upgraded)].every((d) => realDates.has(d)));
+  // direct calls on an empty record (defence in depth)
+  const emptyRec = JSON.parse(MAP.get('early:bundle:v1:' + emptyDates[0]).value);
+  const sentBeforeDirect = (pc.sent || []).length, calBeforeDirect = CAL.calls.length;
+  const dA = await anchor._internals.anchorOnChain(store, rpc, { address: W.anchor, sign: (x) => Core._internal.secp256k1.sign(x, KEYS.anchor) }, emptyRec, () => clock.now());
+  const dO = await anchor._internals.submitOts(store, calFetch, emptyRec, () => clock.now(), ['https://a.example']);
+  const dU = await anchor._internals.upgradeOts(store, calFetch, emptyRec, () => clock.now());
+  check('C15g even if called directly with an empty bundle: anchorOnChain / submitOts / upgradeOts refuse (no tx, no OTS request)', dA === 'empty' && dO === 'empty' && dU === 'skip' && (pc.sent || []).length === sentBeforeDirect && CAL.calls.length === calBeforeDirect);
+  // ---- every transaction the whole section ever sent: self-transfer only, value 0, exact anchor calldata, chain 4663, root of a NON-empty bundle
+  const allBundles = [...MAP.entries()].filter(([k]) => k.startsWith('early:bundle:v1:')).map(([, v]) => JSON.parse(v.value));
+  const okRoots = new Set(allBundles.filter((x) => x.leafCount > 0).map((x) => x.root));
+  const invariants = (pc.sent || []).map((raw) => { const t = Tx.decodeSigned(raw); const c = E.decodeAnchorCalldata(t.data); return t.from === W.anchor && t.to === W.anchor && t.value === 0n && t.chainId === 4663n && Core.hexToBytes(t.data).length === 47 && c && okRoots.has(c.root) && c.root !== E.emptyRoot(c.date) && t.gasPrice <= Tx.MAX_GAS_PRICE_WEI && t.gasLimit <= Tx.MAX_GAS_LIMIT; });
+  check('C15h every anchor tx ever sent in this suite is a self-transfer, value 0, exactly 47 bytes of anchor calldata, chain 4663, for a non-empty bundle root, within the gas caps', invariants.length >= 3 && invariants.every(Boolean), invariants.join(','));
   const off = await job({ env: {} });
   check('C16 disabled deployment → skipped', off.j.skipped === 'disabled');
   MAP.set('early:anchor-lock:v1', { type: 'string', value: '1', expiresAt: clock.now() + 60000 });

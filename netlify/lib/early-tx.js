@@ -17,6 +17,25 @@ const E = require('../../lib/syncnet-early.js');
 const MAX_GAS_LIMIT = 300000n; // Nitro charges L1 calldata inside gasLimit; a 47-byte self-transfer stays far below this
 const MAX_GAS_PRICE_WEI = 5n * 10n ** 9n; // 5 gwei ceiling; the job refuses to anchor above it (retries later)
 const ANCHOR_DATA_BYTES = 47;
+// The legacy transaction's gasPrice is its maxFeePerGas: it must be >= the block base fee AT INCLUSION. The RPC quote
+// can already be below the base fee by the time we broadcast (seen live on the Deploy Preview: maxFeePerGas 33,082,000 <
+// baseFee 33,198,000), so the price used is the larger of the quote and the latest base fee, plus 50 % headroom
+// (rounded up). A legacy sender pays the actual base fee, not the cap, so the headroom costs nothing in normal operation.
+const GAS_PRICE_HEADROOM_NUM = 3n, GAS_PRICE_HEADROOM_DEN = 2n;
+
+/**
+ * anchorGasPrice(quotedWei, baseFeeWei?) -> BigInt: ceil(max(quoted, baseFee) × 1.5).
+ * Fails closed: if the result would exceed MAX_GAS_PRICE_WEI it THROWS (the job records an error and retries later);
+ * the ceiling is never raised, clamped or overridden. anchorTransaction() re-checks the same ceiling independently.
+ */
+function anchorGasPrice(quotedWei, baseFeeWei) {
+  const q = BigInt(quotedWei), bf = baseFeeWei == null ? 0n : BigInt(baseFeeWei);
+  const base = q > bf ? q : bf;
+  if (base <= 0n) throw new Error('anchor: no usable gas price');
+  const price = (base * GAS_PRICE_HEADROOM_NUM + (GAS_PRICE_HEADROOM_DEN - 1n)) / GAS_PRICE_HEADROOM_DEN;
+  if (price > MAX_GAS_PRICE_WEI) throw new Error('anchor: gas price with headroom above the ceiling');
+  return price;
+}
 
 // ---------------------------------------------------------------- RLP
 const toBytes = (v) => {
@@ -115,4 +134,4 @@ function verifyAnchorTx(tx, anchorAddress) {
   return dec ? { ok: true, root: dec.root, date: dec.date } : { ok: false, reason: 'calldata' };
 }
 
-module.exports = { rlpEncode, rlpDecode, signLegacy, decodeSigned, anchorTransaction, verifyAnchorTx, MAX_GAS_LIMIT, MAX_GAS_PRICE_WEI, ANCHOR_DATA_BYTES };
+module.exports = { rlpEncode, rlpDecode, signLegacy, decodeSigned, anchorTransaction, anchorGasPrice, verifyAnchorTx, MAX_GAS_LIMIT, MAX_GAS_PRICE_WEI, ANCHOR_DATA_BYTES };
