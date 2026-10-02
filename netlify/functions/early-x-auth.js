@@ -1,9 +1,9 @@
 'use strict';
 /*
- * EARLY creator identity for X: OAuth 2.0 Authorization Code with PKCE (S256), confidential web app, scope `users.read` only.
+ * EARLY creator identity for X: OAuth 2.0 Authorization Code with PKCE (S256), confidential web app, scopes `tweet.read users.read` only.
  * Two GET shapes, both answer with a 302 to the FIXED creator page (never a caller-supplied location):
  *
- *   /api/early-x-auth?start=<stateToken>        -> X consent (users.read only, no offline.access, PKCE S256)
+ *   /api/early-x-auth?start=<stateToken>        -> X consent (tweet.read users.read only, no offline.access, PKCE S256)
  *   /api/early-x-auth?code=…&state=<stateToken> -> exchange the code server-side, read GET /2/users/me, DISCARD the access
  *                                                  token, store a 15-minute OAuth link record bound to the wallet that
  *                                                  requested the state, issue a 2 h creator session and redirect to

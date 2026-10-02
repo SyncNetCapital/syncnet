@@ -409,7 +409,9 @@ assert not _re3.search(r"SYNCNET_X_|EARLY_X_|api\.x\.com|api\.twitter\.com|twitt
 assert 'SYNCNET_X_' not in _efn and 'SYNCNET_X_' not in _esnap and 'SYNCNET_X_' not in _esess and 'SYNCNET_X_' not in _el
 # OAuth posture (code only, comments excluded): minimum scope, PKCE S256, confidential Basic auth, nothing persisted or logged
 _exc=_nocom(_ex); _exac=_nocom(_exauth)
-assert "const OAUTH_SCOPE = 'users.read';" in _exc and 'offline.access' not in _exc and 'tweet.read' not in _exc and 'offline.access' not in _exac and 'tweet.read' not in _exac, 'X must request users.read only'
+assert "const OAUTH_SCOPES = Object.freeze(['tweet.read', 'users.read']);" in _exc and "const OAUTH_SCOPE = OAUTH_SCOPES.join(' ');" in _exc, 'X must request exactly tweet.read users.read'
+assert not _re3.search(r"offline\.access|tweet\.write|tweet\.moderate|follows\.|dm\.|like\.|bookmark\.|list\.|space\.|mute\.|block\.|users\.email", _exc+_exac), 'X must request no other scope'
+assert 'offline.access' not in _exac and 'tweet.read' not in _exac and 'users.read' not in _exac, 'the OAuth function must take the scope from the adapter, never spell it'
 assert "code_challenge_method: 'S256'" in _exc and "'plain'" not in _exc and 'S256' in _exc, 'PKCE must be S256'
 assert "createHmac('sha256', secret)" in _exc and 'syncnet-early-x-pkce|v1|' in _exc and "query(event, 'code_verifier')" not in _exac and "query(event, 'redirect" not in _exac, 'the PKCE verifier is server-derived; the browser supplies neither verifier nor redirect'
 assert "authorization: 'Basic ' + basic" in _exc and 'client_secret' not in _exc.replace('clientSecret','') and "redirect: 'error'" in _exc and 'setTimeout' in _exc, 'confidential Basic auth, no body secret, no redirects, hard timeout'

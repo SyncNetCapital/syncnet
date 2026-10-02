@@ -3,7 +3,7 @@
 // that behaves like the real token endpoint, a fake X consent page). No real network.
 //   O. flag OFF  : X is invisible; the frozen YouTube DOM equals GOLDEN snapshots captured from the pre-phase-5 code (a8568ea)
 //   N. flag ON   : YouTube default + unchanged (its DOM = golden once the X elements are subtracted); X lookup, Count me in,
-//                  "Continue with X" → X consent (PKCE S256, users.read) → manifest → creator page → support → receipt/card
+//                  "Continue with X" → X consent (PKCE S256, tweet.read users.read) → manifest → creator page → support → receipt/card
 //   R. routes    : legacy /c/<UC…>, /c/youtube/<UC…>, /c/x/<id>; invalid platform/id combinations fail closed
 //   P. privacy   : defaults and wording unchanged;  G. gate: the server decides (a stale/tampered client cannot bypass it)
 //   V. visual    : no HTML/CSS file changed (pinned hashes); every class the X UI uses already exists in the stylesheets
@@ -320,7 +320,7 @@ try {
     await page.click('#cLinkX');
     await page.waitForSelector('#allow', { timeout: 10000 });
     const au = new URL(X.authorize[X.authorize.length - 1]), q = au.searchParams;
-    check('N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: users.read ONLY, PKCE S256, exact redirect URI, X-bound wallet state', SIGNLOG.length === signsBefore + 1 && SIGNLOG[SIGNLOG.length - 1] === 'CreatorLinkRequest' && q.get('scope') === 'users.read' && q.get('code_challenge_method') === 'S256' && /^[A-Za-z0-9_-]{43}$/.test(q.get('code_challenge')) && q.get('redirect_uri') === XREDIRECT && q.get('response_type') === 'code' && q.get('client_id') === XCLIENT && /^e1\.state\.0x[0-9a-f]{40}~x\./.test(q.get('state')) && !/tweet\.read|offline\.access/.test(au.search), au.search);
+    check('N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: scopes EXACTLY "tweet.read users.read", PKCE S256, exact redirect URI, X-bound wallet state', SIGNLOG.length === signsBefore + 1 && SIGNLOG[SIGNLOG.length - 1] === 'CreatorLinkRequest' && q.get('scope') === 'tweet.read users.read' && q.get('code_challenge_method') === 'S256' && /^[A-Za-z0-9_-]{43}$/.test(q.get('code_challenge')) && q.get('redirect_uri') === XREDIRECT && q.get('response_type') === 'code' && q.get('client_id') === XCLIENT && /^e1\.state\.0x[0-9a-f]{40}~x\./.test(q.get('state')) && JSON.stringify(q.get('scope').split(' ').sort()) === '["tweet.read","users.read"]' && !/offline\.access|tweet\.write|follows|dm\./.test(au.search), au.search);
     await page.waitForSelector('#allow', { timeout: 5000 }).catch(async () => { throw new Error('X consent page did not render: ' + (await page.content()).replace(/\s+/g, ' ').slice(0, 300) + ' | authorize=' + X.authorize.join(',').slice(0, 200)); });
     await page.click('#allow');
     await page.waitForSelector('#cManifest:not([hidden])', { timeout: 15000 });

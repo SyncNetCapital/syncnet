@@ -96,12 +96,12 @@ audience). It is dated, approximate context; it is never part of payment validit
 ### 7a. X (platform `x`)
 
 Identity is the immutable **numeric X user id, carried as a string** (`^[1-9][0-9]{0,19}$`; ids exceed 2^53 and are never
-parsed as numbers), proved by an authenticated `GET /2/users/me` after OAuth 2.0 Authorization Code with PKCE (S256) with the
-single scope `users.read` (no `offline.access`; the access token is used once and discarded). The `@username`, display name
+parsed as numbers), proved by an authenticated `GET /2/users/me` after OAuth 2.0 Authorization Code with PKCE (S256) with
+the two scopes `tweet.read users.read` and nothing else (X's `GET /2/users/me` requires both; no `offline.access`; the access token is used once and discarded). The `@username`, display name
 and avatar are mutable display metadata, never identity: the handle and avatar appear in no attestation or signature; the display
 name is recorded once, as a dated `title` label, in the `creator-identity` attestation (as for YouTube). The manifest reuses the v1
 `CreatorManifest` with `platform = "x"` and the numeric id in the signed `channelId` field; receipts are ordinary v1
-receipts and verify with the same verifier. The `creator-identity` attestation uses `method = "x-oauth2-pkce users.read GET /2/users/me"`
+receipts and verify with the same verifier. The `creator-identity` attestation uses `method = "x-oauth2-pkce tweet.read users.read GET /2/users/me"`
 and names the id as `externalId` (subject and claims).
 
 `audience-snapshot` for X (same type, same first-success-of-the-UTC-day rule, never backfilled):

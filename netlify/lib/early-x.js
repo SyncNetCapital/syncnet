@@ -7,7 +7,7 @@
 //     parseInput(input)      what a fan pastes -> {kind:'username'|'id', value} | null (reserved / non-user paths are null)
 //     resolve(input)         username / URL / id -> user | null          (app-only bearer)
 //     usersById(ids)         <= 100 ids -> Map(id -> user)               (app-only bearer; audience snapshots)
-//     authUrl(state, challenge)   the consent URL: users.read ONLY, no offline.access, PKCE S256
+//     authUrl(state, challenge)   the consent URL: scopes "tweet.read users.read" and nothing else, no offline.access, PKCE S256
 //     exchangeCode(code, verifier)  -> user access token (held in memory by the caller for ONE request, never stored)
 //     me(accessToken)        -> the signed-in account (authoritative for the immutable id)
 //   user = {externalId, username, title (display name), handle ('@username'), avatarUrl, followerCount|null, protected}
@@ -17,7 +17,10 @@
 // redirects and never retries; errors carry a fixed `code`. Nothing here logs or returns tokens or the client secret.
 const crypto = require('crypto');
 
-const OAUTH_SCOPE = 'users.read'; // the minimum; add nothing (no offline.access) unless a live X requirement is demonstrated
+// EXACTLY these two scopes, nothing else (no tweet.write, offline.access, follows.read, DM scopes). Live canary evidence: X's
+// GET /2/users/me requires OAuth 2.0 user context with BOTH tweet.read and users.read; users.read alone is refused at consent.
+const OAUTH_SCOPES = Object.freeze(['tweet.read', 'users.read']);
+const OAUTH_SCOPE = OAUTH_SCOPES.join(' ');
 const API = 'https://api.x.com/2';
 const AUTH_URL = 'https://x.com/i/oauth2/authorize';
 const TOKEN_URL = 'https://api.x.com/2/oauth2/token';
@@ -114,7 +117,7 @@ function makeX(options = {}) {
   }
 
   return Object.freeze({
-    OAUTH_SCOPE, parseInput, userOf,
+    OAUTH_SCOPE, OAUTH_SCOPES, parseInput, userOf,
     async resolve(input) {
       const p = parseInput(input);
       if (!p) return null;
@@ -150,7 +153,7 @@ function makeX(options = {}) {
       const data = await request(TOKEN_URL, { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json', authorization: 'Basic ' + basic }, body: body.toString() });
       const token = typeof data.access_token === 'string' ? data.access_token : '';
       if (!token || (typeof data.token_type === 'string' && data.token_type.toLowerCase() !== 'bearer')) throw new XError('denied', 'no token');
-      if (typeof data.scope === 'string' && !data.scope.split(/\s+/).includes(OAUTH_SCOPE)) throw new XError('scope', 'scope not granted');
+      if (typeof data.scope === 'string') { const granted = data.scope.split(/\s+/); if (!OAUTH_SCOPES.every((s) => granted.includes(s))) throw new XError('scope', 'scope not granted'); }
       return token; // a refresh_token, if X ever sent one, is ignored and never stored
     },
     async me(accessToken) {
@@ -164,4 +167,4 @@ function makeX(options = {}) {
   });
 }
 
-module.exports = { makeX, parseInput, userOf, pkceChallenge, deriveVerifier, XError, OAUTH_SCOPE, USER_ID, USERNAME, USER_FIELDS, AUTH_URL, TOKEN_URL, API };
+module.exports = { makeX, parseInput, userOf, pkceChallenge, deriveVerifier, XError, OAUTH_SCOPE, OAUTH_SCOPES, USER_ID, USERNAME, USER_FIELDS, AUTH_URL, TOKEN_URL, API };

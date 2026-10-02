@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-02T10:40:31.551Z",
+  "at": "2026-10-02T11:11:45.207Z",
   "passed": 71,
   "failed": 0,
   "results": [
@@ -146,7 +146,7 @@
     {
       "name": "N14 Count me in (X) = connect + ONE free signature, no transaction; the signed struct is platform \"x\" with the immutable numeric id in the v1 channelId field - never the username",
       "ok": true,
-      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790937614,\"expiry\":1806489614,\"nonce\":\"0xe70caf94911a0e47a649129a15e7a8a85e3e200667c3f9658c1a9cbe4386a9eb\"}"
+      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790939487,\"expiry\":1806491487,\"nonce\":\"0xde4366bd2882b1cd0e5bdce15442e2f704a5cb5dcb57c7263027054d554073ba\"}"
     },
     {
       "name": "N15 the signal is stored under the x:<id> ref and the creator is still not public",
@@ -169,9 +169,9 @@
       "detail": ""
     },
     {
-      "name": "N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: users.read ONLY, PKCE S256, exact redirect URI, X-bound wallet state",
+      "name": "N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: scopes EXACTLY \"tweet.read users.read\", PKCE S256, exact redirect URI, X-bound wallet state",
       "ok": true,
-      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790938203.d3225c300b8a87bcb6803e7152bf0bbb.5d1b6f819839e852cdc2e133ac46667018cb7ae3343cf5f6f62c249f7090f184&code_challenge=tOFH9d7DYmUVh8YOskycBJGABceQUb1SYmpAq3618uQ&code_challenge_method=S256"
+      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=tweet.read+users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790940075.723d1c74defb69cd10edc5b95a14d109.712b066281aa884a2051a4e51a9b8675f2bc9140aae98ab4bc4acbc35a5170eb&code_challenge=v_mc9YdzSeFPHfqkNAuKCOvQ3wR8hwn_pzNYzOx_4pc&code_challenge_method=S256"
     },
     {
       "name": "N20 back on the creator page: session in the fragment is cleared, the manifest step shows the X display name and @username (not the numeric id), step 2 is named \"X\"",

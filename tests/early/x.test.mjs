@@ -1,4 +1,4 @@
-// EARLY · X platform (phase 4): the X adapter, X OAuth 2.0 (Authorization Code + PKCE S256, scope users.read only), the X
+// EARLY · X platform (phase 4): the X adapter, X OAuth 2.0 (Authorization Code + PKCE S256, scopes "tweet.read users.read" only), the X
 // resolver, dated follower snapshots, the spend guard and the feature gate. Everything runs against a FAKE X HTTP server
 // that behaves like the real token endpoint (Basic client auth, exact redirect URI, PKCE S256 verification, single-use
 // codes); nothing touches a real network. The real adapter/clients/functions are the code under test.
@@ -162,7 +162,7 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
   const url = new URL(x.authUrl(s1, Xc.pkceChallenge(v1)));
   const q = url.searchParams;
   check('B04 authorize URL: x.com/i/oauth2/authorize, code flow, exact client id + redirect URI, PKCE S256 with the derived challenge, our state, and NOTHING else', url.origin + url.pathname === 'https://x.com/i/oauth2/authorize' && same([...q.keys()].sort(), ['client_id', 'code_challenge', 'code_challenge_method', 'redirect_uri', 'response_type', 'scope', 'state']) && q.get('response_type') === 'code' && q.get('client_id') === CLIENT_ID && q.get('redirect_uri') === REDIRECT && q.get('code_challenge_method') === 'S256' && q.get('code_challenge') === Xc.pkceChallenge(v1) && q.get('state') === s1);
-  check('B05 the ONLY scope requested is users.read: no tweet.read, no offline.access', q.get('scope') === 'users.read' && Xc.OAUTH_SCOPE === 'users.read' && !/tweet\.read|offline\.access|follows|like|write|dm\./.test(url.search));
+  check('B05 the scopes requested are EXACTLY "tweet.read users.read": those two, in that order, no others (no tweet.write, offline.access, follows.read, like, DM or any other scope)', q.get('scope') === 'tweet.read users.read' && Xc.OAUTH_SCOPE === 'tweet.read users.read' && same(Xc.OAUTH_SCOPES, ['tweet.read', 'users.read']) && Object.isFrozen(Xc.OAUTH_SCOPES) && same(q.get('scope').split(' ').slice().sort(), ['tweet.read', 'users.read']) && !/offline\.access|tweet\.write|tweet\.moderate|follows|like\.|dm\.|bookmark|mute|block|list\.|space\.|users\.email/.test(url.search));
   check('B06 authUrl refuses a missing / malformed challenge (never "plain", never absent) and an unconfigured client', (() => { const t = (f) => { try { f(); return false; } catch (e) { return e.code === 'not_configured'; } }; return t(() => x.authUrl(s1)) && t(() => x.authUrl(s1, 'short')) && t(() => x.authUrl(s1, v1 + 'x')) && t(() => Xc.makeX({}).authUrl(s1, Xc.pkceChallenge(v1))); })());
 }
 
@@ -171,7 +171,7 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
   fresh();
   const x = Xc.makeX({ fetch: fakeFetch, bearer: BEARER, clientId: CLIENT_ID, clientSecret: SECRET, redirect: REDIRECT, timeoutMs: 300 });
   const verifier = Xc.deriveVerifier(SESSION_KEY, 'state-1');
-  const grant = (userId, scope = 'users.read') => { const code = 'authcode-' + crypto.randomBytes(8).toString('hex'); X.codes.set(code, { challenge: Xc.pkceChallenge(verifier), redirect_uri: REDIRECT, userId, scope }); return code; };
+  const grant = (userId, scope = 'tweet.read users.read') => { const code = 'authcode-' + crypto.randomBytes(8).toString('hex'); X.codes.set(code, { challenge: Xc.pkceChallenge(verifier), redirect_uri: REDIRECT, userId, scope }); return code; };
   const tok = await x.exchangeCode(grant(BIG), verifier);
   const tc = callsTo((c) => c.path === '/2/oauth2/token')[0];
   const body = new URLSearchParams(tc.body);
@@ -187,8 +187,10 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
   const e2 = await Xc.makeX({ fetch: fakeFetch, clientId: CLIENT_ID, clientSecret: SECRET, redirect: 'https://other.example/api/early-x-auth' }).exchangeCode(grant(BIG), verifier).catch((e) => e);
   check('C06 a different redirect URI is rejected by X (exact match) -> "denied"', e2 && e2.code === 'denied');
   const e3 = await x.exchangeCode(grant(BIG, 'tweet.read'), verifier).catch((e) => e);
+  const e3a = await x.exchangeCode(grant(BIG, 'users.read'), verifier).catch((e) => e);
+  const e3n = await x.exchangeCode(grant(BIG, 'follows.read'), verifier).catch((e) => e);
   const e3b = await x.exchangeCode(grant(BIG, 'users.read tweet.read'), verifier).catch((e) => e);
-  check('C07 a grant without users.read is refused ("scope"); extra scopes do not widen what we request or keep', e3 && e3.code === 'scope' && typeof e3b === 'string');
+  check('C07 a grant missing EITHER tweet.read or users.read (or neither) is refused ("scope"); both, in any order, are accepted', e3 && e3.code === 'scope' && e3a && e3a.code === 'scope' && e3n && e3n.code === 'scope' && typeof e3b === 'string');
   X.refresh = true;
   const withRefresh = await x.exchangeCode(grant(BIG), verifier);
   X.refresh = false;
@@ -246,11 +248,11 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
   fresh(); clock.advance(0);
   const l = await creatorLink(W.creator, 'x');
   const state = stateOf(l);
-  check('D01 creator-link platform=x returns the X start URL and scope users.read; the state is bound to platform x', l.s === 200 && l.j.startUrl.startsWith('/api/early-x-auth?start=') && l.j.scope === 'users.read' && Session.verify(state, { scope: 'state', now: () => clock.now(), env: XENV }).platform === 'x' && state.split('.')[2] === W.creator + '~x', l.body);
+  check('D01 creator-link platform=x returns the X start URL and scopes "tweet.read users.read"; the state is bound to platform x', l.s === 200 && l.j.startUrl.startsWith('/api/early-x-auth?start=') && l.j.scope === 'tweet.read users.read' && Session.verify(state, { scope: 'state', now: () => clock.now(), env: XENV }).platform === 'x' && state.split('.')[2] === W.creator + '~x', l.body);
   const start = await authCall({ start: state });
   const au = new URL(start.headers.location), aq = au.searchParams;
   const expectedChallenge = Xc.pkceChallenge(Xc.deriveVerifier(SESSION_KEY, state));
-  check('D02 start -> 302 to x.com authorize with PKCE S256 whose challenge derives from THIS state (verifier never leaves the server), exact redirect URI, users.read only', start.s === 302 && au.origin + au.pathname === 'https://x.com/i/oauth2/authorize' && aq.get('code_challenge') === expectedChallenge && aq.get('code_challenge_method') === 'S256' && aq.get('redirect_uri') === REDIRECT && aq.get('scope') === 'users.read' && aq.get('state') === state && !start.headers.location.includes(Xc.deriveVerifier(SESSION_KEY, state)), start.headers.location);
+  check('D02 start -> 302 to x.com authorize with PKCE S256 whose challenge derives from THIS state (verifier never leaves the server), exact redirect URI, scopes tweet.read users.read ONLY', start.s === 302 && au.origin + au.pathname === 'https://x.com/i/oauth2/authorize' && aq.get('code_challenge') === expectedChallenge && aq.get('code_challenge_method') === 'S256' && aq.get('redirect_uri') === REDIRECT && aq.get('scope') === 'tweet.read users.read' && aq.get('state') === state && !start.headers.location.includes(Xc.deriveVerifier(SESSION_KEY, state)), start.headers.location);
   const c1 = consent(start.headers.location, BIG);
   const callsBefore = X.calls.length;
   const cb = await authCall({ code: c1.code, state: c1.state, code_verifier: 'attacker-chosen-verifier-0123456789abcdefghijklmnop', redirect_uri: 'https://evil.example/cb', redirect: 'https://evil.example', next: '//evil.example', returnTo: 'https://evil.example' });
@@ -262,7 +264,7 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
   check('D03 callback -> 302 to the FIXED creator page with a session fragment; a browser-supplied code_verifier / redirect_uri / redirect / next / returnTo is ignored (X verified the SERVER-derived verifier and the configured redirect)', cb.s === 302 && cb.headers.location.startsWith('/labs/early/creator#s=') && !cb.headers.location.includes('evil') && tbody.get('code_verifier') === Xc.deriveVerifier(SESSION_KEY, state) && tbody.get('redirect_uri') === REDIRECT && !tokenCall.body.includes('attacker') && !tokenCall.body.includes('evil'), cb.headers.location);
   check('D04 the creator session is bound to (x, numeric externalId as an exact string, wallet) from the AUTHENTICATED /2/users/me; subject spelling x_<id>~<wallet>', sv && sv.platform === 'x' && sv.externalId === BIG && typeof sv.externalId === 'string' && sv.wallet === W.creator && tok.split('.')[2] === 'x_' + BIG + '~' + W.creator && meCall && meCall.auth.startsWith('Bearer xat-'));
   const linkRec = JSON.parse(MAP.get('early:oauth:v1:' + tok.split('.')[4]).value);
-  check('D05 link record: platform x, channelId (v1 name of the external id) = the numeric id string, wallet, display metadata, follower count read at that moment, scope users.read; NO username as identity field', linkRec.platform === 'x' && linkRec.channelId === BIG && linkRec.wallet === W.creator && linkRec.title === 'Alice (X)' && linkRec.handle === '@alice_x' && linkRec.followerCount === 12400 && linkRec.scope === 'users.read' && linkRec.avatarUrl.startsWith('https://') && !('username' in linkRec) && Number.isInteger(linkRec.at));
+  check('D05 link record: platform x, channelId (v1 name of the external id) = the numeric id string, wallet, display metadata, follower count read at that moment, scope "tweet.read users.read"; NO username as identity field', linkRec.platform === 'x' && linkRec.channelId === BIG && linkRec.wallet === W.creator && linkRec.title === 'Alice (X)' && linkRec.handle === '@alice_x' && linkRec.followerCount === 12400 && linkRec.scope === 'tweet.read users.read' && linkRec.avatarUrl.startsWith('https://') && !('username' in linkRec) && Number.isInteger(linkRec.at));
   const everything = JSON.stringify([...MAP.entries()].map(([k, e]) => [k, e.type === 'set' ? [...e.value] : e.type === 'zset' ? [...e.value] : e.value])) + '\n' + LOG.join('\n') + '\n' + cb.body + start.body + l.body;
   const accessTokens = [...X.tokens.keys()];
   const verifierNow = Xc.deriveVerifier(SESSION_KEY, state);
@@ -303,8 +305,9 @@ async function manifestFor(platform, id, wallet, session, version = 1, prev = E.
     await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(400, { error: 'invalid_grant' }) : null), 'denied', 'token 400'),
     await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(503, {}) : null), 'unavailable', 'token 503'),
     await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'bearer', access_token: 'xat-q', scope: 'tweet.read' }) : null), 'denied', 'scope without users.read'),
-    await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'mac', access_token: 'xat-q', scope: 'users.read' }) : null), 'denied', 'non-bearer token'),
-    await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'bearer', scope: 'users.read' }) : null), 'denied', 'no access token'),
+    await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'bearer', access_token: 'xat-q', scope: 'users.read' }) : null), 'denied', 'scope without tweet.read'),
+    await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'mac', access_token: 'xat-q', scope: 'tweet.read users.read' }) : null), 'denied', 'non-bearer token'),
+    await bad((u) => (u.pathname === '/2/oauth2/token' ? resp(200, { token_type: 'bearer', scope: 'tweet.read users.read' }) : null), 'denied', 'no access token'),
     await bad((u) => (u.pathname === '/2/users/me' ? resp(200, { data: { id: 9007199254740993, username: 'x' } }) : null), 'unavailable', '/me numeric id'),
     await bad((u) => (u.pathname === '/2/users/me' ? resp(200, { data: { id: '0', username: 'x' } }) : null), 'unavailable', '/me id 0'),
     await bad((u) => (u.pathname === '/2/users/me' ? resp(200, {}) : null), 'unavailable', '/me empty'),
@@ -398,7 +401,7 @@ async function xCreator(id, wallet) {
   check('F01 an X creator activates through the real OAuth link: manifest (platform x, channelId = numeric id string) accepted, creator record + public view carry platform x / externalId; no legacy channelId on the public view', A.mf.r.s === 201 && A.mf.r.j.creator.platform === 'x' && A.mf.r.j.creator.externalId === BIG && !('channelId' in A.mf.r.j.creator) && (await get('creator', { platform: 'x', externalId: BIG })).j.display.handle === '@alice_x', A.mf.r.body);
   const mfRec = JSON.parse(MAP.get('early:manifest:v1:' + A.mf.hash).value);
   const idAtt = JSON.parse(MAP.get('early:att:v1:' + mfRec.identityAttestationId).value);
-  check('F02 the creator-identity attestation names platform x and the numeric id as `externalId`, method x-oauth2-pkce users.read; no username / handle in it', idAtt.claims.platform === 'x' && idAtt.claims.externalId === BIG && idAtt.subject.externalId === BIG && !('channelId' in idAtt.claims) && idAtt.claims.method === 'x-oauth2-pkce users.read GET /2/users/me' && !JSON.stringify(idAtt).includes('alice_x') && mfRec.struct.platform === 'x' && mfRec.struct.channelId === BIG);
+  check('F02 the creator-identity attestation names platform x and the numeric id as `externalId`, method x-oauth2-pkce tweet.read users.read; no username / handle in it', idAtt.claims.platform === 'x' && idAtt.claims.externalId === BIG && idAtt.subject.externalId === BIG && !('channelId' in idAtt.claims) && idAtt.claims.method === 'x-oauth2-pkce tweet.read users.read GET /2/users/me' && !JSON.stringify(idAtt).includes('alice_x') && mfRec.struct.platform === 'x' && mfRec.struct.channelId === BIG);
   const today = E.utcDate(nowSec());
   const enrol = JSON.parse(MAP.get('early:snap:v1:x:' + BIG + ':' + today).value);
   check('F03 join-day snapshot (from the OAuth link): kind followers, platform x, numeric externalId, follower count, time, source - and NO handleThen / handle / title / avatar / channelId / subscriberCount', same(Object.keys(enrol.claims).sort(), ['audienceKind', 'dateUTC', 'externalId', 'fetchedAt', 'followerCount', 'platform', 'source']) && enrol.claims.audienceKind === 'followers' && enrol.claims.platform === 'x' && enrol.claims.externalId === BIG && enrol.claims.followerCount === 12400 && enrol.claims.source.includes('enrolment') && same(Object.keys(enrol.subject), ['externalId']) && enrol.type === 'audience-snapshot' && !/handle|alice|title|avatar/i.test(JSON.stringify(enrol.claims)));
