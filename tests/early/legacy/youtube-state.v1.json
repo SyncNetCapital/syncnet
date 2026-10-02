@@ -1,0 +1,875 @@
+{
+ "schema": "syncnet.early.legacy-state.v1",
+ "generatedBy": "b4fccd57b3d01709c1d1fdd5465bd3731156da1b",
+ "clockMs": 1791201600000,
+ "ids": {
+  "channel": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+  "unclaimedChannel": "UCabcdefghijklmnopqrstuv",
+  "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+  "manifestHash": "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645",
+  "intentId": "0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7",
+  "receiptId": "0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741",
+  "shareId": "0x2df4d423bdb8e4678e2bf5c605839d8182127b22440aa4220d9fc5029ad33787",
+  "txHash": "0x2aeb81dab724b43d31ebb1c278bf15f65d7a235305ce44c7ce5a15033638c0fc"
+ },
+ "tokens": {
+  "creator": "e1.creator.UC_x5XG1OV2P6uZZ5FSM9Ttw~0x1563915e194d8cfba1943570603f7606a3115508.1791208800.efb29924a9de790d.0e152118cea64c636dcc48b234abd059e100bcbb69c037ed814cb2e2dc83a4dc",
+  "fan": "e1.fan.0x2c7536e3605d9c16a7a3d7b1898e529396a65c23.1791203400.bebf916444e7b14e.7939163c21d514dbbc09a1f850238d4d6f76d8011c3444fdd0cc4b593c28aa0c"
+ },
+ "receipt": {
+  "schema": "syncnet.sync-proof.receipt.v1",
+  "receiptId": "0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741",
+  "matchingRule": "syncnet.sync-proof.matching.v1",
+  "mode": "auto",
+  "status": "FINALIZED",
+  "fact": {
+   "chainId": 4663,
+   "txHash": "0x2aeb81dab724b43d31ebb1c278bf15f65d7a235305ce44c7ce5a15033638c0fc",
+   "logIndex": 0,
+   "blockNumber": "1001",
+   "blockHash": "0xfe1c2c9d4fed80d0d2bdda28671031c45858babb2827f6fa8aade37979614e45",
+   "blockTimestamp": 1791201600,
+   "transfer": {
+    "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+    "from": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+    "to": "0x1563915e194d8cfba1943570603f7606a3115508",
+    "value": "1500000"
+   },
+   "confirmation": {
+    "policy": "safe-then-finalized",
+    "safeAt": "2026-10-05T12:00:00.000Z",
+    "finalizedAt": "2026-10-05T12:00:00.000Z"
+   }
+  },
+  "intent": {
+   "typedData": {
+    "types": {
+     "EIP712Domain": [
+      {
+       "name": "name",
+       "type": "string"
+      },
+      {
+       "name": "version",
+       "type": "string"
+      },
+      {
+       "name": "chainId",
+       "type": "uint256"
+      }
+     ],
+     "SupportIntent": [
+      {
+       "name": "schema",
+       "type": "string"
+      },
+      {
+       "name": "intentId",
+       "type": "bytes32"
+      },
+      {
+       "name": "manifestHash",
+       "type": "bytes32"
+      },
+      {
+       "name": "creatorId",
+       "type": "bytes32"
+      },
+      {
+       "name": "chainId",
+       "type": "uint256"
+      },
+      {
+       "name": "sender",
+       "type": "address"
+      },
+      {
+       "name": "receiver",
+       "type": "address"
+      },
+      {
+       "name": "token",
+       "type": "address"
+      },
+      {
+       "name": "amount",
+       "type": "uint256"
+      },
+      {
+       "name": "notBefore",
+       "type": "uint256"
+      },
+      {
+       "name": "expiry",
+       "type": "uint256"
+      },
+      {
+       "name": "privacy",
+       "type": "string"
+      }
+     ]
+    },
+    "primaryType": "SupportIntent",
+    "domain": {
+     "name": "SyncNet SYNC Proof",
+     "version": "1",
+     "chainId": 4663
+    },
+    "message": {
+     "schema": "syncnet.early.support-intent.v1",
+     "intentId": "0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7",
+     "manifestHash": "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645",
+     "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+     "chainId": 4663,
+     "sender": "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+     "receiver": "0x1563915e194d8cfba1943570603f7606a3115508",
+     "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+     "amount": "1500000",
+     "notBefore": 1791201540,
+     "expiry": 1791208740,
+     "privacy": "PRIVATE"
+    }
+   },
+   "signature": "0x4e32f4133f81cc058ffd61ba40c997186fc945804c41a35d4a71dfb834b049745619a6b35c6e7924d95cf8ce7ee3b605859519d02280f131bf2667d5365fc8a11b",
+   "digest": "0xe611c9101652a56fcf240d75b0aaf508feecec9862a75ca62cf66007ee07760d"
+  },
+  "finalize": null,
+  "creatorManifest": {
+   "typedData": {
+    "types": {
+     "EIP712Domain": [
+      {
+       "name": "name",
+       "type": "string"
+      },
+      {
+       "name": "version",
+       "type": "string"
+      },
+      {
+       "name": "chainId",
+       "type": "uint256"
+      }
+     ],
+     "CreatorManifest": [
+      {
+       "name": "schema",
+       "type": "string"
+      },
+      {
+       "name": "creatorId",
+       "type": "bytes32"
+      },
+      {
+       "name": "platform",
+       "type": "string"
+      },
+      {
+       "name": "channelId",
+       "type": "string"
+      },
+      {
+       "name": "chainId",
+       "type": "uint256"
+      },
+      {
+       "name": "receivingWallet",
+       "type": "address"
+      },
+      {
+       "name": "acceptedAssetsHash",
+       "type": "bytes32"
+      },
+      {
+       "name": "manifestVersion",
+       "type": "uint32"
+      },
+      {
+       "name": "previousManifestHash",
+       "type": "bytes32"
+      },
+      {
+       "name": "issuedAt",
+       "type": "uint256"
+      },
+      {
+       "name": "nonce",
+       "type": "bytes32"
+      }
+     ]
+    },
+    "primaryType": "CreatorManifest",
+    "domain": {
+     "name": "SyncNet SYNC Proof",
+     "version": "1",
+     "chainId": 4663
+    },
+    "message": {
+     "schema": "syncnet.early.creator-manifest.v1",
+     "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+     "platform": "youtube",
+     "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+     "chainId": 4663,
+     "receivingWallet": "0x1563915e194d8cfba1943570603f7606a3115508",
+     "acceptedAssetsHash": "0xdf0fbcabdea57394b008d9485aa3a21f21384675d57ea3579103620d50afd021",
+     "manifestVersion": 1,
+     "previousManifestHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "issuedAt": 1791201600,
+     "nonce": "0xa80313d20f6aa2f2c8beffadd700232fae494a9d89026f450d18ef6618d54b20"
+    }
+   },
+   "acceptedAssets": [
+    {
+     "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168",
+     "minAmount": "1000000"
+    },
+    {
+     "token": "0x6368e007b9f0b941560ed1f3bceb20247f5eca37",
+     "minAmount": "1000000000000000000"
+    }
+   ],
+   "signature": "0xff61d81c35285322bc35635bddfd9633e0f84eccf0bdaeae63b778777fbe0fd045d762409af28cce2fdb01bcd03f88ff21a58650f946547c7c00d848c33383cf1b",
+   "manifestHash": "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645"
+  },
+  "attestations": [
+   {
+    "schema": "syncnet.attestation.v1",
+    "type": "creator-identity",
+    "subject": {
+     "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+     "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+    },
+    "claims": {
+     "platform": "youtube",
+     "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+     "receivingWallet": "0x1563915e194d8cfba1943570603f7606a3115508",
+     "manifestHash": "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645",
+     "manifestVersion": 1,
+     "verifiedAt": 1791201600,
+     "method": "google-oauth2 youtube.readonly channels.mine",
+     "title": "Alice"
+    },
+    "issuedAt": 1791201600,
+    "bundleDate": "2026-10-05",
+    "id": "0xaaf9fd28b1c609b707fb4b256100f1cb80e117e02ca152826c1170be8f77b219",
+    "keyId": "early-att-test-k1",
+    "signature": "0x0111f62a3946cc0f11fd4fa99e398e558a05acbf39f9f2fecca19204db39ee5234e00e7028bf1661b4a6251f98cf56962daa1d797deb91d9701aaba971b456631b",
+    "inclusion": null
+   },
+   {
+    "schema": "syncnet.attestation.v1",
+    "type": "creator-manifest",
+    "subject": {
+     "creatorId": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+     "manifestHash": "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645"
+    },
+    "claims": {
+     "manifestVersion": 1,
+     "previousManifestHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+     "status": "ACTIVE",
+     "effectiveAt": 1791201600,
+     "supersededAt": null,
+     "at": 1791201600
+    },
+    "issuedAt": 1791201600,
+    "bundleDate": "2026-10-05",
+    "id": "0xfc1a0bbcf6743bfe05cf2163b09d09ba272649e9b98a2f6f21028a1adc3e7fcc",
+    "keyId": "early-att-test-k1",
+    "signature": "0xb85c6bdd26454237827c7bfb3ea0962feb250e0f949a2513b86e0f3b215ff47b390177137a6f3aae6f05caf7a4578de6b8ea6f424ac342200de7a2e1a5956aec1b",
+    "inclusion": null
+   },
+   {
+    "schema": "syncnet.attestation.v1",
+    "type": "audience-snapshot",
+    "subject": {
+     "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+    },
+    "claims": {
+     "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+     "dateUTC": "2026-10-05",
+     "title": "Alice",
+     "subscriberCount": 1234,
+     "hiddenSubscriberCount": false,
+     "fetchedAt": 1791201600,
+     "source": "youtube-data-api-v3 channels.list statistics (oauth link, enrolment)"
+    },
+    "issuedAt": 1791201600,
+    "bundleDate": "2026-10-05",
+    "id": "0xf251afdc37c01fb11c7a45da8d62815cd923baaba56d6492a85d7c7b94e19adf",
+    "keyId": "early-att-test-k1",
+    "signature": "0xf0e4edb07def708ed72976eb9a4c6c4980f6442bb4a59b3d47c97f4dedc457f91fb0273f6a43758c15b72cb9763c4b23959f6ee91d6c2699640ac4b2812a1d571b",
+    "inclusion": null
+   }
+  ],
+  "anchors": [
+   {
+    "bundleDate": "2026-10-05",
+    "root": null,
+    "built": false,
+    "robinhood": null,
+    "opentimestamps": null
+   }
+  ],
+  "ordering": {
+   "createdBlock": "1000",
+   "storedAt": "2026-10-05T12:00:00.000Z",
+   "note": "SyncNet-recorded: the signed intent was persisted at this block, before the transfer was enabled. Not independently verifiable."
+  },
+  "context": {
+   "earlyDate": "2026-10-05",
+   "creatorTitleThen": "Alice",
+   "audienceThen": {
+    "state": "approximate",
+    "value": 1234,
+    "display": "~1.2K",
+    "asOf": 1791201600
+   }
+  },
+  "privacy": {
+   "state": "PRIVATE",
+   "revealed": []
+  },
+  "invalidated": null,
+  "issuedAt": "2026-10-05T12:00:00.000Z",
+  "keys": "/api/early?view=keys",
+  "verify": "docs/early/verify-receipt.mjs"
+ },
+ "entries": [
+  [
+   "early:att:v1:0xaaf9fd28b1c609b707fb4b256100f1cb80e117e02ca152826c1170be8f77b219",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.attestation.v1\",\"type\":\"creator-identity\",\"subject\":{\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"},\"claims\":{\"platform\":\"youtube\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"receivingWallet\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"manifestVersion\":1,\"verifiedAt\":1791201600,\"method\":\"google-oauth2 youtube.readonly channels.mine\",\"title\":\"Alice\"},\"issuedAt\":1791201600,\"bundleDate\":\"2026-10-05\",\"id\":\"0xaaf9fd28b1c609b707fb4b256100f1cb80e117e02ca152826c1170be8f77b219\",\"keyId\":\"early-att-test-k1\",\"signature\":\"0x0111f62a3946cc0f11fd4fa99e398e558a05acbf39f9f2fecca19204db39ee5234e00e7028bf1661b4a6251f98cf56962daa1d797deb91d9701aaba971b456631b\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:att:v1:0xf251afdc37c01fb11c7a45da8d62815cd923baaba56d6492a85d7c7b94e19adf",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.attestation.v1\",\"type\":\"audience-snapshot\",\"subject\":{\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"},\"claims\":{\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"dateUTC\":\"2026-10-05\",\"title\":\"Alice\",\"subscriberCount\":1234,\"hiddenSubscriberCount\":false,\"fetchedAt\":1791201600,\"source\":\"youtube-data-api-v3 channels.list statistics (oauth link, enrolment)\"},\"issuedAt\":1791201600,\"bundleDate\":\"2026-10-05\",\"id\":\"0xf251afdc37c01fb11c7a45da8d62815cd923baaba56d6492a85d7c7b94e19adf\",\"keyId\":\"early-att-test-k1\",\"signature\":\"0xf0e4edb07def708ed72976eb9a4c6c4980f6442bb4a59b3d47c97f4dedc457f91fb0273f6a43758c15b72cb9763c4b23959f6ee91d6c2699640ac4b2812a1d571b\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:att:v1:0xfc1a0bbcf6743bfe05cf2163b09d09ba272649e9b98a2f6f21028a1adc3e7fcc",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.attestation.v1\",\"type\":\"creator-manifest\",\"subject\":{\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\"},\"claims\":{\"manifestVersion\":1,\"previousManifestHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"status\":\"ACTIVE\",\"effectiveAt\":1791201600,\"supersededAt\":null,\"at\":1791201600},\"issuedAt\":1791201600,\"bundleDate\":\"2026-10-05\",\"id\":\"0xfc1a0bbcf6743bfe05cf2163b09d09ba272649e9b98a2f6f21028a1adc3e7fcc\",\"keyId\":\"early-att-test-k1\",\"signature\":\"0xb85c6bdd26454237827c7bfb3ea0962feb250e0f949a2513b86e0f3b215ff47b390177137a6f3aae6f05caf7a4578de6b8ea6f424ac342200de7a2e1a5956aec1b\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:bundle-queue:v1:2026-10-05",
+   {
+    "type": "set",
+    "value": [
+     "0x474032f78cbb284e6d81aa1f3f732631308bb919781e14c7645d15b345099cd7",
+     "0x6122da872e2bddbc5fcfed0624e86b7511aae8734489160544a7f91cc5a54aa0",
+     "0xe2ddae625ca4723c0a7c16edf27e360a5291e9311b3757c4558420d770f79f7b"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:card-of:v1:0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741",
+   {
+    "type": "string",
+    "value": "0x2df4d423bdb8e4678e2bf5c605839d8182127b22440aa4220d9fc5029ad33787",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:card:v1:0x2df4d423bdb8e4678e2bf5c605839d8182127b22440aa4220d9fc5029ad33787",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.card.v1\",\"shareId\":\"0x2df4d423bdb8e4678e2bf5c605839d8182127b22440aa4220d9fc5029ad33787\",\"receiptId\":\"0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741\",\"revealed\":[],\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"suspended\":false}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:cmi-of:v1:0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a",
+   {
+    "type": "set",
+    "value": [
+     "UC_x5XG1OV2P6uZZ5FSM9Ttw"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:cmi-of:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+   {
+    "type": "set",
+    "value": [
+     "UCabcdefghijklmnopqrstuv"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:cmi-set:v1:UC_x5XG1OV2P6uZZ5FSM9Ttw",
+   {
+    "type": "set",
+    "value": [
+     "0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:cmi-set:v1:UCabcdefghijklmnopqrstuv",
+   {
+    "type": "set",
+    "value": [
+     "0x2c7536e3605d9c16a7a3d7b1898e529396a65c23"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:cmi:v1:UC_x5XG1OV2P6uZZ5FSM9Ttw:0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"struct\":{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"youtube\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"fan\":\"0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a\",\"issuedAt\":1791201600,\"expiry\":1806753600,\"nonce\":\"0x54b3d15529409cb94bc97bd1b589324b4b1d47e76399b5192c15c0f71a0ef203\"},\"signature\":\"0x2e47019a89bf384c18ce722234a17f9a4603394d3dc6ec69db50272697a507324d4b515c870ac0690021a916b7c40b57bc23d1590ea956ad87a74a3ac687c0551b\",\"nonce\":\"0x54b3d15529409cb94bc97bd1b589324b4b1d47e76399b5192c15c0f71a0ef203\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"renewedAt\":[]}",
+    "expiresAt": 1806840000000
+   }
+  ],
+  [
+   "early:cmi:v1:UCabcdefghijklmnopqrstuv:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"struct\":{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"youtube\",\"channelId\":\"UCabcdefghijklmnopqrstuv\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1791201600,\"expiry\":1806753600,\"nonce\":\"0x238a8d7e506c7ce5cbce37432145b823c71daffa31ea9bb922d35bde81f0ebbb\"},\"signature\":\"0x9f873089fb746bdbad046635649cc898038f6f54fa319988f0f9f3f92df7da0402db08c7a52f7ceff5203783e92aba7d1202b79f40557c5cbe4b3338882265331b\",\"nonce\":\"0x238a8d7e506c7ce5cbce37432145b823c71daffa31ea9bb922d35bde81f0ebbb\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"renewedAt\":[]}",
+    "expiresAt": 1806840000000
+   }
+  ],
+  [
+   "early:creator:v1:0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.creator.v1\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"status\":\"ACTIVE\",\"paused\":false,\"currentManifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"pendingManifestHash\":null,\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\"},\"displayUpdatedAt\":\"2026-10-05T12:00:00.000Z\",\"joinedAt\":1791201600,\"signalsWaitingAtJoin\":1,\"rotation\":null,\"rotations\":[],\"oauthSeen\":[1791201600],\"createdAt\":\"2026-10-05T12:00:00.000Z\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:creators:v1",
+   {
+    "type": "set",
+    "value": [
+     "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:draft:v1:0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.draft.v1\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"struct\":{\"schema\":\"syncnet.early.support-intent.v1\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"chainId\":4663,\"sender\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"receiver\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"token\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"amount\":\"1500000\",\"notBefore\":1791201540,\"expiry\":1791208740,\"privacy\":\"PRIVATE\"},\"status\":\"STORED\",\"createdAt\":\"2026-10-05T12:00:00.000Z\"}",
+    "expiresAt": 1791201720000
+   }
+  ],
+  [
+   "early:intent:v1:0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.support-intent.v1\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"struct\":{\"schema\":\"syncnet.early.support-intent.v1\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"chainId\":4663,\"sender\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"receiver\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"token\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"amount\":\"1500000\",\"notBefore\":1791201540,\"expiry\":1791208740,\"privacy\":\"PRIVATE\"},\"signature\":\"0x4e32f4133f81cc058ffd61ba40c997186fc945804c41a35d4a71dfb834b049745619a6b35c6e7924d95cf8ce7ee3b605859519d02280f131bf2667d5365fc8a11b\",\"digest\":\"0xe611c9101652a56fcf240d75b0aaf508feecec9862a75ca62cf66007ee07760d\",\"status\":\"CONSUMED\",\"createdBlock\":\"1000\",\"storedAt\":\"2026-10-05T12:00:00.000Z\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"receiptId\":\"0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741\",\"consumedAt\":\"2026-10-05T12:00:00.000Z\",\"candidates\":null}",
+    "expiresAt": 1798977600000
+   }
+  ],
+  [
+   "early:intents-of:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+   {
+    "type": "set",
+    "value": [
+     "0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:manifest:v1:0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.early.creator-manifest.v1\",\"struct\":{\"schema\":\"syncnet.early.creator-manifest.v1\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"platform\":\"youtube\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"chainId\":4663,\"receivingWallet\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"acceptedAssetsHash\":\"0xdf0fbcabdea57394b008d9485aa3a21f21384675d57ea3579103620d50afd021\",\"manifestVersion\":1,\"previousManifestHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"issuedAt\":1791201600,\"nonce\":\"0xa80313d20f6aa2f2c8beffadd700232fae494a9d89026f450d18ef6618d54b20\"},\"acceptedAssets\":[{\"token\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"minAmount\":\"1000000\"},{\"token\":\"0x6368e007b9f0b941560ed1f3bceb20247f5eca37\",\"minAmount\":\"1000000000000000000\"}],\"signature\":\"0xff61d81c35285322bc35635bddfd9633e0f84eccf0bdaeae63b778777fbe0fd045d762409af28cce2fdb01bcd03f88ff21a58650f946547c7c00d848c33383cf1b\",\"signer\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"ACTIVE\",\"effectiveAt\":1791201600,\"supersededAt\":null,\"supersededBy\":null,\"identityAttestationId\":\"0xaaf9fd28b1c609b707fb4b256100f1cb80e117e02ca152826c1170be8f77b219\",\"attestationIds\":[\"0xfc1a0bbcf6743bfe05cf2163b09d09ba272649e9b98a2f6f21028a1adc3e7fcc\"],\"createdAt\":\"2026-10-05T12:00:00.000Z\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:manifests:v1:0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+   {
+    "type": "set",
+    "value": [
+     "0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:metrics:v1:cards_generated:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:claims_with_signals_waiting:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:count_me_in_signals:2026-10-05",
+   {
+    "type": "string",
+    "value": "2",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:creators_claimed:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:intents_drafted:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:intents_stored:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:receipts_confirmed:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:receipts_finalized:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:metrics:v1:receipts_mode_auto:2026-10-05",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1825761600000
+   }
+  ],
+  [
+   "early:nonce:v1:0x1563915e194d8cfba1943570603f7606a3115508:0xa80313d20f6aa2f2c8beffadd700232fae494a9d89026f450d18ef6618d54b20",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1798977600000
+   }
+  ],
+  [
+   "early:nonce:v1:0x19e7e376e7c213b7e7e7e46cc70a5dd086daff2a:0x54b3d15529409cb94bc97bd1b589324b4b1d47e76399b5192c15c0f71a0ef203",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1798977600000
+   }
+  ],
+  [
+   "early:nonce:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23:0x238a8d7e506c7ce5cbce37432145b823c71daffa31ea9bb922d35bde81f0ebbb",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1798977600000
+   }
+  ],
+  [
+   "early:oauth:v1:efb29924a9de790d",
+   {
+    "type": "string",
+    "value": "{\"wallet\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\",\"subscriberCount\":1234,\"hiddenSubscriberCount\":false,\"at\":1791201600,\"consumedBy\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\"}",
+    "expiresAt": 1791201900000
+   }
+  ],
+  [
+   "early:open:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23:0x1563915e194d8cfba1943570603f7606a3115508:0x5fc5360d0400a0fd4f2af552add042d716f1d168:1500000",
+   {
+    "type": "string",
+    "value": "",
+    "expiresAt": 1791201601000
+   }
+  ],
+  [
+   "early:receipt:v1:0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.sync-proof.receipt.v1\",\"receiptId\":\"0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"mode\":\"auto\",\"status\":\"FINALIZED\",\"fact\":{\"chainId\":4663,\"txHash\":\"0x2aeb81dab724b43d31ebb1c278bf15f65d7a235305ce44c7ce5a15033638c0fc\",\"logIndex\":0,\"blockNumber\":\"1001\",\"blockHash\":\"0xfe1c2c9d4fed80d0d2bdda28671031c45858babb2827f6fa8aade37979614e45\",\"blockTimestamp\":1791201600,\"transfer\":{\"token\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"from\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"to\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"value\":\"1500000\"}},\"confirmation\":{\"safeAt\":\"2026-10-05T12:00:00.000Z\",\"finalizedAt\":\"2026-10-05T12:00:00.000Z\"},\"intent\":{\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},{\"name\":\"chainId\",\"type\":\"uint256\"},{\"name\":\"sender\",\"type\":\"address\"},{\"name\":\"receiver\",\"type\":\"address\"},{\"name\":\"token\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"notBefore\",\"type\":\"uint256\"},{\"name\":\"expiry\",\"type\":\"uint256\"},{\"name\":\"privacy\",\"type\":\"string\"}]},\"primaryType\":\"SupportIntent\",\"domain\":{\"name\":\"SyncNet SYNC Proof\",\"version\":\"1\",\"chainId\":4663},\"message\":{\"schema\":\"syncnet.early.support-intent.v1\",\"intentId\":\"0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7\",\"manifestHash\":\"0x32d27a28cebb28c26351a7f69b90f8de0541cda9f93ab2ea83cdff925d965645\",\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"chainId\":4663,\"sender\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"receiver\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"token\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"amount\":\"1500000\",\"notBefore\":1791201540,\"expiry\":1791208740,\"privacy\":\"PRIVATE\"}},\"signature\":\"0x4e32f4133f81cc058ffd61ba40c997186fc945804c41a35d4a71dfb834b049745619a6b35c6e7924d95cf8ce7ee3b605859519d02280f131bf2667d5365fc8a11b\",\"digest\":\"0xe611c9101652a56fcf240d75b0aaf508feecec9862a75ca62cf66007ee07760d\"},\"finalize\":null,\"ordering\":{\"createdBlock\":\"1000\",\"storedAt\":\"2026-10-05T12:00:00.000Z\"},\"privacy\":{\"state\":\"PRIVATE\",\"revealed\":[]},\"issuedAt\":\"2026-10-05T12:00:00.000Z\",\"previous\":null}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:receipts-of-creator:v1:0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18",
+   {
+    "type": "set",
+    "value": [
+     "0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:receipts-of:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23",
+   {
+    "type": "set",
+    "value": [
+     "0x473999b63743269f1821dfa0e80a34e72e35a4faa6ffa7f588d5ffbdc125b741"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:snap-days:v1:UC_x5XG1OV2P6uZZ5FSM9Ttw",
+   {
+    "type": "set",
+    "value": [
+     "2026-10-05"
+    ],
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:snap:v1:UC_x5XG1OV2P6uZZ5FSM9Ttw:2026-10-05",
+   {
+    "type": "string",
+    "value": "{\"schema\":\"syncnet.attestation.v1\",\"type\":\"audience-snapshot\",\"subject\":{\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"},\"claims\":{\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"dateUTC\":\"2026-10-05\",\"title\":\"Alice\",\"subscriberCount\":1234,\"hiddenSubscriberCount\":false,\"fetchedAt\":1791201600,\"source\":\"youtube-data-api-v3 channels.list statistics (oauth link, enrolment)\"},\"issuedAt\":1791201600,\"bundleDate\":\"2026-10-05\",\"id\":\"0xf251afdc37c01fb11c7a45da8d62815cd923baaba56d6492a85d7c7b94e19adf\",\"keyId\":\"early-att-test-k1\",\"signature\":\"0xf0e4edb07def708ed72976eb9a4c6c4980f6442bb4a59b3d47c97f4dedc457f91fb0273f6a43758c15b72cb9763c4b23959f6ee91d6c2699640ac4b2812a1d571b\"}",
+    "expiresAt": null
+   }
+  ],
+  [
+   "early:tuple-last:v1:0x2c7536e3605d9c16a7a3d7b1898e529396a65c23:0x1563915e194d8cfba1943570603f7606a3115508:0x5fc5360d0400a0fd4f2af552add042d716f1d168:1500000",
+   {
+    "type": "string",
+    "value": "1791201600",
+    "expiresAt": 1793793600000
+   }
+  ],
+  [
+   "early:txlog:v1:0x2aeb81dab724b43d31ebb1c278bf15f65d7a235305ce44c7ce5a15033638c0fc:0",
+   {
+    "type": "string",
+    "value": "0x166b1010b87de2685550e7e6be7098ef410838ca73f60e3fa7f65a3e882f40a7",
+    "expiresAt": null
+   }
+  ],
+  [
+   "rl:early-card:6530c4b4b48e3730:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-cmi-ch:10d8f5c9e737708c:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-cmi-ch:c5b0bbdc5211cb10:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-cmi-w:419c2080b8bec81d:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-cmi-w:6530c4b4b48e3730:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-creator-w:c5b0bbdc5211cb10:20731",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791288000000
+   }
+  ],
+  [
+   "rl:early-draft-ip:155f72b42ebdf384:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-draft-w:6530c4b4b48e3730:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-read:ebe13dab80673955:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-verify:3d963a3d8ca1133e:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write-h:10c6ff31b1cea394:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:149cd2375e363490:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:155f72b42ebdf384:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:3d963a3d8ca1133e:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:54b6cddb7f91d110:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:c1d69f2e3c4a869c:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write-h:d9d9c6b70497004b:497556",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791205200000
+   }
+  ],
+  [
+   "rl:early-write:10c6ff31b1cea394:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:149cd2375e363490:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:155f72b42ebdf384:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:3d963a3d8ca1133e:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:54b6cddb7f91d110:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:c1d69f2e3c4a869c:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ],
+  [
+   "rl:early-write:d9d9c6b70497004b:29853360",
+   {
+    "type": "string",
+    "value": "1",
+    "expiresAt": 1791201660000
+   }
+  ]
+ ]
+}

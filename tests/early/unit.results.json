@@ -1,0 +1,382 @@
+{
+  "at": "2026-09-29T10:43:02.624Z",
+  "passed": 75,
+  "failed": 0,
+  "results": [
+    {
+      "name": "domain pinned",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "every type carries a schema string first",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "no Marketplace/Website domain confusion",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SupportIntent digest is bytes32",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "SupportIntent signature recovers to sender",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sameTypedData accepts the exact payload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sameTypedData rejects a changed receiver",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sameTypedData rejects a foreign domain",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "a different chainId changes the digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "amount 1 unit off changes the digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "unknown structure refused",
+      "ok": true,
+      "detail": "unknown SYNC Proof structure: Listing"
+    },
+    {
+      "name": "canonicalJson sorts keys at every level",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canonicalJson drops undefined, keeps null, stringifies bigint",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "canonicalJson refuses floats",
+      "ok": true,
+      "detail": "canonicalJson: only safe integers"
+    },
+    {
+      "name": "hashJson stable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "pilot allowlist parses with 2 assets, lowercase, reviewed decimals",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "allowlist refuses a checksummed (non-lowercase) address",
+      "ok": true,
+      "detail": "assets: token must be a lowercase address"
+    },
+    {
+      "name": "allowlist refuses a wrong chain",
+      "ok": true,
+      "detail": "assets: bad file"
+    },
+    {
+      "name": "acceptedAssets normalised: lowercase, sorted by token, hash present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "acceptedAssets: symbol-alike token outside the allowlist refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "acceptedAssets: duplicate refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "acceptedAssets: zero / non-integer / huge minimum refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "acceptedAssets: order-independent hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "formatUnits/parseUnits exact round trip",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "isRawAmount bounds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "transfer calldata is exactly 68 bytes, selector 0xa9059cbb, nothing appended",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "transfer calldata refuses a bad amount",
+      "ok": true,
+      "detail": "transferCalldata: amount"
+    },
+    {
+      "name": "creatorId deterministic from the channel id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "creatorId refuses a handle",
+      "ok": true,
+      "detail": "creatorIdOf: invalid channel id"
+    },
+    {
+      "name": "utcDate uses UTC",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "formatAudience",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "leaves sorted ascending and de-duplicated",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "root deterministic regardless of input order",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inclusion proof 0 verifies",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inclusion proof 1 verifies",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "inclusion proof 2 verifies",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tampered proof fails",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "single leaf root = leaf",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "empty bundle root is date-specific and never equals a leaf root",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "leaf domain-separated from node hashes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "odd level duplicates the last node (5 leaves)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "anchor calldata round-trips and is 47 bytes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "anchor calldata: junk refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "committed keys file is public-only and parses",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "registry refuses any 32-byte value",
+      "ok": true,
+      "detail": "keys: a 32-byte value is present; only addresses and ids are allowed"
+    },
+    {
+      "name": "registry refuses a bare 64-hex secret",
+      "ok": true,
+      "detail": "keys: a 32-byte value is present; only addresses and ids are allowed"
+    },
+    {
+      "name": "attestation verifies with the registered key",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "attestation: tampered claim fails on id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "attestation: other key fails on signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "attestation: unknown keyId",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "attestation: outside key validity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "attestation id excludes keyId and signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: exact transfer matches once",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: two identical transfers in one tx both match (ambiguity surfaced)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: fake token with same symbol never matches",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: wrong sender / receiver / amount",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: reverted tx has no candidates",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: removed log / wrong topic / malformed data skipped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: log from another tx/block skipped",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "matching: checksummed inputs normalised",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "windowState",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "receiptId deterministic",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "golden vector supportIntentDigest",
+      "ok": true,
+      "detail": "0x9fce2d6cc3a5c38d9d758386b22a59afaca442f8604be771ba3a949d23daf2b1 vs 0x9fce2d6cc3a5c38d9d758386b22a59afaca442f8604be771ba3a949d23daf2b1"
+    },
+    {
+      "name": "golden vector creatorManifestDigest",
+      "ok": true,
+      "detail": "0xedd69e3b9cd0c577b094baf96056aa1130e767b0b42a11baca35e723d1c65011 vs 0xedd69e3b9cd0c577b094baf96056aa1130e767b0b42a11baca35e723d1c65011"
+    },
+    {
+      "name": "golden vector countMeInDigest",
+      "ok": true,
+      "detail": "0x70e1bef82b7df6cad6b1c25b29b9cfe6cdb75e10616089f15ce4902ba534b76b vs 0x70e1bef82b7df6cad6b1c25b29b9cfe6cdb75e10616089f15ce4902ba534b76b"
+    },
+    {
+      "name": "golden vector finalizeDigest",
+      "ok": true,
+      "detail": "0x36343b3410b23fb7f774679e3894f2efcd3c074efc63785514b82349f8d78ec0 vs 0x36343b3410b23fb7f774679e3894f2efcd3c074efc63785514b82349f8d78ec0"
+    },
+    {
+      "name": "golden vector hashJsonSample",
+      "ok": true,
+      "detail": "0x4fcf72b17f17c576aa536a00863b124b0a7fedd4fa5a34ea8849c5245a6cef79 vs 0x4fcf72b17f17c576aa536a00863b124b0a7fedd4fa5a34ea8849c5245a6cef79"
+    },
+    {
+      "name": "golden vector acceptedAssetsHash",
+      "ok": true,
+      "detail": "0xdf0fbcabdea57394b008d9485aa3a21f21384675d57ea3579103620d50afd021 vs 0xdf0fbcabdea57394b008d9485aa3a21f21384675d57ea3579103620d50afd021"
+    },
+    {
+      "name": "golden vector creatorId",
+      "ok": true,
+      "detail": "0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18 vs 0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18"
+    },
+    {
+      "name": "golden vector merkleRoot3",
+      "ok": true,
+      "detail": "0x5b9d2bc9d88de2b185b7d3672d3a2678fee42fe6864b27856edd9a606137ca13 vs 0x5b9d2bc9d88de2b185b7d3672d3a2678fee42fe6864b27856edd9a606137ca13"
+    },
+    {
+      "name": "golden vector emptyRoot",
+      "ok": true,
+      "detail": "0x25693c1e624d15fba76fd33ee8a08375aa2d84afb72173b5dca1dc7627b0fb56 vs 0x25693c1e624d15fba76fd33ee8a08375aa2d84afb72173b5dca1dc7627b0fb56"
+    },
+    {
+      "name": "golden vector leaf1",
+      "ok": true,
+      "detail": "0x35263fd6ea15b27f9af10ea426457154eeaa4fdd6e3dc22e6c33fb7b17d41881 vs 0x35263fd6ea15b27f9af10ea426457154eeaa4fdd6e3dc22e6c33fb7b17d41881"
+    },
+    {
+      "name": "golden vector attestationId",
+      "ok": true,
+      "detail": "0x30d0fb05a56fcf5e66a622f1d630b3604989e50c6a5aec87add00b430cf4d5dd vs 0x30d0fb05a56fcf5e66a622f1d630b3604989e50c6a5aec87add00b430cf4d5dd"
+    },
+    {
+      "name": "golden vector receiptId",
+      "ok": true,
+      "detail": "0x626eef70d2d0c914c9953da0cf69c80d62404b085e7946267f88d7d31754e41e vs 0x626eef70d2d0c914c9953da0cf69c80d62404b085e7946267f88d7d31754e41e"
+    },
+    {
+      "name": "golden vector set complete",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

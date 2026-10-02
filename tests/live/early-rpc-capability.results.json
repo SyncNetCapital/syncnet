@@ -1,0 +1,87 @@
+{
+  "at": "2026-09-29T07:11:46.582Z",
+  "rpc": "https://rpc.mainnet.chain.robinhood.com/",
+  "checks": [
+    {
+      "id": "chain-id",
+      "ok": true,
+      "detail": "0x1237"
+    },
+    {
+      "id": "latest",
+      "ok": true,
+      "detail": "block 75467715 ts 1790665906"
+    },
+    {
+      "id": "safe-tag",
+      "ok": true,
+      "detail": "lag 7417 blocks, 751 s"
+    },
+    {
+      "id": "finalized-tag",
+      "ok": true,
+      "detail": "lag 11174 blocks, 1132 s"
+    },
+    {
+      "id": "block-time",
+      "ok": true,
+      "detail": "0.101 s/block → 2 h window ≈ 71287 blocks"
+    },
+    {
+      "id": "getLogs-exact-filter-1000",
+      "ok": true,
+      "detail": "0 logs in 127 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-5000",
+      "ok": true,
+      "detail": "0 logs in 122 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-10000",
+      "ok": true,
+      "detail": "0 logs in 123 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-20000",
+      "ok": true,
+      "detail": "0 logs in 119 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-50000",
+      "ok": true,
+      "detail": "0 logs in 123 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-100000",
+      "ok": true,
+      "detail": "0 logs in 118 ms"
+    },
+    {
+      "id": "getLogs-exact-filter-200000",
+      "ok": true,
+      "detail": "0 logs in 128 ms"
+    },
+    {
+      "id": "getLogs-broad-1000",
+      "ok": true,
+      "detail": "2973 logs in 526 ms"
+    },
+    {
+      "id": "getLogs-broad-5000",
+      "ok": true,
+      "detail": "result cap observed: logs matched by query exceeds limit of 10000"
+    },
+    {
+      "id": "getCode",
+      "ok": true,
+      "detail": "0x6080604052…"
+    }
+  ],
+  "blockTimeSeconds": 0.101,
+  "getLogsRangeMax": 200000,
+  "resultCap": "logs matched by query exceeds limit of 10000",
+  "getLogsMax": 200000,
+  "recommendation": "The exact three-topic filter spans ≥ 200000 blocks per call: EARLY_GETLOGS_CHUNK=50000 covers a 2 h window in 2 call(s) (budget 24).",
+  "ms": 2369
+}

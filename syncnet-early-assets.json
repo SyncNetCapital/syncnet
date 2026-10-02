@@ -1,0 +1,9 @@
+{
+  "schema": "syncnet.early.assets.v1",
+  "chainId": 4663,
+  "note": "Pilot allowlist of accepted ERC-20 assets. Identity is chainId + contract address; symbols are display only. Decimals are reviewed here and never read live. Native ETH is excluded (no Transfer log). No fee-on-transfer or rebasing tokens.",
+  "assets": [
+    { "token": "0x5fc5360d0400a0fd4f2af552add042d716f1d168", "symbol": "USDG", "decimals": 6, "note": "Global Dollar; PAR SDK address book; issuer-upgradeable proxy" },
+    { "token": "0x6368e007b9f0b941560ed1f3bceb20247f5eca37", "symbol": "SYNC", "decimals": 18, "note": "canonical $SYNC" }
+  ]
+}

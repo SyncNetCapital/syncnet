@@ -48,8 +48,34 @@
   function markCurrent() {
     const p = location.pathname;
     const key = p === '/' || p === '/index.html' || p === '/for-sale' || p.startsWith('/project/') || p.startsWith('/token/') || p === '/network.html' ? 'explore'
-      : p === '/build.html' ? 'create' : p === '/you.html' || p === '/home-editor.html' ? 'you' : '';
+      : p === '/build.html' ? 'create' : p === '/you.html' || p === '/home-editor.html' ? 'you' : p === '/labs/early' || p.startsWith('/labs/early/') ? 'early' : '';
     document.querySelectorAll('[data-nav]').forEach((a) => { if (a.dataset.nav === key) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  }
+  // ---- EARLY in the primary navigation (Explore · Create · EARLY · My Projects; mobile: Explore · Create · Early · You).
+  // Shown ONLY when this deployment has EARLY enabled (GET /api/config → early): a closed feature is never a nav dead end.
+  // Built here, once, for every page, so the page markup and the stylesheets stay exactly as they are; with EARLY off nothing changes.
+  const EARLY_TAB_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>';
+  function addEarlyNav() {
+    const create = document.querySelector('.sn-nav [data-nav="create"]'), tab = document.querySelector('.sn-tabbar [data-nav="create"]');
+    if (document.querySelector('[data-nav="early"]') || (!create && !tab)) return;
+    if (create) { const a = document.createElement('a'); a.href = '/labs/early'; a.dataset.nav = 'early'; a.textContent = 'Early'; create.after(a); }
+    if (tab) { const a = document.createElement('a'); a.href = '/labs/early'; a.dataset.nav = 'early'; a.innerHTML = EARLY_TAB_ICON + 'Early'; tab.after(a); tab.parentElement.style.gridTemplateColumns = 'repeat(4,1fr)'; }
+    markCurrent();
+  }
+  function removeEarlyNav() {
+    const bar = document.querySelector('.sn-tabbar');
+    document.querySelectorAll('[data-nav="early"]').forEach((a) => a.remove());
+    if (bar) { bar.style.gridTemplateColumns = ''; if (!bar.getAttribute('style')) bar.removeAttribute('style'); }
+  }
+  function wireEarlyNav() {
+    let cached = ''; try { cached = sessionStorage.getItem('syncnet_early_nav') || ''; } catch { /* storage may be blocked */ }
+    if (cached === '1') addEarlyNav(); // the last answer, so later pages do not flash
+    if (typeof fetch !== 'function') return;
+    fetch('/api/config', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => {
+      const on = Boolean(j && j.early === true);
+      try { sessionStorage.setItem('syncnet_early_nav', on ? '1' : '0'); } catch { /* storage may be blocked */ }
+      if (on) addEarlyNav(); else removeEarlyNav();
+    }).catch(() => { /* config unavailable: the nav simply stays as it is */ });
   }
   function wireWallet() {
     const W = window.SyncNetWallet;
@@ -95,7 +121,7 @@
       else if (!q) e.preventDefault();
     });
   }
-  function init() { markCurrent(); wireWallet(); wireCopy(); wireTopSearch(); }
+  function init() { markCurrent(); wireWallet(); wireCopy(); wireTopSearch(); wireEarlyNav(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 
   window.SyncNetUI = Object.freeze({ glyph, stateHtml, animateSync, esc, short, isAddr, logoHtml, LABEL });

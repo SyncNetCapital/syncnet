@@ -1,0 +1,517 @@
+{
+  "at": "2026-10-02T10:39:46.998Z",
+  "passed": 102,
+  "failed": 0,
+  "results": [
+    {
+      "name": "P01 tests/early/vectors.json equals the vectors pinned at b4fccd5 (every one of the 12)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "P02 YouTube creatorId unchanged: keccak256(\"syncnet.early.creator.v1|youtube|\" + channelId)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P03 SupportIntent digest (which embeds the YouTube creatorId) unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P04 CreatorManifest digest unchanged (the signed field is still `channelId`)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P05 CountMeIn digest unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P06 the EIP-712 type list and schema strings are exactly the v1 ones (no new type, no renamed field)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P07 receiptId derivation unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "P08 `PLATFORM` is still \"youtube\" (the default for every legacy call)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 registry: frozen, exactly youtube + x, each with an id pattern and an audience kind",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 creatorIdOf(CH) === creatorIdOf(CH, \"youtube\") and both are the pinned value",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B03 X creatorId follows the same formula with its own platform tag",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 an id of one platform can never produce another platform's creatorId (validated against the GIVEN platform only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B05 creatorIdOf refuses handles, empty, non-strings",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 isExternalId(x): digits only, no leading zero, 1-20 chars, strings only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B07 isExternalId(youtube) is the legacy channel-id shape and refuses X ids",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B08 the id alphabets are disjoint (4000 random ids per platform): platformOfId is unambiguous",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B09 refOf: YouTube ref is the BARE channel id (stored keys keep their names); X ref is \"x:<id>\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B10 parseRef round-trips every valid identity",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B11 parseRef refuses non-canonical / cross-platform / junk refs (one spelling per identity)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B12 distinct identities have distinct refs and distinct creatorIds",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B13 audienceOf: legacy YouTube claims (no audienceKind) = subscribers; hidden/null stay hidden",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B14 audienceOf: followers claims are followers (never relabelled as subscribers); unknown kinds are never guessed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B15 audienceOf ignores negative / non-numeric counts",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B16 YouTube audience line is byte-identical to the pre-platform text (and to a legacy receipt without `kind`)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B17 X follower context is always labelled as X context, never as the generic \"Audience then\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B18 formatAudience is unchanged (pre-platform rounding: one decimal below 10K, whole units above)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B19 adapters: YouTube and X are registered; adapterOf refuses everything else (incl. prototype names)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B20 idFields: YouTube keeps `channelId` in attestation subjects/claims; other platforms use `externalId`",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B21 YouTube enrolment snapshot claims are exactly the pre-platform shape",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B22 YouTube daily snapshot claims are exactly the pre-platform shape (hidden count -> null)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C01 YouTube creator token: subject is exactly <channelId>~<wallet> (unchanged format), verify returns platform youtube",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 legacy spelling (channelId) and explicit spelling (platform + externalId) issue the SAME subject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 fan and YouTube state subjects are the bare wallet (unchanged)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 an X creator token carries the platform: x_<id>~<wallet>, verifies as platform x",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 tokens cannot be issued for an id that is not of the named platform",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 the platform is inside the MAC: rewriting a token's platform/id invalidates it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 a state token is bound to its platform (an X state is not a YouTube state, and vice versa)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 scopes stay separate (a state/fan token is never a creator token)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 the longest legal subject still fits the token limits (20-digit id)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 the same wallet+id under different platforms can never share a token subject",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C17 harness sanity: forged tokens with canonical subjects verify (youtube, x creator; youtube, x state; fan)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C18 MAC-valid but NON-canonical or cross-platform subjects are refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 creator-link (legacy body, no platform) still returns the YouTube start URL and scope; the state is a YouTube state",
+      "ok": true,
+      "detail": "{\"ok\":true,\"startUrl\":\"/api/early-youtube-auth?start=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790938186.ddcfe28f9e159a87eae37f704e767bc3.1d25bbd05eb8bc7ee72b7c57907520dbc577584eb1d53857dc329e92f9458db8\",\"ttlSeconds\":600,\"scope\":\"https://www.googleapis.com/auth/youtube.readonly\"}"
+    },
+    {
+      "name": "C12 creator-link with explicit platform=youtube is the same",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 OAuth start redirects to Google with the youtube.readonly scope",
+      "ok": true,
+      "detail": "https://accounts.google.com/o/oauth2/v2/auth?client_id=test-client&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-youtube-auth&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fyoutube.readonly&access_type=online&include_granted_scopes=false&prompt=select_account&state=e1.state.0x1563915e194d8cfba1943570603f7606a3115508.1790938186.ddcfe28f9e159a87eae37f704e767bc3.1d25bbd05e"
+    },
+    {
+      "name": "C14 the callback issues a legacy-spelled YouTube creator session (<channelId>~<wallet>) bound to the channel from channels.mine",
+      "ok": true,
+      "detail": "/labs/early/creator#s=e1.creator.UC_x5XG1OV2P6uZZ5FSM9Ttw~0x1563915e194d8cfba1943570603f7606a3115508.1790944786.bfe7cef29297a363.088f2b14c98936b0181090ff5f40d40a85720b82aae63fbbbbe3643ea0e9bba5"
+    },
+    {
+      "name": "C15 the link record keeps `channelId` (v1 name of the external id) and records `platform: youtube`; no token is stored",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C16 an X-bound state is refused by the YouTube OAuth function (start and callback): fixed \"state\" error, no provider call, nothing stored",
+      "ok": true,
+      "detail": "/labs/early/creator#e=state /labs/early/creator#e=state"
+    },
+    {
+      "name": "D01 config (no X settings): only YouTube is enabled; X is described but disabled; platformEnabled is true for youtube and false for x / unknown / prototype names",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D02 X credentials + redirect + generic \"enable\" style variables WITHOUT the explicit SYNCNET_EARLY_X_ENABLED flag never enable X (full matrix in x.test.mjs)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D03 config view lists exactly the enabled platforms",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D04 count-me-in for platform x -> 400 \"Unsupported platform\", nothing stored",
+      "ok": true,
+      "detail": "{\"error\":\"Unsupported platform.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "D05 count-me-in-withdraw for platform x -> 400, nothing stored",
+      "ok": true,
+      "detail": "{\"error\":\"Unsupported platform.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "D06 creator-link for platform x -> 400 before any signature work or nonce burn",
+      "ok": true,
+      "detail": "{\"error\":\"Unsupported platform.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "D07 creator-link for an unknown platform -> 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D08 GET creator for platform x -> 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D09 GET creator by creatorId of a stored non-enabled platform record -> 400, never served",
+      "ok": true,
+      "detail": "{\"error\":\"Unsupported platform.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "D10 `channelId` is the YouTube spelling only (refused for x even if x were enabled)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D11 resolve: platform x -> 400; the legacy `yt` parameter and platform=youtube&q resolve with {platform, externalId, channelId}",
+      "ok": true,
+      "detail": "{\"enabled\":true,\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\",\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"cached\":false}"
+    },
+    {
+      "name": "D12 a (validly signed) X creator session is refused everywhere: manifest/me/pause -> 401, rotation-cancel does not treat it as a creator session; nothing stored",
+      "ok": true,
+      "detail": "401,401,401,404"
+    },
+    {
+      "name": "D13 a manifest naming another channel than the session proved -> 403 channel_mismatch",
+      "ok": true,
+      "detail": "{\"error\":\"The manifest must name the YouTube channel you signed in with.\",\"code\":\"channel_mismatch\"}"
+    },
+    {
+      "name": "D14 a YouTube session cannot be used to publish a manifest for an X identity -> 403",
+      "ok": true,
+      "detail": "{\"error\":\"The manifest must name the YouTube channel you signed in with.\",\"code\":\"channel_mismatch\"}"
+    },
+    {
+      "name": "D15 Count me in by {channelId} and by {platform, externalId} write the same keys and the same signed struct",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D16 conflicting spellings are refused; agreeing ones are accepted (a repeat signal is a renewal)",
+      "ok": true,
+      "detail": "{\"error\":\"externalId and channelId differ.\",\"code\":\"invalid_request\"}{\"ok\":true,\"signal\":{\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-02T10:39:46.000Z\",\"renewedAt\":[\"2026-10-02T10:39:46.000Z\"],\"expiry\":1806489586,\"creatorOnEarly\":false,\"creatorId\":null},\"note\":\"Free, private and non-binding. It reserves "
+    },
+    {
+      "name": "D17 non-string / wrong-shape ids are refused with the legacy message",
+      "ok": true,
+      "detail": "{\"error\":\"Invalid channel id.\",\"code\":\"invalid_request\"}|{\"error\":\"Invalid channel id.\",\"code\":\"invalid_request\"}|{\"error\":\"Invalid channel id.\",\"code\":\"invalid_request\"}"
+    },
+    {
+      "name": "E01 the legacy scenario runs to a FINALIZED receipt and a card on the current code",
+      "ok": true,
+      "detail": "201,FINALIZED,201"
+    },
+    {
+      "name": "E02 the current code stores EXACTLY the legacy key set (no new, no missing, no renamed key)",
+      "ok": true,
+      "detail": "{\"onlyNew\":[],\"onlyOld\":[]}"
+    },
+    {
+      "name": "E03 every stored record has EXACTLY the legacy top-level fields (nothing added, nothing removed)",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "E04 every attestation type has the legacy subject and claim keys (YouTube keeps `channelId`; none gained `externalId`/`audienceKind`)",
+      "ok": true,
+      "detail": "{\"fresh\":[\"audience-snapshot|subject:channelId|claims:channelId,dateUTC,fetchedAt,hiddenSubscriberCount,source,subscriberCount,title\",\"creator-identity|subject:channelId,creatorId|claims:channelId,manifestHash,manifestVersion,method,platform,receivingWallet,title,verifiedAt\",\"creator-manifest|subject:creatorId,manifestHash|claims:at,effectiveAt,manifestVersion,previousManifestHash,status,supersede"
+    },
+    {
+      "name": "E05 YouTube refs: the CMI and snapshot keys use the bare channel id, the creator record says platform youtube",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F01 legacy creator is served by the old `channelId` query AND the new {platform, externalId} query, identically",
+      "ok": true,
+      "detail": "{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"di"
+    },
+    {
+      "name": "F02 an unclaimed legacy channel and an unknown channel answer identically",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F03 the legacy receipt is served unchanged: the document equals the one the old code produced (the only addition is audienceThen.kind)",
+      "ok": true,
+      "detail": "{\"earlyDate\":\"2026-10-05\",\"creatorTitleThen\":\"Alice\",\"audienceThen\":{\"state\":\"approximate\",\"kind\":\"subscribers\",\"value\":1234,\"display\":\"~1.2K\",\"asOf\":1791201600}}"
+    },
+    {
+      "name": "F04 RECEIPT VERIFIED by the independent verifier: the receipt re-served by the current code, the one the old code produced, and the frozen b4fccd5 sample receipt",
+      "ok": true,
+      "detail": "[[],[],[]]"
+    },
+    {
+      "name": "F05 relabelling a legacy receipt's creator as an X identity breaks verification (platform + id are signed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F06 the legacy card still renders: creator title, YouTube channel id, audience, no wallet/amount/tx",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F07 the old fan session still opens \"mine\": the legacy receipt and the legacy signal for the unclaimed creator (bare-id ref)",
+      "ok": true,
+      "detail": "[{\"platform\":\"youtube\",\"externalId\":\"UCabcdefghijklmnopqrstuv\",\"channelId\":\"UCabcdefghijklmnopqrstuv\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"renewedAt\":[],\"expiry\":1806753600,\"creatorOnEarly\":false,\"creatorId\":null}]"
+    },
+    {
+      "name": "F08 the legacy signal that waited for the creator is frozen at join and now resolves to the creator",
+      "ok": true,
+      "detail": "[{\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"FROZEN\",\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"renewedAt\":[],\"expiry\":1806753600,\"creatorOnEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\"}]"
+    },
+    {
+      "name": "F09 the legacy creator session (issued by the old code) still opens the dashboard",
+      "ok": true,
+      "detail": "{\"enabled\":true,\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"linkWallet\":\"0x1563915e194d8cfba1943570603f7606a3115508\",\"linkFresh\":true,\"display\""
+    },
+    {
+      "name": "F10 countSignals reads the legacy bare-id key set",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F11 pause / resume work with the legacy creator session on the legacy creator record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F12 a signal written by the old code can be withdrawn with the (unchanged) withdraw signature",
+      "ok": true,
+      "detail": "{\"ok\":true,\"signal\":{\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"status\":\"WITHDRAWN\",\"createdAt\":\"2026-10-05T12:00:00.000Z\",\"renewedAt\":[],\"expiry\":1806753600,\"creatorOnEarly\":false,\"creatorId\":null}}"
+    },
+    {
+      "name": "F13 a NEW support on the legacy manifest works end to end and its receipt verifies independently",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "F14 the creator's receipt index holds both receipts under the unchanged creatorId key",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F15 a link record that names another platform does not satisfy a YouTube session -> 403 reverify",
+      "ok": true,
+      "detail": "{\"error\":\"Fresh YouTube verification is required (sign in with YouTube again).\",\"code\":\"reverify\"}"
+    },
+    {
+      "name": "F16 a legacy-shaped link record (no `platform`) starts a wallet rotation on the legacy creator",
+      "ok": true,
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"platform\":\"youtube\",\"externalId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\"},\"status\":\"ROTATION_PENDING\",\"paused\":false,\"joinedAt\":1791201600,\"currentManifest\":{\"manifestHash"
+    },
+    {
+      "name": "F17 snapshot job: the legacy creator gets today's snapshot under the bare-id key with the legacy claim shape; display metadata refreshes",
+      "ok": true,
+      "detail": "{\"ok\":true,\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":true,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0}}}}"
+    },
+    {
+      "name": "F18 snapshot job: a creator of a platform with no adapter is skipped - never sent to the YouTube client, never recorded, not a failure",
+      "ok": true,
+      "detail": "{\"seenIds\":[\"UC_x5XG1OV2P6uZZ5FSM9Ttw\"],\"report\":{\"creators\":2,\"rotationsCompleted\":0,\"snapshots\":1,\"snapshotsSkipped\":0,\"snapshotFailures\":0,\"reconciled\":0,\"finalized\":0,\"invalidated\":0,\"timedOut\":false,\"noSigner\":false,\"noYouTube\":false,\"noX\":true,\"byPlatform\":{\"youtube\":{\"snapshots\":1,\"failures\":0}}}}"
+    },
+    {
+      "name": "F19 the legacy enrolment snapshot of the join day is untouched (earlier day, bare-id key)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F20 across the whole replay no key of the form early:(cmi|snap):v1:<platform>: was ever created for YouTube",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G01 identityFrom(x): id, ref and creatorId all derive from the named platform",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G02 identityFrom with only the legacy `channelId` is YouTube, with the legacy ref and creatorId",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G03 identityFrom never crosses identities: wrong platform/id pairs, mixed spellings, handles, numbers, arrays and junk are all errors",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "G04 identityFrom refuses a registered-but-not-enabled platform",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G05 public creator shape: always {platform, externalId}; only YouTube also carries the legacy `channelId`; a pre-platform record (no platform field) is YouTube",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G06 public signal shape follows the same rule",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G07 public manifest shape follows the same rule",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G08 attestation field names: audience-snapshot claims of another platform would use `externalId`, YouTube keeps `channelId` (pinned in B20-B22)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G09 the withdraw guard: platformOfId(id) must equal the named platform",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H01 the X client, X OAuth function and their single route exist (the function answers closed unless X is explicitly enabled)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H02 X env var names, X API hosts and X OAuth endpoints appear only in the X modules, config and platform registry - not in the shared server code or the protocol lib",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H03 the HTML pages carry no X markup or copy (the X UI is created by script only when the server enables it; tests/e2e/early-ui-x.mjs)",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

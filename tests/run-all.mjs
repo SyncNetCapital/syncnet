@@ -47,6 +47,14 @@ const SUITES = [
   ['Project Home · payment deployment validation (P1-2, adversarial)', 'node', ['tests/project-home/deployment.test.mjs'], /(\d+)\/(\d+) deployment validation checks passed/],
   ['Project Home · code identity (immutable-aware fingerprints vs fresh build)', 'node', ['tests/project-home/code-fingerprint.mjs'], /(\d+)\/(\d+) code fingerprint checks passed/],
   ['Phase 2 UI · Explore, Project Page, You, Project Home editor/payment/adoption', 'node', ['tests/e2e/phase2-ui.mjs'], /(\d+)\/(\d+) phase 2 UI checks passed/],
+  ['EARLY · protocol primitives (domain, canonical JSON, assets, Merkle, attestations, matching rule)', 'node', ['tests/early/unit.test.mjs'], /(\d+)\/(\d+) early unit checks passed/],
+  ['EARLY · server /api/early (Count me in, creator, intents, matching, receipts, cards, rotation)', 'node', ['tests/early/server.test.mjs'], /(\d+)\/(\d+) early server checks passed/],
+  ['EARLY · identity/context (YouTube client, OAuth function, daily snapshots)', 'node', ['tests/early/identity.test.mjs'], /(\d+)\/(\d+) early identity checks passed/],
+  ['EARLY · anchoring (RLP/EIP-155, anchor tx, OpenTimestamps, bundle job, verifier)', 'node', ['tests/early/anchor.test.mjs'], /(\d+)\/(\d+) early anchor checks passed/],
+  ['EARLY · platform identity (pinned YouTube vectors, platform helpers, sessions, closed-platform gate, legacy-state replay)', 'node', ['tests/early/platform.test.mjs'], /(\d+)\/(\d+) early platform checks passed/],
+  ['EARLY · X platform (OAuth PKCE, resolver, follower snapshots, spend guard, feature gate)', 'node', ['tests/early/x.test.mjs'], /(\d+)\/(\d+) early X checks passed/],
+  ['EARLY · UI + mobile (two prompts, resume, receipt, card; 320–430 px)', 'node', ['tests/e2e/early-ui.mjs'], /(\d+)\/(\d+) early UI checks passed/],
+  ['EARLY · UI · X (flag off = frozen YouTube DOM, flag on, routes, privacy, gate, no CSS/HTML change)', 'node', ['tests/e2e/early-ui-x.mjs'], /(\d+)\/(\d+) early X UI checks passed/],
 ];
 const out = [];
 for (const [name, cmd, args, re] of SUITES) {

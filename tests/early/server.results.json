@@ -1,0 +1,677 @@
+{
+  "at": "2026-09-29T10:43:03.076Z",
+  "passed": 134,
+  "failed": 0,
+  "results": [
+    {
+      "name": "A01 config enabled with the full test environment; attestations, oauth on; anchoring key configured",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A02 config lists assets by address with reviewed decimals and no supporter data",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A03 config never uses investment framing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A04 default deployment: EARLY closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A05 writes refused when closed (503 closed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A06 kill switch: writes 503 writes_closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A07 kill switch keeps verification reachable (404 for an unknown intent, not 503)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A08 missing attestation key: enabled but attestations false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A09 attestation key whose address is not in the registry: attestations false",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A10 anchor key == attestation key refused (both off)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A11 keys view is public data only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A12 method not allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A13 responses are JSON with nosniff and deny-all CSP",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B01 first signal stored (201, private, no EARLY status)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B02 signing again renews the same record (200, renewedAt grows)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B03 unclaimed channel view is byte-identical before and after signals (no leak)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B04 same nonce twice → idempotent / replay refused, never a second record",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B05 signature by another wallet refused (401)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B06 expiry must be issuedAt + 180 days",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B07 issuedAt outside ±120 s refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B08 extra fields refused (no amount can ride along)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B09 handle instead of channel id refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B10 withdraw (signed) → WITHDRAWN",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "B11 per-wallet signal budget (20/day) enforced",
+      "ok": true,
+      "detail": "20"
+    },
+    {
+      "name": "C01 manifest without a creator session → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 session without a fresh OAuth link → 403 reverify",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 OAuth account mismatch: manifest names another channel → 403 channel_mismatch",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C04 asset outside the allowlist → 400 asset_not_allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 acceptedAssetsHash mismatch → 400",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C06 manifest signed by a wallet other than receivingWallet → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C07 attestation key unavailable → 503 attestation_unavailable, nothing written",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C08 first manifest must be version 1",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C09 valid manifest v1 → 201 ACTIVE, manifestHash = EIP-712 digest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C10 signals waiting at join counted as records (fan active, fan2 withdrawn → 1), wording never \"people\"",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C11 public creator view: wallet, assets, status; NO signal count, NO supporters",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C12 manifest view carries identity + manifest attestations signed by the registered key (inclusion pending until the bundle is built)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C13 enrolment audience snapshot attested for the join day (from the OAuth link value)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C14 a second v1 manifest for an ACTIVE creator is refused as a stale rotation (409 stale_manifest)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C15 another wallet with a fresh session cannot re-claim v1 (must rotate: 409)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C16 creator dashboard shows the count privately",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C17 a fan session cannot open the creator dashboard",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D01 draft returns exact typed data: server-filled receiver/token/chain/creatorId/window, PRIVATE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D02 asset the creator does not accept → 422",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D03 below the creator minimum → 422",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D04 human amount refused: raw integers only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D05 unknown manifest → 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D06 sender == receiving wallet refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D07 client-supplied receiver refused (400 unexpected field)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D08 intent signed by another wallet → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D09 valid signature → INTENT_STORED (OPEN) with createdBlock and the standard transfer calldata",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D10 storing again is idempotent (lost POST after signing is safe)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D11 second draft for the same (sender, receiver, token, amount) while one is OPEN → 409 intent_open, and the open intent id is never disclosed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D12 a different amount is a different tuple → allowed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D13 intent readable by its id (capability), 404 for a random id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D14 listing a wallet’s intents needs a fan session (401)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D15 fan session lists own intents only",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "D16 an unsigned draft expires after 20 minutes → 404 draft_missing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E01 no transfer yet → 202 WAITING, no state change",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E02 transfer mined at/before createdBlock is not a candidate (backdating guard)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E03 wrong amount / same-symbol fake token / reverted / other sender never match",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E04 exact transfer found but block not SAFE → 202 PENDING_CONFIRMATION (observed recorded)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E05 SAFE + exactly one in-window candidate → CONFIRMED receipt, mode auto, no signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E06 verify again is idempotent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E07 receipt document: fact from the log, intent typed data + signature recovering to the sender, creator manifest, ordering note",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E08 receipt context: EARLY date = block date (UTC), audience from the day’s snapshot, approximate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E09 receipt attestations verify against the key registry; anchors pending (no bundle yet)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E10 receipt is PRIVATE and the public creator view still shows nothing about it",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E11a a same-tuple intent in the same second as the transfer waits (409 tuple_cooldown)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E11 after finalisation a new same-tuple intent is allowed (notBefore > transfer time)",
+      "ok": true,
+      "detail": "{\"ok\":true,\"intentId\":\"0x39d35450d789da17bf01c930b7958fb981a266a798a1dab1c3e08d9155af9bdd\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"bytes32\"},{\"name\":\"creatorId\",\"type\":\"bytes32\"},"
+    },
+    {
+      "name": "E12 the consumed transfer is not a candidate for the new intent (window + txlog claim)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E13 two in-window candidates → AMBIGUOUS, needsFinalize, both listed, nothing finalised",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E14 finalize naming a non-matching tx → 409 no_match",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E15 finalize signed by another wallet → 401",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E16 finalize with the sender’s signature → receipt mode ambiguous-finalized",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E17 finalize signature stored in the receipt and recovers to the sender",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E18 the other transfer stays unbound (no receipt exists for it)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E19 expired with no in-window match and no hint → EXPIRED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E20 a late transfer given as a hint → RECOVERY_AVAILABLE (never auto-finalised)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E21 recovery finalize → receipt mode recovery-finalized; EARLY date = block time",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E22 transfer after the 24 h grace → CLOSED, no receipt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E23 finalize refused once closed",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E24 CONFIRMED at SAFE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E25 reconcile before finality: unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E26 reorg removes the block → INVALIDATED_BY_REORG (receipt kept, card impossible)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E27 intent reopened as REORGED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E28 a new matching transfer re-verifies the REORGED intent → FINALIZED (finalized tag) with previous recorded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E29 RPC outage → 503 chain_unavailable, intent unchanged",
+      "ok": true,
+      "detail": "{\"error\":\"Robinhood Chain could not be read right now. Nothing was changed. Try again.\",\"code\":\"chain_unavailable\"}"
+    },
+    {
+      "name": "E29b RPC outage while persisting an intent → 503 chain_unavailable (no intent stored)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "E30 call budget exhausted (tiny chunks over a long window) → 202 VERIFY_DEFERRED, intent unchanged",
+      "ok": true,
+      "detail": "{\"ok\":false,\"status\":\"VERIFY_DEFERRED\",\"message\":\"The chain read budget for one check was reached. Verify again in a moment.\"}"
+    },
+    {
+      "name": "E30b the default chunk size covers the window inside the budget (WAITING, not deferred)",
+      "ok": true,
+      "detail": "{\"ok\":false,\"status\":\"WAITING\",\"intent\":{\"intentId\":\"0x8c1bf47f832cc38f1a5732cfc389fee500db9b3035d78d1779cbb6c8493cbc17\",\"status\":\"OPEN\",\"typedData\":{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"},{\"name\":\"version\",\"type\":\"string\"},{\"name\":\"chainId\",\"type\":\"uint256\"}],\"SupportIntent\":[{\"name\":\"schema\",\"type\":\"string\"},{\"name\":\"intentId\",\"type\":\"bytes32\"},{\"name\":\"manifestHash\",\"type\":\"by"
+    },
+    {
+      "name": "E31 RPC without a safe tag never confirms (fail closed)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F01 EarlySession signature → fan session token",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F02 session nonce replay refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F03 another wallet cannot make a card for this receipt (404)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F04 card created for a FINALIZED receipt, all fields hidden by default",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F05 card creation is idempotent (one share id per receipt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F06 public card: creator, date, audience, \"SYNC Proof verified\"; NO wallet, amount or tx hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F07 public card states what is and is not independently verifiable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F08 public card carries attestations that verify against the registry",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F09 no card for a CONFIRMED (not yet FINALIZED) receipt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F10 share-link-copied is a named metric event",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F11 verification-page visits deduped per (card, ip, hour) and never called shares",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F12 \"mine\" lists receipts with their card share id; nothing about other wallets",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F13 unknown share id → 404",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G00 baseline: drafts work before rotation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G01 a new manifest without a creator session (wallet only) → 401: a wallet alone cannot rotate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G02 rotation must reference the current manifest hash (409 stale_manifest)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G03 rotation to the same wallet refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G04 fresh OAuth + new wallet signature → ROTATION_PENDING with a 48 h effectiveAt and a warning",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G05 public creator view warns: rotation pending, effectiveAt visible, current wallet unchanged",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G06 drafts during the cooldown still pay the CURRENT wallet and expire no later than effectiveAt",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G07 a second rotation while one is pending is refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G08 the NEW wallet cannot cancel (401)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G09 current wallet cancels → ACTIVE again, locked",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G10 the cancelled manifest is CANCELLED and immutable in history",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G11 while locked, one fresh OAuth session is not enough (409 rotation_locked) and is recorded",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G11b a second sign-in only 23 h later is still refused",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G12 two OAuth sessions ≥ 24 h apart after the lock override the wallet’s cancel",
+      "ok": true,
+      "detail": "{\"ok\":true,\"creator\":{\"onEarly\":true,\"creatorId\":\"0x32b74c7680a22c1424cb949ffe137d3bed4067061c681d4c8ec848b9435b2d18\",\"channelId\":\"UC_x5XG1OV2P6uZZ5FSM9Ttw\",\"platform\":\"youtube\",\"display\":{\"title\":\"Alice\",\"avatarUrl\":\"https://yt.example/a.png\",\"handle\":\"@alice\"},\"status\":\"ROTATION_PENDING\",\"paused\":false,\"joinedAt\":1790678582,\"currentManifest\":{\"manifestHash\":\"0xca979935a39a9f2bab6683b61303909b8aa"
+    },
+    {
+      "name": "G13 the same old wallet cannot cancel again within 30 days (409 cancel_repeat)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G14 no new drafts in the final hour before the wallet change (409 rotation_imminent)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G15 after the cooldown any read completes the rotation: ACTIVE, new wallet, new manifest",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G16 old manifest SUPERSEDED (attested, immutable struct), new manifest ACTIVE with an identity attestation for the new wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G17 drafts against the superseded manifest are refused and point at the current one",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G18 drafts against the new manifest pay the new wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G19 an old receipt still references the old manifest and its ACTIVE-at-the-time attestation",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G20 pause (session only) stops new drafts; resume restores",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "G21 a creator session can cancel a pending rotation without a wallet signature (no lock)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H01 no public read contains a fan wallet, an intent id or a tx hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H02 no public read contains a per-creator receipt count or ranking word",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H03 errors are fixed sentences with codes (no stack, no env names)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H04 receipt by receiptId without a session → 401 (never a document, never existence)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H05 receipt by receiptId: another wallet’s session → 404 identical to unknown; the owner’s session → 200",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H06 public reconcile by receiptId is refused identically whether or not the receipt exists (400)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "H07 the scheduled job (internal) may reconcile by receiptId",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

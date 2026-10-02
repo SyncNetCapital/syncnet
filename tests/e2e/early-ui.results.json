@@ -1,0 +1,302 @@
+{
+  "at": "2026-09-29T10:43:46.090Z",
+  "passed": 59,
+  "failed": 0,
+  "results": [
+    {
+      "name": "L01 landing renders on a phone without overflow or JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L02 landing copy: I was there when; direct payment; no investment framing",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L03 resolver shows the channel and offers Count me in for a creator not on EARLY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "L04 Count me in = connect + ONE free signature, no transaction",
+      "ok": true,
+      "detail": "connect,sign"
+    },
+    {
+      "name": "L05 signal stored privately (server) and the public creator view still says not on EARLY",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C01 creator-link signature accepted by the server → redirected to the (fake) Google consent with a wallet-bound state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C02 callback returns to the creator page with a session in the fragment (cleared from the URL) and shows the manifest step",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C03 manifest signed by the receiving wallet → dashboard live; signals counted as records",
+      "ok": true,
+      "detail": "1 signed interest signal was waiting when you joined."
+    },
+    {
+      "name": "C04 dashboard shows the page link and the receiving wallet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "C05 no JS errors in the creator flow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F01 creator page: name, verified wallet, accepted asset + minimum, no supporter data",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F02 no overflow at 390 px",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F03 sign what you mean → ONE typed signature, Send enabled, transfer button appears only after the server stored the intent",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F04 the wallet prompt showed the SYNC Proof domain, receiver = creator wallet, USDG, exact raw amount, PRIVATE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F05 reload after signing resumes at Send (stored intent found), no new signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F06 send → ONE eth_sendTransaction: standard transfer to the token contract, value 0, 68-byte calldata, from the signing wallet",
+      "ok": true,
+      "detail": "{\"from\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"chainId\":\"0x1237\",\"to\":\"0x5fc5360d0400a0fd4f2af552add042d716f1d168\",\"data\":\"0xa9059cbb0000000000000000000000001563915e194d8cfba1943570603f7606a3115508000000000000000000000000000000000000000000000000000000000016e360\",\"value\":\"0x0\"}"
+    },
+    {
+      "name": "F07 happy path = exactly two wallet prompts across the flow (one typed signature in F03, one send in F06); no third signature",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F08 receipt page: transfer seen, waiting for SAFE",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F09 SAFE → verified (CONFIRMED) without any signature; card shows creator/date/audience",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F10 card button hidden until FINALIZED",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F11 reload after finality: verified and final, card available",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F12 making a card is an explicit opt-in (one session signature), link produced",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F13 receipt JSON download offered; details panel states ordering is not independently verifiable",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "F14 no JS errors in the fan flow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V01 public card: EARLY / I WAS THERE WHEN / ALICE / Supported date / audience / SYNC Proof verified",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V02 public card shows no wallet, amount, tx hash or intent id",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V03 public card says what is not shown",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "V04 no overflow, no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A01 two matching transfers → the page asks the fan to choose (never guesses)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "A02 one SupportFinalize signature resolves it (the only case with a third prompt)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "M01 no wallet in the browser → \"Open in your wallet\" hand-off links carrying this exact page URL",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "320px /labs/early: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /labs/early/c/UC_x5XG1OV2P6uZZ5FSM9Ttw: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /labs/early/creator: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /labs/early/mine: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px /labs/early/v/0x80ded1e8bcf27ba3fd164e3001814115463eeebd08fc730acffb3c3d94a30c3f: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "320px creator page: controls tappable (≥ 40 px) and text ≥ 10.5 px",
+      "ok": true,
+      "detail": " "
+    },
+    {
+      "name": "320px: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "360px /labs/early: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px /labs/early/c/UC_x5XG1OV2P6uZZ5FSM9Ttw: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px /labs/early/creator: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px /labs/early/mine: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px /labs/early/v/0x80ded1e8bcf27ba3fd164e3001814115463eeebd08fc730acffb3c3d94a30c3f: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "360px creator page: controls tappable (≥ 40 px) and text ≥ 10.5 px",
+      "ok": true,
+      "detail": " "
+    },
+    {
+      "name": "360px: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "390px /labs/early: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px /labs/early/c/UC_x5XG1OV2P6uZZ5FSM9Ttw: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px /labs/early/creator: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px /labs/early/mine: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px /labs/early/v/0x80ded1e8bcf27ba3fd164e3001814115463eeebd08fc730acffb3c3d94a30c3f: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "390px creator page: controls tappable (≥ 40 px) and text ≥ 10.5 px",
+      "ok": true,
+      "detail": " "
+    },
+    {
+      "name": "390px: no JS errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "430px /labs/early: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px /labs/early/c/UC_x5XG1OV2P6uZZ5FSM9Ttw: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px /labs/early/creator: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px /labs/early/mine: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px /labs/early/v/0x80ded1e8bcf27ba3fd164e3001814115463eeebd08fc730acffb3c3d94a30c3f: no horizontal overflow",
+      "ok": true,
+      "detail": "overflow=0"
+    },
+    {
+      "name": "430px creator page: controls tappable (≥ 40 px) and text ≥ 10.5 px",
+      "ok": true,
+      "detail": " "
+    },
+    {
+      "name": "430px: no JS errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

@@ -143,7 +143,7 @@
 [functions]
   directory = "netlify/functions"
   # Shared browser/server modules and the canonical registry used by the functions.
-  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "lib/syncnet-site.js", "lib/syncnet-project-home-pricing.js", "lib/syncnet-assets.js", "lib/syncnet-pump.js", "syncnet-projects.json", "syncnet-economies.json", "syncnet-project-home-pricing.json", "syncnet-project-home-deployment.json"]
+  included_files = ["lib/syncnet-core.js", "lib/syncnet-chain.js", "lib/syncnet-market.js", "lib/syncnet-origins.js", "lib/syncnet-economy.js", "lib/syncnet-site.js", "lib/syncnet-project-home-pricing.js", "lib/syncnet-assets.js", "lib/syncnet-pump.js", "lib/syncnet-early.js", "syncnet-projects.json", "syncnet-economies.json", "syncnet-project-home-pricing.json", "syncnet-project-home-deployment.json", "syncnet-early-assets.json", "syncnet-early-keys.json"]
 
 [[redirects]]
   from = "/api/canary-auth"
@@ -235,6 +235,52 @@
   to = "/.netlify/functions/project-home"
   status = 200
   force = true
+
+# Labs · EARLY (SYNC Proof). Everything answers closed unless SYNCNET_EARLY_ENABLED=true with a durable store
+# (netlify/lib/early-config.js). Money never touches these functions: the fan's wallet pays the creator's wallet directly.
+[[redirects]]
+  from = "/api/early"
+  to = "/.netlify/functions/early"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/early-youtube-auth"
+  to = "/.netlify/functions/early-youtube-auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/early-x-auth"
+  to = "/.netlify/functions/early-x-auth"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/labs/early/creator"
+  to = "/labs-early-creator.html"
+  status = 200
+
+[[redirects]]
+  from = "/labs/early"
+  to = "/labs-early.html"
+  status = 200
+
+[[redirects]]
+  from = "/labs/early/*"
+  to = "/labs-early.html"
+  status = 200
+
+# EARLY scheduled maintenance (no /api route): hourly at :05 — daily UTC audience snapshots (first success of the day
+# wins), due wallet rotations, finality reconciliation. Does nothing unless SYNCNET_EARLY_ENABLED=true.
+[functions."early-snapshot"]
+  schedule = "5 * * * *"
+
+# EARLY anchoring (no /api route): 00:20 UTC builds yesterday's bundle; :50 every hour retries anchors / OTS upgrades.
+# The ONE server-sent transaction in SyncNet: a zero-value self-transfer from the registry anchor key carrying the
+# Merkle root. Off unless SYNCNET_EARLY_ENABLED=true and the anchor key is configured; SYNCNET_EARLY_ANCHOR_DISABLED=true stops it.
+[functions."early-anchor"]
+  schedule = "20,50 * * * *"
 
 # Project Home public renderer and its image route. Both answer 404 unless SYNCNET_PROJECT_HOME_ENABLED=true.
 [[redirects]]
