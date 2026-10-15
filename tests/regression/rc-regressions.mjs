@@ -3,6 +3,7 @@
 // server-side /api/ipfs-check decides the metadata preflight) and R28 (Pinata gateway when public gateways 429), driven through the
 // real pages with the stateful PAR mock, the real Netlify functions and a signing mock wallet (tests/e2e/harness.mjs).
 // Nothing touches a real network and nothing is broadcast anywhere. Run: node tests/regression/rc-regressions.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, setFlags, serverState, minePending, FOUNDER_KEY, Core, Chain, ROOT, TEST_CID, cidFor } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -446,7 +447,7 @@ await test('R18 upload spam is rate-limited (per wallet, per IP) and uploads fai
 await test('R19 DNS rebinding and internal hosts are blocked by the site check', async () => {
   const sc = require(path.join(ROOT, 'netlify/functions/site-check.js'));
   const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
-  const mk = () => ({ ...createStore({ map: new Map() }), durable: true });
+  const mk = () => ({ ...createStore({ env: {}, map: new Map() }), durable: true });
   const ev = (url) => ({ httpMethod: 'GET', headers: { 'x-nf-client-connection-ip': '7.7.7.' + Math.floor(Math.random() * 250) }, queryStringParameters: { url } });
   for (const u of ['https://localhost/', 'https://127.0.0.1/', 'https://[::1]/', 'https://169.254.169.254/', 'https://10.0.0.1/', 'http://example.com/', 'https://example.com:8443/', 'https://user:pw@example.com/', 'https://metadata.google.internal/', 'https://intranet/']) {
     const r = await sc._handler(ev(u), { store: mk(), lookup: async () => [{ address: '93.184.216.34', family: 4 }], request: () => { throw new Error('must not connect'); } });

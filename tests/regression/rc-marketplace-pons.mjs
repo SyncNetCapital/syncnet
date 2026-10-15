@@ -4,6 +4,7 @@
 //   pending protocol override disables the fee right → Deal Room fee transfer goes ONLY to the canonical Pons V2
 //   factory with calldata bound to token + buyer → server re-read verifies it → Pons Project Page.
 // Screenshots: set PONS_SHOTS=<dir>. Run: node tests/regression/rc-marketplace-pons.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, signDigest, Core, ROOT } from '../e2e/harness.mjs';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';

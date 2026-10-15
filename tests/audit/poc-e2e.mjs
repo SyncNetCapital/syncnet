@@ -4,6 +4,7 @@
 // Checks marked "setup:" confirm the attack was actually carried out and must stay CONFIRMED; every other check
 // prints CONFIRMED only when the vulnerability reproduces. Nothing touches a real network.
 // Run: node tests/audit/poc-e2e.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, LAUNCHES, rpcStats, FOUNDER_KEY, TEST_CID } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

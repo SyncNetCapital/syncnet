@@ -6,6 +6,7 @@
 //   Network: direct mint → SOLANA ASSET center, PUMP.FUN INDEXED children, first 12 / SHOW NEXT 100, server LOAD MORE
 //            independent of local reveal, EVM map unchanged afterwards (Builder / Project Page restored)
 // No real network. Run: node tests/e2e/pump-discovery-ui.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import crypto from 'node:crypto';

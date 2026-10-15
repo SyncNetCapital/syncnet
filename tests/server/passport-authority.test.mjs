@@ -6,6 +6,7 @@
 // Reproduces the retired takeover (seller sells the Passport, keeps the fee right, re-claims as fee recipient) and
 // stress-tests the window between the Passport transfer and an included fee-right transfer. No real network.
 // Run: node tests/server/passport-authority.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -23,7 +24,7 @@ const Origins = require(path.join(ROOT, 'lib/syncnet-origins.js'));
 const Chain = require(path.join(ROOT, 'lib/syncnet-chain.js'));
 const mp = require(path.join(ROOT, 'netlify/functions/marketplace.js'));
 const MAP = new Map();
-const store = { ...createStore({ map: MAP }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: MAP }), durable: true, kind: 'test-durable' };
 let ipSeq = 0;
 const call = async (method, body, query) => { const r = await mp._handler({ httpMethod: method, headers: { 'x-nf-client-connection-ip': `198.19.${(ipSeq >> 8) & 255}.${ipSeq++ & 255}` }, queryStringParameters: query || {}, body: body ? JSON.stringify(body) : null }, { store, env: {} }); let j = {}; try { j = JSON.parse(r.body); } catch { j = {}; } return { s: r.statusCode, j, body: r.body }; };
 const lc = (v) => String(v).toLowerCase();

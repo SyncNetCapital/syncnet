@@ -1,4 +1,5 @@
 // Quick end-to-end smoke of the founder launch path (development aid; the full suites are run.mjs and tests/regression).
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, FOUNDER_KEY, serverState, TEST_CID } from './harness.mjs';
 const { chromium } = await import('playwright').catch(() => import(process.env.PLAYWRIGHT_MODULE || '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs'));
 const BASE = 'http://localhost:8932';

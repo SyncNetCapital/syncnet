@@ -4,6 +4,7 @@
 // the stateful PAR mock of tests/e2e/harness.mjs (no network). Each line prints CONFIRMED when the ISSUE reproduces.
 // Positive "calldata shape" checks must stay CONFIRMED; vulnerability checks must print not-reproduced.
 // Run: node tests/audit/poc-engine.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';

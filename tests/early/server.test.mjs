@@ -3,6 +3,7 @@
 // budget / outage), receipts, sessions, cards, wallet rotation with lock and override, privacy shapes, replay.
 // The function under test is the real code; the chain, wallet keys and store are local fakes. No real network.
 // Run: node tests/early/server.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';

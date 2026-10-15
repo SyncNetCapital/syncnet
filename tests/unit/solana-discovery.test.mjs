@@ -2,6 +2,7 @@
 // generic Solana launch index (same-slot pagination, idempotency, checkpoint), Pump adapter, scheduled indexer gate,
 // /api/pump-economy, pump-backfill. Memory store + stub Solana RPC; no real network.
 // Run: node tests/unit/solana-discovery.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import crypto from 'node:crypto';

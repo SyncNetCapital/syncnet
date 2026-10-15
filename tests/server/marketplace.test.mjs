@@ -3,6 +3,7 @@
 // suite proves claims, listings, offers, two-party operator transfers, on-chain payment/fee-right
 // verification, replay/expiry/status enforcement, persistence and fail-closed behaviour.
 // No real network: chain + wallets are the e2e harness mocks. Run: node tests/server/marketplace.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -21,7 +22,7 @@ const mp = require(path.join(ROOT, 'netlify/functions/marketplace.js'));
 const J = (r) => { try { return JSON.parse(r.body); } catch { return {}; } };
 let ipSeq = 0;
 const ev = (method, { ip, query = {}, body = null } = {}) => ({ httpMethod: method, headers: { 'x-nf-client-connection-ip': ip || `203.0.113.${(ipSeq++ % 200) + 1}` }, queryStringParameters: query, body: body == null ? null : JSON.stringify(body), isBase64Encoded: false });
-const store = { ...createStore({ map: new Map() }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: new Map() }), durable: true, kind: 'test-durable' };
 const deps = { store, env: {} };
 const GET = (query, d = deps) => mp._handler(ev('GET', { query }), d);
 const POST = (body, d = deps, ip) => mp._handler(ev('POST', { body, ip }), d);
@@ -307,7 +308,7 @@ const DEAL = LISTING.dealId;
   const wal = J(await GET({ view: 'wallet', address: BUYER }));
   check('persistence: the wallet view lists my listings, offers and deals', wal.listings.length >= 1 && wal.deals.length >= 1, JSON.stringify({ l: wal.listings.length, o: wal.offers.length, d: wal.deals.length }));
 
-  const mem = { ...createStore({ map: new Map() }) };
+  const mem = { ...createStore({ env: {}, map: new Map() }) };
   let r = await GET({ view: 'config' }, { store: mem, env: {} });
   check('fail closed: without a durable store the Marketplace reports enabled:false', J(r).enabled === false);
   const m = { token: TOKEN, operator: SELLER, basis: 'deployer', nonce: nonce(), expiry: exp(600) };

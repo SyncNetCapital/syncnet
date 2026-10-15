@@ -1,8 +1,10 @@
 // EARLY concurrency / race suite against REAL Redis semantics through the PRODUCTION Upstash adapter code path
 // (netlify/lib/store.js incl. the cas() Lua script sent with EVAL). Two targets, chosen by environment:
 //
-//   real Upstash (the pilot gate):  UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN of a PREVIEW-ONLY database and
-//                                   EARLY_TEST_UPSTASH_CONFIRM=preview   (never point this at production)
+//   real Upstash (the pilot gate):  SYNCNET_TEST_UPSTASH_URL + SYNCNET_TEST_UPSTASH_TOKEN of a dedicated NON-PRODUCTION
+//                                   database and SYNCNET_TEST_UPSTASH_CONFIRM=non-production (tests/lib/isolate.mjs).
+//                                   The production variable names (UPSTASH_REDIS_REST_*) are never read: they are
+//                                   removed before this suite runs, and a test URL equal to them is refused.
 //   a local/throwaway Redis:        EARLY_TEST_REDIS=host:port  (a RESP bridge emulates the Upstash REST protocol,
 //                                   so the same adapter, pipelines and EVAL script run against genuine Redis)
 //
@@ -11,6 +13,7 @@
 // duplicate nonces, simultaneous intent creation for one tuple, simultaneous matching of one transfer, duplicate
 // finalisation, Count me in duplicates, manifest version races, rotation cancel races, session nonces.
 // Keys are namespaced per run (fresh channel ids / wallets), nothing is flushed. Run: node tests/early/upstash-concurrency.test.mjs
+import { testUpstash } from '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import net from 'node:net';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -28,9 +31,9 @@ const finish = (target) => { fs.writeFileSync(path.join(ROOT, 'tests/early/upsta
 
 // ---------------------------------------------------------------- target selection
 let store, target;
-if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-  if (process.env.EARLY_TEST_UPSTASH_CONFIRM !== 'preview') { console.log('Refusing: set EARLY_TEST_UPSTASH_CONFIRM=preview to confirm this is a preview-only Upstash database, never production.'); process.exit(2); }
-  store = createStore({ env: process.env, timeoutMs: 8000 }); target = 'upstash:' + new URL(process.env.UPSTASH_REDIS_REST_URL).hostname;
+const TEST_DB = testUpstash(); // throws (refuses) on a half-configured or production-equal opt-in
+if (TEST_DB) {
+  store = createStore({ env: { UPSTASH_REDIS_REST_URL: TEST_DB.url, UPSTASH_REDIS_REST_TOKEN: TEST_DB.token }, timeoutMs: 8000 }); target = 'upstash-test:' + TEST_DB.host;
 } else if (process.env.EARLY_TEST_REDIS) {
   const [host, portText] = process.env.EARLY_TEST_REDIS.split(':'); const port = Number(portText || 6379);
   // minimal RESP client pool + Upstash REST bridge (the same approach as tests/project-home/redis-atomic.test.mjs)
@@ -51,7 +54,7 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   const bridge = async (url, init) => { const u = new URL(url); const body = JSON.parse(init.body); if (u.pathname === '/pipeline') { const c = pool[rr++ % pool.length]; const out = []; for (const cmd of body) out.push(wrap(await c.cmd(cmd))); return new Response(JSON.stringify(out), { status: 200 }); } return new Response(JSON.stringify(wrap(await pool[rr++ % pool.length].cmd(body))), { status: 200 }); };
   store = createStore({ env: { UPSTASH_REDIS_REST_URL: 'https://redis.bridge', UPSTASH_REDIS_REST_TOKEN: 't' }, fetch: bridge, timeoutMs: 8000 }); target = 'redis:' + host + ':' + port;
   process.on('exit', () => pool.forEach((c) => c.s.destroy()));
-} else { console.log('No target: set UPSTASH_REDIS_REST_URL/TOKEN (+EARLY_TEST_UPSTASH_CONFIRM=preview) or EARLY_TEST_REDIS=host:port'); process.exit(2); }
+} else { console.log('No target: set SYNCNET_TEST_UPSTASH_URL/TOKEN (+SYNCNET_TEST_UPSTASH_CONFIRM=non-production, never production) or EARLY_TEST_REDIS=host:port'); process.exit(2); }
 check('store is the production Upstash adapter (durable)', store.kind === 'upstash' && store.durable === true, store.kind);
 
 // ---------------------------------------------------------------- helpers (unique namespace per run)

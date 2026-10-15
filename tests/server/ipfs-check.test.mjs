@@ -2,6 +2,7 @@
 // Cases 1-7 of the hotfix brief, plus redirects, strict timeout, caching, rate limit and response hygiene.
 // No real network: every gateway request goes to the fakes below; a real fetch or socket would throw.
 // Run: node tests/server/ipfs-check.test.mjs  -> exit 1 on any failure; writes tests/server/ipfs-check.results.json
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -74,7 +75,7 @@ async function run(uri, spec, { ip, method = 'GET', store, keepCache = false } =
   const event = { httpMethod: method, headers: { 'x-nf-client-connection-ip': ip || `198.51.100.${(ipSeq++ % 250) + 1}` }, queryStringParameters: uri === undefined ? {} : { uri }, body: null };
   const before = calls.length;
   const t0 = Date.now();
-  const res = await mod._handler(event, { fetch: gateways(spec || {}), store: store || createStore({ map: new Map() }) });
+  const res = await mod._handler(event, { fetch: gateways(spec || {}), store: store || createStore({ env: {}, map: new Map() }) });
   return { res, body: J(res), ms: Date.now() - t0, requests: calls.slice(before) };
 }
 const passes = (r) => r.res.statusCode === 200 && r.body.ok === true && Object.keys(r.body).join() === 'ok';
@@ -242,7 +243,7 @@ const blocks = (r, reason) => r.body.ok === false && (!reason || r.body.reason =
   check('POST -> 405 {ok:false}', r.res.statusCode === 405 && r.body.ok === false && r.requests.length === 0);
   r = await run('ipfs://' + CID, { 'ipfs.io': image(PNG), 'dweb.link': status(502) });
   check('headers: JSON, nosniff, deny-all CSP, no-store', /application\/json/.test(r.res.headers['content-type']) && r.res.headers['x-content-type-options'] === 'nosniff' && /default-src 'none'/.test(r.res.headers['content-security-policy']) && r.res.headers['cache-control'] === 'no-store');
-  const store = createStore({ map: new Map() });
+  const store = createStore({ env: {}, map: new Map() });
   let last = null;
   for (let i = 0; i < 21; i++) last = await run('ipfs://' + CID, { 'ipfs.io': image(PNG), 'dweb.link': status(502) }, { ip: '203.0.113.9', store, keepCache: i > 0 });
   check('rate limit: the 21st check within a minute from one IP -> 429 {ok:false, reason:"rate_limited"} + Retry-After', last.res.statusCode === 429 && blocks(last, 'rate_limited') && Number(last.res.headers['retry-after']) > 0, last.res.statusCode + ' ' + last.res.body);

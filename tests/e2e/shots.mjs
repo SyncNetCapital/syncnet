@@ -1,5 +1,6 @@
 // Visual QA helper: screenshots of the given paths at 1440 / 768 / 375 using the offline E2E harness.
 // Usage: SHOTS=/dir node tests/e2e/shots.mjs /path1 /path2 ...   (optional: VIEWPORTS=1440,375  FULL=1)
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, setFlags } from './harness.mjs';
 import path from 'node:path';
 const { chromium } = await import('playwright').catch(() => import(process.env.PLAYWRIGHT_MODULE || '/home/claude/.npm-global/lib/node_modules/playwright/index.mjs'));

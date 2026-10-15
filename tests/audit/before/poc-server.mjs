@@ -1,5 +1,6 @@
 // Audit PoCs for the Netlify functions (Node only; outbound fetch is mocked, nothing leaves the machine).
 // Run: node tests/audit/poc-server.mjs
+import '../../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';

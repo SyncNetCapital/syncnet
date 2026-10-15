@@ -2,6 +2,7 @@
 // signed site writes, Passport-transfer behaviour, the public renderer (/site/<token>), the image route and metrics.
 // The functions under test are the real code; the chain, wallet keys and store are local fakes. No real network.
 // Run: node tests/project-home/server.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -28,7 +29,7 @@ const imgFn = require(path.join(ROOT, 'netlify/functions/site-img.js'));
 const mp = require(path.join(ROOT, 'netlify/functions/marketplace.js'));
 
 const MAP = new Map();
-const base = { ...createStore({ map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
+const base = { ...createStore({ env: {}, map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
 let storeMode = { failGet: false, failCas: false, beforeCas: null };
 const store = {
   ...base,
@@ -126,7 +127,7 @@ async function unpublishSite(token, who = W, over = {}) {
   }
   const zeroRate = await request(T2, W, { pricingFile: { ...PRICING, rates: [{ ...PRICING.rates[0], syncUsd: '0' }] } });
   check('A11 zero rate in the pricing file → whole table invalid → 503', zeroRate.s === 503);
-  const nonDurable = parse(await ph._handler({ httpMethod: 'POST', headers: {}, body: '{"action":"intent"}' }, { store: { ...createStore({ map: new Map() }) }, env: ENV, rpc, pricingFile: PRICING }));
+  const nonDurable = parse(await ph._handler({ httpMethod: 'POST', headers: {}, body: '{"action":"intent"}' }, { store: { ...createStore({ env: {}, map: new Map() }) }, env: ENV, rpc, pricingFile: PRICING }));
   check('A12 no durable store → closed', nonDurable.s === 503);
 }
 

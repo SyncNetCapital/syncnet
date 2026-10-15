@@ -6,6 +6,7 @@
 //   Network: PONS children + labels · mixed counts · PONS center shows its launch pair (and native ETH, unlinked) ·
 //            12 / show-all / batches preserved · server LOAD MORE distinct from local reveal · no duplicates
 // No real network. Run: node tests/e2e/pons-discovery-ui.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { startServer, installRoutes, setFlags, A, chain, resetChain, resetServer, ROOT } from './harness.mjs';

@@ -3,6 +3,7 @@
 // submit / upgrade / status wording, the scheduled anchor job (deterministic bundle build, frozen bundles, stragglers,
 // write-ahead single send, receipt confirmation, kill switches), and the independent receipt verifier end to end.
 // Run: node tests/early/anchor.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
@@ -116,7 +117,7 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
   const noop = await anchor._internals.buildBundle(store, '2020-01-01', new Date().toISOString());
   check('C02b buildBundle on a day with zero queued leaves is a clear no-op: {built:false, empty:true}, nothing persisted', noop.built === false && noop.empty === true && !MAP.has('early:bundle:v1:2020-01-01') && !(await store.smembers('early:bundles:v1')).includes('2020-01-01'));
   // (isolated store: this must not leave a real bundle in the shared state the rest of the section reasons about)
-  const side = require(path.join(ROOT, 'netlify/lib/store.js')).createStore({ map: new Map(), now: () => clock.now() });
+  const side = require(path.join(ROOT, 'netlify/lib/store.js')).createStore({ env: {}, map: new Map(), now: () => clock.now() });
   const first = await anchor._internals.buildBundle(side, '2020-01-02', new Date().toISOString());
   await side.sadd('early:bundle-queue:v1:2020-01-02', E.leafHash('attestation', rnd32()));
   const late = await anchor._internals.buildBundle(side, '2020-01-02', new Date().toISOString());
@@ -214,7 +215,7 @@ const job = async (over = {}) => parse(await anchor._handler({}, { store, env: o
     const T0 = clock.now(), HOUR = 3600000;
     let seq = 0;
     const iso = async () => { // an isolated store holding one real-looking, non-empty, unanchored bundle
-      const s = createStore({ map: new Map(), now: () => clock.now() });
+      const s = createStore({ env: {}, map: new Map(), now: () => clock.now() });
       const date = '2031-03-' + String(10 + seq++).padStart(2, '0');
       const leaf = E.leafHash('attestation', rnd32());
       await s.set('early:bundle:v1:' + date, JSON.stringify({ schema: E.SCHEMA.bundle, date, leafType: E.LEAF_ATTESTATION, leaves: [leaf], leafCount: 1, root: E.merkleRoot([leaf], date), builtAt: new Date(T0).toISOString(), anchors: { robinhood: null, opentimestamps: null } }));

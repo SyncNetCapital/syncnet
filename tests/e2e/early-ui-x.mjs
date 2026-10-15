@@ -16,6 +16,7 @@
 // Run: node tests/e2e/early-ui-x.mjs     (PLAYWRIGHT_MODULE=… if playwright is not resolvable)
 // Golden mode (run from a checkout of the PRE-phase-5 code):  WRITE_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
 // Chrome golden (run from a checkout of the pre-nav code):     WRITE_CHROME_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

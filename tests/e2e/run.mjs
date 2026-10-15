@@ -1,3 +1,4 @@
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, setFlags, serverState, ROOT, rpcStats, FOUNDER_KEY, TEST_CID } from './harness.mjs';
 import path from 'node:path';
 import fs from 'node:fs';

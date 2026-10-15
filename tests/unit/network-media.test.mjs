@@ -3,6 +3,7 @@
 // Also covers /api/par-launches-all keeping PAR's ipfs:// `logo` beside `logoUrl`.
 // Loads the real v2-network.js in a vm with a stub DOM and a counting fetch. No network.
 // Run: node tests/unit/network-media.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
 import path from 'node:path';

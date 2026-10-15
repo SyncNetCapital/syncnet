@@ -1,6 +1,7 @@
 // Phase 2 product UI / information architecture — end-to-end in a real browser against the offline harness
 // (real Netlify functions in-process, mock chain, mock wallet, mock Upstash with the CAS script emulated).
 // Run: node tests/e2e/phase2-ui.mjs      (SHOTS=dir to keep screenshots)
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, setFlags, serverState } from './harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

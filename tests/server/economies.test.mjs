@@ -3,6 +3,7 @@
 // /api/marketplace claim + two-party transfer), relationships come from live mock-chain reads, and every
 // write is an append-only SADD. The suite also proves that Economies never writes mp:*, reg:* or any
 // non-eco key other than rate-limit counters. No real network. Run: node tests/server/economies.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -24,7 +25,7 @@ const J = (r) => { try { return JSON.parse(r.body); } catch { return {}; } };
 let ipSeq = 0;
 const ev = (method, { ip, query = {}, body = null } = {}) => ({ httpMethod: method, headers: { 'x-nf-client-connection-ip': ip || `198.51.100.${(ipSeq++ % 250) + 1}` }, queryStringParameters: query, body: body == null ? null : JSON.stringify(body) });
 const MAP = new Map();
-const store = { ...createStore({ map: MAP }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: MAP }), durable: true, kind: 'test-durable' };
 const ON = { SYNCNET_ECONOMY_CURATION: 'true' };
 const deps = { store, env: ON };
 const GET = (query, d = deps) => eco._handler(ev('GET', { query }), d);
@@ -66,7 +67,7 @@ const keysBefore = new Set(MAP.keys());
 
 // ================================================================================ fail closed
 {
-  const mem = createStore({ map: new Map() });
+  const mem = createStore({ env: {}, map: new Map() });
   let r = await POST(curation({}), { store, env: {} });
   check('fail closed: writes refused (503) when the flag is off', r.statusCode === 503 && J(r).code === 'closed', r.body);
   r = await POST(curation({}), { store, env: { ...ON, SYNCNET_ECONOMIES_DISABLED: 'true' } });

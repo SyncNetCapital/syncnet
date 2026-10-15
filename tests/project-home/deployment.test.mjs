@@ -4,6 +4,7 @@
 // be produced ONLY after the configured sink, its converter and the treasury verify on-chain; every other case must
 // return no quote, store no intent and expose no payment recipient.
 // Run: node tests/project-home/deployment.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import {
@@ -25,7 +26,7 @@ const Dep = require(path.join(ROOT, 'netlify/lib/project-home-deployment.js'));
 const SEL = (s) => Core.functionSelector(s);
 
 const MAP = new Map();
-const store = { ...createStore({ map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
 let ipSeq = 0;
 const ip = () => `203.0.${(ipSeq >> 8) & 255}.${ipSeq++ & 255}`;
 const parse = (r) => { let j = {}; try { j = JSON.parse(r.body); } catch { j = {}; } return { s: r.statusCode, j, body: r.body }; };

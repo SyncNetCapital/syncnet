@@ -3,6 +3,7 @@
 // Checks: no horizontal overflow, launch information inside the viewport, tap targets ≥ 40 px, text ≥ 10.5 px.
 // Plus every page at 320 px (no overflow, no JS errors).
 // Run: node tests/regression/rc-mobile.mjs   (SHOTS=dir to save screenshots)
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, chain, resetChain, resetServer, FOUNDER_KEY, ROOT, TEST_CID } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

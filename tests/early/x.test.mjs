@@ -7,6 +7,7 @@
 //   E. resolver (cache, reserved paths, budget, malformed)     F. snapshots + receipts (first-of-day, outage, mixed run)
 //   G. feature gate (flag, credentials, redirect, kill switches; YouTube unaffected)
 // Run: node tests/early/x.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';

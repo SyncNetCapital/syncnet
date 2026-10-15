@@ -2,6 +2,7 @@
 // scheduled pons-indexer gate, Economy curation of PONS children (LIVE factory proof only — never the index), and
 // PONS V2 root curator routing (existing Project Passport, never the generic manual request). Mock chain = the e2e
 // harness (exact Pons V2 ABI, Multicall3). No real network. Run: node tests/server/pons-economy.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { A, chain, resetChain, signDigest, ROOT } from '../e2e/harness.mjs';
@@ -35,7 +36,7 @@ const noLeak = (r) => !/\n\s+at |Error:|ENOTFOUND|stack|\.js:\d|upstash|redis/i.
 const rpc = Chain.makeRpc(Chain.ROBINHOOD.rpcUrl, { retries: 0 });
 
 const MAP = new Map();
-const store = { ...createStore({ map: MAP }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: MAP }), durable: true, kind: 'test-durable' };
 const ON = { SYNCNET_PONS_DISCOVERY_ENABLED: 'true', SYNCNET_ECONOMY_CURATION: 'true' };
 const OFF = { SYNCNET_ECONOMY_CURATION: 'true' };
 const deps = { store, env: ON, rpc };
@@ -136,7 +137,7 @@ resetChain();
   const r = await PAGE({ root: USDG }, { ...deps, store: broken });
   check('index read failure: 503 with a fixed, leak-free message', r.statusCode === 503 && /temporarily unavailable/.test(J(r).error) && noLeak(r), r.body);
   par._resetCache();
-  const p = await par._handler(ev('GET'), { store: { ...createStore({ map: new Map() }), durable: true } });
+  const p = await par._handler(ev('GET'), { store: { ...createStore({ env: {}, map: new Map() }), durable: true } });
   check('PAR history endpoint is unaffected by a PONS failure (separate function, no PONS dependency)', p.statusCode === 200 && Array.isArray(J(p).launches));
   const src = require('node:fs').readFileSync(path.join(ROOT, 'netlify/functions/par-launches-all.js'), 'utf8');
   check('par-launches-all has no PONS code path', !/\bpons|pons-index|pons2:/i.test(src));
@@ -144,7 +145,7 @@ resetChain();
 
 // ================================================================================ scheduled indexer (ON)
 {
-  const s2 = { ...createStore({ map: new Map() }), durable: true };
+  const s2 = { ...createStore({ env: {}, map: new Map() }), durable: true };
   const r = J(await indexer._handler({}, { store: s2, env: ON, rpc }));
   check('indexer ON without a backfilled cursor: never scans history', r.report && r.report[0].status === 'not-backfilled');
   await s2.set(Index.K.lock, 'x', { ttlSeconds: 55 });

@@ -1,5 +1,6 @@
 // PONS V2 discovery · decoding, adaptive scanning, reorg handling, sorted-set storage (memory + Upstash REST emulation).
 // No real network: stub JSON-RPC and the harness Upstash emulation (upstash.mock). Run: node tests/unit/pons-discovery.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { ROOT, serverState } from '../e2e/harness.mjs';

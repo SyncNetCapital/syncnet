@@ -3,6 +3,7 @@
 // runs against genuine Redis semantics. Proves: the script is atomic under heavy concurrency, it matches the in-memory
 // adapter operation for operation, keys/values are inert data, and one chain payment can never activate two projects.
 // Requires redis-server on PATH (Ubuntu: apt install redis-server). Run: node tests/project-home/redis-atomic.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';
