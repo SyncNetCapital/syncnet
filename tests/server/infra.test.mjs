@@ -2,6 +2,7 @@
 // No real network: DNS, HTTPS, fetch and Upstash are injected fakes, and the real network entry points are
 // trapped as a safety net (any attempt fails the run).
 // Run: node tests/server/infra.test.mjs   -> exit 1 on any failure; writes tests/server/infra.results.json
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual as same } from 'node:util';

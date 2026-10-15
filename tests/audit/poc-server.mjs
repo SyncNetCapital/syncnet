@@ -2,6 +2,7 @@
 // Same attacks as tests/audit/before/poc-server.mjs (original V2.5 build: 11/11 reproduced). Node only; every
 // outbound request is injected or mocked. Each line prints CONFIRMED when the ISSUE reproduces.
 // Run: node tests/audit/poc-server.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import zlib from 'node:zlib';
@@ -14,7 +15,7 @@ const results = []; let reproduced = 0;
 const check = (name, cond, detail = '') => { results.push({ name, ok: !!cond, detail: String(detail).slice(0, 300) }); if (cond) reproduced++; console.log((cond ? 'CONFIRMED ' : 'not-reproduced ') + name + (detail ? ' :: ' + String(detail).slice(0, 220) : '')); };
 console.log = ((orig) => (...a) => { if (typeof a[0] === 'string' && a[0].startsWith('{"ts"')) return; orig(...a); })(console.log);
 const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
-const durableStore = () => ({ ...createStore({ map: new Map() }), durable: true, kind: 'test-durable' });
+const durableStore = () => ({ ...createStore({ env: {}, map: new Map() }), durable: true, kind: 'test-durable' });
 const ev = (ip, extra = {}) => ({ httpMethod: 'GET', headers: { 'x-nf-client-connection-ip': ip }, ...extra });
 
 // ---------------------------------------------------------------- site-check (L10)

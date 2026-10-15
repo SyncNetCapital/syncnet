@@ -5,8 +5,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Suites never inherit production store credentials (each suite also imports tests/lib/isolate.mjs, which removes them).
+const STORE_ENV_VARS = ['UPSTASH_REDIS_REST_URL', 'UPSTASH_REDIS_REST_TOKEN', 'SYNCNET_UPSTASH_URL', 'SYNCNET_UPSTASH_TOKEN'];
+const SUITE_ENV = Object.fromEntries(Object.entries(process.env).filter(([k]) => !STORE_ENV_VARS.includes(k)));
 const SUITES = [
   ['static audit', 'python3', ['tests/static_audit.py'], /PASS/],
+  ['test isolation (no suite can reach a real Upstash database)', 'node', ['tests/unit/test-isolation.test.mjs'], /(\d+)\/(\d+) test isolation checks passed/],
   ['core unit (keccak, secp256k1, EIP-712, ABI, text policy)', 'node', ['tests/unit/core.test.mjs'], /(\d+) passed, (\d+) failed/],
   ['image sanitizer', 'node', ['tests/server/image-sanitize.test.mjs'], /(\d+) passed, (\d+) failed/],
   ['server infrastructure', 'node', ['tests/server/infra.test.mjs'], /(\d+) passed, (\d+) failed/],
@@ -59,7 +63,7 @@ const SUITES = [
 const out = [];
 for (const [name, cmd, args, re] of SUITES) {
   const t0 = Date.now();
-  const r = spawnSync(cmd, args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 30 * 60 * 1000 });
+  const r = spawnSync(cmd, args, { cwd: ROOT, env: SUITE_ENV, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: 30 * 60 * 1000 });
   const text = (r.stdout || '') + (r.stderr || '');
   const m = text.match(re);
   const last = text.trim().split('\n').slice(-1)[0];

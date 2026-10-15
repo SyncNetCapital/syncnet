@@ -2,6 +2,7 @@
 // One canonical renderer (lib/syncnet-ipfs.js): gateway.pinata.cloud → ipfs.io → dweb.link → deterministic
 // placeholder, driven by a document-level error listener. The stored metadata always stays ipfs://<CID>.
 // Uses the REAL PONSYNC logo CID. Nothing touches a real network. Run: node tests/regression/rc-ipfs-display.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, chain, resetChain, resetServer, browserGateways, LAUNCHES, FOUNDER_KEY, ROOT } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

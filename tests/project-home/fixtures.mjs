@@ -1,6 +1,7 @@
 // Shared fixtures for the Project Home server suites: a controllable mock of the Robinhood Chain payment surface
 // (chain id, head / safe / finalized tags, blocks, receipts with canonical-SYNC Transfer logs, reorgs, outages, 429)
 // layered over the existing E2E harness chain (PAR / Pons factories, EIP-1271 Safe) for project resolution.
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { deploymentFile, deploymentChain } from './deployment-fixture.mjs';
 import { createRequire } from 'node:module';
 import path from 'node:path';

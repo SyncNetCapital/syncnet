@@ -9,6 +9,7 @@
  * as independent decoders for cross-checks. The library itself uses Node built-ins only.
  * Every fixture is generated in memory; the results file is the only thing written.
  */
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import fs from 'fs';
 import zlib from 'zlib';
 import { execFileSync } from 'child_process';

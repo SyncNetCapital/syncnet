@@ -6,6 +6,7 @@
 //   "Create a project in the $X Economy" opens the existing Builder prefill → entry points from Map + Project page
 //   → no ranking page, no OFFICIAL badge, no volume/TVL → mobile widths. Nothing touches a real network.
 // Screenshots: set ECONOMY_SHOTS=<dir>. Run: node tests/regression/rc-economy.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, setFlags, A, chain, resetChain, resetServer, LAUNCHES, signDigest, ROOT } from '../e2e/harness.mjs';
 import { createRequire } from 'node:module';
 import fs from 'node:fs';

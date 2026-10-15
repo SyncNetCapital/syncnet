@@ -1,5 +1,6 @@
 // Audit PoCs driven through the real pages with the project's own mocks (tests/e2e/harness.mjs).
 // Nothing touches a real network. Run: node tests/audit/poc-e2e.mjs
+import '../../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, LAUNCHES, rpcStats } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

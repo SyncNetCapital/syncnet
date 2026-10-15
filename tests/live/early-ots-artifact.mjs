@@ -3,6 +3,7 @@
 // validate it (`ots info`, `ots verify -d <root>`; `ots upgrade` becomes possible once Bitcoin attests, hours later).
 // Not part of run-all.mjs. Touches the real network. Nothing on-chain.
 //   node tests/live/early-ots-artifact.mjs <out.ots>
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';

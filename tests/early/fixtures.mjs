@@ -2,6 +2,7 @@
 // blocks with timestamps, receipts with ERC-20 Transfer logs, eth_getLogs with topic filters, reorgs, outages, budget
 // probes), an in-memory durable store, a controllable clock, test wallets and a test attestation/anchor key pair
 // whose PUBLIC addresses go into a test key registry. Nothing touches a real network.
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -136,7 +137,8 @@ export async function rpc(method, params = []) {
 export const MAP = new Map();
 export function makeStore() {
   const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
-  return { ...createStore({ map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
+  // env:{} pins the in-memory adapter: a test must never reach a real Upstash because the shell happens to have its credentials
+  return { ...createStore({ env: {}, map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
 }
 export const resetStore = () => MAP.clear();
 

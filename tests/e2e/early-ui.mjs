@@ -6,6 +6,7 @@
 // the ambiguous path (a conditional third signature), the wallet-app hand-off when no wallet is injected, and the
 // 320/360/390/430 px sweep (no overflow, tap targets ≥ 40 px, text ≥ 10.5 px). No real network.
 // Run: node tests/e2e/early-ui.mjs   (PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs if not resolvable)
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

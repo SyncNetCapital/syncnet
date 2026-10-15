@@ -3,6 +3,7 @@
 // sold and have their creator-fee right settled — verified by re-reading the Pons V2 factory, never by a tx hash.
 // Chain = the e2e harness mock (exact Pons ABI layouts); stub RPCs cover decoding edge cases. No real network.
 // Run: node tests/server/marketplace-pons.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -23,7 +24,7 @@ const J = (r) => { try { return JSON.parse(r.body); } catch { return {}; } };
 let ipSeq = 0;
 const ev = (method, { query = {}, body = null } = {}) => ({ httpMethod: method, headers: { 'x-nf-client-connection-ip': `192.0.2.${(ipSeq++ % 250) + 1}` }, queryStringParameters: query, body: body == null ? null : JSON.stringify(body) });
 const MAP = new Map();
-const store = { ...createStore({ map: MAP }), durable: true, kind: 'test-durable' };
+const store = { ...createStore({ env: {}, map: MAP }), durable: true, kind: 'test-durable' };
 const deps = { store, env: {} };
 const GET = (query, d = deps) => mp._handler(ev('GET', { query }), d);
 const POST = (body, d = deps) => mp._handler(ev('POST', { body }), d);
@@ -151,7 +152,7 @@ resetChain();
   check('8 Pons project with a contract fee recipient can still be claimed by its deployer', r.statusCode === 200, r.body);
   r = await claim(PONS_PENDING, SELLER, 'deployer');
   check('16 Pons project with a pending override can be claimed by its deployer', r.statusCode === 200, r.body);
-  const mem = createStore({ map: new Map() });
+  const mem = createStore({ env: {}, map: new Map() });
   r = await POST({ action: 'claim', token: PONS, operator: SELLER, basis: 'deployer', nonce: rnd(), expiry: exp(600), signature: '0x' + '11'.repeat(65) }, { store: mem, env: {} });
   check('20 no durable store → Pons writes refused (503)', r.statusCode === 503, r.body);
   chain.rpcDown = true;

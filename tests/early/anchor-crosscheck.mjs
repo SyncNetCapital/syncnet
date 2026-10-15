@@ -3,6 +3,7 @@
 // or an installed package). Compares raw bytes for the EIP-155 vector and for 300 random anchor transactions, decodes
 // our raw bytes with ethers and checks from/to/value/data/chainId, and confirms the hard limits. Writes
 // tests/early/anchor-crosscheck.results.json. Nothing is broadcast.
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';

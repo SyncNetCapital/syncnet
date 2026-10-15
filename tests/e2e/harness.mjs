@@ -5,6 +5,7 @@
 // + an EIP-1193 wallet that signs with real secp256k1 keys.
 // Nothing here touches a real network: every outbound fetch of the server process is intercepted and every
 // browser request to a third-party host is routed. Run: node tests/e2e/run.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -31,6 +31,8 @@
   async function api(params) { const r = await fetch('/api/early?' + new URLSearchParams(params), { cache: 'no-store', headers: session.get() ? { 'x-syncnet-early-session': session.get() } : {} }); const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, body: j }; }
   async function post(body) { const r = await fetch('/api/early', { method: 'POST', headers: { 'content-type': 'application/json', ...(session.get() ? { 'x-syncnet-early-session': session.get() } : {}) }, body: JSON.stringify(body) }); const j = await r.json().catch(() => ({})); return { ok: r.ok, status: r.status, body: j }; }
   const errText = (r, fallback) => (r && r.body && r.body.error) || fallback || 'The request was refused.';
+  // EARLY messages are signed on Robinhood Chain (4663): the wallet is switched first, never signed on another network
+  const CHAIN = Object.freeze({ chain: true });
   const rejected = (e) => e && (e.code === 4001 || /reject|denied/i.test(String(e.message)));
   const nonce = () => { const b = new Uint8Array(32); crypto.getRandomValues(b); return '0x' + Array.from(b, (x) => x.toString(16).padStart(2, '0')).join(''); };
   const nowSec = () => Math.floor(Date.now() / 1000);
@@ -123,7 +125,7 @@
       const x = ch.platform === 'x';
       const m = { schema: E.SCHEMA.countMeIn, platform: x ? 'x' : 'youtube', channelId: x ? ch.externalId : ch.channelId, fan, issuedAt: nowSec(), expiry: nowSec() + E.CONST.CMI_TTL_S, nonce: nonce() };
       st('Sign the free signal in your wallet…');
-      const signature = await W.signTyped(E.typedData('CountMeIn', m));
+      const signature = await W.signTyped(E.typedData('CountMeIn', m), CHAIN);
       const r = await post(x ? { action: 'count-me-in', platform: 'x', externalId: m.channelId, fan, issuedAt: m.issuedAt, expiry: m.expiry, nonce: m.nonce, signature } : { action: 'count-me-in', channelId: m.channelId, fan, issuedAt: m.issuedAt, expiry: m.expiry, nonce: m.nonce, signature });
       if (!r.ok) throw new Error(errText(r, 'The signal was not recorded.'));
       st('Counted in. Private, free and non-binding. You will see it under My EARLY.', 'ok');
@@ -205,7 +207,7 @@
       const td = d.body.typedData;
       if (lc(td.message.receiver) !== lc(m.receivingWallet) || lc(td.message.token) !== lc(token) || td.message.amount !== raw || td.domain.chainId !== 4663) throw new Error('The prepared intent does not match this page. Nothing was signed.');
       flow('Sign what you mean in your wallet. This is a free signature, not a payment.');
-      const signature = await W.signTyped(td);
+      const signature = await W.signTyped(td, CHAIN);
       let stored = null;
       for (let n = 0; n < 4 && !stored; n++) { const r = await post({ action: 'intent-store', intentId: d.body.intentId, signature }); if (r.ok) stored = r.body.intent; else if (r.status !== 503 && r.status !== 429) throw new Error(errText(r, 'The intent could not be stored.')); else await new Promise((res) => setTimeout(res, 1500 * (n + 1))); }
       if (!stored) throw new Error('SyncNet could not store your signed intent right now. Nothing was sent. Try again.');
@@ -293,7 +295,7 @@
         if (!W.state().connected) await W.connect();
         const m = { schema: E.SCHEMA.finalize, intentId, txHash: btn.dataset.tx, logIndex: Number(btn.dataset.log), issuedAt: nowSec(), nonce: nonce() };
         status('Sign once to finalise this transfer…', undefined, 'eRStatus');
-        const signature = await W.signTyped(E.typedData('SupportFinalize', m));
+        const signature = await W.signTyped(E.typedData('SupportFinalize', m), CHAIN);
         const r = await post({ action: 'finalize', intentId, txHash: m.txHash, logIndex: m.logIndex, issuedAt: m.issuedAt, nonce: m.nonce, signature });
         if (!r.ok && r.status !== 202) throw new Error(errText(r, 'Could not finalise.'));
         $('eRChoose').hidden = true;
@@ -311,7 +313,7 @@
     if (!W.state().connected) await W.connect();
     const wallet = W.state().account;
     const m = { schema: E.SCHEMA.session, wallet, issuedAt: nowSec(), nonce: nonce() };
-    const signature = await W.signTyped(E.typedData('EarlySession', m));
+    const signature = await W.signTyped(E.typedData('EarlySession', m), CHAIN);
     const r = await post({ action: 'session', wallet, issuedAt: m.issuedAt, nonce: m.nonce, signature });
     if (!r.ok) throw new Error(errText(r, 'Could not sign in.'));
     session.set(r.body.session);

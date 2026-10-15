@@ -8,6 +8,7 @@
 //     node <dir>/tests/early/legacy/make-legacy-state.mjs <out.json>
 // The committed fixture is what tests/early/legacy-state.test.mjs replays against the CURRENT code: stored keys, stored
 // records, issued session tokens and the downloadable receipt must all keep working, byte for byte.
+import '../../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';

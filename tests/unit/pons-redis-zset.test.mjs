@@ -2,6 +2,7 @@
 // and bridges the Upstash REST protocol to it, so the PRODUCTION Upstash adapter code path (ZADD batches, pipelines,
 // ZREVRANGEBYSCORE … WITHSCORES LIMIT, ZCARD, ZREM, ZREMRANGEBYSCORE) runs against genuine Redis, and compares every
 // answer with the in-memory adapter. Requires redis-server on PATH. Run: node tests/unit/pons-redis-zset.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import { spawn, spawnSync } from 'node:child_process';
 import net from 'node:net';

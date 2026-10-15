@@ -10,9 +10,13 @@
 //   NAV. the primary navigation: EARLY appears (desktop top nav + mobile tab bar) only when the server reports EARLY enabled;
 //        header / tab bar / footer are DOM-identical to the golden once the inserted EARLY item is removed
 //   COPY. platform-aware wording: YouTube text unchanged; X selected / X route / X session change only the platform words
+//   CH. network before signing: X + YouTube creator onboarding and fan signing from Ethereum mainnet (switch first, sign on
+//       4663), already on 4663 (no prompt), chain not added (4902 → add), switch refused (nothing signed or submitted),
+//       390px error visibility. The wallet mock refuses a domain chainId that is not the active network, exactly like MetaMask.
 // Run: node tests/e2e/early-ui-x.mjs     (PLAYWRIGHT_MODULE=… if playwright is not resolvable)
 // Golden mode (run from a checkout of the PRE-phase-5 code):  WRITE_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
 // Chrome golden (run from a checkout of the pre-nav code):     WRITE_CHROME_GOLDEN=<file.json> node tests/e2e/early-ui-x.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -104,7 +108,15 @@ await new Promise((r) => srv.listen(PORT, r));
 // ---------------------------------------------------------------- browser: wallet mock (counts prompts) + fake external hosts
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
 const SENT = [], SIGNLOG = []; // every signature the wallet mock produced, in order (survives page navigations)
-async function wireWallet(context, { account = W.fan } = {}) {
+// The wallet mock behaves like MetaMask on networks: it starts on `chain` (Robinhood Chain 0x1237 unless a test says
+// otherwise), REFUSES eth_signTypedData_v4 when the EIP-712 domain chainId is not the active network (the exact MetaMask
+// error), and answers wallet_switchEthereumChain per `switchMode` ('accept' | 'reject' = user refuses | 'unknown' = 4902
+// until wallet_addEthereumChain). window.__walletLog records every network call and every signature with the chain that
+// was ACTIVE at that moment.
+async function wireWallet(context, { account = W.fan, chain = '0x1237', switchMode = 'accept' } = {}) {
+  // network state + log live in Node, so they survive the OAuth round trip (a real wallet stays switched across pages)
+  const net = context.__net = { active: chain, added: switchMode !== 'unknown', log: [] };
+  await context.exposeBinding('__wnet', (_s, op, v) => { if (op === 'set') net.active = v; else if (op === 'add') { net.added = true; net.active = v; } else if (op === 'log') net.log.push(v); return { active: net.active, added: net.added }; });
   await context.route('https://yt3.example/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: PNG }));
   await context.route('https://pbs.twimg.com/**', (r) => r.fulfill({ status: 200, contentType: 'image/png', body: PNG }));
   // the fake X consent page: validates the authorize URL like X would, mints a one-time code bound to the PKCE challenge
@@ -124,18 +136,33 @@ async function wireWallet(context, { account = W.fan } = {}) {
   });
   await context.exposeBinding('__earlySign', (_s, { typed, account: acct }) => { SIGNLOG.push(JSON.parse(typed).primaryType); return signDigest(acct, Core.hashTypedData(JSON.parse(typed))); });
   await context.exposeBinding('__earlySend', (_s, tx) => { SENT.push(tx); const data = String(tx.data || ''); const to = '0x' + data.slice(34, 74), amount = BigInt('0x' + data.slice(74)).toString(); return pay({ from: tx.from, to, token: tx.to, amount }).txHash; });
-  await context.addInitScript(({ WALLET }) => {
+  await context.addInitScript(({ WALLET, MODE }) => {
     const listeners = {}; const emit = (e, v) => (listeners[e] || []).forEach((f) => { try { f(v); } catch (err) { console.warn(err); } });
     window.__prompts = []; window.__typed = [];
+    const wlog = (e) => window.__wnet('log', e);
     const provider = {
       isMetaMask: true, on: (e, f) => ((listeners[e] ||= []).push(f)), removeListener: () => {},
       async request({ method, params }) {
         switch (method) {
           case 'eth_requestAccounts': window.__prompts.push('connect'); return [WALLET];
           case 'eth_accounts': return [WALLET];
-          case 'eth_chainId': return '0x1237';
-          case 'wallet_switchEthereumChain': case 'wallet_addEthereumChain': return null;
-          case 'eth_signTypedData_v4': window.__prompts.push('sign'); window.__typed.push(params[1]); return window.__earlySign({ typed: params[1], account: params[0] });
+          case 'eth_chainId': { const { active } = await window.__wnet('get'); await wlog('chainId:' + active); return active; }
+          case 'wallet_switchEthereumChain': {
+            await wlog('switch:' + params[0].chainId);
+            const { added } = await window.__wnet('get');
+            if (MODE === 'reject') throw Object.assign(new Error('User rejected the request.'), { code: 4001 });
+            if (!added) throw Object.assign(new Error('Unrecognized chain ID "' + params[0].chainId + '". Try adding the chain using wallet_addEthereumChain first.'), { code: 4902 });
+            await window.__wnet('set', params[0].chainId); emit('chainChanged', params[0].chainId); return null;
+          }
+          case 'wallet_addEthereumChain': await wlog('add:' + params[0].chainId); await window.__wnet('add', params[0].chainId); emit('chainChanged', params[0].chainId); return null;
+          case 'eth_signTypedData_v4': {
+            const { active } = await window.__wnet('get');
+            const d = JSON.parse(params[1]).domain || {};
+            if (d.chainId != null && Number(d.chainId) !== parseInt(active, 16)) { await wlog('sign-refused:' + active); throw new Error('Provided chainId "' + d.chainId + '" must match the active chainId "' + parseInt(active, 16) + '"'); }
+            if (window.__signHold) await window.__signHold;
+            await wlog('sign:' + JSON.parse(params[1]).primaryType + '@' + active);
+            window.__prompts.push('sign'); window.__typed.push(params[1]); return window.__earlySign({ typed: params[1], account: params[0] });
+          }
           case 'eth_sendTransaction': window.__prompts.push('send'); return window.__earlySend(params[0]);
           default: throw Object.assign(new Error('unsupported ' + method), { code: -32601 });
         }
@@ -143,7 +170,7 @@ async function wireWallet(context, { account = W.fan } = {}) {
     };
     window.ethereum = provider;
     window.addEventListener('eip6963:requestProvider', () => window.dispatchEvent(new CustomEvent('eip6963:announceProvider', { detail: { info: { name: 'Mock Wallet', rdns: 'test.mock', uuid: '1', icon: '' }, provider } })));
-  }, { WALLET: account });
+  }, { WALLET: account, MODE: switchMode });
 }
 const browser = await chromium.launch();
 const newCtx = async (opts = {}) => { const c = await browser.newContext({ viewport: opts.mobile ? { width: 390, height: 780 } : { width: 1280, height: 900 }, ...(opts.mobile ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) }); await wireWallet(c, opts); return c; };
@@ -675,6 +702,139 @@ try {
     const classes = [...new Set(xBlocks.flatMap((b) => [...b.matchAll(/class="([^"]+)"/g)].flatMap((m) => m[1].split(/\s+/))))];
     check('V02 every CSS class used by the X additions already exists in the shared stylesheets (no new visual language): ' + classes.join(', '), classes.length >= 3 && classes.every(defined) && !/early-x|sn-x|platform-/.test(css), classes.filter((c) => !defined(c)).join());
     check('V03 the only inline style added is the tab strip margin (the same inline-margin pattern the page already uses); no new <style>, no new stylesheet link', (js.match(/style="margin:14px 0 0"/g) || []).length === 1 && !/<style|createElement\('style'\)|stylesheet/.test(js));
+  }
+
+  // ---- CH. network before signing (production report: "it wouldn't load the next page after I connected my wallet").
+  // EARLY messages are EIP-712 with domain chainId 4663; MetaMask refuses to sign them on any other active network. The wallet
+  // mock enforces exactly that, so every check below proves the ACTIVE chain at signing time, not merely that a signature came back.
+  {
+    CUR.env = ENV_ON; CUR.configFail = false;
+    addUser({ id: '5550001', name: 'Dave', username: 'dave_x', followers: 7 });
+    const actionsOf = (page) => { const a = []; page.on('request', (r) => { if (r.method() === 'POST' && new URL(r.url()).pathname === '/api/early') { try { a.push(JSON.parse(r.postData() || '{}').action); } catch { a.push('?'); } } }); return a; };
+    const netOf = (c) => c.__net.log;
+    const kinds = (log, k) => log.filter((e) => e.startsWith(k));
+    const switchBeforeSign = (log, primaryType) => { const i = log.indexOf('switch:0x1237'), j = log.indexOf('sign:' + primaryType + '@0x1237'); return i >= 0 && j > i; };
+    const start = async (opts, platform = 'x') => {
+      const c = await newCtx(opts); const page = await c.newPage(); const errs = errsOf(page); const actions = actionsOf(page);
+      await page.goto(BASE + '/labs/early/creator'); await page.waitForSelector('#cWallet:not([hidden])');
+      await page.click('#cConnect'); await page.waitForSelector(platform === 'x' ? '#cLinkX:not([hidden])' : '#cLink:not([hidden])');
+      return { c, page, errs, actions, btn: platform === 'x' ? '#cLinkX' : '#cLink' };
+    };
+    // the provider consent page (fake X / fake Google); on failure the error names what the creator page said
+    const toConsent = (page) => page.waitForSelector('#allow', { timeout: 10000 }).catch(async () => { throw new Error('consent page not reached: url=' + page.url().slice(0, 120) + ' status=' + (await page.textContent('#cStatus').catch(() => '?'))); });
+    const SWITCH_MSG = /Switch your wallet to Robinhood Chain \(4663\) to continue\. Nothing was signed\./;
+
+    // CH01 X creator onboarding, wallet connected on Ethereum mainnet
+    {
+      X.approves = '5550001';
+      const { c, page, errs, actions, btn } = await start({ account: W.attacker, chain: '0x1' });
+      await page.click(btn); await toConsent(page);
+      const log = [...netOf(c)];
+      check('CH01 X from Ethereum mainnet: ONE switch to 0x1237 requested BEFORE the link signature, the signature is made while 0x1237 is active, never refused, ONE creator-link submission', kinds(log, 'switch:').length === 1 && switchBeforeSign(log, 'CreatorLinkRequest') && !kinds(log, 'sign-refused').length && JSON.stringify(actions) === '["creator-link"]', log.join(' ') + ' :: ' + actions.join());
+      await page.click('#allow'); await page.waitForSelector('#cManifest:not([hidden])', { timeout: 15000 });
+      await page.check('input[type="checkbox"][data-token="' + USDG + '"]'); await page.fill('input[data-min="' + USDG + '"]', '1');
+      await page.click('#cSign'); await page.waitForSelector('#cDash:not([hidden])', { timeout: 15000 });
+      const all = netOf(c);
+      check('CH02 X from Ethereum mainnet completes: X consent → manifest signed on 0x1237 → live dashboard; still ONE switch in total (none for the second signature), one submission per step', /ACTIVE/.test(await page.textContent('#dStatus')) && (await page.textContent('#dHandle')) === '@dave_x' && kinds(all, 'switch:').length === 1 && all.includes('sign:CreatorManifest@0x1237') && kinds(all, 'sign:').every((e) => e.endsWith('@0x1237')) && JSON.stringify(actions) === '["creator-link","creator-manifest"]', all.join(' ') + ' :: ' + actions.join());
+      check('CH03 no JS errors in the X flow from Ethereum mainnet', errs.length === 0, errs.join(' | '));
+      await c.close();
+    }
+    // CH04 YouTube creator onboarding, wallet connected on Ethereum mainnet
+    {
+      const { c, page, errs, actions, btn } = await start({ account: W.attacker, chain: '0x1' }, 'youtube');
+      await page.click(btn); await toConsent(page);
+      const log = [...netOf(c)];
+      check('CH04 YouTube from Ethereum mainnet: ONE switch before the link signature, signed on 0x1237, ONE creator-link submission, Google consent reached', kinds(log, 'switch:').length === 1 && switchBeforeSign(log, 'CreatorLinkRequest') && !kinds(log, 'sign-refused').length && JSON.stringify(actions) === '["creator-link"]', log.join(' ') + ' :: ' + actions.join());
+      await page.click('#allow'); await page.waitForFunction(() => !document.getElementById('cManifest').hidden || !document.getElementById('cDash').hidden, null, { timeout: 15000 });
+      check('CH05 YouTube from Ethereum mainnet: back on the creator page with a creator session (OAuth callback completed), no JS errors', !page.url().includes('#') && errs.length === 0, page.url() + ' ' + errs.join(' | '));
+      await c.close();
+    }
+    // CH06 already on Robinhood Chain: no switch prompt at all
+    {
+      const { c, page, actions, btn } = await start({ account: W.attacker });
+      await page.click(btn); await toConsent(page);
+      const log = netOf(c);
+      check('CH06 already on 0x1237: NO switch or add request, the link is signed on 0x1237, ONE creator-link submission', !kinds(log, 'switch:').length && !kinds(log, 'add:').length && log.includes('sign:CreatorLinkRequest@0x1237') && JSON.stringify(actions) === '["creator-link"]', log.join(' '));
+      await c.close();
+    }
+    // CH07 Robinhood Chain not yet added to the wallet (4902 → wallet_addEthereumChain)
+    {
+      const { c, page, actions, btn } = await start({ account: W.attacker, chain: '0x1', switchMode: 'unknown' });
+      await page.click(btn); await toConsent(page);
+      const log = netOf(c);
+      check('CH07 chain not added: switch → 4902 → ONE add of 0x1237 → signed on 0x1237, ONE submission', kinds(log, 'switch:').length === 1 && JSON.stringify(kinds(log, 'add:')) === '["add:0x1237"]' && log.includes('sign:CreatorLinkRequest@0x1237') && JSON.stringify(actions) === '["creator-link"]', log.join(' '));
+      await c.close();
+    }
+    // CH08 the user refuses the network switch: nothing is signed, nothing is submitted, the error is shown, retry works
+    for (const platform of ['x', 'youtube']) {
+      const { c, page, errs, actions, btn } = await start({ account: W.attacker, chain: '0x1', switchMode: 'reject' }, platform);
+      const url0 = page.url();
+      await page.click(btn); await page.waitForFunction(() => /Switch your wallet/.test(document.getElementById('cStatus').textContent), null, { timeout: 10000 });
+      const log1 = [...netOf(c)];
+      check('CH08 ' + platform + ': switch refused → status "Switch your wallet to Robinhood Chain (4663) to continue. Nothing was signed." (tone bad), NO signature request, NO submission, still on step 1', SWITCH_MSG.test(await page.textContent('#cStatus')) && (await page.getAttribute('#cStatus', 'data-tone')) === 'bad' && !kinds(log1, 'sign').length && actions.length === 0 && page.url() === url0 && !(await page.locator('#cWallet').isHidden()) && /Wallet/.test(await page.textContent('#cSteps [aria-current]')), log1.join(' ') + ' :: ' + actions.join());
+      await page.click(btn); await page.waitForTimeout(600);
+      const log2 = netOf(c);
+      check('CH09 ' + platform + ': the button works again after a refusal; each press makes exactly ONE switch request and still nothing is signed or submitted; no JS errors', kinds(log2, 'switch:').length === 2 && !kinds(log2, 'sign').length && actions.length === 0 && errs.length === 0, log2.join(' ') + ' :: ' + errs.join(' | '));
+      await c.close();
+    }
+    // CH10 mobile 390px: a refused switch is visible without scrolling up; a successful step never scrolls the page
+    {
+      const { c, page, btn } = await start({ account: W.attacker, chain: '0x1', switchMode: 'reject', mobile: true });
+      await page.locator(btn).scrollIntoViewIfNeeded();
+      const hiddenBefore = await page.evaluate(() => { const r = document.getElementById('cStatus').getBoundingClientRect(); return r.bottom <= 0 || r.top >= innerHeight; });
+      await page.click(btn); await page.waitForFunction(() => /Switch your wallet/.test(document.getElementById('cStatus').textContent), null, { timeout: 10000 }); await page.waitForTimeout(900);
+      const vis = await page.evaluate(() => { const r = document.getElementById('cStatus').getBoundingClientRect(); return { top: r.top, bottom: r.bottom, h: innerHeight, live: document.getElementById('cStatus').getAttribute('aria-live'), role: document.getElementById('cStatus').getAttribute('role') }; });
+      check('CH10 390px: the status line was off-screen when the button was pressed, and the error is then fully inside the viewport (role=status, aria-live=polite)', hiddenBefore && vis.top >= 0 && vis.bottom <= vis.h && vis.role === 'status' && vis.live === 'polite', JSON.stringify({ hiddenBefore, ...vis }));
+      await c.close();
+    }
+    {
+      const { c, page, btn } = await start({ account: W.attacker, mobile: true });
+      await page.locator(btn).scrollIntoViewIfNeeded();
+      await page.evaluate(() => { window.__signHold = new Promise((r) => { window.__releaseSign = r; }); });
+      // what the user sees: the pressed button stays where it was and the page is not moved to the status line
+      // (scrollY itself may change by the status line's height: that is the browser's scroll anchoring keeping the button still)
+      const view = (sel) => page.evaluate((sel) => ({ btn: Math.round(document.querySelector(sel).getBoundingClientRect().top), statusVisible: document.getElementById('cStatus').getBoundingClientRect().bottom > 0 }), sel);
+      const v0 = await view(btn);
+      await page.click(btn); await page.waitForFunction(() => /Sign the free link request/.test(document.getElementById('cStatus').textContent), null, { timeout: 10000 }); await page.waitForTimeout(700);
+      const v1 = await view(btn);
+      await page.evaluate(() => window.__releaseSign()); await toConsent(page);
+      check('CH11 390px: progress messages during a successful step do not scroll the page (the button stays in place; no jump to the status line)', !v0.statusVisible && !v1.statusVisible && Math.abs(v1.btn - v0.btn) <= 2, JSON.stringify([v0, v1]));
+      await c.close();
+    }
+    // CH12 fan side from Ethereum mainnet: Count me in and "sign what you mean" switch first, then sign on 0x1237
+    {
+      const c = await newCtx({ account: W.fan, chain: '0x1' }); const page = await c.newPage(); const errs = errsOf(page); const actions = actionsOf(page);
+      await page.goto(BASE + '/labs/early'); await page.waitForSelector('#ePlatform'); await page.click('#ePlatform button[data-platform="x"]');
+      await page.fill('#eCmiInput', '@bob'); await page.click('#eCmiFind'); await page.waitForSelector('#eCmiSign');
+      await page.click('#eCmiSign'); await page.waitForFunction(() => /Counted in/.test(document.getElementById('eCmiStatus').textContent), null, { timeout: 15000 });
+      const log = [...netOf(c)];
+      check('CH12 fan Count me in from Ethereum mainnet: ONE switch before the signature, signed on 0x1237, ONE count-me-in submission', kinds(log, 'switch:').length === 1 && switchBeforeSign(log, 'CountMeIn') && JSON.stringify(actions) === '["count-me-in"]', log.join(' ') + ' :: ' + actions.join());
+      await page.goto(BASE + xPage); await page.waitForSelector('#eCreator:not([hidden])');
+      await page.click('#eConnect'); await page.waitForSelector('#eSign:not([hidden])');
+      await page.fill('#eAmount', '1.75'); await page.click('#eSign');
+      await page.waitForSelector('#eSend:not([hidden])', { timeout: 15000 }).catch(async () => { throw new Error('send step not reached: ' + (await page.textContent('#eFlowStatus')) + ' :: ' + netOf(c).join(' ') + ' :: ' + actions.join()); });
+      const all = netOf(c), signs = kinds(all, 'sign:');
+      check('CH13 fan support intent: the wallet is already on 0x1237 (no second switch), the intent is signed on 0x1237, ONE draft + ONE store submission, nothing sent', kinds(all, 'switch:').length === 1 && signs.length === 2 && signs.every((e) => e.endsWith('@0x1237')) && JSON.stringify(actions) === '["count-me-in","intent-draft","intent-store"]' && !(await prompts(page)).includes('send'), all.join(' ') + ' :: ' + actions.join());
+      check('CH14 no JS errors on the fan pages from Ethereum mainnet', errs.length === 0, errs.join(' | '));
+      await c.close();
+    }
+    {
+      const c = await newCtx({ account: W.fan, chain: '0x1', switchMode: 'reject' }); const page = await c.newPage(); const actions = actionsOf(page);
+      await page.goto(BASE + xPage); await page.waitForSelector('#eCreator:not([hidden])');
+      await page.click('#eConnect'); await page.waitForSelector('#eSign:not([hidden])');
+      await page.fill('#eAmount', '1.85'); await page.click('#eSign');
+      await page.waitForFunction(() => /Switch your wallet/.test(document.getElementById('eFlowStatus').textContent), null, { timeout: 15000 });
+      const log = netOf(c);
+      check('CH15 fan support with the switch refused: clear message, NO signature, the intent is drafted but never stored, nothing sent', /Robinhood Chain \(4663\)/.test(await page.textContent('#eFlowStatus')) && !kinds(log, 'sign').length && JSON.stringify(actions) === '["intent-draft"]' && (await page.locator('#eSend').isHidden()), log.join(' ') + ' :: ' + actions.join());
+      await c.close();
+    }
+    // CH16 every EARLY signature asks for the chain; other SyncNet pages that share sn-wallet keep their calls unchanged
+    {
+      const early = fs.readFileSync(path.join(ROOT, 'labs-early.js'), 'utf8') + fs.readFileSync(path.join(ROOT, 'labs-early-creator.js'), 'utf8');
+      const calls = early.match(/W\.signTyped\([^;]*\)/g) || [];
+      const other = ['project-page.js', 'home-editor.js'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n').match(/W\.signTyped\([^;]*\)/g) || [];
+      check('CH16 all 6 EARLY W.signTyped calls pass the chain option; the non-EARLY callers do not (their behaviour is unchanged)', calls.length === 6 && calls.every((x) => /, CHAIN\)$/.test(x)) && other.length >= 2 && other.every((x) => !/CHAIN/.test(x)), calls.concat(other).join(' | '));
+    }
   }
 } finally {
   await browser.close(); srv.close();

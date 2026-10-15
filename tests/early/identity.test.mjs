@@ -3,6 +3,7 @@
 // and the scheduled snapshot job (first success of the UTC day wins, hidden counts, API outage, no backfill after the
 // day ends, rotation completion, finality reconciliation). No real network.
 // Run: node tests/early/identity.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';

@@ -1,6 +1,7 @@
 // Network Map · child connections ("projects using this token as a market") — reveal / collapse.
 // The first 12 render immediately; the rest are revealed from the already-discovered set, without a refetch.
 // Run: node tests/e2e/network-children.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, resetChain, resetServer } from './harness.mjs';
 const { chromium } = await import('playwright').catch(() => import(process.env.PLAYWRIGHT_MODULE || '/opt/node22/lib/node_modules/playwright/index.mjs'));
 

@@ -1,5 +1,6 @@
 // Project Home pricing: USD-denominated price, SYNC/USD reference rate, fixed-point conversion (round UP), payment tag,
 // versioned configuration and the fail-closed rollout gate. Pure — no network. Run: node tests/project-home/pricing.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';

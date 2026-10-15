@@ -5,6 +5,7 @@
 //   new operator with the old one preserved in history. Plus refresh/disconnect/cancel/RPC-down/storage-down
 //   failure modes and the no-fake-data sweep. Nothing touches a real network.
 // Run: node tests/regression/rc-marketplace.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, chain, resetChain, resetServer, serverState, browserGateways, LAUNCHES, ROOT } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

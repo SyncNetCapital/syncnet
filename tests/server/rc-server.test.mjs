@@ -2,6 +2,7 @@
 // registry. No real network: every outbound request goes to in-process fakes (PAR mock chain + indexer from the e2e
 // harness, a fake Pinata/pinning service, an in-memory durable store). Real network entry points are trapped.
 // Run: node tests/server/rc-server.test.mjs  -> exit 1 on any failure; writes tests/server/rc-server.results.json
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';
@@ -16,8 +17,8 @@ console.log = ((orig) => (...a) => { if (typeof a[0] === 'string' && a[0].starts
 for (const n of ['https', 'http', 'net', 'tls']) { const m = require(n); for (const f of ['request', 'get', 'connect', 'createConnection']) if (typeof m[f] === 'function') m[f] = () => { throw new Error('real network access attempted: ' + n + '.' + f); }; }
 
 const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
-const durable = () => ({ ...createStore({ map: new Map() }), durable: true, kind: 'test-durable' });
-const memory = () => createStore({ map: new Map() });
+const durable = () => ({ ...createStore({ env: {}, map: new Map() }), durable: true, kind: 'test-durable' });
+const memory = () => createStore({ env: {}, map: new Map() });
 const session = require(path.join(ROOT, 'netlify/lib/upload-session.js'));
 const fn = (n) => require(path.join(ROOT, 'netlify/functions', n + '.js'));
 const J = (r) => { try { return JSON.parse(r.body); } catch { return {}; } };

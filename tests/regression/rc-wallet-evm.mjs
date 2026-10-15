@@ -3,6 +3,7 @@
 // TRY AGAIN reconnects after the user switches account, that every other error keeps the existing generic message,
 // and that MetaMask / Phantom-EVM / disconnect / chain switching are unchanged. Nothing touches a real network.
 // Run: node tests/regression/rc-wallet-evm.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, resetChain, resetServer, ROOT } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

@@ -6,6 +6,7 @@
 //   - resolveProject() on the release tokens gives the expected classification;
 //   - real signed claim / list attempts for Pons V1 are refused by the Marketplace handler (in-memory store only).
 // Run: node tests/live/pons-step3-live.mjs   → writes tests/live/pons-step3-live.results.json
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import fs from 'node:fs';

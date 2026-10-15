@@ -3,6 +3,7 @@
 //   one provider / no provider / CHANGE WALLET / several already-authorised wallets / no wallet side-effects.
 // Extra wallets are injected on top of the harness mock; nothing touches a real network.
 // Run: node tests/regression/rc-wallet-select.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { startServer, installRoutes, A, resetChain, resetServer, ROOT } from '../e2e/harness.mjs';
 import fs from 'node:fs';
 import path from 'node:path';

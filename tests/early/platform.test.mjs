@@ -10,6 +10,7 @@
 //   G. generic code with a hypothetically enabled second platform (pure functions + the snapshot job's grouping)
 //   H. nothing of another platform exists in this build (no adapter, route, env var)
 // Run: node tests/early/platform.test.mjs
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import path from 'node:path';
 import fs from 'node:fs';
 import crypto from 'node:crypto';

@@ -12,6 +12,7 @@
 //              contracts/project-home-sink/abi/runtime.json equal a fresh compilation (drift = failure);
 //   --print    prints the values a reviewer would pin (never writes files).
 // Run: node tests/project-home/code-fingerprint.mjs [--print]
+import '../lib/isolate.mjs'; // must stay first: no test may reach a real Upstash database (see tests/lib/isolate.mjs)
 import { createRequire } from 'node:module';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
