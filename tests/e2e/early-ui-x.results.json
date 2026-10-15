@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-02T13:34:15.291Z",
-  "passed": 105,
+  "at": "2026-10-15T18:50:09.323Z",
+  "passed": 123,
   "failed": 0,
   "results": [
     {
@@ -146,7 +146,7 @@
     {
       "name": "N14 Count me in (X) = connect + ONE free signature, no transaction; the signed struct is platform \"x\" with the immutable numeric id in the v1 channelId field - never the username",
       "ok": true,
-      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1790948021,\"expiry\":1806500021,\"nonce\":\"0x242d8a2f41a3f302ee831a91c2ad5f978fef7c3e74bc40edf84177f7298ebea4\"}"
+      "detail": "{\"schema\":\"syncnet.early.count-me-in.v1\",\"platform\":\"x\",\"channelId\":\"18446744073709551615\",\"fan\":\"0x2c7536e3605d9c16a7a3d7b1898e529396a65c23\",\"issuedAt\":1792090165,\"expiry\":1807642165,\"nonce\":\"0x0fca508cad1aa798c8de6a39139b3290a051aaba33b27cb7209a84bee317b32d\"}"
     },
     {
       "name": "N15 the signal is stored under the x:<id> ref and the creator is still not public",
@@ -171,7 +171,7 @@
     {
       "name": "N19 Continue with X: ONE free link signature, then X consent with the Phase-4 flow: scopes EXACTLY \"tweet.read users.read\", PKCE S256, exact redirect URI, X-bound wallet state",
       "ok": true,
-      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=tweet.read+users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1790948609.df7b5a88d425ccbee0256fd4e69ab72b.c1017b8dc047f433366a129b20bfb88fd1801aa949fe303da7d804465d2f02d0&code_challenge=jqABcDEvulIW5pGH_MfiIt65lFISjxNVtxbhflW6Q7E&code_challenge_method=S256"
+      "detail": "?response_type=code&client_id=x-client-id-TEST-abc&redirect_uri=https%3A%2F%2Fexample.test%2Fapi%2Fearly-x-auth&scope=tweet.read+users.read&state=e1.state.0xd3e442496eb66a4748912ec4a3b7a111d0b855d6%7Ex.1792090753.ccf5bc365b911e9ca06e2324397198f5.269348f54ab4f92496e09570251c466964a0be7bd427ee6f298959cdec0dd54c&code_challenge=CHu7CT21AusLyK4S_q8vDXrWWyggZcN3ZQ07Z8hl0Fs&code_challenge_method=S256"
     },
     {
       "name": "N20 back on the creator page: session in the fragment is cleared, the manifest step shows the X display name and @username (not the numeric id), step 2 is named \"X\"",
@@ -527,6 +527,96 @@
       "name": "V03 the only inline style added is the tab strip margin (the same inline-margin pattern the page already uses); no new <style>, no new stylesheet link",
       "ok": true,
       "detail": ""
+    },
+    {
+      "name": "CH01 X from Ethereum mainnet: ONE switch to 0x1237 requested BEFORE the link signature, the signature is made while 0x1237 is active, never refused, ONE creator-link submission",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1237 sign:CreatorLinkRequest@0x1237 :: creator-link"
+    },
+    {
+      "name": "CH02 X from Ethereum mainnet completes: X consent → manifest signed on 0x1237 → live dashboard; still ONE switch in total (none for the second signature), one submission per step",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1237 sign:CreatorLinkRequest@0x1237 chainId:0x1237 chainId:0x1237 sign:CreatorManifest@0x1237 :: creator-link,creator-manifest"
+    },
+    {
+      "name": "CH03 no JS errors in the X flow from Ethereum mainnet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CH04 YouTube from Ethereum mainnet: ONE switch before the link signature, signed on 0x1237, ONE creator-link submission, Google consent reached",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1237 sign:CreatorLinkRequest@0x1237 :: creator-link"
+    },
+    {
+      "name": "CH05 YouTube from Ethereum mainnet: back on the creator page with a creator session (OAuth callback completed), no JS errors",
+      "ok": true,
+      "detail": "http://localhost:8946/labs/early/creator "
+    },
+    {
+      "name": "CH06 already on 0x1237: NO switch or add request, the link is signed on 0x1237, ONE creator-link submission",
+      "ok": true,
+      "detail": "chainId:0x1237 chainId:0x1237 sign:CreatorLinkRequest@0x1237"
+    },
+    {
+      "name": "CH07 chain not added: switch → 4902 → ONE add of 0x1237 → signed on 0x1237, ONE submission",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 add:0x1237 chainId:0x1237 sign:CreatorLinkRequest@0x1237"
+    },
+    {
+      "name": "CH08 x: switch refused → status \"Switch your wallet to Robinhood Chain (4663) to continue. Nothing was signed.\" (tone bad), NO signature request, NO submission, still on step 1",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 :: "
+    },
+    {
+      "name": "CH09 x: the button works again after a refusal; each press makes exactly ONE switch request and still nothing is signed or submitted; no JS errors",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1 switch:0x1237 chainId:0x1 :: "
+    },
+    {
+      "name": "CH08 youtube: switch refused → status \"Switch your wallet to Robinhood Chain (4663) to continue. Nothing was signed.\" (tone bad), NO signature request, NO submission, still on step 1",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 :: "
+    },
+    {
+      "name": "CH09 youtube: the button works again after a refusal; each press makes exactly ONE switch request and still nothing is signed or submitted; no JS errors",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1 switch:0x1237 chainId:0x1 :: "
+    },
+    {
+      "name": "CH10 390px: the status line was off-screen when the button was pressed, and the error is then fully inside the viewport (role=status, aria-live=polite)",
+      "ok": true,
+      "detail": "{\"hiddenBefore\":true,\"top\":369,\"bottom\":411,\"h\":780,\"live\":\"polite\",\"role\":\"status\"}"
+    },
+    {
+      "name": "CH11 390px: progress messages during a successful step do not scroll the page (the button stays in place; no jump to the status line)",
+      "ok": true,
+      "detail": "[{\"btn\":371,\"statusVisible\":false},{\"btn\":371,\"statusVisible\":false}]"
+    },
+    {
+      "name": "CH12 fan Count me in from Ethereum mainnet: ONE switch before the signature, signed on 0x1237, ONE count-me-in submission",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1237 sign:CountMeIn@0x1237 :: count-me-in"
+    },
+    {
+      "name": "CH13 fan support intent: the wallet is already on 0x1237 (no second switch), the intent is signed on 0x1237, ONE draft + ONE store submission, nothing sent",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 chainId:0x1237 sign:CountMeIn@0x1237 chainId:0x1237 chainId:0x1237 sign:SupportIntent@0x1237 :: count-me-in,intent-draft,intent-store"
+    },
+    {
+      "name": "CH14 no JS errors on the fan pages from Ethereum mainnet",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "CH15 fan support with the switch refused: clear message, NO signature, the intent is drafted but never stored, nothing sent",
+      "ok": true,
+      "detail": "chainId:0x1 chainId:0x1 switch:0x1237 :: intent-draft"
+    },
+    {
+      "name": "CH16 all 6 EARLY W.signTyped calls pass the chain option; the non-EARLY callers do not (their behaviour is unchanged)",
+      "ok": true,
+      "detail": "W.signTyped(E.typedData('CountMeIn', m), CHAIN) | W.signTyped(td, CHAIN) | W.signTyped(E.typedData('SupportFinalize', m), CHAIN) | W.signTyped(E.typedData('EarlySession', m), CHAIN) | W.signTyped(E.typedData('CreatorLinkRequest', m), CHAIN) | W.signTyped(E.typedData('CreatorManifest', m), CHAIN) | W.signTyped(Market.typedData('OperatorClaim', message)) | W.signTyped(Site.typedData(kind, message))"
     }
   ]
 }

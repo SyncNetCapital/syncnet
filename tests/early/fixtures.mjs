@@ -136,7 +136,8 @@ export async function rpc(method, params = []) {
 export const MAP = new Map();
 export function makeStore() {
   const { createStore } = require(path.join(ROOT, 'netlify/lib/store.js'));
-  return { ...createStore({ map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
+  // env:{} pins the in-memory adapter: a test must never reach a real Upstash because the shell happens to have its credentials
+  return { ...createStore({ env: {}, map: MAP, now: () => clock.now() }), durable: true, kind: 'test-durable' };
 }
 export const resetStore = () => MAP.clear();
 

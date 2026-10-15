@@ -17,7 +17,21 @@
   const xOauth = () => Boolean(S.cfg && Array.isArray(S.cfg.platforms) && S.cfg.platforms.includes('x') && S.cfg.platformServices && S.cfg.platformServices.x && S.cfg.platformServices.x.oauth);
   const LINKED = { get() { try { return sessionStorage.getItem('syncnet_early_link_platform') || ''; } catch { return ''; } }, set(v) { try { sessionStorage.setItem('syncnet_early_link_platform', v); } catch { /* blocked */ } } };
   const isX = (o) => Boolean(o) && o.platform === 'x';
-  const status = (m, tone) => { const el = $('cStatus'); el.textContent = m || ''; if (tone) el.dataset.tone = tone; else delete el.dataset.tone; };
+  // A problem must be seen where the user is: the status line sits above the steps, so on a phone it is usually off-screen
+  // when a step's button is pressed. Errors and warnings are brought into view (only if they are not already visible);
+  // progress and success messages never scroll the page.
+  const status = (m, tone) => {
+    const el = $('cStatus'); el.textContent = m || ''; if (tone) el.dataset.tone = tone; else delete el.dataset.tone;
+    if (m && (tone === 'bad' || tone === 'warn')) {
+      const r = el.getBoundingClientRect();
+      if (r.top < 0 || r.bottom > window.innerHeight) {
+        const smooth = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        try { el.scrollIntoView({ block: 'center', behavior: smooth ? 'smooth' : 'auto' }); } catch { el.scrollIntoView(); }
+      }
+    }
+  };
+  // EARLY messages are signed on Robinhood Chain (4663): the wallet is switched first, never signed on another network
+  const CHAIN = Object.freeze({ chain: true });
   const rejected = (e) => e && (e.code === 4001 || /reject|denied/i.test(String(e.message)));
   const nonce = () => { const b = new Uint8Array(32); crypto.getRandomValues(b); return '0x' + Array.from(b, (x) => x.toString(16).padStart(2, '0')).join(''); };
   const nowSec = () => Math.floor(Date.now() / 1000);
@@ -74,7 +88,7 @@
       const wallet = W.state().account;
       const m = { schema: E.SCHEMA.creatorLink, wallet, issuedAt: nowSec(), nonce: nonce() };
       status('Sign the free link request in your wallet…');
-      const signature = await W.signTyped(E.typedData('CreatorLinkRequest', m));
+      const signature = await W.signTyped(E.typedData('CreatorLinkRequest', m), CHAIN);
       const r = await post(x ? { action: 'creator-link', platform: 'x', wallet, issuedAt: m.issuedAt, nonce: m.nonce, signature } : { action: 'creator-link', wallet, issuedAt: m.issuedAt, nonce: m.nonce, signature });
       if (!r.ok) throw new Error(errText(r, x ? 'Could not start X sign-in.' : 'Could not start YouTube sign-in.'));
       LINKED.set(platform);
@@ -130,7 +144,7 @@
       const x = isX(me), id = x ? me.externalId : me.channelId;
       const m = { schema: E.SCHEMA.manifest, creatorId: x ? E.creatorIdOf(id, 'x') : E.creatorIdOf(me.channelId), platform: x ? 'x' : 'youtube', channelId: id, chainId: 4663, receivingWallet: wallet, acceptedAssetsHash: na.hash, manifestVersion: cur ? cur.manifestVersion + 1 : 1, previousManifestHash: cur ? cur.manifestHash : E.ZERO32, issuedAt: nowSec(), nonce: nonce() };
       status('Sign the manifest in your wallet (free)…');
-      const signature = await W.signTyped(E.typedData('CreatorManifest', m));
+      const signature = await W.signTyped(E.typedData('CreatorManifest', m), CHAIN);
       const ident = x ? { platform: 'x', externalId: m.channelId } : { channelId: m.channelId };
       const r = await post({ action: 'creator-manifest', creatorId: m.creatorId, ...ident, receivingWallet: wallet, acceptedAssets: na.assets, acceptedAssetsHash: na.hash, manifestVersion: m.manifestVersion, previousManifestHash: m.previousManifestHash, issuedAt: m.issuedAt, nonce: m.nonce, signature });
       if (!r.ok) throw new Error(errText(r, 'The manifest was refused.'));

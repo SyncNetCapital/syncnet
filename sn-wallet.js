@@ -90,20 +90,38 @@
   }
   function disconnect() { provider = null; account = ''; info = null; remember(''); emit(); }
 
+  // 4902 = "chain not added"; some mobile wallets nest it under data.originalError.
+  const unknownChain = (e) => Boolean(e) && (e.code === 4902 || (e.data && e.data.originalError && e.data.originalError.code === 4902));
+  let switching = null; // one switch prompt at a time: concurrent callers share it
   async function ensureChain() {
     if (!provider) throw new Error('Connect a wallet first.');
     if (chainId === CHAIN_HEX) return;
-    try { await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
-    catch (e) {
-      if (e && e.code === 4902) await provider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://rpc.mainnet.chain.robinhood.com/'], blockExplorerUrls: ['https://robinhoodchain.blockscout.com'] }] });
-      else throw e;
-    }
-    chainId = lc(await provider.request({ method: 'eth_chainId' }));
-    if (chainId !== CHAIN_HEX) throw new Error('Switch your wallet to Robinhood Chain (4663).');
+    if (switching) return switching;
+    switching = (async () => {
+      try { await provider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: CHAIN_HEX }] }); }
+      catch (e) {
+        if (unknownChain(e)) await provider.request({ method: 'wallet_addEthereumChain', params: [{ chainId: CHAIN_HEX, chainName: 'Robinhood Chain', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://rpc.mainnet.chain.robinhood.com/'], blockExplorerUrls: ['https://robinhoodchain.blockscout.com'] }] });
+        else throw e;
+      }
+      chainId = lc(await provider.request({ method: 'eth_chainId' }));
+      if (chainId !== CHAIN_HEX) throw new Error('Switch your wallet to Robinhood Chain (4663).');
+    })();
+    try { await switching; } finally { switching = null; }
   }
-  /** EIP-712 typed data signature (free: never a transaction). */
-  async function signTyped(typed) {
+  /**
+   * EIP-712 typed data signature (free: never a transaction).
+   * {chain:true}: the message's domain names Robinhood Chain (4663), and wallets such as MetaMask refuse to sign a domain
+   * chainId that is not the active network. The wallet is switched first (no prompt when it is already on 4663); if the
+   * switch is refused or fails, NOTHING is signed and the caller gets code 'WRONG_CHAIN'. Without the option: unchanged.
+   */
+  async function signTyped(typed, options) {
     if (!provider || !account) throw new Error('Connect a wallet first.');
+    if (options && options.chain && typed && typed.domain && Number(typed.domain.chainId) === parseInt(CHAIN_HEX, 16)) {
+      // the remembered chainId can be stale (a missed chainChanged event): read it live, without a prompt
+      try { chainId = lc(await provider.request({ method: 'eth_chainId' })); } catch { /* keep the last known value */ }
+      try { await ensureChain(); }
+      catch (e) { throw Object.assign(new Error('Switch your wallet to Robinhood Chain (4663) to continue. Nothing was signed.'), { code: 'WRONG_CHAIN', cause: e }); }
+    }
     return provider.request({ method: 'eth_signTypedData_v4', params: [account, JSON.stringify(typed)] });
   }
   async function personalSign(message) {
